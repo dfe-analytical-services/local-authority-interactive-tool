@@ -1,0 +1,402 @@
+/* Fonts ------------------------------------------------------------------- */
+/* main body text */
+body {
+  font-family: "Arial", sans-serif;
+  font-size: 19px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-family: "Arial", sans-serif;
+  font-size: 19px;
+  margin-bottom: 20px;
+}
+
+/* heading text */
+.govuk-header__link--service-name {
+  font-size: 24px;
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.h1,
+h1 {
+  font-family: "Arial", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.0416666667;
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+
+.h2,
+h2 {
+  font-family: "Arial", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.0416666667;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.h3,
+h3 {
+  font-family: "Arial", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.0416666667;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* feedback banner */
+.govuk-phase-banner__content {
+  font-family: "Arial", sans-serif;
+  font-size: 14px;
+  color: #000000;
+}
+
+/* well text */
+label {
+  font-family: "Arial", sans-serif;
+  font-size: 19px;
+}
+
+
+/* Bullet point formatting ------------------------------------------------- */
+li {
+  margin-bottom: 5px;
+  display: list-item;
+  text-align: -webkit-match-parent;
+  unicode-bidi: isolate;
+}
+
+ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+/* Link text styling ------------------------------------------------------- */
+a {
+  font-family: "Arial", sans-serif;
+  text-decoration: underline;
+  text-decoration-thickness: max(1px, .0625rem);
+  text-underline-offset: .1578em;
+  word-break: break-word;
+  background-color: transparent;
+}
+
+a:visited {
+  color: #4C2C92;
+}
+
+a:focus {
+  outline: 3px solid rgba(0, 0, 0, 0);
+  color: #0b0c0c;
+  background-color: #fd0;
+  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+  text-decoration: none;
+}
+
+/* GOV.UK containers ------------------------------------------------------- */
+.govuk-width-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/*removing white gutters on govheader container */
+.container,
+.container-fluid,
+.container-xxl,
+.container-xl,
+.container-lg,
+.container-md,
+.container-sm {
+  --bs-gutter-x: 0;
+  --bs-gutter-y: 0;
+}
+
+/* This line sets the main area width. Originally set to 66.667% in the GDS 
+template. 80% works well here to reduce white space on the right hand side.*/
+.col-sm-8 {
+  width: 80%
+}
+
+.container-fluid {
+  padding: 0px;
+}
+
+.row {
+  margin-right: 0px;
+}
+
+/* GOV.UK cookies ---------------------------------------------------------- */
+.govuk-cookie-banner {
+  padding: 6px 6px 6px 6px;
+}
+
+/* GOV.UK header CSS ------------------------------------------------------- */
+.govuk-header__content,
+.govuk-header__logo {
+  box-sizing: border-box
+}
+
+.govuk-header__logo {
+  margin-bottom: 10px;
+  padding-right: 50px
+}
+
+@media (min-width:40.0625em) {
+  .govuk-header__logo {
+    margin-bottom: 10px
+  }
+}
+
+@media (min-width:48.0625em) {
+  .govuk-header__logo {
+    width: 15% !important;
+    margin-left: 15px !important;
+    padding-right: 15px !important;
+    float: left !important;
+    vertical-align: top !important;
+  }
+}
+
+@media (min-width:48.0625em) {
+  .govuk-header__content {
+    width: 64% !important;
+    text-align: center !important;
+    padding-left: 15px !important;
+    float: left !important;
+    vertical-align: top !important;
+  }
+}
+
+/* GOV.UK footer ----------------------------------------------------------- */
+/* footer padding */
+.govuk-footer {
+  padding-right: 50px;
+  padding-left: 50px;
+}
+
+/* This makes it look like the footer extends on shorter pages  */
+html {
+  background-color: #f3f2f1;
+}
+
+/* GOV.UK details component ------------------------------------------------ */
+.govuk-details {
+  padding: 19px;
+  font-family: "Arial", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 25px;
+  background-color: #1d70b8;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 20px;
+  display: block;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+}
+
+.govuk-details__summary {
+  display: inline-block;
+  position: relative;
+  margin-bottom: 5px;
+  padding-left: 25px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.govuk-details__summary-text:hover {
+  text-decoration: underline;
+  text-decoration-thickness: max(4px, .1875rem, .12em);
+}
+
+.govuk-details__summary:hover {
+  color: #fff;
+}
+
+.govuk-details__summary:focus {
+  outline: 3px solid rgba(0, 0, 0, 0);
+  /* color: #0b0c0c; */
+  background-color: #fd0;
+  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+  color: #0b0c0c;
+  text-decoration: none;
+}
+
+/* Left nav tabs styling --------------------------------------------------- */
+
+.nav-stacked>li>a {
+  text-decoration: none; /* Remove underlining */
+  color: #000;
+}
+
+.nav-stacked>li>a:focus {
+  background-color: #fd0;
+  box-shadow: 0 0px #fd0, 0 4px #1d70b8;
+}
+
+.nav-stacked>li>a:hover {
+  color: #000;
+  font-weight: bold;
+  background-color: #b1b4b6;
+}
+
+.nav-pills>li.active>a {
+  color: #ffffff;
+  background-color: #1d70b8;
+  box-shadow: 0 0px #b1b4b6, 0 4px #1d70b8;
+}
+
+.nav-pills>li.active>a:focus {
+  color: #000;
+  background-color: #fd0;
+  box-shadow: 0 0px #b1b4b6, 0 4px #1d70b8;
+}
+
+/* Tabs layout styling ----------------------------------------------------- */
+.nav-tabs>li>a {
+  color: #000;
+  text-decoration: none /* Remove underlining */
+}
+
+.nav-tabs>li>a:focus {
+  background-color: #fd0 !important;
+  box-shadow: 0 0px #fd0, 0 4px #1d70b8 !important;
+}
+
+.nav-tabs>li>a:hover {
+  color: #000;
+  font-weight: bold;
+  background-color: #b1b4b6;
+}
+
+/* Well panel CSS used in user selections ---------------------------------- */
+.well {
+  min-height: 90vh;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #1d70b8;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgb(0 0 0 / 5%);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 5%);
+  color: #fff;
+}
+
+/* Custom disconnect CSS --------------------------------------------------- */
+#ss-connect-dialog {
+  display: none !important;
+}
+
+#shiny-disconnected-overlay {
+  display: none !important;
+}
+
+#ss-overlay {
+  background-color: #000000 !important;
+  opacity: 0.6 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  z-index: 99998 !important;
+  overflow: hidden !important;
+  cursor: not-allowed !important;
+}
+
+#custom-disconnect-dialog {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  width: full !important;
+  transform: translateX(-50%) translateY(-50%) !important;
+  font-size: 16px !important;
+  top: 50% !important;
+  position: fixed !important;
+  bottom: auto !important;
+  left: 50% !important;
+  padding: 0.8em 1.5em !important;
+  text-align: center !important;
+  height: auto !important;
+  opacity: 1 !important;
+  z-index: 99999 !important;
+  border-radius: 3px !important;
+  box-shadow: rgba(0, 0, 0, 0.3) 3px 3px 10px !important;
+}
+
+/* Custom value boxes CSS -------------------------------------------------- */
+/* Set the font sizes */
+#vboxhead-small {
+  text-align: left;
+  font-weight: bold;
+  font-size: 36px;
+}
+
+#vboxdetail-small {
+  text-align: left;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+#vboxhead-medium {
+  text-align: left;
+  font-weight: bold;
+  font-size: 42px;
+}
+
+#vboxdetail-medium {
+  text-align: left;
+  font-weight: bold;
+  font-size: 26px;
+}
+
+#vboxhead-large {
+  text-align: left;
+  font-weight: bold;
+  font-size: 56px;
+}
+
+#vboxdetail-large {
+  text-align: left;
+  font-weight: bold;
+  font-size: 28px;
+}
+
+/* Set the colours for the value boxes */
+.small-box.bg-purple {
+  background-color: #801650 !important;
+  color: #ffffff !important;
+}
+
+.small-box.bg-white {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.small-box.bg-blue {
+  background-color: #1d70b8 !important;
+  color: #ffffff !important;
+}
+
+.small-box.bg-orange {
+  background-color: #F46A25 !important;
+  color: #ffffff !important;
+}
+
+.small-box.bg-red {
+  background-color: #f499be !important;
+  color: #ffffff !important;
+}
+
+.small-box.bg-green {
+  background-color: #00703c !important;
+  color: #ffffff !important;
+}
+
+.small-box.bg-dark-blue {
+  background-color: #12436D !important;
+  color: #ffffff !important;
+}
