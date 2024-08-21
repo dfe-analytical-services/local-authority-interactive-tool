@@ -46,26 +46,26 @@ server <- function(input, output, session) {
     updateQueryString(url)
   })
 
-  observe({
-    if (input$navlistPanel == "Example tab 1") {
-      change_window_title(
-        session,
-        paste0(
-          site_title, " - ",
-          input$selectPhase, ", ",
-          input$selectArea
-        )
-      )
-    } else {
-      change_window_title(
-        session,
-        paste0(
-          site_title, " - ",
-          input$navlistPanel
-        )
-      )
-    }
-  })
+  # observe({
+  #   if (input$navlistPanel == "Example tab 1") {
+  #     change_window_title(
+  #       session,
+  #       paste0(
+  #         site_title, " - ",
+  #         input$selectPhase, ", ",
+  #         input$selectArea
+  #       )
+  #     )
+  #   } else {
+  #     change_window_title(
+  #       session,
+  #       paste0(
+  #         site_title, " - ",
+  #         input$navlistPanel
+  #       )
+  #     )
+  #   }
+  # })
 
   # Cookies logic -------------------------------------------------------------
   observeEvent(input$cookies, {
