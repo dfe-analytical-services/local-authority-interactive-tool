@@ -66,7 +66,7 @@ lapply(list.files("R/ui_panels/", full.names = TRUE), source)
 
 # Set global variables --------------------------------------------------------
 
-site_title <- "Local Authority Interactive Tool" # name of app
+site_title <- "Local Authority Interactive Tool (LAIT)" # name of app
 parent_pub_name <- "LAIT publication" # name of source publication
 parent_publication <- # link to source publication
   "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait"
