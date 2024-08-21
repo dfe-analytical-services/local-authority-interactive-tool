@@ -142,7 +142,7 @@ Get in contact with jake.tufts@education.gov.uk to discuss contributions outside
 
 ### Flagging issues
 
-If you spot any issues with the application, please flag it in the ["Issues"tab of this repository](https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues), and label as a bug.
+If you spot any issues with the application, please flag it in the ["Issues" tab of this repository](https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues), and label as a bug.
 Include as much detail as possible to help the developers diagnose the issue and prepare a suitable remedy.
 
 ### Making suggestions
