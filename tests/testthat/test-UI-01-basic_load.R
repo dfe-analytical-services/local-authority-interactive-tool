@@ -11,7 +11,6 @@
 # -----------------------------------------------------------------------------
 # Start an app running
 app <- AppDriver$new(
-  app_dir = "C:/Users/jtufts/Documents/no_net_work/Open source/local-authority-interactive-tool",
   name = "basic_load",
   height = 846,
   width = 1445,
