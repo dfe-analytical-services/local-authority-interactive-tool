@@ -24,7 +24,7 @@ server <- function(input, output, session) {
   # or plotly chart) using the list below, but it will need updating to match
   # any entries in your own dashboard's bookmarking url that you don't want
   # including.
-  setBookmarkExclude(c(
+  shiny::setBookmarkExclude(c(
     "cookies", "link_to_app_content_tab",
     "tabBenchmark_rows_current", "tabBenchmark_rows_all",
     "tabBenchmark_columns_selected", "tabBenchmark_cell_clicked",
@@ -36,39 +36,39 @@ server <- function(input, output, session) {
     ".clientValue-default-plotlyCrosstalkOpts"
   ))
 
-  observe({
+  shiny::observe({
     # Trigger this observer every time an input changes
-    reactiveValuesToList(input)
+    shiny::reactiveValuesToList(input)
     session$doBookmark()
   })
 
-  onBookmarked(function(url) {
-    updateQueryString(url)
+  shiny::onBookmarked(function(url) {
+    shiny::updateQueryString(url)
   })
 
-  observe({
-    if (input$navlistPanel == "Example tab 1") {
-      change_window_title(
-        session,
-        paste0(
-          site_title, " - ",
-          input$selectPhase, ", ",
-          input$selectArea
-        )
-      )
-    } else {
-      change_window_title(
-        session,
-        paste0(
-          site_title, " - ",
-          input$navlistPanel
-        )
-      )
-    }
-  })
+  # shiny::observe({
+  #   if (input$navlistPanel == "Example tab 1") {
+  #     shinytitle::change_window_title(
+  #       session,
+  #       paste0(
+  #         site_title, " - ",
+  #         input$selectPhase, ", ",
+  #         input$selectArea
+  #       )
+  #     )
+  #   } else {
+  #     shinytitle::change_window_title(
+  #       session,
+  #       paste0(
+  #         site_title, " - ",
+  #         input$navlistPanel
+  #       )
+  #     )
+  #   }
+  # })
 
   # Cookies logic -------------------------------------------------------------
-  observeEvent(input$cookies, {
+  shiny::observeEvent(input$cookies, {
     if (!is.null(input$cookies)) {
       if (!("dfe_analytics" %in% names(input$cookies))) {
         shinyjs::show(id = "cookieMain")
@@ -94,7 +94,7 @@ server <- function(input, output, session) {
   })
 
   # Need these set of observeEvent to create a path through the cookie banner
-  observeEvent(input$cookieAccept, {
+  shiny::observeEvent(input$cookieAccept, {
     msg <- list(
       name = "dfe_analytics",
       value = "granted"
@@ -105,7 +105,7 @@ server <- function(input, output, session) {
     shinyjs::hide(id = "cookieMain")
   })
 
-  observeEvent(input$cookieReject, {
+  shiny::observeEvent(input$cookieReject, {
     msg <- list(
       name = "dfe_analytics",
       value = "denied"
@@ -116,15 +116,15 @@ server <- function(input, output, session) {
     shinyjs::hide(id = "cookieMain")
   })
 
-  observeEvent(input$hideAccept, {
+  shiny::observeEvent(input$hideAccept, {
     shinyjs::toggle(id = "cookieDiv")
   })
 
-  observeEvent(input$hideReject, {
+  shiny::observeEvent(input$hideReject, {
     shinyjs::toggle(id = "cookieDiv")
   })
 
-  observeEvent(input$remove, {
+  shiny::observeEvent(input$remove, {
     shinyjs::toggle(id = "cookieMain")
     msg <- list(name = "dfe_analytics", value = "denied")
     session$sendCustomMessage("cookie-remove", msg)
@@ -132,11 +132,11 @@ server <- function(input, output, session) {
     print(input$cookies)
   })
 
-  cookies_data <- reactive({
+  cookies_data <- shiny::reactive({
     input$cookies
   })
 
-  output$cookie_status <- renderText({
+  output$cookie_status <- shiny::renderText({
     cookie_text_stem <- "To better understand the reach of our dashboard tools,
     this site uses cookies to identify numbers of unique users as part of Google
     Analytics. You have chosen to"
@@ -154,26 +154,27 @@ server <- function(input, output, session) {
     }
   })
 
-  observeEvent(input$cookieLink, {
+  shiny::observeEvent(input$cookieLink, {
     # Need to link here to where further info is located.  You can
     # updateTabsetPanel to have a cookie page for instance
-    updateTabsetPanel(session, "navlistPanel",
+    shiny::updateTabsetPanel(session, "navlistPanel",
       selected = "Support and feedback"
     )
   })
 
   # Dataset with timeseries data ----------------------------------------------
-  reactive_rev_bal <- reactive({
-    df_revbal %>% filter(
-      area_name == input$selectArea | area_name == "England",
-      school_phase == input$selectPhase
-    )
+  reactive_rev_bal <- shiny::reactive({
+    df_revbal |>
+      dplyr::filter(
+        area_name == input$selectArea | area_name == "England",
+        school_phase == input$selectPhase
+      )
   })
 
   # Dataset with benchmark data -----------------------------------------------
-  reactive_benchmark <- reactive({
-    df_revbal %>%
-      filter(
+  reactive_benchmark <- shiny::reactive({
+    df_revbal |>
+      dplyr::filter(
         area_name %in% c(input$selectArea, input$selectBenchLAs),
         school_phase == input$selectPhase,
         year == max(year)
@@ -182,8 +183,8 @@ server <- function(input, output, session) {
 
   # Charts --------------------------------------------------------------------
   # Line chart for revenue balance over time
-  output$lineRevBal <- renderGirafe({
-    girafe(
+  output$lineRevBal <- ggiraph::renderGirafe({
+    ggiraph::girafe(
       ggobj = create_avg_rev_timeseries(reactive_rev_bal(), input$selectArea),
       options = list(
         opts_sizing(rescale = TRUE, width = 1.0),
@@ -195,8 +196,8 @@ server <- function(input, output, session) {
   })
 
   # Benchmarking bar chart
-  output$colBenchmark <- renderGirafe({
-    girafe(
+  output$colBenchmark <- ggiraph::renderGirafe({
+    ggiraph::girafe(
       ggobj = plot_avg_rev_benchmark(reactive_benchmark()),
       options = list(
         opts_sizing(rescale = TRUE, width = 1.0),
@@ -208,10 +209,10 @@ server <- function(input, output, session) {
   })
 
   # Benchmarking table
-  output$tabBenchmark <- renderDataTable({
-    datatable(
-      reactive_benchmark() %>%
-        select(
+  output$tabBenchmark <- DT::renderDataTable({
+    DT::datatable(
+      reactive_benchmark() |>
+        dplyr::select(
           Area = area_name,
           `Average Revenue Balance (£)` = average_revenue_balance,
           `Total Revenue Balance (£m)` = total_revenue_balance_million
@@ -226,35 +227,35 @@ server <- function(input, output, session) {
 
   # Value boxes ---------------------------------------------------------------
   # Create a reactive value for average revenue balance
-  latest_average_balance <- reactive({
-    reactive_rev_bal() %>%
-      filter(
+  latest_average_balance <- shiny::reactive({
+    reactive_rev_bal() |>
+      dplyr::filter(
         year == max(year),
         area_name == input$selectArea,
         school_phase == input$selectPhase
-      ) %>%
-      pull(average_revenue_balance)
+      ) |>
+      dplyr::pull(average_revenue_balance)
   })
 
   # Create a reactive value for previous year average
-  previous_average_balance <- reactive({
-    previous_year <- reactive_rev_bal() %>%
-      filter(
+  previous_average_balance <- shiny::reactive({
+    previous_year <- reactive_rev_bal() |>
+      dplyr::filter(
         year == max(year) - 1,
         area_name == input$selectArea,
         school_phase == input$selectPhase
-      ) %>%
-      pull(average_revenue_balance)
+      ) |>
+      dplyr::pull(average_revenue_balance)
   })
 
   # Export values for use in UI tests -----------------------------------------
-  exportTestValues(
+  shiny::exportTestValues(
     avg_rev_bal_value = latest_average_balance(),
     prev_avg_rev_bal_value = previous_average_balance()
   )
 
   # Create a value box for average revenue balance
-  output$box_balance_latest <- renderValueBox({
+  output$box_balance_latest <- shinydashboard::renderValueBox({
     value_box(
       value = dfeR::pretty_num(latest_average_balance(), gbp = TRUE),
       subtitle = paste0("Average revenue balance"),
@@ -263,7 +264,7 @@ server <- function(input, output, session) {
   })
 
   # Create a value box for the change on previous year
-  output$box_balance_change <- renderValueBox({
+  output$box_balance_change <- shinydashboard::renderValueBox({
     value_box(
       value = dfeR::pretty_num(
         latest_average_balance() - previous_average_balance(),
@@ -276,12 +277,12 @@ server <- function(input, output, session) {
   })
 
   # Link in the user guide panel back to the main panel -----------------------
-  observeEvent(input$link_to_app_content_tab, {
-    updateTabsetPanel(session, "navlistPanel", selected = "Example tab 1")
+  shiny::observeEvent(input$link_to_app_content_tab, {
+    shiny::updateTabsetPanel(session, "navlistPanel", selected = "Example tab 1")
   })
 
   # Download the underlying data button --------------------------------------
-  output$download_data <- downloadHandler(
+  output$download_data <- shiny::downloadHandler(
     filename = "shiny_template_underlying_data.csv",
     content = function(file) {
       write.csv(df_revbal, file)
@@ -289,12 +290,12 @@ server <- function(input, output, session) {
   )
 
   # Dynamic label showing custom selections -----------------------------------
-  output$dropdown_label <- renderText({
+  output$dropdown_label <- shiny::renderText({
     paste0("Current selections: ", input$selectPhase, ", ", input$selectArea)
   })
 
   # Stop app ------------------------------------------------------------------
   session$onSessionEnded(function() {
-    stopApp()
+    shiny::stopApp()
   })
 }
