@@ -46,6 +46,7 @@ shhh(library(shinyalert))
 if (FALSE) {
   shhh(library(shinytest2))
   shhh(library(testthat))
+  shhh(library(lintr))
 }
 
 # Source scripts --------------------------------------------------------------
@@ -86,36 +87,36 @@ google_analytics_key <- "Z967JJVQQX"
 # End of global variables -----------------------------------------------------
 
 # Enable bookmarking so that input choices are shown in the url ---------------
-enableBookmarking("url")
+shiny::enableBookmarking("url")
 
 # Read in the data ------------------------------------------------------------
 df_revbal <- read_revenue_data()
 
 # Get geographical areas from data
-df_areas <- df_revbal %>%
-  select(
+df_areas <- df_revbal |>
+  dplyr::select(
     geographic_level, country_name, country_code,
     region_name, region_code,
     la_name, old_la_code, new_la_code
-  ) %>%
-  distinct()
+  ) |>
+  dplyr::distinct()
 
 # Extract lists for use in drop downs -----------------------------------------
 # LA list
-choices_las <- df_areas %>%
-  filter(geographic_level == "Local authority") %>%
-  select(geographic_level, area_name = la_name) %>%
-  arrange(area_name)
+choices_las <- df_areas |>
+  dplyr::filter(geographic_level == "Local authority") |>
+  dplyr::select(geographic_level, area_name = la_name) |>
+  dplyr::arrange(area_name)
 
 # Full list of areas
-choices_areas <- df_areas %>%
-  filter(geographic_level == "National") %>%
-  select(geographic_level, area_name = country_name) %>%
+choices_areas <- df_areas |>
+  dplyr::filter(geographic_level == "National") |>
+  dplyr::select(geographic_level, area_name = country_name) |>
   rbind(
-    df_areas %>%
-      filter(geographic_level == "Regional") %>%
-      select(geographic_level, area_name = region_name)
-  ) %>%
+    df_areas |>
+      dplyr::filter(geographic_level == "Regional") |>
+      dplyr::select(geographic_level, area_name = region_name)
+  ) |>
   rbind(choices_las)
 
 # List of phases

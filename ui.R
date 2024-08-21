@@ -19,15 +19,15 @@
 #
 # -----------------------------------------------------------------------------
 ui <- function(input, output, session) {
-  fluidPage(
+  shiny::fluidPage(
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
-    meta() %>%
-      meta_general(
+    metathis::meta() %>%
+      metathis::meta_general(
         application_name = "Local Authority Interactive Tool (LAIT)",
         description = "Local Authority Interactive Tool (LAIT)",
         robots = "index,follow",
@@ -46,7 +46,7 @@ ui <- function(input, output, session) {
     ),
 
     # Load javascript dependencies --------------------------------------------
-    useShinydashboard(),
+    shinyWidgets::useShinydashboard(),
     shinyjs::useShinyjs(),
 
     # Cookies -----------------------------------------------------------------
@@ -64,7 +64,7 @@ ui <- function(input, output, session) {
     shinyGovstyle::cookieBanner("Local Authority Interactive Tool (LAIT)"),
 
     # Google analytics --------------------------------------------------------
-    tags$head(includeHTML(("google-analytics.html"))),
+    tags$head(shiny::includeHTML(("google-analytics.html"))),
     tags$head(
       tags$link(
         rel = "stylesheet",
@@ -116,6 +116,6 @@ ui <- function(input, output, session) {
     ),
 
     # Footer ------------------------------------------------------------------
-    footer(full = TRUE)
+    shinyGovstyle::footer(full = TRUE)
   )
 }
