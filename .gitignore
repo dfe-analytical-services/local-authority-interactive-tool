@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.RData*
+.Ruserdata
+_output
+04_Outputs
+*/*_priv
+*.html
+*.xlsx
+*/*_raw
+01_data/02_prod/bds
+03_documentation/01_public/LAIT.xlsm

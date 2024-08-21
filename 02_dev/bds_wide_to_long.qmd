@@ -1,0 +1,232 @@
+---
+title: "LAIT - Shiny upgrade"
+subtitle: "Workings and development code"
+format: html
+date-modified: "`r Sys.Date()`"
+output:
+  html_document:
+  toc: true
+output-file: lait_workings
+embed-resources: true
+execute:
+  echo: false
+  cache: true
+  message: false
+  warning: false
+---
+
+
+```{r src-funs}
+source(here::here("R/helper_functions.R"))
+source(here::here("R/load_data.R"))
+```
+
+
+```{r pull-latest-bds-data}
+# Load raw BDS wide from shared folder
+bds_wide_raw_sf <- readxl::read_xlsx(
+  path = paste0(shared_folder, "/BDS - Wide.xlsx"),
+  sheet = "BigDataSheet",
+  col_names = T,
+  skip = 1,
+  # Replace multi-space with single-space
+  .name_repair = clean_spaces,
+  col_types = "text"
+)
+
+# Save to data folder
+write.csv(
+  bds_wide_raw_sf,
+  here::here("01_data/01_raw/BDS - Wide.csv"),
+  row.names = FALSE
+)
+```
+
+
+```{r load-bds}
+# Load BDS wide
+bds_wide_raw <- read.csv(
+  here::here("01_data/01_raw/BDS - Wide.csv"),
+  check.names = FALSE
+)
+
+# Remove any cols that are all na
+bds_wide <- bds_wide_raw |>
+  {\(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.))) }()
+```
+
+
+```{r wide-long}
+# Pivot BDS long on geographic cols
+bds_long <- bds_wide |>
+  tidyr::pivot_longer(cols = `Barking and Dagenham`:England_state_funded,
+                      names_to = 'LA and Regions',
+                      values_to = 'Values') |>
+  # Removes these lines with matching entries in year column
+  dplyr::filter (
+    Years %notin% c(
+      "-",
+      "",
+      "Trend",
+      "Change",
+      "Rank",
+      "Target",
+      "Distance",
+      "Quartile",
+      "Deviation National",
+      "% YoY change",
+      "%3yr change",
+      "2010 Target",
+      "Target 2011",
+      "NA - Distance",
+      is.na(0)
+    )
+  )
+```
+
+
+```{r bds-clean}
+# Vector to store columns to delete
+columns_to_delete <- c(
+  "Quartile 1 (A)",
+  "Quartile 2 (B)",
+  "Quartile 3 (C )",
+  "Quartile 4 (D)",
+  "line",
+  "Data item"
+)
+
+# Delete lines in vector from column, remove '.'s and underscores/number
+bds_long_clean <- bds_long |>
+  dplyr::select(!dplyr::all_of(columns_to_delete)) |>
+  dplyr::mutate(
+    'LA and Regions' = stringr::str_replace_all(`LA and Regions`, "\\.", " "), 
+    'LA and Regions' = stringr::str_replace_all(`LA and Regions`, "  ", "\\. "),
+    
+    # Remove final _ and following digits
+    # NOTE: Also remove whitespace - 'LACStableNum_2016on'
+    `Short Desc` = trimws(sub("_\\d+$", "", `Short Desc`))
+  )
+```
+
+
+```{r bds-la_codes}
+# Load LA codes
+la_codes <- readxl::read_xlsx(
+  path = here::here("01_data/02_prod/LA code list.xlsx")
+)
+
+# Join to bds and create combined codes var
+bds_long_la <- bds_long_clean |>
+  dplyr::left_join(la_codes, by = c('LA and Regions' = 'LA Name')) |>
+  dplyr::mutate(combined_code = paste(`LA Number`, `Short Desc`, Years,
+                                      sep = "_"))
+```
+
+
+```{r bds-data_dict}
+# Pull list of measures from data dictionary (primary key and filters for
+# only public-safe/in-use measures)
+# NOTE: Children_away changed to Children_Away to match BDS
+data_dict <- readxl::read_xlsx(
+  path = paste0(shared_folder, "/LAIT Data Dictionary (To QA!).xlsx"),
+  sheet = "Data_prod"
+) |> 
+  pull_uniques("Measure_short")
+
+# Filter BDS for only measures in the data dict
+bds_long_public <- bds_long_la |> 
+  dplyr::filter(`Short Desc` %in% data_dict)
+```
+
+
+```{r bds-save}
+# Save BDS long as .csv
+write.csv(bds_long_public,
+          here::here("01_data/02_prod/bds/bds_long.csv"),
+          row.names = FALSE)
+```
+
+
+```{r bds-region}
+# Regions
+bds_region <- bds_long_public |>
+  dplyr::filter(
+    `LA and Regions` %in% c(
+      'North East',
+      'North West',
+      'Yorkshire and the Humber',
+      'East Midlands',
+      'West Midlands',
+      'East of England',
+      'London',
+      'Inner London',
+      'Outer London',
+      'South East',
+      'South West'
+    )
+  )
+write.csv(
+  bds_region,
+  here::here("01_data/02_prod/bds/bds_regions_long.csv"),
+  row.names = FALSE
+)
+
+# England
+bds_eng_all <- bds_long_public |>
+  dplyr::filter(`LA and Regions` == 'England_all_schools')
+
+write.csv(bds_eng_all,
+          here::here("01_data/02_prod/bds/bds_eng_all_schools_long.csv"),
+          row.names = FALSE)
+
+# LAs
+bds_la <- bds_long_public |>
+  dplyr::filter(
+    `LA and Regions` %notin% c(
+      'England_all_schools',
+      'North East',
+      'North West',
+      'Yorkshire and the Humber',
+      'East Midlands',
+      'West Midlands',
+      'East of England',
+      'London',
+      'Inner London',
+      'Outer London',
+      'South East',
+      'South West',
+      'England_state_funded'
+    )
+  )
+
+write.csv(bds_la, here::here("01_data/02_prod/bds/bds_la_long.csv"),
+          row.names = FALSE)
+
+# England_2
+
+bds_eng_state <- bds_long_public |>
+  dplyr::filter(`LA and Regions` == 'England_state_funded')
+
+write.csv(bds_eng_state,
+          here::here("01_data/02_prod/bds/bds_eng_state_funded_long.csv"),
+          row.names = FALSE)
+```
+
+
+
+```{r}
+# Read in files saved from above transformation
+bds_long_csv <- data.table::fread(
+  here::here("01_data/02_prod/bds/bds_long.csv")
+)
+# Write out parquet version
+arrow::write_dataset(
+  bds_long_csv,
+  here::here("01_data/02_prod/"),
+  format = "parquet",
+  basename_template = "bds_long_{i}.parquet"
+)
+
+```
+

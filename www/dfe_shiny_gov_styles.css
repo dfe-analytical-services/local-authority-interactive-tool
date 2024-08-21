@@ -1,0 +1,350 @@
+/* Fonts ------------------------------------------------------------------- */
+/* main body text */
+body {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 19px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 19px;
+  margin-bottom: 20px;
+}
+
+/* heading text */
+.govuk-header__link--service-name {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 30px;
+}
+
+.h1,
+h1 {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.0416666667;
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+
+.h2,
+h2 {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.0416666667;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.h3,
+h3 {
+  font-family: "Helvetica Neue","Arial", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.0416666667;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+
+/* feedback banner */
+.govuk-phase-banner__content {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 16px;
+  color: #000000;
+}
+
+/* well text */
+label {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 19px;
+}
+
+/* bslib card text */
+.bslib-card .card-header, .bslib-card .card-footer {
+    font-size: 19px;
+}
+
+.bslib-card {
+    box-shadow: none;
+}
+
+/* second dropdown options */
+.select-input {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size: 19px;
+  color: #000000;
+}
+
+/* Bullet point formatting ------------------------------------------------- */
+li {
+  margin-bottom: 5px;
+  display: list-item;
+  text-align: -webkit-match-parent;
+  unicode-bidi: isolate;
+}
+
+ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+/* Link text styling ------------------------------------------------------- */
+a {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  text-decoration: underline;
+  text-decoration-thickness: max(1px, .0625rem);
+  text-underline-offset: .1578em;
+  word-break: break-word;
+  background-color: transparent;
+}
+
+a:visited {
+  color: #4C2C92;
+}
+
+a:focus {
+  outline: 3px solid rgba(0, 0, 0, 0);
+  color: #0b0c0c;
+  background-color: #fd0 !important;
+  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+  text-decoration: underline;
+}
+
+a:hover {
+  outline: 3px solid rgba(0, 0, 0, 0);
+  color: #0b0c0c;
+  background-color: #fd0 !important;
+  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+  text-decoration: underline;
+}
+
+/* GOV.UK containers ------------------------------------------------------- */
+.govuk-header__link:hover {
+  color: #000;
+}
+
+/* force things like beta banner to full width */
+.govuk-width-container {
+  max-width: 100% !important;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* reduce the padding around govuk-main-wrapper */
+.govuk-main-wrapper {
+  padding: 1rem;
+}
+
+/* reduce the padding even more around the beta banner */
+.govuk-phase-banner.govuk-width-container.govuk-main-wrapper {
+  padding: 0.5rem !important;
+}
+
+
+/* removing white gutters on govheader container */
+.container,
+.container-fluid,
+.container-xxl,
+.container-xl,
+.container-lg,
+.container-md,
+.container-sm {
+  --bs-gutter-x: 0;
+  --bs-gutter-y: 0;
+}
+
+.container-fluid {
+  padding: 0px;
+}
+
+.row {
+  margin-right: 0px;
+}
+
+/* sets the main area width. Originally set to 66.667% in the GDS
+template. 80% works well here to reduce white space on the right hand side.*/
+.col-sm-8 {
+  width: 80%
+}
+
+/* GOV.UK footer ----------------------------------------------------------- */
+/* footer padding */
+.govuk-footer {
+  padding: 2rem;
+}
+
+/* This makes it look like the footer extends on shorter pages  */
+html {
+  background-color: #f3f2f1;
+}
+
+/* Card tabs CSS ----------------------------------------------------------- */
+/* Fairly sure none of this works yet */
+.card-header-tabs>li>a {
+}
+
+.card-header-tabs>li.active>a {
+  box-shadow: 0 0px #fd0, 0 4px #1d70b8 !important;
+}
+
+.card-header-tabs>li>a:focus {
+  background-color: #fd0 !important;
+  box-shadow: 0 0px #fd0, 0 4px #1d70b8 !important;
+}
+
+.card-header-tabs>li>a:hover {
+  color: #000;
+  font-weight: bold;
+  background-color: #b1b4b6;
+}
+
+/* Custom disconnect CSS --------------------------------------------------- */
+#ss-connect-dialog {
+  display: none !important;
+}
+
+#shiny-disconnected-overlay {
+  display: none !important;
+}
+
+#ss-overlay {
+  background-color: #000000 !important;
+  opacity: 0.6 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  z-index: 99998 !important;
+  overflow: hidden !important;
+  cursor: not-allowed !important;
+}
+
+#custom-disconnect-dialog {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  width: full !important;
+  transform: translateX(-50%) translateY(-50%) !important;
+  top: 50% !important;
+  position: fixed !important;
+  bottom: auto !important;
+  left: 50% !important;
+  padding: 0.8em 1.5em !important;
+  text-align: center !important;
+  height: auto !important;
+  opacity: 1 !important;
+  z-index: 99999 !important;
+  border-radius: 3px !important;
+  box-shadow: rgba(0, 0, 0, 0.3) 3px 3px 10px !important;
+}
+
+/* GOV.UK button copied in from shiny gov style ---------------------------- */
+.btn-default {
+    font-family: "Helvetica Neue", "Arial", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.1875;
+    box-sizing: border-box;
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    max-width: fit-content;
+    margin: 0 0 22px;
+    padding: 8px 10px 7px;
+    border: 2px solid transparent;
+    border-radius: 0;
+    color: #fff !important;
+    background-color: #00703c;
+    box-shadow: 0 2px 0 #002d18;
+    text-align: center;
+    vertical-align: top;
+    cursor: pointer;
+    -webkit-appearance: none
+}
+
+/* custom sort indicators -------------------------------------------------- */
+.bar-sort-header:hover,
+.bar-sort-header:focus {
+  background: #fd0;
+}
+
+/* Add a top bar on ascending sort */
+.bar-sort-header[aria-sort="ascending"] {
+  box-shadow: inset 0 3px 0 0 #1d70b8;
+}
+
+/* Add a bottom bar on descending sort */
+.bar-sort-header[aria-sort="descending"] {
+  box-shadow: inset 0 -3px 0 0 #1d70b8;
+}
+
+/* Add an animation when toggling between ascending and descending sort */
+.bar-sort-header {
+  transition: box-shadow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Highlight on the page button indicators --------------------------------- */
+.rt-page-button:hover,
+.rt-page-button:focus,
+.rt-page-button:active {
+    background: #fd0 !important;
+    box-shadow: inset 0 -3px 0 0 #1d70b8;
+}
+
+.selectize-input:hover,
+.selectize-input:active,
+.selectize-input:focus {
+  box-shadow: inset 0 -3px 0 0 #1d70b8;
+}
+
+/* Change focus border color to yellow */
+.selectize-input.focus {
+    border-color: #fd0 !important;
+    box-shadow: 0 0 5px #fd0 !important;
+}
+
+/* Change focus color to bright yellow */
+.selectize-dropdown-content .option:hover,
+.selectize-dropdown-content .option:focus,
+.selectize-dropdown-content .option.active {
+    background-color: #fd0 !important;
+    color: black !important;
+}
+
+
+/* JT edits */
+.ggiraph-tooltip {
+  background-color: #ECECEC;
+  color: black;
+  padding: 5px;
+  border-radius: 3px;
+  font-family: Arial;
+  font-weight: 500;
+  border: 1px solid black;
+}
+
+.bslib-mb-spacing {
+  margin-bottom: 0;
+}
+
+.bslib-page-fill {
+  height: auto;
+}
+
+
+
+/* Set the SVG to fill the available space within the card */
+.ggiraph-svg {
+    max-height: 80vh !important;
+}
+
+/* Target the specific card using classes */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
+  width: 50vw !important;
+  align-self: center;
+}
+
