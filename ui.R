@@ -21,18 +21,18 @@
 ui <- function(input, output, session) {
   fluidPage(
     # Set application metadata ------------------------------------------------
-    tags$head(HTML("<title>Department for Education (DfE) Shiny Template</title>")),
+    tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
     meta() %>%
       meta_general(
-        application_name = "Department for Education (DfE) Shiny Template",
-        description = "Department for Education (DfE) Shiny Template",
+        application_name = "Local Authority Interactive Tool (LAIT)",
+        description = "Local Authority Interactive Tool (LAIT)",
         robots = "index,follow",
         generator = "R-Shiny",
-        subject = "stats development",
+        subject = "data tool",
         rating = "General",
         referrer = "no-referrer"
       ),
@@ -61,7 +61,7 @@ ui <- function(input, output, session) {
       ),
       tags$script(src = "cookie-consent.js")
     ),
-    shinyGovstyle::cookieBanner("Department for Education (DfE) R-Shiny dashboard template"),
+    shinyGovstyle::cookieBanner("Local Authority Interactive Tool (LAIT)"),
 
     # Google analytics --------------------------------------------------------
     tags$head(includeHTML(("google-analytics.html"))),
@@ -77,7 +77,7 @@ ui <- function(input, output, session) {
     shinyGovstyle::header(
       main_text = "",
       main_link = "https://www.gov.uk/government/organisations/department-for-education",
-      secondary_text = "Department for Education (DfE) Shiny Template",
+      secondary_text = "Local Authority Interactive Tool (LAIT)",
       logo = "images/DfE_logo_landscape.png",
       logo_width = 150,
       logo_height = 32
@@ -110,7 +110,7 @@ ui <- function(input, output, session) {
       a11y_panel(),
       support_panel(
         team_email = "explore.statistics@education.gov.uk",
-        repo_name = "https://github.com/dfe-analytical-services/shiny-template",
+        repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
         form_url = "https://forms.office.com"
       )
     ),
