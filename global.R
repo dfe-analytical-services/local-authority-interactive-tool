@@ -66,14 +66,14 @@ lapply(list.files("R/ui_panels/", full.names = TRUE), source)
 
 # Set global variables --------------------------------------------------------
 
-site_title <- "Department for Education (DfE) Shiny Template" # name of app
-parent_pub_name <- "Statistical publication" # name of source publication
+site_title <- "Local Authority Interactive Tool" # name of app
+parent_pub_name <- "LAIT publication" # name of source publication
 parent_publication <- # link to source publication
-  "https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships"
+  "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait"
 
 # Set the URLs that the site will be published to
-site_primary <- "https://department-for-education.shinyapps.io/dfe-shiny-template/"
-site_overflow <- "https://department-for-education.shinyapps.io/dfe-shiny-template-overflow/"
+site_primary <- "https://department-for-education.shinyapps.io/local-authority-interactive-tool/"
+site_overflow <- "https://department-for-education.shinyapps.io/local-authority-interactive-tool-overflow/"
 
 # Combine URLs into list for disconnect function
 # We can add further mirrors where necessary. Each one can generally handle
