@@ -39,16 +39,24 @@ Steps to reproduce the behaviour:
 ...
 
 **Desktop (please complete the following information):**
- 
+
+<!-- Add the information relevant below. Delete where not relevant. -->
+
  - OS: [e.g. iOS]
  - Browser [e.g. chrome, safari]
  - Version [e.g. 22]
 
 **Smartphone (please complete the following information):**
+
+<!-- Add the information relevant below. Delete where not relevant. -->
+ 
  - Device: [e.g. iPhone6]
  - OS: [e.g. iOS8.1]
  - Browser [e.g. stock browser, safari]
  - Version [e.g. 22]
 
 **Additional context**
-Add any other context about the problem here.
+
+<!-- Add any other context about the problem here. -->
+
+...
