@@ -1,6 +1,6 @@
 ---
-name: Developer: Add feature
-about: Propose a new feature for the project
+name: 'Developer: Add feature'
+about: 'Propose a new feature for the project'
 title: '[Feature]: '
 labels: 'enhancement'
 assignees: ''
