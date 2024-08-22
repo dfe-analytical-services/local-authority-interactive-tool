@@ -19,16 +19,17 @@ read_revenue_data <- function(file = "data/la_maintained_schools_revenue_reserve
   # the LA expenditure data downloaded from an EES release
   df_revenue <- read.csv(file)
 
-  df_revenue <- df_revenue %>% mutate(
-    # Convert 6 digit year to 4 digit for end year
-    year = as.numeric(paste0("20", substr(format(time_period), 5, 6))),
+  df_revenue <- df_revenue |>
+    dplyr::mutate(
+      # Convert 6 digit year to 4 digit for end year
+      year = as.numeric(paste0("20", substr(format(time_period), 5, 6))),
 
-    # Create a flat column listing all locations
-    area_name = case_when(
-      geographic_level == "National" ~ country_name,
-      geographic_level == "Regional" ~ region_name,
-      .default = la_name
+      # Create a flat column listing all locations
+      area_name = dplyr::case_when(
+        geographic_level == "National" ~ country_name,
+        geographic_level == "Regional" ~ region_name,
+        .default = la_name
+      )
     )
-  )
   return(df_revenue)
 }

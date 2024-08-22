@@ -1,9 +1,9 @@
 a11y_panel <- function() {
-  tabPanel(
+  shiny::tabPanel(
     "Accessibility",
-    gov_main_layout(
-      gov_row(
-        column(
+    shinyGovstyle::gov_main_layout(
+      shinyGovstyle::gov_row(
+        shiny::column(
           width = 12,
           h1("Accessibility statement for [service name]"), # TODO
           p(

@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 cat("Running commit hooks...", fill = TRUE)
 shhh <- suppressPackageStartupMessages # It's a library, so shhh!
-shhh(library(dplyr))
-shhh(library(xfun))
-shhh(library(dfeshiny))
+# shhh(library(dplyr))
+# shhh(library(xfun))
+# shhh(library(dfeshiny))
 
 message("\n")
 
@@ -11,9 +11,9 @@ message("1. Checking for unpublished data...\n")
 
 error_flag <- FALSE
 
-datalog <- "datafiles_log.csv"
+datalog <- here::here("datafiles_log.csv")
 log_files <- read.csv(datalog, stringsAsFactors = FALSE)
-ign_files <- read.csv(".gitignore", header = FALSE, stringsAsFactors = FALSE)
+ign_files <- read.csv(here::here(".gitignore"), header = FALSE, stringsAsFactors = FALSE)
 colnames(ign_files)[1] <- "filename"
 
 message("Contents of the .gitignore file:")
@@ -34,8 +34,8 @@ if (ncol(ign_files) > 1) {
 
 suffixes <- "xlsx$|dat$|csv$|tex$|pdf$"
 
-current_files <- data.frame(files = list.files("./", recursive = TRUE)) %>%
-  filter(grepl(suffixes, files), !grepl("renv|datafiles_log.csv", files))
+current_files <- data.frame(files = list.files(here::here(), recursive = TRUE)) |>
+  dplyr::filter(grepl(suffixes, files), !grepl("renv|datafiles_log.csv", files))
 
 for (file in current_files$files) {
   if (!file %in% log_files$filename) {
@@ -43,7 +43,7 @@ for (file in current_files$files) {
     message("Please add an entry to datafiles_log.csv for this file and mark it as unpublished, published or reference.\n\n")
     error_flag <- TRUE
   } else {
-    file_status <- (log_files %>% filter(filename == file))$status
+    file_status <- (log_files |> dplyr::filter(filename == file))$status
     if (!file_status %in% c("published", "Published", "reference", "Reference", "dummy", "Dummy")) {
       if (!file %in% ign_files$filename & !grepl("unpublished", file)) {
         message("Error: ", file, " is not logged as published or reference data in datafiles_log.csv and is not found in .gitignore.\n\n")
@@ -72,8 +72,8 @@ message("2. Checking Google Analytics tag...\n")
 if (grepl("G-Z967JJVQQX", htmltools::includeHTML(("google-analytics.html"))) &
   !(toupper(Sys.getenv("USERNAME")) %in% c("CFOSTER4", "CRACE", "LSELBY", "RBIELBY", "JMACHIN"))) {
   message("...cleaning out the template's Google Analytics tag.")
-  gsub_file("google-analytics.html", pattern = "G-Z967JJVQQX", replacement = "G-XXXXXXXXXX")
-  gsub_file("ui.R", pattern = "Z967JJVQQX", replacement = "XXXXXXXXXX")
+  xfun::gsub_file("google-analytics.html", pattern = "G-Z967JJVQQX", replacement = "G-XXXXXXXXXX")
+  xfun::gsub_file("ui.R", pattern = "Z967JJVQQX", replacement = "XXXXXXXXXX")
   system2(command = "git", args = c("add", "google-analytics.html"))
 } else {
   message("...all good!")

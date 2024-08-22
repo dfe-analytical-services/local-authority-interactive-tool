@@ -1,14 +1,14 @@
 example_tab_1_panel <- function() {
-  tabPanel(
+  shiny::tabPanel(
     "Example tab 1",
-    gov_main_layout(
-      gov_row(
-        column(
+    shinyGovstyle::gov_main_layout(
+      shinyGovstyle::gov_row(
+        shiny::column(
           width = 12,
           h1("Overall content title for this dashboard page"),
         ),
         # Expandable section --------------------------------------------------
-        column(
+        shiny::column(
           width = 12,
           expandable(
             input_id = "details", label = textOutput("dropdown_label"),
@@ -16,28 +16,28 @@ example_tab_1_panel <- function() {
               div(
                 id = "div_a",
                 # User selection dropdowns ------------------------------------
-                gov_row(
-                  column(
+                shinyGovstyle::gov_row(
+                  shiny::column(
                     width = 6,
-                    selectizeInput("selectPhase",
+                    shiny::selectizeInput("selectPhase",
                       "Select a school phase",
                       choices = choices_phase
                     )
                   ),
-                  column(
+                  shiny::column(
                     width = 6,
-                    selectizeInput(
+                    shiny::selectizeInput(
                       inputId = "selectArea",
                       label = "Choose an area:",
                       choices = choices_areas$area_name
                     )
                   ),
                   # Download button -------------------------------------------
-                  column(
+                  shiny::column(
                     width = 12,
                     paste("Download the underlying data for this dashboard:"),
                     br(),
-                    downloadButton(
+                    shiny::downloadButton(
                       outputId = "download_data",
                       label = "Download data",
                       icon = shiny::icon("download"),
@@ -49,65 +49,65 @@ example_tab_1_panel <- function() {
           ),
         ),
         # Tabset under dropdowns ----------------------------------------------
-        column(
+        shiny::column(
           width = 12,
-          tabsetPanel(
+          shiny::tabsetPanel(
             id = "tabsetpanels",
             # Value boxes tab -------------------------------------------------
-            tabPanel(
+            shiny::tabPanel(
               "Valuebox example",
-              fluidRow(
-                column(
+              shiny::fluidRow(
+                shiny::column(
                   width = 12,
                   h2("Examples of producing value boxes in R-Shiny"),
-                  fluidRow(
-                    column(
+                  shiny::fluidRow(
+                    shiny::column(
                       width = 12,
-                      valueBoxOutput("box_balance_latest", width = 6),
-                      valueBoxOutput("box_balance_change", width = 6)
+                      shinydashboard::valueBoxOutput("box_balance_latest", width = 6),
+                      shinydashboard::valueBoxOutput("box_balance_change", width = 6)
                     )
                   )
                 )
               )
             ),
             # Timeseries tab --------------------------------------------------
-            tabPanel(
+            shiny::tabPanel(
               "Line chart example",
-              fluidRow(
-                column(
+              shiny::fluidRow(
+                shiny::column(
                   width = 12,
                   h2("An example line chart using ggplot and ggiraph"),
-                  girafeOutput("lineRevBal", width = "100%", height = "100%")
+                  ggiraph::girafeOutput("lineRevBal", width = "100%", height = "100%")
                 )
               )
             ),
             # Benchmarking tab ------------------------------------------------
-            tabPanel(
+            shiny::tabPanel(
               "Benchmarking example",
-              fluidRow(
-                column(
+              shiny::fluidRow(
+                shiny::column(
                   width = 12,
                   h2("An example bar chart using ggplot and ggiraph"),
                   p("This is the standard paragraph style for adding guiding
                     info around data content."),
                   # Bar chart for benchmarking --------------------------------
-                  column(
+                  shiny::column(
                     width = 6,
                     girafeOutput("colBenchmark",
                       width = "100%", height = "100%"
                     )
                   ),
-                  column(
+                  shiny::column(
                     width = 6,
                     div(
                       class = "well",
                       style = "min-height: 100%; height: 100%; overflow-y:
                       visible",
-                      fluidRow(
+                      shiny::fluidRow(
                         # Benchmarking dropdown selection ---------------------
-                        column(
+                        shiny::column(
                           width = 12,
-                          selectizeInput("selectBenchLAs",
+                          shiny::selectizeInput("selectBenchLAs",
                             "Select benchmark local authorities",
                             choices = choices_las$area_name,
                             multiple = TRUE,
@@ -117,7 +117,7 @@ example_tab_1_panel <- function() {
                       )
                     ),
                     # Benchmarking table --------------------------------------
-                    dataTableOutput("tabBenchmark")
+                    DT::dataTableOutput("tabBenchmark")
                   )
                 )
               )

@@ -1,9 +1,9 @@
 user_guide_panel <- function() {
-  tabPanel(
+  shiny::tabPanel(
     "User guide",
-    gov_main_layout(
-      gov_row(
-        column(
+    shinyGovstyle::gov_main_layout(
+      shinyGovstyle::gov_row(
+        shiny::column(
           12,
           h1("Department for Education (DfE) Analytical Services R Shiny data dashboard template"),
           h2("Introduction"),
