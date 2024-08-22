@@ -46,6 +46,7 @@ source(here::here("R/helper_functions.R"))
 
 # Source all files in the ui_panels folder
 lapply(list.files(here::here("R/ui_panels/"), full.names = TRUE), source)
+lapply(list.files(here::here("R/general_modules/"), full.names = TRUE), source)
 
 # Set global variables --------------------------------------------------------
 

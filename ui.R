@@ -52,26 +52,12 @@ ui <- function(input, output, session) {
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
     # https://book.javascript-for-r.com/shiny-cookies.html
-    tags$head(
-      tags$script(
-        src = paste0(
-          "https://cdn.jsdelivr.net/npm/js-cookie@rc/",
-          "dist/js.cookie.min.js"
-        )
-      ),
-      tags$script(src = "cookie-consent.js")
-    ),
+    set_javascript_dependencies(),
     shinyGovstyle::cookieBanner("Local Authority Interactive Tool (LAIT)"),
 
     # Google analytics --------------------------------------------------------
     tags$head(shiny::includeHTML(("google-analytics.html"))),
-    tags$head(
-      tags$link(
-        rel = "stylesheet",
-        type = "text/css",
-        href = "dfe_shiny_gov_style.css"
-      )
-    ),
+    set_css_style_sheet("dfe_shiny_gov_style.css"),
 
     # Header ------------------------------------------------------------------
     shinyGovstyle::header(
