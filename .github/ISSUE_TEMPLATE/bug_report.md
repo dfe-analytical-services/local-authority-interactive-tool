@@ -1,16 +1,25 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
+title: 'Bug: '
+labels: 'bug'
 assignees: ''
 
 ---
 
+<!-- 
+Hey, thanks for raising a bug issue!
+To help us understand the bug you have found, please complete each section in this template by replacing '...' with details to help explain the reason for this issue. 
+-->
+
 **Describe the bug**
-A clear and concise description of what the bug is.
+
+<!-- A clear and concise description of what the bug is. -->
+
+...
 
 **To Reproduce**
+
 Steps to reproduce the behaviour:
 1. Go to '...'
 2. Click on '....'
@@ -18,12 +27,19 @@ Steps to reproduce the behaviour:
 4. See error
 
 **Expected behaviour**
-A clear and concise description of what you expected to happen.
+
+<!-- A clear and concise description of what you expected to happen. -->
+
+...
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+
+<!-- If applicable, add screenshots to help explain your problem. -->
+
+...
 
 **Desktop (please complete the following information):**
+ 
  - OS: [e.g. iOS]
  - Browser [e.g. chrome, safari]
  - Version [e.g. 22]
