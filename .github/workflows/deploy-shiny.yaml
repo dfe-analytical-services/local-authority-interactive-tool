@@ -23,13 +23,13 @@ jobs:
       - name: Set env vars (dev)
         if: endsWith(github.ref, '/development')
         run: |
-          echo "SHINYAPP_NAME='dev-dfe-shiny-template'" >> $GITHUB_ENV
-          echo "SHINYAPP_OVERFLOW_NAME='dev-dfe-shiny-template-overflow'">> $GITHUB_ENV
+          echo "SHINYAPP_NAME='dev-local-authority-interactive-tool'" >> $GITHUB_ENV
+          echo "SHINYAPP_OVERFLOW_NAME='dev-local-authority-interactive-tool-overflow'">> $GITHUB_ENV
       - name: Set env vars (prod)
         if: endsWith(github.ref, '/main')
         run: |
-          echo "SHINYAPP_NAME='dfe-shiny-template'">> $GITHUB_ENV
-          echo "SHINYAPP_OVERFLOW_NAME='dfe-shiny-template-overflow'">> $GITHUB_ENV
+          echo "SHINYAPP_NAME='local-authority-interactive-tool'">> $GITHUB_ENV
+          echo "SHINYAPP_OVERFLOW_NAME='local-authority-interactive-tool-overflow'">> $GITHUB_ENV
         
       - name: Restore renv snapshot
         shell: Rscript {0}
