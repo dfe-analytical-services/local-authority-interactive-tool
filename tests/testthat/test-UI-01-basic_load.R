@@ -25,8 +25,8 @@ app$wait_for_idle(5)
 
 # Test that the app will start up without error
 # Checks that the title is as expected
-test_that("App loads and title of app appears as expected", {
-  expect_equal(
+testthat::test_that("App loads and title of app appears as expected", {
+  testthat::expect_equal(
     app$get_text("title"),
     # This is the title of the app on load, you should change to match your app's title
     # The app title is usually set early on in the ui.R script or through a variable in the global.R script

@@ -54,5 +54,5 @@ rev_bal_export <- app$get_values(export = c("avg_rev_bal_value", "prev_avg_rev_b
 # Expect that the exported values used in the boxes are always a number
 # This checks that there is a value present, it hasn't errored, and won't
 # fail when you next update the data.
-expect_true(is.numeric(rev_bal_export$export$avg_rev_bal_value))
-expect_true(is.numeric(rev_bal_export$export$prev_avg_rev_bal_value))
+testthat::expect_true(is.numeric(rev_bal_export$export$avg_rev_bal_value))
+testthat::expect_true(is.numeric(rev_bal_export$export$prev_avg_rev_bal_value))

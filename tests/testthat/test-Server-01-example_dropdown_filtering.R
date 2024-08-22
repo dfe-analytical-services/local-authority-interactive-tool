@@ -16,9 +16,9 @@
 # Read in the data to test against
 # Note that when running tests you need to write the paths from the point of view
 # of the tests folder
-source("../../R/read_data.R")
+source(here::here("R/read_data.R"))
 test_data <- read_revenue_data(
-  file = "../../data/la_maintained_schools_revenue_reserve_final.csv"
+  file = here::here("data/la_maintained_schools_revenue_reserve_final.csv")
 )
 
 # Test the server file --------------------------------------------------------
@@ -31,13 +31,13 @@ shiny::testServer(expr = {
   )
 
   # Check the reactive data frame is being filtered down by the dropdowns as we'd expect it to be
-  expect_identical(
+  testthat::expect_identical(
     # Reactive data set
     reactive_rev_bal(),
 
     # Example of what we're expecting made from test data
-    test_data %>%
-      filter(
+    test_data |>
+      dplyr::filter(
         area_name == "England",
         school_phase == "All Local authority maintained schools"
       )
@@ -50,10 +50,10 @@ shiny::testServer(expr = {
   )
 
   # Check the reactive data frame is being filtered down by the dropdowns as we'd expect it to be
-  expect_identical(
+  testthat::expect_identical(
     reactive_rev_bal(),
-    test_data %>%
-      filter(
+    test_data |>
+      dplyr::filter(
         area_name %in% c("England", "North East"),
         school_phase == "Secondary"
       )
