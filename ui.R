@@ -23,10 +23,10 @@ ui <- function(input, output, session) {
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
-    use_shiny_title(),
+    shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
-    metathis::meta() %>%
+    metathis::meta() |>
       metathis::meta_general(
         application_name = "Local Authority Interactive Tool (LAIT)",
         description = "Local Authority Interactive Tool (LAIT)",
@@ -108,7 +108,7 @@ ui <- function(input, output, session) {
       example_tab_1_panel(),
       user_guide_panel(),
       a11y_panel(),
-      support_panel(
+      dfeshiny::support_panel(
         team_email = "explore.statistics@education.gov.uk",
         repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
         form_url = "https://forms.office.com"

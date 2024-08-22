@@ -13,32 +13,32 @@ shhh <- suppressPackageStartupMessages # It's a library, so shhh!
 
 # Core shiny and R packages
 shhh(library(shiny))
-shhh(library(bslib))
-shhh(library(rstudioapi))
+# shhh(library(bslib))
+# shhh(library(rstudioapi))
 
 # Custom packages
-shhh(library(dfeR))
-shhh(library(dfeshiny))
-shhh(library(shinyGovstyle))
+# shhh(library(dfeR))
+# shhh(library(dfeshiny))
+# shhh(library(shinyGovstyle))
 
 # Creating charts and tables
 shhh(library(ggplot2))
-shhh(library(DT))
+shhh(library(ggiraph))
+# shhh(library(DT))
 
 # Data and string manipulation
-shhh(library(dplyr))
-shhh(library(stringr))
-shhh(library(ggiraph))
+# shhh(library(dplyr))
+# shhh(library(stringr))
 
 # Shiny extensions
-shhh(library(shinyjs))
-shhh(library(tools))
-shhh(library(shinydashboard))
-shhh(library(shinyWidgets))
-shhh(library(shinytitle))
-shhh(library(xfun))
-shhh(library(metathis))
-shhh(library(shinyalert))
+# shhh(library(shinyjs))
+# shhh(library(tools))
+# shhh(library(shinydashboard))
+# shhh(library(shinyWidgets))
+# shhh(library(shinytitle))
+# shhh(library(xfun))
+# shhh(library(metathis))
+# shhh(library(shinyalert))
 
 # Dependencies needed for testing or CI but not for the app -------------------
 # Including them here keeps them in renv but avoids the app needlessly loading
