@@ -57,13 +57,13 @@ if (FALSE) {
 # It's best to do this here instead of the server file, to improve performance.
 
 # Source script for loading in data
-source("R/read_data.R")
+source(here::here("R/read_data.R"))
 
 # Source custom functions script
-source("R/helper_functions.R")
+source(here::here("R/helper_functions.R"))
 
 # Source all files in the ui_panels folder
-lapply(list.files("R/ui_panels/", full.names = TRUE), source)
+lapply(list.files(here::here("R/ui_panels/"), full.names = TRUE), source)
 
 # Set global variables --------------------------------------------------------
 
