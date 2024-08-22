@@ -1306,7 +1306,7 @@
       "Package": "shinyWidgets",
       "Version": "0.8.6",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "anytime",
