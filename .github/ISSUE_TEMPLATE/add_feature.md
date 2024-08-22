@@ -1,7 +1,7 @@
 ---
 name: 'Developer: Add feature'
 about: 'Propose a new feature for the project'
-title: '[Feature]: '
+title: 'Feature: '
 labels: 'enhancement'
 assignees: ''
 
