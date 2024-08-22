@@ -48,10 +48,13 @@ ui <- function(input, output, session) {
     # Styling with CSS
     set_css_style_sheet("dfe_shiny_gov_style.css"),
 
+    # Load javascript dependencies --------------------------------------------
+    shinyWidgets::useShinydashboard(),
+    shinyjs::useShinyjs(),
+
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
     # https://book.javascript-for-r.com/shiny-cookies.html
-    shinyjs::useShinyjs(),
     dfeshiny::dfe_cookie_script(),
     dfeshiny::cookie_banner_ui(
       "cookie-banner",
