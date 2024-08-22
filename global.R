@@ -29,7 +29,10 @@ if (FALSE) {
   # Continuous Integration
   shhh(library(styler))
   shhh(library(lintr))
+  shhh(library(roxygen2))
   shhh(library(rstudioapi))
+  # For {arrow} to not give warning
+  shhh(library(tzdb))
 }
 
 # Load functions ----------------------------------
