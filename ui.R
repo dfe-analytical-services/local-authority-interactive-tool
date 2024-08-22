@@ -45,19 +45,18 @@ ui <- function(input, output, session) {
       publication_link = parent_publication
     ),
 
-    # Load javascript dependencies --------------------------------------------
-    shinyWidgets::useShinydashboard(),
-    shinyjs::useShinyjs(),
+    # Styling with CSS
+    set_css_style_sheet("dfe_shiny_gov_style.css"),
 
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
     # https://book.javascript-for-r.com/shiny-cookies.html
-    set_javascript_dependencies(),
-    shinyGovstyle::cookieBanner("Local Authority Interactive Tool (LAIT)"),
-
-    # Google analytics --------------------------------------------------------
-    tags$head(shiny::includeHTML(("google-analytics.html"))),
-    set_css_style_sheet("dfe_shiny_gov_style.css"),
+    shinyjs::useShinyjs(),
+    dfeshiny::dfe_cookie_script(),
+    dfeshiny::cookie_banner_ui(
+      "cookie-banner",
+      "Local Authority Interactive Tool (LAIT)"
+    ),
 
     # Header ------------------------------------------------------------------
     shinyGovstyle::header(
@@ -98,6 +97,11 @@ ui <- function(input, output, session) {
         team_email = "explore.statistics@education.gov.uk",
         repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
         form_url = "https://forms.office.com"
+      ),
+      # Cookies info
+      dfeshiny::cookies_panel_ui(
+        id = "cookie-panel",
+        google_analytics_key = google_analytics_key
       )
     ),
 
