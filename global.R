@@ -12,10 +12,25 @@
 # Library calls ===============================================================
 shhh <- suppressPackageStartupMessages # It's a library, so shhh!
 
-## Core shiny and R packages --------------------------------------------------
+# Core shiny packages
 shhh(library(shiny))
+
+# Creating charts and tables
 shhh(library(ggplot2))
 shhh(library(ggiraph))
+
+# Dependencies needed for testing or CI but not for the app -------------------
+# Including them here keeps them in renv but avoids the app needlessly loading
+# them, saving on load time.
+if (FALSE) {
+  # Testing
+  shhh(library(testthat))
+  shhh(library(shinytest2))
+  # Continuous Integration
+  shhh(library(styler))
+  shhh(library(lintr))
+  shhh(library(rstudioapi))
+}
 
 # Load functions ----------------------------------
 list.files("R/", full.names = TRUE) |>
