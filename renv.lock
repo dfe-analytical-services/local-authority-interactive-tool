@@ -308,15 +308,15 @@
     },
     "checkmate": {
       "Package": "checkmate",
-      "Version": "2.3.2",
+      "Version": "2.3.1",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R",
         "backports",
         "utils"
       ],
-      "Hash": "0e14e01ce07e7c88fd25de6d4260d26b"
+      "Hash": "c01cab1cb0f9125211a6fc99d540e315"
     },
     "chromote": {
       "Package": "chromote",
@@ -1734,16 +1734,16 @@
     },
     "websocket": {
       "Package": "websocket",
-      "Version": "1.4.2",
+      "Version": "1.4.1",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "AsioHeaders",
         "R6",
         "cpp11",
         "later"
       ],
-      "Hash": "e77c5569354172d0d04d54a9dec89e33"
+      "Hash": "76e0d400757e318cca33def29ccebbc2"
     },
     "withr": {
       "Package": "withr",
