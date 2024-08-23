@@ -99,7 +99,7 @@ la_table <- la_long |>
 # Extract change from prev year (from LA table)
 la_change_prev <- la_table |>
   filter_la_regions(selected_la,
-    latest = F,
+    latest = FALSE,
     pull_col = "Change from previous year"
   )
 # Set the trend value
@@ -123,12 +123,12 @@ la_rank <- filtered_bds |>
 
 # Calculate quartile bands for indicator
 la_quartile_bands <- filtered_bds |>
-  filter_la_regions(la_names_bds, latest = T, pull_col = "values_num") |>
+  filter_la_regions(la_names_bds, latest = TRUE, pull_col = "values_num") |>
   quantile(na.rm = TRUE)
 
 # Extracting LA latest value
 la_indicator_val <- filtered_bds |>
-  filter_la_regions(selected_la, latest = T, pull_col = "values_num")
+  filter_la_regions(selected_la, latest = TRUE, pull_col = "values_num")
 
 # Calculating which quartile this value sits in
 la_quartile <- dplyr::case_when(

@@ -93,7 +93,8 @@ ui_dev <- bslib::page_fillable(
         h3("Methodology:"),
         uiOutput("methodology"),
         div(
-          style = "display: flex; align-items: baseline;", # This will create a flex container where the items are centered vertically
+          # Creates a flex container where the items are centered vertically
+          style = "display: flex; align-items: baseline;",
           h3("Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
@@ -255,18 +256,18 @@ server_dev <- function(input, output, session) {
 
     # Get latest rank, ties are set to min & NA vals to NA rank
     la_rank <- filtered_bds$data |>
-      filter_la_regions(la_names_bds, latest = T) |>
+      filter_la_regions(la_names_bds, latest = TRUE) |>
       calculate_rank() |>
       filter_la_regions(input$la_input, pull_col = "rank")
 
     # Calculate quartile bands for indicator
     la_quartile_bands <- filtered_bds$data |>
-      filter_la_regions(la_names_bds, latest = T, pull_col = "values_num") |>
+      filter_la_regions(la_names_bds, latest = TRUE, pull_col = "values_num") |>
       quantile(na.rm = TRUE)
 
     # Extracting LA latest value
     la_indicator_val <- filtered_bds$data |>
-      filter_la_regions(input$la_input, latest = T, pull_col = "values_num")
+      filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
 
     # Calculating which quartile this value sits in
     la_quartile <- calculate_quartile_band(

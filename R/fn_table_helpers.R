@@ -97,7 +97,8 @@ create_sn_table <- function(data_indicator,
   table_prod <- data_indicator |>
     dplyr::filter(local_authority %in% c(df_selected_sns$`LA Name_sn`, selected_la)) |>
     dplyr::select(-c(`Short Desc`, line, `Data item`)) |>
-    dplyr::mutate(indicator = unlist(lapply(!!rlang::sym(indicator_colname),
+    dplyr::mutate(indicator = unlist(lapply(
+      !!rlang::sym(indicator_colname),
       dfeR::pretty_num,
       dp = 3
     ))) |>
@@ -144,7 +145,7 @@ create_sn_table <- function(data_indicator,
 #' )
 #' }
 #'
-filter_la_regions <- function(data, filter_col, latest = F, pull_col = NA) {
+filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
   # Filter LA & Regions
   result <- data |>
     dplyr::filter(`LA and Regions` %in% filter_col)

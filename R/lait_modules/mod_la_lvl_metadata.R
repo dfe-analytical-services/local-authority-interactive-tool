@@ -1,3 +1,5 @@
+# nolint start: object_name
+#
 #' UI module for displaying metadata
 #'
 #' @param id A character string that is used as the namespace for the module's
@@ -59,7 +61,8 @@ LA_LevelMetaUI <- function(id) {
         h3("Methodology:"),
         MetadataUI(ns("methodology")),
         div(
-          style = "display: flex; align-items: baseline;", # This will create a flex container where the items are centered vertically
+          # Creates a flex container where the items are centered vertically
+          style = "display: flex; align-items: baseline;",
           h3("Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
@@ -132,3 +135,5 @@ LA_LevelMetaServer <- function(id, indicator_input, data_metrics) {
     )
   })
 }
+
+# nolint end

@@ -1,3 +1,4 @@
+# nolint start: object_name
 #
 # General modules =============================================================
 # These are nested within other modules
@@ -240,18 +241,24 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
       # Get latest rank, ties are set to min & NA vals to NA rank
       la_rank <- filtered_bds() |>
-        filter_la_regions(la_names_bds, latest = T) |>
+        filter_la_regions(la_names_bds, latest = TRUE) |>
         calculate_rank() |>
         filter_la_regions(app_inputs$la(), pull_col = "rank")
 
       # Calculate quartile bands for indicator
       la_quartile_bands <- filtered_bds() |>
-        filter_la_regions(la_names_bds, latest = T, pull_col = "values_num") |>
+        filter_la_regions(la_names_bds,
+          latest = TRUE,
+          pull_col = "values_num"
+        ) |>
         quantile(na.rm = TRUE)
 
       # Extracting LA latest value
       la_indicator_val <- filtered_bds() |>
-        filter_la_regions(app_inputs$la(), latest = T, pull_col = "values_num")
+        filter_la_regions(app_inputs$la(),
+          latest = TRUE,
+          pull_col = "values_num"
+        )
 
       # Calculating which quartile this value sits in
       la_quartile <- calculate_quartile_band(
@@ -315,3 +322,5 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     })
   })
 }
+
+# nolint end

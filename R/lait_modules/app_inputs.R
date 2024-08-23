@@ -1,3 +1,5 @@
+# nolint start: object_name
+#
 #' Shiny Module UI for Displaying the App Inputs
 #'
 #' This function creates a Shiny UI module for displaying the app inputs.
@@ -83,3 +85,5 @@ appInputsServer <- function(id) {
     )
   })
 }
+
+# nolint end

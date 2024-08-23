@@ -361,7 +361,7 @@ tooltip_vlines <- function(x, data) {
       ),
       collapse = ""
     )),
-    hover_nearest = T,
+    hover_nearest = TRUE,
     linetype = "dashed",
     size = 2.5,
     color = "transparent"

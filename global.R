@@ -58,10 +58,8 @@ lapply(
 
 # Loading data ----------------------------------
 # BDS - London regions changed to match SN
-# - Christ Church to Christchurch
-# - Westmoreland to Westmorland
-# - London (Inner) & London (Outer)
-# - England_all_schools & England_state_funded
+# - Christ Church to Christchurch, Westmoreland to Westmorland
+# - London (Inner) & London (Outer), England_all_schools & England_state_funded
 # - Added LA nums for Englands and London (inner/outer)
 bds <- arrow::read_parquet(
   here::here("01_data/02_prod/bds_long_0.parquet")
@@ -71,7 +69,7 @@ bds <- arrow::read_parquet(
 stat_n_raw <- readxl::read_xlsx(
   here::here("01_data/02_prod/SN_April 2021.xlsx"),
   sheet = "LA SN Groups",
-  col_names = T,
+  col_names = TRUE,
   skip = 2,
   .name_repair = "unique_quiet"
 )
@@ -93,7 +91,7 @@ bds_clean <- bds |>
       Values == "-" ~ NA,
       Values == "c" ~ NA,
       is.na(Values) ~ NA,
-      T ~ Values
+      TRUE ~ Values
     ),
     values_num = as.numeric(values_clean)
   )
@@ -149,8 +147,8 @@ bds_metrics <- metrics_clean |>
 # Testing many-to-many join
 metrics_duplicates <- metrics_clean |>
   dplyr::filter(
-    (duplicated(metrics_clean$Measure_short) |
-      duplicated(metrics_clean$Measure_short, fromLast = F))
+    duplicated(metrics_clean$Measure_short) |
+      duplicated(metrics_clean$Measure_short, fromLast = FALSE)
   ) |>
   dplyr::pull(Measure_short)
 
@@ -162,9 +160,10 @@ testthat::test_that(
   "Rows in BDS and BDS post merge are equal (minus the dupes)",
   {
     testthat::expect_equal(
-      nrow(bds_clean |>
-        dplyr::filter(`Short Desc` %notin% metrics_discontinued)),
-      (nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2))
+      bds_clean |>
+        dplyr::filter(`Short Desc` %notin% metrics_discontinued) |>
+        nrow(),
+      nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)
     )
   }
 )
@@ -280,11 +279,12 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
     11
   )
 
-  # testthat::expect_setequal(
-  #   region_names_bds,
-  #   stat_n_la |>
-  #     pull_uniques("GOReg")
-  # )
+  testthat::expect_setequal(
+    setdiff(region_names_bds, "London"),
+    stat_n_la |>
+      pull_uniques("GOReg") |>
+      na.omit()
+  )
 })
 
 

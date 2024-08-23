@@ -27,7 +27,7 @@ source(here::here("R/fn_load_data.R"))
 bds_wide_raw_sf <- readxl::read_xlsx(
   path = paste0(shared_folder, "/BDS - Wide.xlsx"),
   sheet = "BigDataSheet",
-  col_names = T,
+  col_names = TRUE,
   skip = 1,
   # Replace multi-space with single-space
   .name_repair = clean_spaces,
@@ -50,11 +50,11 @@ bds_wide_raw <- read.csv(
   check.names = FALSE
 )
 
+# styler: off
 # Remove any cols that are all na
 bds_wide <- bds_wide_raw |>
-  {
-    \(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.)))
-  }()
+  { \(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.))) }() # nolint: brace
+# styler: on
 ```
 
 

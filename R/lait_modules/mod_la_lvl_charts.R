@@ -1,3 +1,5 @@
+# nolint start: object_name
+#
 #' Local Authority Chart UI Module
 #'
 #' This module creates the UI elements for displaying Local Authority
@@ -232,3 +234,5 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     })
   })
 }
+
+# nolint end
