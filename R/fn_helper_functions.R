@@ -4,7 +4,8 @@
 #'
 #' @param x A vector of any type.
 #'
-#' @return A logical value: `TRUE` if not all elements are `NA`, otherwise `FALSE`.
+#' @return A logical value: `TRUE` if not all elements are `NA`,
+#' otherwise `FALSE`.
 #'
 #' @examples
 #' # Check if not all elements are NA
@@ -22,12 +23,14 @@ not_all_na <- function(x) {
 
 #' Negated %in% Operator
 #'
-#' This function provides a negated version of the `%in%` operator, allowing you to check if elements are not in a specified set.
+#' This function provides a negated version of the `%in%` operator,
+#' allowing you to check if elements are not in a specified set.
 #'
 #' @param x A vector of values to be checked.
 #' @param table A vector of values to be compared against.
 #'
-#' @return A logical vector indicating if the elements of `x` are not in `table`.
+#' @return A logical vector indicating if the elements of
+#' `x` are not in `table`.
 #'
 #' @examples
 #' # Check if elements are not in the specified set
@@ -51,7 +54,8 @@ not_all_na <- function(x) {
 #' @param x A dataframe.
 #' @return A character vector containing non-empty column names.
 #' @examples
-#' df <- data.frame(col1 = c(1, 2, 3), "" = c(4, 5, 6), col3 = c(7, 8, 9))
+#' df <- data.frame(col1 = c(1, 2, 3), "col2" = c(4, 5, 6), col3 = c(7, 8, 9))
+#' colnames(df)[2] <- ""
 #' non_empty_colnames(df)
 #' df |> {\(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.))) }()
 #' @export
@@ -62,8 +66,8 @@ non_empty_colnames <- function(x) {
 
 #' Replace Multiple Spaces with a Single Space
 #'
-#' This function takes a character vector and replaces any occurrence of multiple
-#' whitespace characters with a single space.
+#' This function takes a character vector and replaces any occurrence of
+#' multiple whitespace characters with a single space.
 #'
 #' @param x A character vector.
 #'
