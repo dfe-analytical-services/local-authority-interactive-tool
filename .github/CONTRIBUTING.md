@@ -23,4 +23,4 @@ All code is styled using the styleR package. Running the `styler::style_dir()` f
 
 ## Any other questions
 
-If you have any other questions, please do not hesitate to contact us at explore.statistics@education.gov.uk
+If you have any other questions, please do not hesitate to contact us at jake.tufts@education.gov.uk or explore.statistics@education.gov.uk

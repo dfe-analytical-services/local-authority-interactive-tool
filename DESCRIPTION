@@ -1,8 +1,8 @@
-Title: shiny-template
-Author: c(person(given = "Laura",
-                 family = "Selby",
+Title: local-authority-interactive-tool
+Author: c(person(given = "Jake",
+                 family = "Tufts",
                  role = c("cre", "aut"),
-                 email = "laura.selby@education.gov.uk"),
+                 email = "jake.tufts@education.gov.uk"),
           person(given = "Cameron",
                  family = "Race",
                  role = "aut",
