@@ -37,7 +37,7 @@ bds_wide_raw_sf <- readxl::read_xlsx(
 # Save to data folder
 write.csv(
   bds_wide_raw_sf,
-  here::here("01_data/01_raw/BDS - Wide.csv"),
+  here::here("01_data/01_raw/BDS_Wide.csv"),
   row.names = FALSE
 )
 ```
@@ -52,18 +52,22 @@ bds_wide_raw <- read.csv(
 
 # Remove any cols that are all na
 bds_wide <- bds_wide_raw |>
-  {\(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.))) }()
+  {
+    \(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.)))
+  }()
 ```
 
 
 ```{r wide-long}
 # Pivot BDS long on geographic cols
 bds_long <- bds_wide |>
-  tidyr::pivot_longer(cols = `Barking and Dagenham`:England_state_funded,
-                      names_to = 'LA and Regions',
-                      values_to = 'Values') |>
+  tidyr::pivot_longer(
+    cols = `Barking and Dagenham`:England_state_funded,
+    names_to = "LA and Regions",
+    values_to = "Values"
+  ) |>
   # Removes these lines with matching entries in year column
-  dplyr::filter (
+  dplyr::filter(
     Years %notin% c(
       "-",
       "",
@@ -100,9 +104,9 @@ columns_to_delete <- c(
 bds_long_clean <- bds_long |>
   dplyr::select(!dplyr::all_of(columns_to_delete)) |>
   dplyr::mutate(
-    'LA and Regions' = stringr::str_replace_all(`LA and Regions`, "\\.", " "), 
-    'LA and Regions' = stringr::str_replace_all(`LA and Regions`, "  ", "\\. "),
-    
+    "LA and Regions" = stringr::str_replace_all(`LA and Regions`, "\\.", " "),
+    "LA and Regions" = stringr::str_replace_all(`LA and Regions`, "  ", "\\. "),
+
     # Remove final _ and following digits
     # NOTE: Also remove whitespace - 'LACStableNum_2016on'
     `Short Desc` = trimws(sub("_\\d+$", "", `Short Desc`))
@@ -118,9 +122,10 @@ la_codes <- readxl::read_xlsx(
 
 # Join to bds and create combined codes var
 bds_long_la <- bds_long_clean |>
-  dplyr::left_join(la_codes, by = c('LA and Regions' = 'LA Name')) |>
+  dplyr::left_join(la_codes, by = c("LA and Regions" = "LA Name")) |>
   dplyr::mutate(combined_code = paste(`LA Number`, `Short Desc`, Years,
-                                      sep = "_"))
+    sep = "_"
+  ))
 ```
 
 
@@ -131,11 +136,11 @@ bds_long_la <- bds_long_clean |>
 data_dict <- readxl::read_xlsx(
   path = paste0(shared_folder, "/LAIT Data Dictionary (To QA!).xlsx"),
   sheet = "Data_prod"
-) |> 
+) |>
   pull_uniques("Measure_short")
 
 # Filter BDS for only measures in the data dict
-bds_long_public <- bds_long_la |> 
+bds_long_public <- bds_long_la |>
   dplyr::filter(`Short Desc` %in% data_dict)
 ```
 
@@ -143,8 +148,9 @@ bds_long_public <- bds_long_la |>
 ```{r bds-save}
 # Save BDS long as .csv
 write.csv(bds_long_public,
-          here::here("01_data/02_prod/bds/bds_long.csv"),
-          row.names = FALSE)
+  here::here("01_data/02_prod/bds/bds_long.csv"),
+  row.names = FALSE
+)
 ```
 
 
@@ -153,17 +159,17 @@ write.csv(bds_long_public,
 bds_region <- bds_long_public |>
   dplyr::filter(
     `LA and Regions` %in% c(
-      'North East',
-      'North West',
-      'Yorkshire and the Humber',
-      'East Midlands',
-      'West Midlands',
-      'East of England',
-      'London',
-      'Inner London',
-      'Outer London',
-      'South East',
-      'South West'
+      "North East",
+      "North West",
+      "Yorkshire and the Humber",
+      "East Midlands",
+      "West Midlands",
+      "East of England",
+      "London",
+      "Inner London",
+      "Outer London",
+      "South East",
+      "South West"
     )
   )
 write.csv(
@@ -174,43 +180,46 @@ write.csv(
 
 # England
 bds_eng_all <- bds_long_public |>
-  dplyr::filter(`LA and Regions` == 'England_all_schools')
+  dplyr::filter(`LA and Regions` == "England_all_schools")
 
 write.csv(bds_eng_all,
-          here::here("01_data/02_prod/bds/bds_eng_all_schools_long.csv"),
-          row.names = FALSE)
+  here::here("01_data/02_prod/bds/bds_eng_all_schools_long.csv"),
+  row.names = FALSE
+)
 
 # LAs
 bds_la <- bds_long_public |>
   dplyr::filter(
     `LA and Regions` %notin% c(
-      'England_all_schools',
-      'North East',
-      'North West',
-      'Yorkshire and the Humber',
-      'East Midlands',
-      'West Midlands',
-      'East of England',
-      'London',
-      'Inner London',
-      'Outer London',
-      'South East',
-      'South West',
-      'England_state_funded'
+      "England_all_schools",
+      "North East",
+      "North West",
+      "Yorkshire and the Humber",
+      "East Midlands",
+      "West Midlands",
+      "East of England",
+      "London",
+      "Inner London",
+      "Outer London",
+      "South East",
+      "South West",
+      "England_state_funded"
     )
   )
 
 write.csv(bds_la, here::here("01_data/02_prod/bds/bds_la_long.csv"),
-          row.names = FALSE)
+  row.names = FALSE
+)
 
 # England_2
 
 bds_eng_state <- bds_long_public |>
-  dplyr::filter(`LA and Regions` == 'England_state_funded')
+  dplyr::filter(`LA and Regions` == "England_state_funded")
 
 write.csv(bds_eng_state,
-          here::here("01_data/02_prod/bds/bds_eng_state_funded_long.csv"),
-          row.names = FALSE)
+  here::here("01_data/02_prod/bds/bds_eng_state_funded_long.csv"),
+  row.names = FALSE
+)
 ```
 
 
@@ -227,6 +236,5 @@ arrow::write_dataset(
   format = "parquet",
   basename_template = "bds_long_{i}.parquet"
 )
-
 ```
 
