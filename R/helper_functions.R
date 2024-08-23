@@ -72,3 +72,39 @@ validate_color <- function(color) {
 suppressMessages(
   gss_colour_pallette <- afcolours::af_colours("categorical", colour_format = "hex", n = 4)
 )
+
+
+#' Set CSS Style Sheet --------------------------------------------------------
+#'
+#' This function generates an HTML `head` tag that includes a
+#' link to a specified CSS stylesheet.
+#' It can be used to dynamically set or include a CSS file in a Shiny
+#' application or any other HTML-based interface that utilizes R.
+#'
+#' @param css_filename A character string specifying the path or
+#' URL to the CSS file.
+#' This should be a relative or absolute path to a `.css` file or a URL
+#' pointing to an external stylesheet.
+#'
+#' @return A `tags$head` object containing a `link` tag that references
+#' the specified CSS file.
+#' This object can be directly included in the UI definition of a
+#' Shiny application.
+#'
+#' @details
+#' When included in the UI of a Shiny app, it instructs the web browser
+#' to load and apply the specified CSS stylesheet.
+#'
+#' This function is useful when you need to modularise the
+#' inclusion of stylesheets, especially in applications where the CSS file
+#'  might change dynamically or needs to be set programmatically.
+#'
+set_css_style_sheet <- function(css_filename) {
+  tags$head(
+    tags$link(
+      rel = "stylesheet",
+      type = "text/css",
+      href = css_filename
+    )
+  )
+}
