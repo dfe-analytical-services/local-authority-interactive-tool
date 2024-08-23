@@ -20,9 +20,11 @@
 # -----------------------------------------------------------------------------
 ui <- function(input, output, session) {
   shiny::fluidPage(
+
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
+    tags$head(includeHTML(("google-analytics.html"))),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -86,6 +88,8 @@ ui <- function(input, output, session) {
       )
     ),
 
+    # Start of app ============================================================
+
     # Nav panels --------------------------------------------------------------
     shiny::navlistPanel(
       "",
@@ -93,7 +97,28 @@ ui <- function(input, output, session) {
       widths = c(2, 8),
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
-      example_tab_1_panel(),
+      shiny::tabPanel(
+        title = "Local Authority View",
+
+        # Tab header ==============================================================
+        h1("Local Authority View"),
+
+        # User Inputs =============================================================
+        appInputsUI("la_level"),
+
+        # LA Tables ===============================================================
+        # Main table
+        LA_LevelTableUI("la_table"),
+
+        # Stats table
+        LA_StatsTableUI("la_stats"),
+
+        # LA Charts ===============================================================
+        LA_ChartUI("la_chart"),
+
+        # LA Metadata =============================================================
+        LA_LevelMetaUI("la_meta")
+      ),
       user_guide_panel(),
       a11y_panel(),
       dfeshiny::support_panel(
