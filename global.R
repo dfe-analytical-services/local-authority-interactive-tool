@@ -35,6 +35,7 @@ if (FALSE) {
   # DfE packages
   shhh(library(dfeR))
   shhh(library(dfeshiny))
+  shhh(library(shinyGovstyle))
 }
 
 
@@ -54,6 +55,9 @@ list.files("R/", full.names = TRUE) |>
 
 # Source modules (all scripts in R/lait_modules) ------------------------------
 lapply(list.files(here::here("R/lait_modules/"), full.names = TRUE), source)
+
+# Source ui components (all scripts in R/ui_panels) ---------------------------
+lapply(list.files(here::here("R/ui_panels/"), full.names = TRUE), source)
 
 
 # Set admin global variables ==================================================
