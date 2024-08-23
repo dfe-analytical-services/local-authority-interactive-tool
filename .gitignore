@@ -5,11 +5,10 @@
 .RData*
 .Ruserdata
 
-# Folders and file types
+# Folders
 _output
 04_Outputs
 */*_priv
-*.html
 */*_raw
 01_data/02_prod/bds
 

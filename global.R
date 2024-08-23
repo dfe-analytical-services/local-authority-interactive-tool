@@ -33,6 +33,9 @@ if (FALSE) {
   shhh(library(rstudioapi))
   # For {arrow} to not give warning
   shhh(library(tzdb))
+  # DfE packages
+  shhh(library(dfeR))
+  shhh(library(dfeshiny))
 }
 
 # Load functions ----------------------------------
