@@ -2,3 +2,6 @@ filename,status
 data/la_maintained_schools_revenue_reserve_final.csv,published
 data/some_unpublished_data.csv,unpublished
 01_data/01_raw/BDS_Wide.csv,unpublished
+01_data/02_prod/bds_long_0.parquet,published
+01_data/02_prod/LA code list.xlsx,published
+01_data/02_prod/SN_April 2021.xlsx,published

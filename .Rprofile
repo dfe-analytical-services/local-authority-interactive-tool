@@ -11,6 +11,17 @@ message("Sourcing .Rprofile...")
 
 source("renv/activate.R")
 
+# Welcome message
+.First <- function() {
+  message(
+    praise::praise("${Exclamation}-${Exclamation}! "),
+    "Welcome to your dfeR project.
+",
+    praise::praise("Time for some ${adjective} R coding...")
+  )
+}
+
+# Check if dfeshiny installed
 if (system.file(package = "dfeshiny") != "") {
   library(dfeshiny)
 } else {
