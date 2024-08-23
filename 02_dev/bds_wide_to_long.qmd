@@ -17,8 +17,8 @@ execute:
 
 
 ```{r src-funs}
-source(here::here("R/helper_functions.R"))
-source(here::here("R/load_data.R"))
+source(here::here("R/fn_helper_functions.R"))
+source(here::here("R/fn_load_data.R"))
 ```
 
 

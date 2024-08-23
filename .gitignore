@@ -1,12 +1,18 @@
+# R files
 .Rproj.user
 .Rhistory
 .RData
 .RData*
 .Ruserdata
+
+# Folders and file types
 _output
 04_Outputs
 */*_priv
 *.html
 */*_raw
 01_data/02_prod/bds
+
+# Specific files
 03_documentation/01_public/LAIT.xlsm
+BDS - Wide.csv
