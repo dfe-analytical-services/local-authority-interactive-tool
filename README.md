@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!-- This is a template README for a DfE dashboard, use this as a starting point for creating your own readme, making sure to replace or delete wherevere there is three dots (...) with the content appropriate for your dashboard -->
 
 <!-- Add the title of your of application -->
