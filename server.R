@@ -18,7 +18,6 @@
 #
 # -----------------------------------------------------------------------------
 server <- function(input, output, session) {
-
   # Bookmarking ===============================================================
   # The template uses bookmarking to store input choices in the url. You can
   # exclude specific inputs (for example extra info created for a datatable
