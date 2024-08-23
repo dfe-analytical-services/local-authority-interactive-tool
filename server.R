@@ -16,40 +16,49 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 server <- function(input, output, session) {
-
   # User Inputs ===============================================================
   app_inputs <- appInputsServer("la_level")
 
   # LA level tables ===========================================================
   # Main table
-  LA_LevelTableServer("la_table",
-                      app_inputs,
-                      bds_metrics,
-                      stat_n_la)
+  LA_LevelTableServer(
+    "la_table",
+    app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
 
   # Stats table
-  LA_StatsTableServer("la_stats",
-                      app_inputs,
-                      bds_metrics,
-                      stat_n_la)
+  LA_StatsTableServer(
+    "la_stats",
+    app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
 
 
   # LA level charts ===========================================================
   # Line chart
-  LA_LineChartServer("la_chart",
-                     app_inputs,
-                     bds_metrics,
-                     stat_n_la)
+  LA_LineChartServer(
+    "la_chart",
+    app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
 
   # Bar chart
-  LA_BarChartServer("la_chart",
-                    app_inputs,
-                    bds_metrics,
-                    stat_n_la)
+  LA_BarChartServer(
+    "la_chart",
+    app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
 
 
   # LA Metadata ===============================================================
-  LA_LevelMetaServer("la_meta",
-                     app_inputs$indicator,
-                     metrics_clean)
+  LA_LevelMetaServer(
+    "la_meta",
+    app_inputs$indicator,
+    metrics_clean
+  )
 }

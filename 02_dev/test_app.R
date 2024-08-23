@@ -16,21 +16,26 @@ ui <- bslib::page_fillable(
 
     # Tab header ==============================================================
     h1("Local Authority View"),
-
     div(
       class = "well",
       style = "min-height: 100%; height: 100%; overflow-y: visible;",
       bslib::layout_column_wrap(
         width = "15rem", # Minimum width for each input box before wrapping
-        shiny::selectInput(inputId = "la_input",
-                           label = "LA:",
-                           choices = la_names_bds),
-        shiny::selectInput(inputId = "topic_input",
-                              label = "Topic:",
-                              choices = metric_topics),
-        shiny::selectInput(inputId = "indicator_input",
-                              label = NULL,
-                              choices = metric_names)
+        shiny::selectInput(
+          inputId = "la_input",
+          label = "LA:",
+          choices = la_names_bds
+        ),
+        shiny::selectInput(
+          inputId = "topic_input",
+          label = "Topic:",
+          choices = metric_topics
+        ),
+        shiny::selectInput(
+          inputId = "indicator_input",
+          label = NULL,
+          choices = metric_names
+        )
       ),
       bslib::card(
         bslib::card_body(
@@ -42,7 +47,6 @@ ui <- bslib::page_fillable(
 )
 
 server <- function(input, output, session) {
-
   # Then for the respective National indicator (all schools or State funded)
   filtered_topic_bds <- reactive({
     bds_metrics |>
@@ -75,13 +79,14 @@ server <- function(input, output, session) {
 
 
   la_table_stats <- shiny::reactive({
-
     # Extract change from prev year (from LA table)
     la_change_prev <- filtered_bds() |>
       filter_la_regions(input$la_input) |>
       dplyr::arrange(`LA and Regions`, desc(Years)) |>
-      dplyr::mutate(values_num = dplyr::lag(values_num) - values_num,
-                    Years = "Change from previous year") |>
+      dplyr::mutate(
+        values_num = dplyr::lag(values_num) - values_num,
+        Years = "Change from previous year"
+      ) |>
       dplyr::filter(dplyr::row_number() == 2) |>
       dplyr::pull(values_num)
 
@@ -147,7 +152,6 @@ server <- function(input, output, session) {
   output$la_table_stats <- reactable::renderReactable({
     dfe_reactable(la_table_stats())
   })
-
 }
 
 shinyApp(ui, server)

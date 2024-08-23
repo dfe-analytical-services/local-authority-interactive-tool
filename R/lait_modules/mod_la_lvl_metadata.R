@@ -25,9 +25,7 @@ MetadataUI <- function(id) {
 #'
 MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
   moduleServer(id, function(input, output, session) {
-
     output$metadata <- renderUI({
-
       metadata <- data_metrics |>
         get_metadata(indicator_input(), metadata_type)
 
@@ -63,19 +61,22 @@ LA_LevelMetaUI <- function(id) {
         div(
           style = "display: flex; align-items: baseline;", # This will create a flex container where the items are centered vertically
           h3("Last Updated:",
-             style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
           MetadataUI(ns("last_update"))
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Next Updated:",
-             style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
           MetadataUI(ns("next_update"))
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Source:",
-             style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
           MetadataUI(ns("source"))
         )
       )
@@ -94,7 +95,6 @@ LA_LevelMetaUI <- function(id) {
 #' @return A server-side module that fetches and renders the LA level metadata.
 LA_LevelMetaServer <- function(id, indicator_input, data_metrics) {
   moduleServer(id, function(input, output, session) {
-
     # Pass the indicator_input reactive expression itself (without calling it)
     output$description <- MetadataServer(
       "description",

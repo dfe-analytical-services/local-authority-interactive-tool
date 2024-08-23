@@ -50,11 +50,9 @@ appInputsUI <- function(id) {
 #'
 appInputsServer <- function(id) {
   moduleServer(id, function(input, output, session) {
-
     # Input ----------------------------------
     # Update Indicator dropdown for Topic selected
     shiny::observeEvent(input$topic_name, {
-
       # Get indicator choices for selected topic
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(
@@ -73,9 +71,15 @@ appInputsServer <- function(id) {
 
     # Input outputs
     list(
-      la = reactive({input$la_name}),
-      topic = reactive({input$topic_name}),
-      indicator = reactive({input$indicator_name})
+      la = reactive({
+        input$la_name
+      }),
+      topic = reactive({
+        input$topic_name
+      }),
+      indicator = reactive({
+        input$indicator_name
+      })
     )
   })
 }

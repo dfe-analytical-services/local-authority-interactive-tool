@@ -1,10 +1,11 @@
-
 # Load global
 source(here::here("global.R"))
 
 # Load functions
 list.files("R/", full.names = TRUE) |>
-  (\(x) {x[grepl("fn_", x)]})() |>
+  (\(x) {
+    x[grepl("fn_", x)]
+  })() |>
   purrr::walk(source)
 
 # UI
@@ -15,21 +16,26 @@ ui_dev <- bslib::page_fillable(
 
   # Tab header ==============================================================
   h1("Local Authority View"),
-
   div(
     class = "well",
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
-      shiny::selectInput(inputId = "la_input",
-                         label = "LA:",
-                         choices = la_names_bds),
-      shiny::selectInput(inputId = "topic_input",
-                         label = "Topic:",
-                         choices = metric_topics),
-      shiny::selectInput(inputId = "indicator",
-                         label = NULL,
-                         choices = metric_names)
+      shiny::selectInput(
+        inputId = "la_input",
+        label = "LA:",
+        choices = la_names_bds
+      ),
+      shiny::selectInput(
+        inputId = "topic_input",
+        label = "Topic:",
+        choices = metric_topics
+      ),
+      shiny::selectInput(
+        inputId = "indicator",
+        label = NULL,
+        choices = metric_names
+      )
     )
   ),
   div(
@@ -89,19 +95,22 @@ ui_dev <- bslib::page_fillable(
         div(
           style = "display: flex; align-items: baseline;", # This will create a flex container where the items are centered vertically
           h3("Last Updated:",
-             style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
           textOutput("last_update")
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Next Updated:",
-             style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
           uiOutput("next_update")
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Source:",
-             style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
           uiOutput("source")
         )
       )
@@ -111,11 +120,9 @@ ui_dev <- bslib::page_fillable(
 
 # Server
 server_dev <- function(input, output, session) {
-
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
   shiny::observeEvent(input$topic_input, {
-
     # Get indicator choices for selected topic
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(
@@ -149,7 +156,6 @@ server_dev <- function(input, output, session) {
 
   # Long format LA data
   la_long <- reactive({
-
     # Filter stat neighbour for selected LA
     filtered_sn <- stat_n_la |>
       dplyr::filter(`LA Name` == input$la_input)
@@ -179,11 +185,15 @@ server_dev <- function(input, output, session) {
     # SN average
     sn_avg <- la_filtered_bds |>
       dplyr::filter(`LA and Regions` %in% la_sns) |>
-      dplyr::summarise(values_num = mean(values_num, na.rm = TRUE),
-                       .by = c("Years")) |>
-      dplyr::mutate("LA Number" = NA,
-                    "LA and Regions" = "Statistical Neighbours",
-                    .before = "Years")
+      dplyr::summarise(
+        values_num = mean(values_num, na.rm = TRUE),
+        .by = c("Years")
+      ) |>
+      dplyr::mutate(
+        "LA Number" = NA,
+        "LA and Regions" = "Statistical Neighbours",
+        .before = "Years"
+      )
 
     # LA levels long
     la_filtered_bds |>
@@ -193,8 +203,10 @@ server_dev <- function(input, output, session) {
       dplyr::mutate(
         `LA and Regions` = factor(
           `LA and Regions`,
-          levels = c(input$la_input, la_region,
-                     "Statistical Neighbours", la_national)
+          levels = c(
+            input$la_input, la_region,
+            "Statistical Neighbours", la_national
+          )
         ),
         Years_num = as.numeric(substr(Years, start = 1, stop = 4))
       )
@@ -206,20 +218,23 @@ server_dev <- function(input, output, session) {
     la_long() |>
       dplyr::group_by(`LA and Regions`) |>
       dplyr::arrange(`LA and Regions`, desc(Years)) |>
-      dplyr::mutate(values_num = dplyr::lag(values_num) - values_num,
-                    Years = "Change from previous year") |>
+      dplyr::mutate(
+        values_num = dplyr::lag(values_num) - values_num,
+        Years = "Change from previous year"
+      ) |>
       dplyr::filter(dplyr::row_number() == 2)
   })
 
   # Build Main LA Level table
   la_table <- shiny::reactive({
-
     # Join difference and pivot wider to recreate LAIT table
     la_long() |>
       dplyr::bind_rows(la_diff()) |>
-      tidyr::pivot_wider(id_cols = c("LA Number", "LA and Regions"),
-                         names_from = Years,
-                         values_from = values_num) |>
+      tidyr::pivot_wider(
+        id_cols = c("LA Number", "LA and Regions"),
+        names_from = Years,
+        values_from = values_num
+      ) |>
       pretty_num_table(dp = 1) |>
       dplyr::arrange(`LA and Regions`)
   })
@@ -231,7 +246,6 @@ server_dev <- function(input, output, session) {
 
   # Stats LA Level table ----------------------------------
   la_stats_table <- shiny::reactive({
-
     # Extract change from prev year (from LA table)
     la_change_prev <- la_diff() |>
       filter_la_regions(input$la_input, pull_col = "values_num")
@@ -255,8 +269,10 @@ server_dev <- function(input, output, session) {
       filter_la_regions(input$la_input, latest = T, pull_col = "values_num")
 
     # Calculating which quartile this value sits in
-    la_quartile <- calculate_quartile_band(la_indicator_val,
-                                           la_quartile_bands)
+    la_quartile <- calculate_quartile_band(
+      la_indicator_val,
+      la_quartile_bands
+    )
 
     # Get polarity of indicator
     la_indicator_polarity <- filtered_bds$data |>
@@ -297,7 +313,6 @@ server_dev <- function(input, output, session) {
 
   # LA Level line chart plot ----------------------------------
   la_line_chart <- reactive({
-
     # Build plot
     la_line_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -327,9 +342,11 @@ server_dev <- function(input, output, session) {
 
 
     # Creating vertical geoms to make vertical hover tooltip
-    vertical_hover <- lapply(get_years(la_long()),
-                             tooltip_vlines,
-                             la_long())
+    vertical_hover <- lapply(
+      get_years(la_long()),
+      tooltip_vlines,
+      la_long()
+    )
 
     # Plotting interactive graph
     ggiraph::girafe(
@@ -350,7 +367,6 @@ server_dev <- function(input, output, session) {
 
   # LA Level bar plot ----------------------------------
   la_bar_chart <- reactive({
-
     # Build plot
     la_bar_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -377,9 +393,10 @@ server_dev <- function(input, output, session) {
       custom_theme()
 
     # Plotting interactive graph
-    ggiraph::girafe(ggobj = la_bar_chart,
-                    width_svg = 8,
-                    options = generic_ggiraph_options()
+    ggiraph::girafe(
+      ggobj = la_bar_chart,
+      width_svg = 8,
+      options = generic_ggiraph_options()
     )
   })
 
@@ -422,10 +439,7 @@ server_dev <- function(input, output, session) {
     label <- input$indicator
     tags$a(href = hyperlink, class = "btn btn-default", label)
   })
-
-
 }
 
 # App
 shinyApp(ui_dev, server_dev)
-

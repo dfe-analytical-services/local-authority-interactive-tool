@@ -25,10 +25,13 @@ calculate_change_from_prev_yr <- function(data) {
   data |>
     dplyr::group_by(`LA and Regions`) |>
     dplyr::arrange(`LA and Regions`,
-                   desc(Years_num),
-                   .by_group = TRUE) |>
-    dplyr::mutate(values_num = dplyr::lag(values_num) - values_num,
-                  Years = "Change from previous year") |>
+      desc(Years_num),
+      .by_group = TRUE
+    ) |>
+    dplyr::mutate(
+      values_num = dplyr::lag(values_num) - values_num,
+      Years = "Change from previous year"
+    ) |>
     dplyr::filter(dplyr::row_number() == 2)
 }
 

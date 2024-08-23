@@ -21,7 +21,6 @@
 
 ui <- function(input, output, session) {
   bslib::page_fillable(
-
     shinytitle::use_shiny_title(),
 
     ## Custom CSS =============================================================

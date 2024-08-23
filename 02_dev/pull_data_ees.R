@@ -7,6 +7,6 @@ ees_file <- "sen2_mi.csv" # will need to specify the file which contains the dat
 
 unzip_destination <- here::here("temp") # file path of where to save the archive
 
-download.file(ees_url, destfile=paste0(unzip_destination, ".zip"), mode="wb") # download and save the ees archive
+download.file(ees_url, destfile = paste0(unzip_destination, ".zip"), mode = "wb") # download and save the ees archive
 unzip(paste0(unzip_destination, ".zip"), overwrite = TRUE, exdir = unzip_destination) # extract archive
 dataframe <- read.csv(here::here(unzip_destination, ees_data_dir, ees_file)) # read-in selected file from extracted archive

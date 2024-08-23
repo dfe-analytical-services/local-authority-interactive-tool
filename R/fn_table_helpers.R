@@ -9,8 +9,10 @@
 #' @export
 #'
 #' @examples
-#' data_bds <- data.frame(indicator = c("Indicator1", "Indicator2", "Indicator1"),
-#'                        value = c(10, 20, 30))
+#' data_bds <- data.frame(
+#'   indicator = c("Indicator1", "Indicator2", "Indicator1"),
+#'   value = c(10, 20, 30)
+#' )
 #' indicator_colname <- "Indicator1"
 #' get_indicator_data(data_bds, indicator_colname)
 get_indicator_data <- function(data_bds, indicator_colname) {
@@ -96,10 +98,14 @@ create_sn_table <- function(data_indicator,
     dplyr::filter(local_authority %in% c(df_selected_sns$`LA Name_sn`, selected_la)) |>
     dplyr::select(-c(`Short Desc`, line, `Data item`)) |>
     dplyr::mutate(indicator = unlist(lapply(!!rlang::sym(indicator_colname),
-                                            dfeR::pretty_num, dp = 3))) |>
-    tidyr::pivot_wider(id_cols = local_authority,
-                       names_from = Years,
-                       values_from = indicator) |>
+      dfeR::pretty_num,
+      dp = 3
+    ))) |>
+    tidyr::pivot_wider(
+      id_cols = local_authority,
+      names_from = Years,
+      values_from = indicator
+    ) |>
     dplyr::rename("Local Authority" = "local_authority") |>
     dplyr::arrange(!!rlang::sym(max_year))
 
@@ -132,24 +138,25 @@ create_sn_table <- function(data_indicator,
 #'
 #' @examples
 #' \dontrun{
-#'   filter_la_regions(data = df, filter_col = c("LA1", "Region1"),
-#'   latest = TRUE, pull_col = "Population")
+#' filter_la_regions(
+#'   data = df, filter_col = c("LA1", "Region1"),
+#'   latest = TRUE, pull_col = "Population"
+#' )
 #' }
 #'
 filter_la_regions <- function(data, filter_col, latest = F, pull_col = NA) {
-
   # Filter LA & Regions
   result <- data |>
     dplyr::filter(`LA and Regions` %in% filter_col)
 
   # Slice max Year if latest is TRUE
-  if(latest) {
+  if (latest) {
     result <- result |>
       dplyr::slice_max(Years)
   }
 
   # Return df or col
-  if(!is.na(pull_col)) {
+  if (!is.na(pull_col)) {
     result <- result |>
       dplyr::pull(pull_col)
   }
@@ -199,7 +206,6 @@ pretty_num_table <- function(data,
                              include_columns = NULL,
                              exclude_columns = NULL,
                              ...) {
-
   # Determine the columns to include or exclude
   if (!is.null(include_columns)) {
     cols_to_include <- include_columns
@@ -238,8 +244,10 @@ dfe_reactable <- function(data, ...) {
     borderless = TRUE,
     showSortIcon = FALSE,
     style = list(fontSize = "16px"),
-    defaultColDef = reactable::colDef(headerClass = "bar-sort-header",
-                                      html = TRUE),
+    defaultColDef = reactable::colDef(
+      headerClass = "bar-sort-header",
+      html = TRUE
+    ),
     ...
   )
 }

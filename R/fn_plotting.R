@@ -55,13 +55,14 @@ get_plot_title <- function(selected_indicator, axis_indicator) {
 #' and the values are the respective colors.
 #'
 create_plot_colours <- function(data_long) {
-
   # Colours
   plot_groups <- data_long |>
     pull_uniques("LA and Regions")
 
-  plot_colours <- afcolours::af_colours(type = "categorical",
-                                        n = length(plot_groups))
+  plot_colours <- afcolours::af_colours(
+    type = "categorical",
+    n = length(plot_groups)
+  )
   names(plot_colours) <- plot_groups
 
   plot_colours
@@ -127,7 +128,7 @@ get_ylim_low <- function(data_long) {
   if (y_range[1] >= 0) {
     0
   } else {
-    y_range[1]*1.1
+    y_range[1] * 1.1
   }
 }
 
@@ -147,7 +148,7 @@ get_ylim_high <- function(data_long) {
   if (y_range[2] <= 0) {
     0
   } else {
-    y_range[2]*1.1
+    y_range[2] * 1.1
   }
 }
 
@@ -207,7 +208,6 @@ get_num_years <- function(data_long) {
 #'
 #' @export
 format_axes <- function(data_long) {
-
   y_lim_low <- get_ylim_low(data_long)
   y_lim_high <- get_ylim_high(data_long)
   num_years <- get_num_years(data_long)
@@ -219,7 +219,7 @@ format_axes <- function(data_long) {
       breaks = scales::breaks_pretty()
     ),
     ggplot2::scale_x_continuous(
-        breaks = scales::breaks_pretty(n = num_years)
+      breaks = scales::breaks_pretty(n = num_years)
     )
   )
 }
@@ -249,7 +249,6 @@ format_axes <- function(data_long) {
 #'
 set_plot_colours <- function(data_long,
                              colour_type = "colour") {
-
   colour_params <- create_plot_colours(data_long)
 
   if (colour_type == "colour") {
@@ -275,8 +274,10 @@ set_plot_colours <- function(data_long,
 #'
 #' @examples
 #' \dontrun{
-#' filtered_bds <- data.frame(year = 2000:2020, value = rnorm(21),
-#' indicator = "GDP")
+#' filtered_bds <- data.frame(
+#'   year = 2000:2020, value = rnorm(21),
+#'   indicator = "GDP"
+#' )
 #' p <- ggplot(filtered_bds, aes(x = year, y = value)) +
 #'   geom_line() +
 #'   set_plot_labs(filtered_bds, "GDP")
@@ -285,7 +286,6 @@ set_plot_colours <- function(data_long,
 #'
 #' @export
 set_plot_labs <- function(filtered_bds, selected_indicator) {
-
   y_title <- get_yaxis_title(filtered_bds)
   plot_title <- get_plot_title(selected_indicator, y_title)
 
@@ -318,7 +318,7 @@ custom_theme <- function() {
   list(
     ggplot2::theme_minimal(),
     ggplot2::theme(
-      plot.title = element_text(hjust=0.5),
+      plot.title = element_text(hjust = 0.5),
       legend.position = "bottom",
       panel.grid.minor.x = element_blank()
     )
@@ -434,7 +434,7 @@ generic_ggiraph_options <- function(...) {
       position = "topright",
       pngname = "lait-png-download",
       tooltips = list(
-        saveaspng = 'Download as .png'
+        saveaspng = "Download as .png"
       ),
       hidden = c("selection", "zoom")
     ),

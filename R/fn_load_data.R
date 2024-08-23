@@ -4,8 +4,8 @@
 #' The folder is synchronized and located in the user's local system.
 #'
 shared_folder <- paste0(
-   r"(C:\Users\jtufts\Department for Education\LAIT modernisation - General)",
-   r"(\LAIT Modernisation 2024\Information for App Development)"
+  r"(C:\Users\jtufts\Department for Education\LAIT modernisation - General)",
+  r"(\LAIT Modernisation 2024\Information for App Development)"
 )
 
 
@@ -26,26 +26,25 @@ shared_folder <- paste0(
 #'
 #' @export
 clean_snp_colnames <- function(data) {
+  col_names <- colnames(data)
 
-   col_names <- colnames(data)
+  # Logical vectors to identify "SN" and "SNP" columns
+  sn_cols <- which(grepl("^SN\\d+$", col_names))
+  snp_cols <- which(grepl("^SNP", col_names))
 
-   # Logical vectors to identify "SN" and "SNP" columns
-   sn_cols <- which(grepl("^SN\\d+$", col_names))
-   snp_cols <- which(grepl("^SNP", col_names))
+  # Extract the numbers from "SN" columns
+  sn_numbers <- gsub("^SN", "", col_names[sn_cols])
 
-   # Extract the numbers from "SN" columns
-   sn_numbers <- gsub("^SN", "", col_names[sn_cols])
+  # Clean column names vector
+  clean_col_names <- col_names
 
-   # Clean column names vector
-   clean_col_names <- col_names
+  # Assign new names to "SNP" columns using extracted "SN" column numbers
+  clean_col_names[snp_cols] <- paste0("SNP", sn_numbers)
 
-   # Assign new names to "SNP" columns using extracted "SN" column numbers
-   clean_col_names[snp_cols] <- paste0("SNP", sn_numbers)
+  # Assign the new column names to the dataframe
+  colnames(data) <- clean_col_names
 
-   # Assign the new column names to the dataframe
-   colnames(data) <- clean_col_names
-
-   data
+  data
 }
 
 
@@ -67,10 +66,9 @@ clean_snp_colnames <- function(data) {
 #'
 #' @export
 create_measure_key <- function(data) {
-   data |>
-      dplyr::mutate(
-         measure_key = tolower(gsub(" ", "_", paste(Topic, Measure_short))),
-         .after = Measure_short
-      )
+  data |>
+    dplyr::mutate(
+      measure_key = tolower(gsub(" ", "_", paste(Topic, Measure_short))),
+      .after = Measure_short
+    )
 }
-

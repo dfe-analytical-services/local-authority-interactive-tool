@@ -57,7 +57,10 @@ not_all_na <- function(x) {
 #' df <- data.frame(col1 = c(1, 2, 3), "col2" = c(4, 5, 6), col3 = c(7, 8, 9))
 #' colnames(df)[2] <- ""
 #' non_empty_colnames(df)
-#' df |> {\(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.))) }()
+#' df |>
+#'   {
+#'     \(.) dplyr::select(., dplyr::all_of(non_empty_colnames(.)))
+#'   }()
 #' @export
 non_empty_colnames <- function(x) {
   colnames(x)[nzchar(colnames(x))]
@@ -95,8 +98,10 @@ clean_spaces <- function(x) {
 #'
 #' @return A vector of unique values from the specified column.
 #' @examples
-#' data <- data.frame("A" = c(1, 2, 2, 3, 3, 3),
-#' "B" = c("a", "b", "b", "c", "c", "c"))
+#' data <- data.frame(
+#'   "A" = c(1, 2, 2, 3, 3, 3),
+#'   "B" = c("a", "b", "b", "c", "c", "c")
+#' )
 #' pull_uniques(data, "A")
 #' pull_uniques(data, "B")
 #'
@@ -157,4 +162,3 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output
   }
 }
-

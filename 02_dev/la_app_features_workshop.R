@@ -1,10 +1,11 @@
-
 # Load global
 source(here::here("global.R"))
 
 # Load functions
 list.files("R/", full.names = TRUE) |>
-  (\(x) {x[grepl("fn_", x)]})() |>
+  (\(x) {
+    x[grepl("fn_", x)]
+  })() |>
   purrr::walk(source)
 
 
@@ -50,11 +51,15 @@ la_filtered_bds <- filtered_bds |>
 # SN average
 sn_avg <- la_filtered_bds |>
   dplyr::filter(`LA and Regions` %in% la_sns) |>
-  dplyr::summarise(values_num = mean(values_num, na.rm = TRUE),
-                   .by = c("Years")) |>
-  dplyr::mutate("LA Number" = NA,
-                "LA and Regions" = "Statistical Neighbours",
-                .before = "Years")
+  dplyr::summarise(
+    values_num = mean(values_num, na.rm = TRUE),
+    .by = c("Years")
+  ) |>
+  dplyr::mutate(
+    "LA Number" = NA,
+    "LA and Regions" = "Statistical Neighbours",
+    .before = "Years"
+  )
 
 # LA levels long
 la_long <- la_filtered_bds |>
@@ -64,8 +69,10 @@ la_long <- la_filtered_bds |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`,
-      levels = c(selected_la, la_region,
-                 "Statistical Neighbours", la_national)
+      levels = c(
+        selected_la, la_region,
+        "Statistical Neighbours", la_national
+      )
     ),
     Years_num = as.numeric(substr(Years, start = 1, stop = 4))
   )
@@ -77,9 +84,11 @@ la_diff <- la_long |>
 # Join difference and pivot wider to recreate LAIT table
 la_table <- la_long |>
   dplyr::bind_rows(la_diff) |>
-  tidyr::pivot_wider(id_cols = c("LA Number", "LA and Regions"),
-                     names_from = Years,
-                     values_from = values_num) |>
+  tidyr::pivot_wider(
+    id_cols = c("LA Number", "LA and Regions"),
+    names_from = Years,
+    values_from = values_num
+  ) |>
   pretty_num_table(dp = 1) |>
   dplyr::arrange(`LA and Regions`)
 
@@ -89,8 +98,10 @@ la_table <- la_long |>
 
 # Extract change from prev year (from LA table)
 la_change_prev <- la_table |>
-  filter_la_regions(selected_la, latest = F,
-                    pull_col = "Change from previous year")
+  filter_la_regions(selected_la,
+    latest = F,
+    pull_col = "Change from previous year"
+  )
 # Set the trend value
 la_trend <- dplyr::case_when(
   is.na(la_change_prev) ~ NA_character_,
@@ -208,9 +219,11 @@ la_line_chart <- la_long |>
 
 
 # Creating vertical geoms to make vertical hover tooltip
-vertical_hover <- lapply(get_years(la_long),
-                         tooltip_vlines,
-                         la_long)
+vertical_hover <- lapply(
+  get_years(la_long),
+  tooltip_vlines,
+  la_long
+)
 
 # Plotting interactive graph
 ggiraph::girafe(
@@ -251,9 +264,10 @@ la_bar_chart <- la_long |>
   custom_theme()
 
 # Plotting interactive graph
-ggiraph::girafe(ggobj = la_bar_chart,
-                width_svg = 8,
-                options = generic_ggiraph_options()
+ggiraph::girafe(
+  ggobj = la_bar_chart,
+  width_svg = 8,
+  options = generic_ggiraph_options()
 )
 
 
@@ -279,6 +293,3 @@ metrics_clean |>
 # Source (hyperlink)
 metrics_clean |>
   get_metadata(selected_indicator, "Hyperlink(s)")
-
-
-

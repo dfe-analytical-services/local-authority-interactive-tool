@@ -10,7 +10,6 @@
 #' @return A reactive expression that contains the filtered BDS metrics
 BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
   moduleServer(id, function(input, output, session) {
-
     # Filter for selected topic and indicator
     # Define filtered_bds outside of observeEvent
     filtered_bds <- reactiveValues(data = NULL)
@@ -18,7 +17,6 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
     # Must ensure filtering only done when Indicator is changed
     # Otherwise it will filter immediately on Topic change
     observeEvent(app_inputs$indicator(), {
-
       filtered_bds$data <- bds_metrics |>
         dplyr::filter(
           Topic == app_inputs$topic(),
@@ -26,7 +24,9 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
         )
     })
 
-    reactive({ filtered_bds$data })
+    reactive({
+      filtered_bds$data
+    })
   })
 }
 
@@ -40,13 +40,11 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
 #' @return A reactive expression that contains the long format LA data
 LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
-
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
     la_long <- reactive({
-
       # Filter stat neighbour for selected LA
       filtered_sn <- stat_n_la |>
         dplyr::filter(`LA Name` == app_inputs$la())
@@ -60,30 +58,38 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         pull_uniques("GOReg")
 
       # List of areas being compared
-      la_comparison <- c(app_inputs$la(), la_region,
-                         "Statistical Neighbours", "England")
+      la_comparison <- c(
+        app_inputs$la(), la_region,
+        "Statistical Neighbours", "England"
+      )
 
       # Get national term
       la_national <- filtered_bds() |>
         dplyr::filter(grepl("England_", `LA and Regions`) &
-                        !is.na(values_num)) |>
+          !is.na(values_num)) |>
         pull_uniques("LA and Regions")
 
       # Then filter for selected LA, region, stat neighbours and national
       la_filtered_bds <- filtered_bds() |>
         dplyr::filter(
-          `LA and Regions` %in% c(app_inputs$la(), la_region,
-                                  la_sns, la_national)
+          `LA and Regions` %in% c(
+            app_inputs$la(), la_region,
+            la_sns, la_national
+          )
         )
 
       # SN average
       sn_avg <- la_filtered_bds |>
         dplyr::filter(`LA and Regions` %in% la_sns) |>
-        dplyr::summarise(values_num = mean(values_num, na.rm = TRUE),
-                         .by = c("Years")) |>
-        dplyr::mutate("LA Number" = NA,
-                      "LA and Regions" = "Statistical Neighbours",
-                      .before = "Years")
+        dplyr::summarise(
+          values_num = mean(values_num, na.rm = TRUE),
+          .by = c("Years")
+        ) |>
+        dplyr::mutate(
+          "LA Number" = NA,
+          "LA and Regions" = "Statistical Neighbours",
+          .before = "Years"
+        )
 
       # LA levels long
       la_long <- la_filtered_bds |>
@@ -93,8 +99,10 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         dplyr::mutate(
           `LA and Regions` = factor(
             `LA and Regions`,
-            levels = c(app_inputs$la(), la_region,
-                       "Statistical Neighbours", la_national)
+            levels = c(
+              app_inputs$la(), la_region,
+              "Statistical Neighbours", la_national
+            )
           ),
           Years_num = as.numeric(substr(Years, start = 1, stop = 4))
         )
@@ -134,13 +142,13 @@ LA_LevelTableUI <- function(id) {
 #' @param stat_n_la A data frame of statistical neighbours for each LA
 #' @return A list of outputs for the UI, including a data table of the LA levels
 LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
-
   moduleServer(id, function(input, output, session) {
-
     # Main LA Level table ----------------------------------
     # Long format LA data
-    la_long <- LA_LongDataServer("la_table_data", app_inputs,
-                                 bds_metrics, stat_n_la)
+    la_long <- LA_LongDataServer(
+      "la_table_data", app_inputs,
+      bds_metrics, stat_n_la
+    )
 
     # Difference between last two years
     la_diff <- reactive({
@@ -151,11 +159,13 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     # Build Main LA Level table
     # Join difference and pivot wider to recreate LAIT table
     la_table <- reactive({
-        la_long() |>
+      la_long() |>
         dplyr::bind_rows(la_diff()) |>
-        tidyr::pivot_wider(id_cols = c("LA Number", "LA and Regions"),
-                           names_from = Years,
-                           values_from = values_num) |>
+        tidyr::pivot_wider(
+          id_cols = c("LA Number", "LA and Regions"),
+          names_from = Years,
+          values_from = values_num
+        ) |>
         pretty_num_table(dp = 1) |>
         dplyr::arrange(`LA and Regions`)
     })
@@ -204,13 +214,14 @@ LA_StatsTableUI <- function(id) {
 #' @return A list of outputs for the UI, including a data table of the LA stats
 LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
-
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
-    la_long <- LA_LongDataServer("la_table_data", app_inputs,
-                                 bds_metrics, stat_n_la)
+    la_long <- LA_LongDataServer(
+      "la_table_data", app_inputs,
+      bds_metrics, stat_n_la
+    )
 
     # Difference between last two years
     la_diff <- reactive({
@@ -220,7 +231,6 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # Build Stats LA Level table ----------------------------------
     la_stats_table <- shiny::reactive({
-
       # Extract change from prev year (from LA table)
       la_change_prev <- la_diff() |>
         filter_la_regions(app_inputs$la(), pull_col = "values_num")
@@ -244,8 +254,10 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         filter_la_regions(app_inputs$la(), latest = T, pull_col = "values_num")
 
       # Calculating which quartile this value sits in
-      la_quartile <- calculate_quartile_band(la_indicator_val,
-                                             la_quartile_bands)
+      la_quartile <- calculate_quartile_band(
+        la_indicator_val,
+        la_quartile_bands
+      )
 
       # Get polarity of indicator
       la_indicator_polarity <- filtered_bds() |>

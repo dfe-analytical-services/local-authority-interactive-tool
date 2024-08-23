@@ -85,17 +85,17 @@ LA_ChartUI <- function(id) {
 #'
 LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
-
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
-    la_long <- LA_LongDataServer("la_table_data", app_inputs,
-                                 bds_metrics, stat_n_la)
+    la_long <- LA_LongDataServer(
+      "la_table_data", app_inputs,
+      bds_metrics, stat_n_la
+    )
 
     # LA Level line chart plot ----------------------------------
     la_line_chart <- reactive({
-
       # Plot
       la_line_chart <- la_long() |>
         ggplot2::ggplot() +
@@ -125,9 +125,11 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
 
       # Creating vertical geoms to make vertical hover tooltip
-      vertical_hover <- lapply(get_years(la_long()),
-                               tooltip_vlines,
-                               la_long())
+      vertical_hover <- lapply(
+        get_years(la_long()),
+        tooltip_vlines,
+        la_long()
+      )
 
       # Plotting interactive graph
       ggiraph::girafe(
@@ -180,17 +182,17 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 #'
 LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
-
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
-    la_long <- LA_LongDataServer("la_table_data", app_inputs,
-                                 bds_metrics, stat_n_la)
+    la_long <- LA_LongDataServer(
+      "la_table_data", app_inputs,
+      bds_metrics, stat_n_la
+    )
 
     # LA Level bar plot ----------------------------------
     la_bar_chart <- reactive({
-
       # Build plot
       la_bar_chart <- la_long() |>
         ggplot2::ggplot() +
@@ -217,9 +219,10 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         custom_theme()
 
       # Plotting interactive graph
-      ggiraph::girafe(ggobj = la_bar_chart,
-                      width_svg = 8,
-                      options = generic_ggiraph_options()
+      ggiraph::girafe(
+        ggobj = la_bar_chart,
+        width_svg = 8,
+        options = generic_ggiraph_options()
       )
     })
 
