@@ -36,6 +36,10 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install praise
+        run: |
+          Rscript -e "install.packages('praise')"
+
       - name: restore renv
         uses: r-lib/actions/setup-renv@v2
         continue-on-error: true
