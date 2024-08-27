@@ -14,4 +14,5 @@ Imports:
 Suggests:
     shinytest,
     testthat,
-    styler
+    styler,
+    praise
