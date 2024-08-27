@@ -155,3 +155,81 @@ test_that("calculate_quartile_band works correctly", {
     regexp = "Indicator value is empty; returning an empty character vector."
   )
 })
+
+
+library(testthat)
+library(dplyr)
+
+test_that("get_quartile_band_cell_colour works correctly", {
+  # Sample data for table_stats
+  table_stats <- data.frame(
+    Polarity = c("Low", "High", NA, "-", "Low"),
+    `Quartile Banding` = c("A", "D", "B", "C", "D"),
+    check.names = FALSE
+  )
+
+  polarity_colours <- polarity_colours_df()
+
+  # Expected results
+  expected_colours <- c("green", "green", "none", "none", "red")
+
+  # Test with matching polarity and quartile bands
+  # Low A
+  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[1, ])
+  expect_equal(result, expected_colours[1])
+
+  # High D
+  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[2, ])
+  expect_equal(result, expected_colours[2])
+
+  # NA B
+  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[3, ])
+  expect_equal(result, expected_colours[3])
+
+  # - C
+  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[4, ])
+  expect_equal(result, expected_colours[4])
+
+  # Low D
+  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[5, ])
+  expect_equal(result, expected_colours[5])
+
+  # Test where multiple polarity in table_stats
+  table_stats_multiple_polarity <- data.frame(
+    Polarity = c("Low", "High")
+    # Missing `Quartile Banding` column
+  )
+  expect_error(
+    get_quartile_band_cell_colour(polarity_colours, table_stats_multiple_polarity),
+    "the condition has length > 1"
+  )
+
+  # Test when there is no matching row
+  table_stats_no_match <- data.frame(
+    Polarity = c("Unknown"),
+    `Quartile Banding` = c("A"),
+    check.names = FALSE
+  )
+  expect_warning(
+    expect_equal(
+      get_quartile_band_cell_colour(
+        polarity_colours,
+        table_stats_no_match
+      ),
+      character(0)
+    ),
+    "Unexpected polarity value"
+  )
+
+  # Test with missing values in polarity_colours
+  polarity_colours_na <- polarity_colours
+  polarity_colours_na$cell_colour[is.na(polarity_colours_na$polarity)] <- NA
+
+  table_stats_with_na <- data.frame(
+    Polarity = c(NA),
+    `Quartile Banding` = c("D"),
+    check.names = FALSE
+  )
+  result_na <- get_quartile_band_cell_colour(polarity_colours_na, table_stats_with_na)
+  expect_equal(result_na, c(NA_character_))
+})

@@ -150,9 +150,14 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
 #' to the given polarity and quartile band.
 #'
 get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
+  if (table_stats$Polarity %notin% c("High", "Low", "-", NA)) {
+    warning("Unexpected polarity value")
+  }
+
   polarity_colours |>
     dplyr::filter(
-      polarity == table_stats$Polarity,
+      (is.na(polarity) & is.na(table_stats$Polarity)) |
+        (polarity == table_stats$Polarity),
       quartile_band == table_stats$`Quartile Banding`
     ) |>
     dplyr::pull(cell_colour)
