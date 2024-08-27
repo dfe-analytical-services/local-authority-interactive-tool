@@ -41,9 +41,9 @@ jobs:
         continue-on-error: true
 
       - name: Print renv status
-         run: |
-           renv::status()
         shell: Rscript {0}
+        run: |
+          renv::status()
         continue-on-error: true
 
       - name: Install lintr
