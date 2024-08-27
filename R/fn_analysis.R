@@ -77,11 +77,19 @@ calculate_change_from_prev_yr <- function(data) {
 #' "No trend", or `NA` if the input is missing.
 #'
 calculate_trend <- function(change_since_prev) {
+  # Check if change_since_prev is empty or has a length greater than one
+  if (length(change_since_prev) == 0 || length(change_since_prev) > 1) {
+    warning(
+      "The change_since_prev value looks wrong: ",
+      "length is either 0 or greater than 1."
+    )
+  }
+
   dplyr::case_when(
-    is.na(change_since_prev) ~ NA_character_,
+    change_since_prev == 0 ~ "No change",
     change_since_prev > 0 ~ "Increase",
     change_since_prev < 0 ~ "Decrease",
-    TRUE ~ "No trend"
+    TRUE ~ NA_character_
   )
 }
 

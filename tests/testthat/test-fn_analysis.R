@@ -65,3 +65,39 @@ test_that("calculate_change_from_prev_yr works correctly", {
   # 6. Test with multiple LAs and Regions (already covered in the sample data)
   expect_equal(nrow(result), 2) # Two regions should be processed correctly
 })
+
+test_that("calculate_trend works correctly", {
+  # 1. Test with positive values
+  positive_change <- c(5)
+  expected_positive <- c("Increase")
+  expect_equal(calculate_trend(positive_change), expected_positive)
+
+  # 2. Test with negative values
+  negative_change <- c(-2)
+  expected_negative <- c("Decrease")
+  expect_equal(calculate_trend(negative_change), expected_negative)
+
+  # 3. Test with zero values
+  zero_change <- c(0)
+  expected_zero <- c("No change")
+  expect_equal(calculate_trend(zero_change), expected_zero)
+
+  # 5. Test with NA values
+  na_change <- c(NA)
+  expected_na <- NA_character_
+  expect_equal(calculate_trend(na_change), expected_na)
+
+  # 6. Test with an empty vector
+  empty_change <- numeric(0)
+  expected_empty <- character(0)
+  expected_warning <- "The change_since_prev value looks wrong:"
+  expect_warning(
+    expect_equal(calculate_trend(empty_change), expected_empty),
+    expected_warning
+  )
+
+
+  # 7. Test with multiple values
+  multiple_val <- c(-3, 5)
+  expect_warning(calculate_trend(multiple_val), expected_warning)
+})
