@@ -233,7 +233,7 @@ test_that("1. get_quartile_band_cell_colour returns correct colours for matching
 })
 
 # 2. Test with multiple polarity values in table_stats
-test_that("2. get_quartile_band_cell_colour throws an error when there are multiple polarities and missing quartile band", {
+test_that("2. get_quartile_band_cell_colour throws error when multiple polarities", {
   table_stats_multiple_polarity <- data.frame(
     Polarity = c("Low", "High")
     # Missing `Quartile Banding` column
@@ -245,7 +245,7 @@ test_that("2. get_quartile_band_cell_colour throws an error when there are multi
 })
 
 # 3. Test when there is no matching row for Polarity
-test_that("3. get_quartile_band_cell_colour returns an empty vector with a warning when no matching polarity is found", {
+test_that("3. get_quartile_band_cell_colour returns empty vector and a warning when no matching polarity", {
   table_stats_no_match <- data.frame(
     Polarity = c("Unknown"),
     `Quartile Banding` = c("A"),
@@ -261,7 +261,7 @@ test_that("3. get_quartile_band_cell_colour returns an empty vector with a warni
 })
 
 # 4. Test when there is no matching row for Quartile band
-test_that("4. get_quartile_band_cell_colour returns an empty vector with a warning when no matching quartile band is found", {
+test_that("4. get_quartile_band_cell_colour returns empty vector with warning when no matching quartile band ", {
   table_stats_no_match <- data.frame(
     Polarity = c("High"),
     `Quartile Banding` = c("F"),

@@ -13,17 +13,17 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   measures_n_topics <- bds_data |>
     dplyr::distinct(Topic, Measure, Measure_short, y_axis_name) |>
     dplyr::sample_n(n_measure) |>
-    {
-      \(x) dplyr::slice(x, rep(1:nrow(x), each = n_years * n_las))
-    }()
+    (
+      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), each = n_years * n_las))
+    )()
 
   # Local Authorities
   local_authorities <- bds_data |>
     dplyr::distinct(`LA and Regions`, Region) |>
     dplyr::sample_n(n_las) |>
-    {
-      \(x) dplyr::slice(x, rep(1:nrow(x), years = n_years * n_measure))
-    }()
+    (
+      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), years = n_years * n_measure))
+    )()
 
   # Values
   measure_test <- measures_n_topics |>
@@ -70,7 +70,11 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   measure_code_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
   la_number_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
   type_col <- replicate(n_repeats, paste0(sample(LETTERS, 3, replace = TRUE), collapse = ""))
-  combined_code_col <- paste(measure_code_col, dummy_bds_dependent$Measure_short, dummy_bds_dependent$year_col, sep = "_")
+  combined_code_col <- paste(measure_code_col,
+    dummy_bds_dependent$Measure_short,
+    dummy_bds_dependent$year_col,
+    sep = "_"
+  )
 
   # Build dataframe
   data.frame(
@@ -110,7 +114,7 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   # y_axis_name
   # Years
   # LA and Regions
-  `LA and Regions` <- c(rep("Region1", 3), rep("Region2", 3))
+  la_and_regions <- c(rep("Region1", 3), rep("Region2", 3))
 
   # Values
   # LA Number
@@ -129,17 +133,17 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   measures_n_topics <- bds_data |>
     dplyr::distinct(Topic, Measure, Measure_short, y_axis_name) |>
     dplyr::sample_n(n_measure) |>
-    {
-      \(x) dplyr::slice(x, rep(1:nrow(x), each = n_years * n_las))
-    }()
+    (
+      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), each = n_years * n_las))
+    )()
 
   # Local Authorities
   local_authorities <- bds_data |>
     dplyr::distinct(`LA and Regions`, Region) |>
     dplyr::sample_n(n_las) |>
-    {
-      \(x) dplyr::slice(x, rep(1:nrow(x), years = n_years * n_measure))
-    }()
+    (
+      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), years = n_years * n_measure))
+    )()
 
   # Values
   measure_test <- measures_n_topics |>
@@ -186,7 +190,11 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   measure_code_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
   la_number_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
   type_col <- replicate(n_repeats, paste0(sample(LETTERS, 3, replace = TRUE), collapse = ""))
-  combined_code_col <- paste(measure_code_col, dummy_bds_dependent$Measure_short, dummy_bds_dependent$year_col, sep = "_")
+  combined_code_col <- paste(measure_code_col,
+    dummy_bds_dependent$Measure_short,
+    dummy_bds_dependent$year_col,
+    sep = "_"
+  )
 
   # Build dataframe
   data.frame(
