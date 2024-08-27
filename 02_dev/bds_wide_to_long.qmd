@@ -46,7 +46,7 @@ write.csv(
 ```{r load-bds}
 # Load BDS wide
 bds_wide_raw <- read.csv(
-  here::here("01_data/01_raw/BDS - Wide.csv"),
+  here::here("01_data/01_raw/BDS_Wide.csv"),
   check.names = FALSE
 )
 
@@ -62,7 +62,7 @@ bds_wide <- bds_wide_raw |>
 # Pivot BDS long on geographic cols
 bds_long <- bds_wide |>
   tidyr::pivot_longer(
-    cols = `Barking and Dagenham`:England_state_funded,
+    cols = `Barking and Dagenham`:`England (State-funded)`,
     names_to = "LA and Regions",
     values_to = "Values"
   ) |>
@@ -178,9 +178,9 @@ write.csv(
   row.names = FALSE
 )
 
-# England
+# England (All schools)
 bds_eng_all <- bds_long_public |>
-  dplyr::filter(`LA and Regions` == "England_all_schools")
+  dplyr::filter(`LA and Regions` == "England (All schools)")
 
 write.csv(bds_eng_all,
   here::here("01_data/02_prod/bds/bds_eng_all_schools_long.csv"),
@@ -191,7 +191,7 @@ write.csv(bds_eng_all,
 bds_la <- bds_long_public |>
   dplyr::filter(
     `LA and Regions` %notin% c(
-      "England_all_schools",
+      "England (All schools)",
       "North East",
       "North West",
       "Yorkshire and the Humber",
@@ -203,7 +203,7 @@ bds_la <- bds_long_public |>
       "Outer London",
       "South East",
       "South West",
-      "England_state_funded"
+      "England (State-funded)"
     )
   )
 
@@ -211,10 +211,10 @@ write.csv(bds_la, here::here("01_data/02_prod/bds/bds_la_long.csv"),
   row.names = FALSE
 )
 
-# England_2
+# England (State-funded)
 
 bds_eng_state <- bds_long_public |>
-  dplyr::filter(`LA and Regions` == "England_state_funded")
+  dplyr::filter(`LA and Regions` == "England (State-funded)")
 
 write.csv(bds_eng_state,
   here::here("01_data/02_prod/bds/bds_eng_state_funded_long.csv"),
