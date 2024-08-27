@@ -307,3 +307,43 @@ create_stats_table <- function(
   ) |>
     pretty_num_table(dp = 1)
 }
+
+
+# Creating indicator polarity cell colour dataframe
+polarity_colours_df <- function() {
+  # Define the possible values for each column
+  polarity_options <- c(NA, "-", "Low", "High")
+  quartile_band_options <- c("A", "B", "C", "D")
+  cell_colour_options <- c("red", "green", "none")
+
+  # Create all combinations of polarity and quartile band
+  polarity_colours <- expand.grid(
+    polarity = polarity_options,
+    quartile_band = quartile_band_options,
+    stringsAsFactors = FALSE
+  )
+
+  # Initialize cell_colour column with "none"
+  polarity_colours$cell_colour <- "none"
+
+  # Apply the conditions to determine the cell colour
+  polarity_colours$cell_colour <- with(polarity_colours, ifelse(
+    (is.na(polarity) | polarity == "-") | (quartile_band == "B" | quartile_band == "C"),
+    "none", ifelse(
+      (quartile_band == "A" & polarity == "Low"),
+      "green", ifelse(
+        (quartile_band == "D" & polarity == "Low"),
+        "red", ifelse(
+          (quartile_band == "A" & polarity == "High"),
+          "red", ifelse(
+            (quartile_band == "D" & polarity == "High"),
+            "green",
+            "none"
+          )
+        )
+      )
+    )
+  ))
+
+  polarity_colours
+}
