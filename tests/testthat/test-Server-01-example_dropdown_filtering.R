@@ -1,3 +1,5 @@
+# nolint start: commented_code
+
 # -----------------------------------------------------------------------------
 # This is an example integration test file
 #
@@ -59,3 +61,5 @@
 #       )
 #   )
 # })
+
+# nolint end

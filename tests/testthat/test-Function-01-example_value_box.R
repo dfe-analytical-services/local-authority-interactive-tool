@@ -1,3 +1,5 @@
+# nolint start: commented_code
+
 # -----------------------------------------------------------------------------
 # This is an example unit test file.
 #
@@ -10,7 +12,8 @@
 # -----------------------------------------------------------------------------
 # testthat::test_that("Example - two plus two equals four", {
 #   # Expect two objects to be the same
-#   testthat::expect_equal(2 + 2, 4)
+#
+testthat::expect_equal(2 + 2, 4)
 #   # Expect comparisons to be TRUE or FALSE
 #   testthat::expect_true(2 + 2 == 4)
 #   # Expect code to execute without error
@@ -25,3 +28,5 @@
 #   # Expect an error if no value argument is given to value_box() function
 #   testthat::expect_error(value_box())
 # })
+
+# nolint end

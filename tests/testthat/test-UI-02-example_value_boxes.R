@@ -1,3 +1,5 @@
+# nolint start: commented_code
+
 # -----------------------------------------------------------------------------
 # This is an example UI test file
 # It includes some tests that show how to check the elements in the template
@@ -56,3 +58,5 @@
 # # fail when you next update the data.
 # testthat::expect_true(is.numeric(rev_bal_export$export$avg_rev_bal_value))
 # testthat::expect_true(is.numeric(rev_bal_export$export$prev_avg_rev_bal_value))
+
+# nolint end

@@ -174,8 +174,10 @@ server_dev <- function(input, output, session) {
 
     # Get national term
     la_national <- filtered_bds$data |>
-      dplyr::filter(`LA and Regions` %in% national_names_bds &
-        !is.na(values_num)) |>
+      dplyr::filter(
+        `LA and Regions` %in% national_names_bds &
+          !is.na(values_num)
+      ) |>
       pull_uniques("LA and Regions")
 
     # Then filter for selected LA, region, stat neighbours and relevant national
