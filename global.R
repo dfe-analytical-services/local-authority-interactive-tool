@@ -281,7 +281,7 @@ testthat::test_that("Same LAs in both BDS and Stat Neighbours", {
 
 # Englands
 national_names_bds <- bds_clean |>
-  dplyr::filter(grepl("England_", `LA and Regions`)) |>
+  dplyr::filter(grepl("England \\(", `LA and Regions`)) |>
   pull_uniques("LA and Regions")
 
 # PROOF: 2 England names
