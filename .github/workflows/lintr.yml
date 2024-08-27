@@ -36,14 +36,14 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: restore renv
-        uses: r-lib/actions/setup-renv@v2
-        continue-on-error: true
-
       - name: Print renv status
         shell: Rscript {0}
         run: |
-          renv::status()
+          renv::install("praise")
+        continue-on-error: true
+
+      - name: restore renv
+        uses: r-lib/actions/setup-renv@v2
         continue-on-error: true
 
       - name: Install lintr
