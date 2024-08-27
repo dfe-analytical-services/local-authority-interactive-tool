@@ -30,6 +30,10 @@ if (FALSE) {
   shhh(library(lintr))
   shhh(library(roxygen2))
   shhh(library(rstudioapi))
+  # Housekeeping
+  shhh(library(devtools))
+  shhh(library(usethis))
+  shhh(library(covr))
   # For {arrow} to not give warning
   shhh(library(tzdb))
   # DfE packages
