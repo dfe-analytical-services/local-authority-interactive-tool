@@ -101,3 +101,57 @@ test_that("calculate_trend works correctly", {
   multiple_val <- c(-3, 5)
   expect_warning(calculate_trend(multiple_val), expected_warning)
 })
+
+
+# Define test cases for calculate_quartile_band
+test_that("calculate_quartile_band works correctly", {
+  # Define quartile bands for testing
+  quartile_bands <- c(
+    "0%" = 0,
+    "25%" = 25,
+    "50%" = 50,
+    "75%" = 75,
+    "100%" = 100
+  )
+
+  # 1. Test when indicator_val is within each quartile
+  expect_equal(calculate_quartile_band(10, quartile_bands), "A") # within 0%-25%
+  expect_equal(calculate_quartile_band(30, quartile_bands), "B") # within 25%-50%
+  expect_equal(calculate_quartile_band(60, quartile_bands), "C") # within 50%-75%
+  expect_equal(calculate_quartile_band(80, quartile_bands), "D") # within 75%-100%
+
+  # 2. Test edge cases at the boundaries
+  expect_equal(calculate_quartile_band(0, quartile_bands), "A") # exactly 0%
+  expect_equal(calculate_quartile_band(25, quartile_bands), "A") # exactly 25%
+  expect_equal(calculate_quartile_band(50, quartile_bands), "B") # exactly 50%
+  expect_equal(calculate_quartile_band(75, quartile_bands), "C") # exactly 75%
+  expect_equal(calculate_quartile_band(100, quartile_bands), "D") # exactly 100%
+
+  # 3. Test when indicator_val is NA
+  expect_equal(calculate_quartile_band(NA, quartile_bands), NA_character_)
+
+  # 4. Test when indicator_val is outside the defined quartile bands
+  expect_equal(calculate_quartile_band(-10, quartile_bands), "Error") # less than 0%
+  expect_equal(calculate_quartile_band(110, quartile_bands), "Error") # more than 100%
+
+  # 5. Test when quartile_bands are non-standard (e.g., non-uniform)
+  custom_quartile_bands <- c(
+    "0%" = 10,
+    "25%" = 20,
+    "50%" = NA,
+    "75%" = 40,
+    "100%" = 50
+  )
+  expect_equal(calculate_quartile_band(15, custom_quartile_bands), "A") # within 10%-20%
+  expect_equal(calculate_quartile_band(25, custom_quartile_bands), "Error") # within 20%-NA%
+  expect_equal(calculate_quartile_band(35, custom_quartile_bands), "Error") # within NA%-40%
+  expect_equal(calculate_quartile_band(45, custom_quartile_bands), "D") # within 40%-50%
+  expect_equal(calculate_quartile_band(5, custom_quartile_bands), "Error") # less than 10%
+  expect_equal(calculate_quartile_band(55, custom_quartile_bands), "Error") # more than 50%
+
+  # 6. Test with an empty vector
+  expect_warning(
+    expect_equal(calculate_quartile_band(numeric(0), quartile_bands), character(0)),
+    regexp = "Indicator value is empty; returning an empty character vector."
+  )
+})

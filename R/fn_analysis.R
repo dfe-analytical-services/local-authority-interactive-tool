@@ -108,6 +108,19 @@ calculate_trend <- function(change_since_prev) {
 #' or "Error" if the value does not fit within the provided ranges.
 #'
 calculate_quartile_band <- function(indicator_val, quartile_bands) {
+  # Check if all required quartile bands are present
+  required_bands <- c("0%", "25%", "50%", "75%", "100%")
+  missing_bands <- setdiff(required_bands, names(quartile_bands))
+  if (length(missing_bands) > 0) {
+    warning("Quartile bands are missing: ", paste(missing_bands, collapse = ", "))
+    return(rep("Error", length(indicator_val)))
+  }
+
+  if (length(indicator_val) == 0) {
+    warning("Indicator value is empty; returning an empty character vector.")
+    return(character(0))
+  }
+
   dplyr::case_when(
     is.na(indicator_val) ~ NA_character_,
     (indicator_val >= quartile_bands[["0%"]]) &
