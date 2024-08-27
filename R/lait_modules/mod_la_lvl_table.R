@@ -66,7 +66,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
       # Get national term
       la_national <- filtered_bds() |>
-        dplyr::filter(grepl("England_", `LA and Regions`) &
+        dplyr::filter(`LA and Regions` %in% national_names_bds &
           !is.na(values_num)) |>
         pull_uniques("LA and Regions")
 
