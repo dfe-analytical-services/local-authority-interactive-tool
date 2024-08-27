@@ -212,14 +212,16 @@ testthat::test_that(
 # PROOF 3: Number of topics per duplicate is 2
 testthat::test_that("Number of topics per duplicate is 2", {
   testthat::expect_no_error(
-    metric_topics_lst = lapply(metrics_duplicates, function(metric) {
-      metric_topics <- bds_metrics |>
-        dplyr::filter(Measure_short == metric) |>
-        pull_uniques("Topic")
+    local({
+      metric_topics_lst <- lapply(metrics_duplicates, function(metric) {
+        metric_topics <- bds_metrics |>
+          dplyr::filter(Measure_short == metric) |>
+          pull_uniques("Topic")
 
-      stopifnot(length(metric_topics) == 2)
+        stopifnot(length(metric_topics) == 2)
 
-      return(metric_topics)
+        return(metric_topics)
+      })
     }),
     message = "length(metric_topics) > 2 is not TRUE"
   )
