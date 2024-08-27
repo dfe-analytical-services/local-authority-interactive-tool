@@ -121,7 +121,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
     return(character(0))
   }
 
-  dplyr::case_when(
+  quartile_band <- dplyr::case_when(
     is.na(indicator_val) ~ NA_character_,
     (indicator_val >= quartile_bands[["0%"]]) &
       (indicator_val <= quartile_bands[["25%"]]) ~ "A",
@@ -133,6 +133,12 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
       (indicator_val <= quartile_bands[["100%"]]) ~ "D",
     TRUE ~ "Error"
   )
+
+  if (quartile_band %notin% c("A", "B", "C", "D", NA_character_)) {
+    warning("Unexpected Quartile Banding")
+  }
+
+  quartile_band
 }
 
 
@@ -152,6 +158,10 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
 get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
   if (table_stats$Polarity %notin% c("High", "Low", "-", NA)) {
     warning("Unexpected polarity value")
+  }
+
+  if (table_stats$`Quartile Banding` %notin% c("A", "B", "C", "D", NA_character_)) {
+    warning("Unexpected Quartile Banding")
   }
 
   polarity_colours |>
