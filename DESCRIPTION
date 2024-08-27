@@ -13,5 +13,5 @@ Imports:
     shiny
 Suggests:
     shinytest,
-    testthat,
+    testthat (>= 3.0.0)
     styler

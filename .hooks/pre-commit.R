@@ -1,9 +1,5 @@
 #!/usr/bin/env Rscript
 cat("Running commit hooks...", fill = TRUE)
-shhh <- suppressPackageStartupMessages # It's a library, so shhh!
-# shhh(library(dplyr))
-# shhh(library(xfun))
-# shhh(library(dfeshiny))
 
 message("\n")
 
@@ -13,7 +9,12 @@ error_flag <- FALSE
 
 datalog <- here::here("datafiles_log.csv")
 log_files <- read.csv(datalog, stringsAsFactors = FALSE)
-ign_files <- read.csv(here::here(".gitignore"), header = FALSE, stringsAsFactors = FALSE)
+gitignore_content <- read.csv(here::here(".gitignore"),
+  header = FALSE,
+  stringsAsFactors = FALSE
+)
+ign_files <- gitignore_content |>
+  dplyr::filter(!grepl("^#", V1))
 colnames(ign_files)[1] <- "filename"
 
 message("Contents of the .gitignore file:")

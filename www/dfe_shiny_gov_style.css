@@ -116,7 +116,7 @@ a:focus {
   --bs-gutter-y: 0;
 }
 
-/* This line sets the main area width. Originally set to 66.667% in the GDS 
+/* This line sets the main area width. Originally set to 66.667% in the GDS
 template. 80% works well here to reduce white space on the right hand side.*/
 .col-sm-8 {
   width: 80%
@@ -274,6 +274,7 @@ html {
 }
 
 /* Well panel CSS used in user selections ---------------------------------- */
+/*
 .well {
   min-height: 90vh;
   padding: 19px;
@@ -285,6 +286,7 @@ html {
   box-shadow: inset 0 1px 1px rgb(0 0 0 / 5%);
   color: #fff;
 }
+*/
 
 /* Custom disconnect CSS --------------------------------------------------- */
 #ss-connect-dialog {
@@ -400,3 +402,30 @@ html {
   background-color: #12436D !important;
   color: #ffffff !important;
 }
+
+
+/*********************************  JT edits *********************************/
+
+/* Remove bottom margin from bslib cards */
+.bslib-mb-spacing {
+  margin-bottom: 0;
+}
+
+/* Extends bslib page height */
+.bslib-page-fill {
+  height: auto;
+}
+
+
+/* Make full-screen bslib cards aesthetic */
+/* Set the SVG to fill the available space within the card */
+.ggiraph-svg {
+    max-height: 80vh !important;
+}
+
+/* Target the specific card using classes */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
+  width: 50vw !important;
+  align-self: center;
+}
+

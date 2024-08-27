@@ -1,3 +1,4 @@
+# R files
 .Rproj.user
 .Rhistory
 .RData
@@ -6,3 +7,14 @@
 README.html
 *_.new.png
 *unpublished*
+
+# Folders
+_output
+04_Outputs
+*/*_priv
+*/*_raw
+01_data/02_prod/bds
+
+# Specific files
+03_documentation/01_public/LAIT.xlsm
+01_data/01_raw/BDS_Wide.csv
