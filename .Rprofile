@@ -13,12 +13,18 @@ source("renv/activate.R")
 
 # Welcome message
 .First <- function() {
-  message(
+  welcome_msg <- message(
     praise::praise("${Exclamation}-${Exclamation}! "),
-    "Welcome to your dfeR project.
-",
+    "Welcome to your dfeR project.",
     praise::praise("Time for some ${adjective} R coding...")
   )
+
+  # Check if praise installed
+  if (system.file(package = "praise") != "") {
+    welcome_msg
+  } else {
+    warning("praise package is not installed, please run renv::restore() to set up the necessary package environment")
+  }
 }
 
 # Check if dfeshiny installed
