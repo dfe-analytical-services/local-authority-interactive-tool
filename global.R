@@ -103,7 +103,7 @@ stat_n_raw <- readxl::read_xlsx(
 
 # Data dictionary
 metrics_raw <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/LAIT Data Dictionary (To QA!).xlsx"),
+  here::here("01_data/02_prod/LAIT Data Dictionary.xlsx"),
   sheet = "Data_prod"
 )
 
