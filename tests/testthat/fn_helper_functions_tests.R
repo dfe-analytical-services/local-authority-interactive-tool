@@ -207,3 +207,28 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
     values_num = dummy_bds_dependent$values_num
   )
 }
+
+
+
+
+# Source functions (all scripts in R/ with prefix 'fn_') ----------------------
+list.files("R/", full.names = TRUE) |>
+  (\(x) {
+    x[grepl("fn_", x)]
+  })() |>
+  purrr::walk(source)
+
+# Test coverage ---------------------------------------------------------------
+library(testthat)
+
+# Define a function to calculate coverage for each file
+calculate_coverage <- function(fn_file) {
+  coverage <- covr::file_coverage(paste0("R/", fn_file), paste0("tests/testthat/test-", fn_file))
+  coverage
+}
+
+list.files("R/") |>
+  (\(x) {
+    x[grepl("fn_", x)]
+  })() |>
+  purrr::walk(calculate_coverage)
