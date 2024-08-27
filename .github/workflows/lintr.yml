@@ -36,18 +36,14 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install praise
-        run: |
-          Rscript -e "install.packages('praise')"
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::lintr, local::.
+          needs: lint
 
       - name: restore renv
         uses: r-lib/actions/setup-renv@v2
         continue-on-error: true
-
-      - name: Install lintr
-        shell: Rscript {0}
-        run: |
-          renv::install("lintr")
 
       - name: Run lintr
         run: lintr::sarif_output(lintr::lint_dir("."), "lintr-results.sarif")

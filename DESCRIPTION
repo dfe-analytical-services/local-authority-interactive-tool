@@ -13,6 +13,5 @@ Imports:
     shiny
 Suggests:
     shinytest,
-    testthat,
-    styler,
-    praise
+    testthat (>= 3.0.0)
+    styler
