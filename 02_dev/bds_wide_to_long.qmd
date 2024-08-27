@@ -226,12 +226,12 @@ write.csv(bds_eng_state,
 
 ```{r}
 # Read in files saved from above transformation
-bds_long_csv <- data.table::fread(
-  here::here("01_data/02_prod/bds/bds_long.csv")
-)
+# bds_long_csv <- data.table::fread(
+#   here::here("01_data/02_prod/bds/bds_long.csv")
+# )
 # Write out parquet version
 arrow::write_dataset(
-  bds_long_csv,
+  bds_long_public,
   here::here("01_data/02_prod/"),
   format = "parquet",
   basename_template = "bds_long_{i}.parquet"
