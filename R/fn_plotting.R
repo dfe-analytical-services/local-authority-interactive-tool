@@ -69,32 +69,6 @@ create_plot_colours <- function(data_long) {
 }
 
 
-#' Create Plot Axes Parameters
-#'
-#' This function calculates the axis limits and other parameters necessary
-#' for plotting the y-axis and x-axis.
-#'
-#' @param data_long A data frame in long format containing the data for
-#' the plot.
-#'
-#' @return A list containing the following elements:
-#' \item{y_lim_low}{The lower limit of the y-axis, adjusted to zero if
-#' positive.}
-#' \item{y_lim_high}{The upper limit of the y-axis, expanded by 10%.}
-#' \item{plot_yrs}{A vector of unique years (x-axis values) from the dataset.}
-#' \item{num_yrs}{The total number of unique years to be plotted.}
-#'
-#' @details
-#' The function computes the range of the y-axis based on the
-#' `values_num` column in `data_long`,
-#' ensuring that the axis starts from zero if all values are positive.
-#' It also extracts and counts the unique years (x-axis values)
-#' present in the data.
-#' These values are returned as a list that can be used to configure the
-#' axes in a `ggplot2` plot.
-#'
-
-
 #' @title Calculate Y-Axis Range
 #' @description This function calculates the range of the 'values_num'
 #' column in the provided dataset.
