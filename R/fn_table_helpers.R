@@ -209,7 +209,39 @@ create_stats_table <- function(
 }
 
 
-# Creating indicator polarity cell colour dataframe
+#' Create Indicator Polarity Cell Colour Data Frame
+#'
+#' This function generates a data frame that associates combinations of
+#' indicator polarity and quartile bands with specific cell colours.
+#' The function uses predefined rules to assign colours based on the polarity
+#' ("Low", "High", or "-") and the quartile band ("A", "B", "C", "D").
+#'
+#' @details
+#' The function creates a data frame with all combinations of polarity and
+#' quartile bands.
+#' It assigns a cell colour according to the following rules:
+#' \itemize{
+#'   \item "Low" polarity in quartile band "A" results in "green".
+#'   \item "Low" polarity in quartile band "D" results in "red".
+#'   \item "High" polarity in quartile band "A" results in "red".
+#'   \item "High" polarity in quartile band "D" results in "green".
+#'   \item Quartile bands "B" and "C" and any `NA` or "-" polarity result in "none".
+#' }
+#'
+#' @return A data frame with the following columns:
+#' \describe{
+#'   \item{polarity}{Character vector indicating the polarity of the indicator.
+#'   Values can be \code{NA}, "-", "Low", or "High".}
+#'   \item{quartile_band}{Character vector indicating the quartile band.
+#'   Values are "A", "B", "C", or "D".}
+#'   \item{cell_colour}{Character vector indicating the assigned cell colour.
+#'   Values are "red", "green", or "none".}
+#' }
+#'
+#' @examples
+#' # Generate the polarity colour data frame
+#' polarity_colours_df()
+#'
 polarity_colours_df <- function() {
   # Define the possible values for each column
   polarity_options <- c(NA, "-", "Low", "High")
