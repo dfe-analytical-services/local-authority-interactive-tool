@@ -160,7 +160,7 @@ get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
     warning("Unexpected polarity value")
   }
 
-  if (table_stats$`Quartile Banding` %notin% c("A", "B", "C", "D", NA_character_)) {
+  if (table_stats$`Quartile Banding` %notin% c("A", "B", "C", "D")) {
     warning("Unexpected Quartile Banding")
   }
 
