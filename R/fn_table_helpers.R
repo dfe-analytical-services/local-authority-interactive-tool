@@ -1,26 +1,3 @@
-#' Get Indicator Data
-#'
-#' This function extracts data relevant to a specific indicator name from a dataset.
-#'
-#' @param data_bds A data frame containing the dataset with indicator data.
-#' @param indicator_colname A character string representing the name of the indicator to filter by.
-#'
-#' @return A data frame containing the filtered data for the specified indicator.
-#' @export
-#'
-#' @examples
-#' data_bds <- data.frame(
-#'   indicator = c("Indicator1", "Indicator2", "Indicator1"),
-#'   value = c(10, 20, 30)
-#' )
-#' indicator_colname <- "Indicator1"
-#' get_indicator_data(data_bds, indicator_colname)
-get_indicator_data <- function(data_bds, indicator_colname) {
-  data_bds |>
-    dplyr::filter(indicator == indicator_colname)
-}
-
-
 #' Pivot Indicator Data to Long Format
 #'
 #' This function pivots indicator data from wide format to long format.
