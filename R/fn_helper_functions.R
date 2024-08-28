@@ -70,12 +70,12 @@ valid_colors <- c("blue", "dark-blue", "green", "orange", "purple", "white")
 
 # Validate that only valid colours are used -----------------------------------
 validate_color <- function(color) {
-  if (color %in% valid_colors) {
+  if (color %in% valid_colors && !is.null(color)) {
     return(TRUE)
   }
 
   stop(
-    "Invalid color: ", color, ". Valid colors are: ",
+    "Invalid color: ", ifelse(is.null(color), "NULL", color), ". Valid colors are: ",
     paste(valid_colors, collapse = ", "), "."
   )
 }

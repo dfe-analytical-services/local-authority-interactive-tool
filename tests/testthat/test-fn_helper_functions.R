@@ -121,3 +121,30 @@ test_that("10. Invalid icon in value_box", {
     "icon must be a shiny.tag object"
   )
 })
+
+
+# validate_color() ------------------------------------------------------------
+test_that("1. validate_color with valid colors", {
+  expect_true(validate_color("orange"))
+})
+
+test_that("2. validate_color with invalid color", {
+  expect_error(
+    validate_color("black"),
+    "Invalid color: black. Valid colors are: blue, "
+  )
+})
+
+test_that("3. validate_color with empty string", {
+  expect_error(
+    validate_color(""),
+    "Invalid color: . Valid colors are: blue, "
+  )
+})
+
+test_that("4. validate_color with NULL", {
+  expect_error(
+    validate_color(NULL),
+    "Invalid color: NULL. Valid colors are: blue, "
+  )
+})
