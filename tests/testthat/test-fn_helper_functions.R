@@ -148,3 +148,263 @@ test_that("4. validate_color with NULL", {
     "Invalid color: NULL. Valid colors are: blue, "
   )
 })
+
+# set_css_style_sheet() -------------------------------------------------------
+# Can't be tested
+test_that("1. set_css_style_sheet deals with non css files", {
+  expect_error(
+    set_css_style_sheet("wrong_file"),
+    "This doesn't look like a css file"
+  )
+})
+
+
+# not_all_na() ----------------------------------------------------------------
+test_that("1. not_all_na with all NA values", {
+  result <- not_all_na(c(NA, NA, NA))
+  expect_false(result)
+})
+
+test_that("2. not_all_na with no NA values", {
+  result <- not_all_na(c(1, 2, 3))
+  expect_true(result)
+})
+
+test_that("3. not_all_na with a mix of NA and non-NA values", {
+  result <- not_all_na(c(NA, 1, NA, 2))
+  expect_true(result)
+})
+
+test_that("4. not_all_na with an empty vector", {
+  result <- not_all_na(c())
+  expect_false(result)
+})
+
+
+# clean_spaces() --------------------------------------------------------------
+test_that("1. clean_spaces with multiple spaces between words", {
+  result <- clean_spaces("This  is   a  test")
+  expect_equal(result, "This is a test")
+})
+
+test_that("2. clean_spaces with leading and trailing spaces", {
+  result <- clean_spaces("  Leading and trailing  ")
+  expect_equal(result, " Leading and trailing ")
+})
+
+test_that("3. clean_spaces with mixed whitespace characters", {
+  result <- clean_spaces("This\tis\na test")
+  expect_equal(result, "This is a test")
+})
+
+
+# pull_uniques() --------------------------------------------------------------
+test_that("1. pull_uniques with numeric column containing duplicates", {
+  data <- data.frame(a = c(1, 2, 2, 3, 3, 3, 4))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, c(1, 2, 3, 4))
+})
+
+test_that("2. pull_uniques with character column containing duplicates", {
+  data <- data.frame(a = c("apple", "banana", "apple", "cherry", "banana"))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, c("apple", "banana", "cherry"))
+})
+
+test_that("3. pull_uniques with factor column containing duplicates", {
+  data <- data.frame(a = factor(c("low", "medium", "low", "high", "medium")))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, factor(c("low", "medium", "high")))
+})
+
+test_that("4. pull_uniques with an empty data frame", {
+  data <- data.frame(a = numeric(0))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, numeric(0))
+})
+
+test_that("5. pull_uniques with a column containing only NA values", {
+  data <- data.frame(a = c(NA, NA, NA))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, NA)
+})
+
+test_that("6. pull_uniques with a column containing NA and non-NA values", {
+  data <- data.frame(a = c(1, NA, 2, NA, 3))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, c(1, NA, 2, 3))
+})
+
+test_that("7. pull_uniques with a column containing mixed data types", {
+  data <- data.frame(a = c(1, "2", TRUE, 1, "2", FALSE))
+  result <- pull_uniques(data, "a")
+  expect_equal(result, c("1", "2", "TRUE", "FALSE"))
+})
+
+test_that("8. Data frame with no columns", {
+  df <- data.frame()
+  expect_error(
+    pull_uniques(df, "nonexistent"),
+    "Can't extract columns that don't exist."
+  )
+})
+
+
+# filter_and_pull() -----------------------------------------------------------
+test_that("1. filter_and_pull with a simple case", {
+  data <- data.frame(
+    category = c("A", "B", "A", "C"),
+    value = c(10, 20, 30, 40)
+  )
+
+  result <- filter_and_pull(data, "category", "A", "value")
+  expect_equal(result, c(10, 30))
+})
+
+test_that("2. filter_and_pull with no matching filter variable", {
+  data <- data.frame(
+    category = c("A", "B", "A", "C"),
+    value = c(10, 20, 30, 40)
+  )
+
+  result <- filter_and_pull(data, "category", "D", "value")
+  expect_equal(result, numeric(0))
+})
+
+test_that("3. filter_and_pull with missing values in column filtering for", {
+  data <- data.frame(
+    category = c("A", "B", NA, "C"),
+    value = c(NA, 20, 30, 40)
+  )
+
+  result <- filter_and_pull(data, "category", "A", "value")
+  expect_equal(result, c(NA_integer_))
+})
+
+test_that("4. filter_and_pull with an empty data frame", {
+  data <- data.frame(
+    category = character(),
+    value = numeric()
+  )
+
+  result <- filter_and_pull(data, "category", "A", "value")
+  expect_equal(result, numeric(0))
+})
+
+test_that("5. filter_and_pull with a non-existing pull column", {
+  data <- data.frame(
+    category = c("A", "B", "A", "C"),
+    value = c(10, 20, 30, 40)
+  )
+
+  expect_error(
+    filter_and_pull(data, "category", "A", "non_existing"),
+    "Can't extract columns that don't exist"
+  )
+})
+
+test_that("6. filter_and_pull with filter_col and pull_col being the same", {
+  data <- data.frame(
+    category = c("A", "B", "A", "C"),
+    value = c(10, 20, 30, 40)
+  )
+
+  result <- filter_and_pull(data, "category", "A", "category")
+  expect_equal(result, c("A", "A"))
+})
+
+
+# get_metadata() --------------------------------------------------------------
+test_that("1. get_metadata with text metadata (no date conversion)", {
+  data <- data.frame(
+    Measure = c("mpg", "cyl", "hp"),
+    Description = c("Miles per gallon", "Number of cylinders", "Horsepower"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- get_metadata(data, "mpg", "Description")
+  expect_equal(result, "Miles per gallon")
+})
+
+test_that("2. get_metadata with numeric metadata (date conversion)", {
+  data <- data.frame(
+    Measure = c("mpg", "cyl", "hp"),
+    `Last Update` = c("44561", "44562", "44563"), # Excel date format
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  result <- get_metadata(data, "mpg", "Last Update")
+  expect_equal(result, "2021-12-31")
+})
+
+test_that("3. get_metadata with metadata that shouldn't be converted to a date", {
+  data <- data.frame(
+    Measure = c("mpg", "cyl", "hp"),
+    `Value` = c("Test 12345", "Test 67890", "Test 23456"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- get_metadata(data, "cyl", "Value")
+  expect_equal(result, "Test 67890")
+})
+
+test_that("4. get_metadata with non-matching indicator", {
+  data <- data.frame(
+    Measure = c("mpg", "cyl", "hp"),
+    Description = c("Miles per gallon", "Number of cylinders", "Horsepower"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_warning(
+    expect_equal(get_metadata(data, "gear", "Description"), "No matching metadata"),
+    "No matching metadata for Description"
+  )
+})
+
+test_that("5. get_metadata with missing values in metadata column", {
+  data <- data.frame(
+    Measure = c("mpg", "cyl", "hp"),
+    Description = c("Miles per gallon", NA, "Horsepower"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- get_metadata(data, "cyl", "Description")
+  expect_equal(result, NA_character_)
+})
+
+test_that("6. get_metadata with empty data frame", {
+  data <- data.frame(
+    Measure = character(),
+    Description = character(),
+    stringsAsFactors = FALSE
+  )
+
+  expect_warning(
+    expect_equal(get_metadata(data, "gear", "Description"), "No matching metadata"),
+    "No matching metadata for Description"
+  )
+})
+
+test_that("7. get_metadata with special characters in metadata", {
+  data <- data.frame(
+    Measure = c("mpg", "cyl", "hp"),
+    `Hyperlink(s)` = c("http://example.com/mpg", "http://example.com/cyl", "http://example.com/hp"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  result <- get_metadata(data, "hp", "Hyperlink(s)")
+  expect_equal(result, "http://example.com/hp")
+})
+
+test_that("8. get_metadata with non-string input_indicator", {
+  data <- data.frame(
+    Measure = c(1, 2, 3),
+    Description = c("First", "Second", "Third"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- get_metadata(data, 2, "Description")
+  expect_equal(result, "Second")
+})

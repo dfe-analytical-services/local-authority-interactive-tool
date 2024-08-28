@@ -117,6 +117,10 @@ suppressMessages(
 #'  might change dynamically or needs to be set programmatically.
 #'
 set_css_style_sheet <- function(css_filename) {
+  if (!grepl(".css", css_filename)) {
+    stop("This doesn't look like a css file")
+  }
+
   tags$head(
     tags$link(
       rel = "stylesheet",
@@ -281,6 +285,11 @@ filter_and_pull <- function(data, filter_col, filter_var, pull_col) {
 get_metadata <- function(data, input_indicator, metadata) {
   metadata_output <- data |>
     filter_and_pull("Measure", input_indicator, metadata)
+
+  if (length(metadata_output) < 1) {
+    warning("No matching metadata for ", metadata)
+    metadata_output <- "No matching metadata"
+  }
 
   if (grepl("^[0-9]+$", metadata_output)) {
     metadata_output |>
