@@ -32,6 +32,24 @@ clean_snp_colnames <- function(data) {
   sn_cols <- which(grepl("^SN\\d+$", col_names))
   snp_cols <- which(grepl("^SNP", col_names))
 
+  if (length(sn_cols) < 1) {
+    stop(
+      paste0(
+        "SN columns do not seem to be in the right format e.g., SNx",
+        "where x is a number"
+      )
+    )
+  }
+
+  if (length(snp_cols) < 1) {
+    stop(
+      paste0(
+        "SNP columns do not seem to be in the right format e.g., SNPx",
+        "where x can be anything"
+      )
+    )
+  }
+
   # Extract the numbers from "SN" columns
   sn_numbers <- gsub("^SN", "", col_names[sn_cols])
 
