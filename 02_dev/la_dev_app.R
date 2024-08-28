@@ -305,7 +305,7 @@ server_dev <- function(input, output, session) {
         `Quartile Banding` = reactable::colDef(
           style = reactablefmtr::cell_style(
             background_color = get_quartile_band_cell_colour(
-              polarity_colours,
+              polarity_colours_df(),
               la_stats_table()
             )
           )

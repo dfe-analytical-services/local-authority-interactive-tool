@@ -1,119 +1,3 @@
-#' Get Indicator Data
-#'
-#' This function extracts data relevant to a specific indicator name from a dataset.
-#'
-#' @param data_bds A data frame containing the dataset with indicator data.
-#' @param indicator_colname A character string representing the name of the indicator to filter by.
-#'
-#' @return A data frame containing the filtered data for the specified indicator.
-#' @export
-#'
-#' @examples
-#' data_bds <- data.frame(
-#'   indicator = c("Indicator1", "Indicator2", "Indicator1"),
-#'   value = c(10, 20, 30)
-#' )
-#' indicator_colname <- "Indicator1"
-#' get_indicator_data(data_bds, indicator_colname)
-get_indicator_data <- function(data_bds, indicator_colname) {
-  data_bds |>
-    dplyr::filter(indicator == indicator_colname)
-}
-
-
-#' Pivot Indicator Data to Long Format
-#'
-#' This function pivots indicator data from wide format to long format.
-#'
-#' @param data_ind A data frame containing the indicator data in wide format.
-#' @param indicator_colname A character string representing the name of the indicator column.
-#'
-#' @return A data frame containing the indicator data in long format.
-#' @export
-#'
-#' @examples
-#' data_ind <- data.frame(
-#'   `Short Desc` = c("Desc1", "Desc2"),
-#'   line = c(1, 2),
-#'   `Data item` = c("Item1", "Item2"),
-#'   Years = c("2020", "2021"),
-#'   `Local Authority 1` = c(10, 20),
-#'   `Local Authority 2` = c(30, 40)
-#' )
-#' indicator_colname <- "IndicatorValue"
-#' pivot_indicator_data_long(data_ind, indicator_colname)
-pivot_indicator_data_long <- function(data_ind, indicator_colname) {
-  data_ind |>
-    dplyr::filter(!is.na(as.Date(Years, format = "%Y"))) |>
-    tidyr::pivot_longer(
-      cols = -c(`Short Desc`, line, `Data item`, Years),
-      names_to = "local_authority",
-      values_to = indicator_colname
-    )
-}
-
-
-#' Create a Table of Statistical Neighbours for an Indicator
-#'
-#' This function creates a table of statistical neighbours for a given indicator and local authority.
-#'
-#' @param data_indicator A data frame containing the indicator data.
-#' @param data_sn A data frame containing the statistical neighbours data.
-#' @param indicator_colname A character string representing the name of the indicator column.
-#' @param la A character string representing the name of the local authority. Defaults to "Barking and Dagenham".
-#'
-#' @return A data frame containing the statistical neighbours table for the specified indicator and local authority.
-#' @export
-#'
-#' @examples
-#' data_indicator <- data.frame(
-#'   local_authority = c("Barking and Dagenham", "Neighbour1", "Neighbour2"),
-#'   Years = c("2020", "2020", "2020"),
-#'   IndicatorValue = c(10, 20, 30)
-#' )
-#' data_sn <- data.frame(
-#'   `LA Name` = c("Barking and Dagenham", "Barking and Dagenham"),
-#'   `LA Name_sn` = c("Neighbour1", "Neighbour2")
-#' )
-#' indicator_colname <- "IndicatorValue"
-#' create_sn_table(data_indicator, data_sn, indicator_colname)
-create_sn_table <- function(data_indicator,
-                            data_sn,
-                            indicator_colname,
-                            la = "Barking and Dagenham") {
-  # Selected LA
-  selected_la <- la
-
-  # Selected LA statistical neighbours
-  df_selected_sns <- data_sn |>
-    dplyr::filter(`LA Name` == selected_la)
-
-  # Most recent year data available
-  max_year <- data_indicator |>
-    dplyr::pull(Years) |>
-    max()
-
-  # Indicator stat neigh table
-  table_prod <- data_indicator |>
-    dplyr::filter(local_authority %in% c(df_selected_sns$`LA Name_sn`, selected_la)) |>
-    dplyr::select(-c(`Short Desc`, line, `Data item`)) |>
-    dplyr::mutate(indicator = unlist(lapply(
-      !!rlang::sym(indicator_colname),
-      dfeR::pretty_num,
-      dp = 3
-    ))) |>
-    tidyr::pivot_wider(
-      id_cols = local_authority,
-      names_from = Years,
-      values_from = indicator
-    ) |>
-    dplyr::rename("Local Authority" = "local_authority") |>
-    dplyr::arrange(!!rlang::sym(max_year))
-
-  table_prod
-}
-
-
 #' Filter data based on LA and Regions
 #'
 #' This function filters a data frame based on the provided
@@ -146,14 +30,22 @@ create_sn_table <- function(data_indicator,
 #' }
 #'
 filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
+  if (nrow(data) < 1) {
+    warning("Dataframe seems empty")
+  }
+
   # Filter LA & Regions
   result <- data |>
     dplyr::filter(`LA and Regions` %in% filter_col)
 
+  if (nrow(result) < 1) {
+    warning("Filter value doesn't exist in LA and Regions")
+  }
+
   # Slice max Year if latest is TRUE
   if (latest) {
     result <- result |>
-      dplyr::slice_max(Years)
+      dplyr::slice_max(Years, na_rm = TRUE)
   }
 
   # Return df or col
@@ -207,6 +99,10 @@ pretty_num_table <- function(data,
                              include_columns = NULL,
                              exclude_columns = NULL,
                              ...) {
+  if (nrow(data) < 1) {
+    warning("Data seems to be empty")
+  }
+
   # Determine the columns to include or exclude
   if (!is.null(include_columns)) {
     cols_to_include <- include_columns
@@ -290,6 +186,10 @@ create_stats_table <- function(
     quartile,
     quartile_bands,
     indicator_polarity) {
+  if (any(is.na(c(selected_la, main_table$`LA Number`, quartile_bands)))) {
+    warning("Suprise NA value in stats table")
+  }
+
   data.frame(
     "LA Number" = main_table |>
       filter_la_regions(selected_la, pull_col = "LA Number"),
@@ -306,4 +206,76 @@ create_stats_table <- function(
     check.names = FALSE
   ) |>
     pretty_num_table(dp = 1)
+}
+
+
+#' Create Indicator Polarity Cell Colour Data Frame
+#'
+#' This function generates a data frame that associates combinations of
+#' indicator polarity and quartile bands with specific cell colours.
+#' The function uses predefined rules to assign colours based on the polarity
+#' ("Low", "High", or "-") and the quartile band ("A", "B", "C", "D").
+#'
+#' @details
+#' The function creates a data frame with all combinations of polarity and
+#' quartile bands.
+#' It assigns a cell colour according to the following rules:
+#' \itemize{
+#'   \item "Low" polarity in quartile band "A" results in "green".
+#'   \item "Low" polarity in quartile band "D" results in "red".
+#'   \item "High" polarity in quartile band "A" results in "red".
+#'   \item "High" polarity in quartile band "D" results in "green".
+#'   \item Quartile bands "B" and "C" and any `NA` or "-" polarity result in "none".
+#' }
+#'
+#' @return A data frame with the following columns:
+#' \describe{
+#'   \item{polarity}{Character vector indicating the polarity of the indicator.
+#'   Values can be \code{NA}, "-", "Low", or "High".}
+#'   \item{quartile_band}{Character vector indicating the quartile band.
+#'   Values are "A", "B", "C", or "D".}
+#'   \item{cell_colour}{Character vector indicating the assigned cell colour.
+#'   Values are "red", "green", or "none".}
+#' }
+#'
+#' @examples
+#' # Generate the polarity colour data frame
+#' polarity_colours_df()
+#'
+polarity_colours_df <- function() {
+  # Define the possible values for each column
+  polarity_options <- c(NA, "-", "Low", "High")
+  quartile_band_options <- c("A", "B", "C", "D")
+  cell_colour_options <- c("red", "green", "none")
+
+  # Create all combinations of polarity and quartile band
+  polarity_colours <- expand.grid(
+    polarity = polarity_options,
+    quartile_band = quartile_band_options,
+    stringsAsFactors = FALSE
+  )
+
+  # Initialize cell_colour column with "none"
+  polarity_colours$cell_colour <- "none"
+
+  # Apply the conditions to determine the cell colour
+  polarity_colours$cell_colour <- with(polarity_colours, ifelse(
+    (is.na(polarity) | polarity == "-") | (quartile_band == "B" | quartile_band == "C"),
+    "none", ifelse(
+      (quartile_band == "A" & polarity == "Low"),
+      "green", ifelse(
+        (quartile_band == "D" & polarity == "Low"),
+        "red", ifelse(
+          (quartile_band == "A" & polarity == "High"),
+          "red", ifelse(
+            (quartile_band == "D" & polarity == "High"),
+            "green",
+            "none"
+          )
+        )
+      )
+    )
+  ))
+
+  polarity_colours
 }

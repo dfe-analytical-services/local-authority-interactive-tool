@@ -5,8 +5,20 @@
 # app to keep the rest of the app code easier to read.
 # -----------------------------------------------------------------------------
 
-# Expandable function ---------------------------------------------------------
+# Expandable function with input validation
 expandable <- function(input_id, label, contents) {
+  # Input validation
+  if (!is.character(input_id) || length(input_id) != 1) {
+    stop("input_id must be a single string.")
+  }
+  if (!is.character(label) || length(label) != 1) {
+    stop("label must be a single string.")
+  }
+  if (!is.character(contents) && !inherits(contents, "shiny.tag")) {
+    stop("contents must be a string or a shiny.tag object.")
+  }
+
+  # Create the expandable element
   gov_details <- shiny::tags$details(
     class = "govuk-details", id = input_id,
     shiny::tags$summary(
@@ -18,7 +30,10 @@ expandable <- function(input_id, label, contents) {
     ),
     shiny::tags$div(contents)
   )
+
+  return(gov_details)
 }
+
 
 # Value box function ----------------------------------------------------------
 # fontsize: can be small, medium or large
@@ -26,7 +41,9 @@ value_box <- function(value, subtitle, icon = NULL,
                       color = "blue", width = 4,
                       href = NULL, fontsize = "medium") {
   validate_color(color)
-  if (!is.null(icon)) tagAssert(icon, type = "i")
+  if (!is.null(icon) && !inherits(icon, "shiny.tag")) {
+    stop("icon must be a shiny.tag object")
+  }
 
   box_content <- div(
     class = paste0("small-box bg-", color),
@@ -53,12 +70,12 @@ valid_colors <- c("blue", "dark-blue", "green", "orange", "purple", "white")
 
 # Validate that only valid colours are used -----------------------------------
 validate_color <- function(color) {
-  if (color %in% valid_colors) {
+  if (color %in% valid_colors && !is.null(color)) {
     return(TRUE)
   }
 
   stop(
-    "Invalid color: ", color, ". Valid colors are: ",
+    "Invalid color: ", ifelse(is.null(color), "NULL", color), ". Valid colors are: ",
     paste(valid_colors, collapse = ", "), "."
   )
 }
@@ -100,6 +117,10 @@ suppressMessages(
 #'  might change dynamically or needs to be set programmatically.
 #'
 set_css_style_sheet <- function(css_filename) {
+  if (!grepl(".css", css_filename)) {
+    stop("This doesn't look like a css file")
+  }
+
   tags$head(
     tags$link(
       rel = "stylesheet",
@@ -264,6 +285,11 @@ filter_and_pull <- function(data, filter_col, filter_var, pull_col) {
 get_metadata <- function(data, input_indicator, metadata) {
   metadata_output <- data |>
     filter_and_pull("Measure", input_indicator, metadata)
+
+  if (length(metadata_output) < 1) {
+    warning("No matching metadata for ", metadata)
+    metadata_output <- "No matching metadata"
+  }
 
   if (grepl("^[0-9]+$", metadata_output)) {
     metadata_output |>

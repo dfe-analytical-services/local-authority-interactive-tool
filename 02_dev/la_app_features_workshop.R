@@ -105,8 +105,8 @@ la_change_prev <- la_table |>
 # Set the trend value
 la_trend <- dplyr::case_when(
   is.na(la_change_prev) ~ NA_character_,
-  la_change_prev > 0 ~ "increase",
-  la_change_prev < 0 ~ "decrease",
+  la_change_prev > 0 ~ "Increase",
+  la_change_prev < 0 ~ "Decrease",
   TRUE ~ "No trend"
 )
 
@@ -149,7 +149,7 @@ la_indicator_polarity <- filtered_bds |>
   pull_uniques("Polarity")
 
 # Build stats table
-la_table_stats <- data.frame(
+la_stats_table <- data.frame(
   "LA Number" = la_table |>
     filter_la_regions(selected_la, pull_col = "LA Number"),
   "LA and Regions" = selected_la,
@@ -161,21 +161,22 @@ la_table_stats <- data.frame(
   "(B) Up to and including" = la_quartile_bands[["50%"]],
   "(C) Up to and including" = la_quartile_bands[["75%"]],
   "(D) Up to and including" = la_quartile_bands[["100%"]],
+  "Polarity" = la_indicator_polarity,
   check.names = FALSE
 )
 
 # Format stats table
 dfe_reactable(
-  la_table_stats,
+  la_stats_table |>
+    dplyr::select(-Polarity),
   columns = list(
     `Quartile Banding` = reactable::colDef(
       style = reactablefmtr::cell_style(
-        background_color = polarity_colours |>
-          dplyr::filter(
-            polarity == la_indicator_polarity,
-            quartile_band == la_quartile
-          ) |>
-          dplyr::pull(cell_colour)
+        data = la_stats_table,
+        background_color = get_quartile_band_cell_colour(
+          polarity_colours_df(),
+          la_stats_table
+        )
       )
     )
   )

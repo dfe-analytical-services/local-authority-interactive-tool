@@ -2,25 +2,48 @@
 #'
 #' This function calculates the change in `values_num` from the previous year
 #' for each `LA and Regions` group in the provided data.
+#' It computes the difference
+#' between the `values_num` of the current year and the previous year, ensuring
+#' that the difference is only calculated if both the current and previous years
+#' are consecutive and neither of the `values_num` values is `NA`. If the years
+#' are not consecutive or if either `values_num` is `NA`, the result is `NA`.
+#'
 #' The result is a data frame where each row corresponds to the second row of
-#' each group when sorted in descending order by `Years`.
-#' The `values_num` column in the result contains the change from the
-#' previous year,
-#' and the `Years` column is set to "Change from previous year".
+#' each group when sorted in descending order by `Years_num`. The `values_num`
+#' column in the result contains the change from the previous year (or `NA`
+#' where appropriate), and the `Years` column is set to
+#' "Change from previous year".
 #'
 #' @param data A data frame that contains at least the columns
-#' `LA and Regions`, `Years`, and `values_num`.
-#' `LA and Regions` and `Years` should be of type character or factor,
-#' and `values_num` should be numeric.
+#' `LA and Regions`, `Years`, `Years_num`, and `values_num`.
+#' `LA and Regions` should be of type character or factor,
+#' `Years` should be of type character or factor,
+#' `Years_num` should be numeric (representing the year),
+#' and `values_num` should be numeric (representing the value for that year).
 #'
 #' @return A data frame with the same columns as the input data frame,
-#' but only the second row of each group when sorted in descending
-#' order by `Years`.
-#' The `values_num` column contains the change from the previous year,
-#' and the `Years` column is set to "Change from previous year".
-#' If a group has only one row in the input data,
-#' it will not appear in the output.
+#' but only the second row of each group when sorted in descending o
+#' rder by `Years_num`.
+#' The `values_num` column contains the change from the previous year, or `NA`
+#' if the years are not consecutive or if either `values_num` is `NA`.
+#' The `Years` column is set to "Change from previous year".
+#' Groups with only one row in the input data or where the year difference
+#' is not exactly one will not appear in the output.
 #'
+#' @examples
+#' \dontrun{
+#' data <- data.frame(
+#'   `LA and Regions` = c(
+#'     "Region1", "Region1", "Region1",
+#'     "Region2", "Region2"
+#'   ),
+#'   Years = c("2023", "2022", "2021", "2023", "2022"),
+#'   Years_num = c(2023, 2022, 2021, 2023, 2022),
+#'   values_num = c(100, 90, 80, 200, 195)
+#' )
+#' calculate_change_from_prev_yr(data)
+#' }
+#' #
 calculate_change_from_prev_yr <- function(data) {
   data |>
     dplyr::group_by(`LA and Regions`) |>
@@ -29,10 +52,16 @@ calculate_change_from_prev_yr <- function(data) {
       .by_group = TRUE
     ) |>
     dplyr::mutate(
-      values_num = dplyr::lag(values_num) - values_num,
+      values_num = ifelse(
+        dplyr::lag(Years_num) - Years_num != 1,
+        NA,
+        dplyr::lag(values_num) - values_num
+      ),
       Years = "Change from previous year"
     ) |>
-    dplyr::filter(dplyr::row_number() == 2)
+    dplyr::filter(dplyr::row_number() == 2) |>
+    dplyr::ungroup() |>
+    as.data.frame()
 }
 
 
@@ -48,11 +77,19 @@ calculate_change_from_prev_yr <- function(data) {
 #' "No trend", or `NA` if the input is missing.
 #'
 calculate_trend <- function(change_since_prev) {
+  # Check if change_since_prev is empty or has a length greater than one
+  if (length(change_since_prev) == 0 || length(change_since_prev) > 1) {
+    warning(
+      "The change_since_prev value looks wrong: ",
+      "length is either 0 or greater than 1."
+    )
+  }
+
   dplyr::case_when(
-    is.na(change_since_prev) ~ NA_character_,
+    change_since_prev == 0 ~ "No change",
     change_since_prev > 0 ~ "Increase",
     change_since_prev < 0 ~ "Decrease",
-    TRUE ~ "No trend"
+    TRUE ~ NA_character_
   )
 }
 
@@ -71,7 +108,20 @@ calculate_trend <- function(change_since_prev) {
 #' or "Error" if the value does not fit within the provided ranges.
 #'
 calculate_quartile_band <- function(indicator_val, quartile_bands) {
-  dplyr::case_when(
+  # Check if all required quartile bands are present
+  required_bands <- c("0%", "25%", "50%", "75%", "100%")
+  missing_bands <- setdiff(required_bands, names(quartile_bands))
+  if (length(missing_bands) > 0) {
+    warning("Quartile bands are missing: ", paste(missing_bands, collapse = ", "))
+    return(rep("Error", length(indicator_val)))
+  }
+
+  if (length(indicator_val) == 0) {
+    warning("Indicator value is empty; returning an empty character vector.")
+    return(character(0))
+  }
+
+  quartile_band <- dplyr::case_when(
     is.na(indicator_val) ~ NA_character_,
     (indicator_val >= quartile_bands[["0%"]]) &
       (indicator_val <= quartile_bands[["25%"]]) ~ "A",
@@ -83,6 +133,12 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
       (indicator_val <= quartile_bands[["100%"]]) ~ "D",
     TRUE ~ "Error"
   )
+
+  if (quartile_band %notin% c("A", "B", "C", "D", NA_character_)) {
+    warning("Unexpected Quartile Banding")
+  }
+
+  quartile_band
 }
 
 
@@ -100,9 +156,18 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
 #' to the given polarity and quartile band.
 #'
 get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
+  if (table_stats$Polarity %notin% c("High", "Low", "-", NA)) {
+    warning("Unexpected polarity value")
+  }
+
+  if (table_stats$`Quartile Banding` %notin% c("A", "B", "C", "D")) {
+    warning("Unexpected Quartile Banding")
+  }
+
   polarity_colours |>
     dplyr::filter(
-      polarity == table_stats$Polarity,
+      (is.na(polarity) & is.na(table_stats$Polarity)) |
+        (polarity == table_stats$Polarity),
       quartile_band == table_stats$`Quartile Banding`
     ) |>
     dplyr::pull(cell_colour)
