@@ -1,96 +1,3 @@
-#' Pivot Indicator Data to Long Format
-#'
-#' This function pivots indicator data from wide format to long format.
-#'
-#' @param data_ind A data frame containing the indicator data in wide format.
-#' @param indicator_colname A character string representing the name of the indicator column.
-#'
-#' @return A data frame containing the indicator data in long format.
-#' @export
-#'
-#' @examples
-#' data_ind <- data.frame(
-#'   `Short Desc` = c("Desc1", "Desc2"),
-#'   line = c(1, 2),
-#'   `Data item` = c("Item1", "Item2"),
-#'   Years = c("2020", "2021"),
-#'   `Local Authority 1` = c(10, 20),
-#'   `Local Authority 2` = c(30, 40)
-#' )
-#' indicator_colname <- "IndicatorValue"
-#' pivot_indicator_data_long(data_ind, indicator_colname)
-pivot_indicator_data_long <- function(data_ind, indicator_colname) {
-  data_ind |>
-    dplyr::filter(!is.na(as.Date(Years, format = "%Y"))) |>
-    tidyr::pivot_longer(
-      cols = -c(`Short Desc`, line, `Data item`, Years),
-      names_to = "local_authority",
-      values_to = indicator_colname
-    )
-}
-
-
-#' Create a Table of Statistical Neighbours for an Indicator
-#'
-#' This function creates a table of statistical neighbours for a given indicator and local authority.
-#'
-#' @param data_indicator A data frame containing the indicator data.
-#' @param data_sn A data frame containing the statistical neighbours data.
-#' @param indicator_colname A character string representing the name of the indicator column.
-#' @param la A character string representing the name of the local authority. Defaults to "Barking and Dagenham".
-#'
-#' @return A data frame containing the statistical neighbours table for the specified indicator and local authority.
-#' @export
-#'
-#' @examples
-#' data_indicator <- data.frame(
-#'   local_authority = c("Barking and Dagenham", "Neighbour1", "Neighbour2"),
-#'   Years = c("2020", "2020", "2020"),
-#'   IndicatorValue = c(10, 20, 30)
-#' )
-#' data_sn <- data.frame(
-#'   `LA Name` = c("Barking and Dagenham", "Barking and Dagenham"),
-#'   `LA Name_sn` = c("Neighbour1", "Neighbour2")
-#' )
-#' indicator_colname <- "IndicatorValue"
-#' create_sn_table(data_indicator, data_sn, indicator_colname)
-create_sn_table <- function(data_indicator,
-                            data_sn,
-                            indicator_colname,
-                            la = "Barking and Dagenham") {
-  # Selected LA
-  selected_la <- la
-
-  # Selected LA statistical neighbours
-  df_selected_sns <- data_sn |>
-    dplyr::filter(`LA Name` == selected_la)
-
-  # Most recent year data available
-  max_year <- data_indicator |>
-    dplyr::pull(Years) |>
-    max()
-
-  # Indicator stat neigh table
-  table_prod <- data_indicator |>
-    dplyr::filter(local_authority %in% c(df_selected_sns$`LA Name_sn`, selected_la)) |>
-    dplyr::select(-c(`Short Desc`, line, `Data item`)) |>
-    dplyr::mutate(indicator = unlist(lapply(
-      !!rlang::sym(indicator_colname),
-      dfeR::pretty_num,
-      dp = 3
-    ))) |>
-    tidyr::pivot_wider(
-      id_cols = local_authority,
-      names_from = Years,
-      values_from = indicator
-    ) |>
-    dplyr::rename("Local Authority" = "local_authority") |>
-    dplyr::arrange(!!rlang::sym(max_year))
-
-  table_prod
-}
-
-
 #' Filter data based on LA and Regions
 #'
 #' This function filters a data frame based on the provided
@@ -123,14 +30,22 @@ create_sn_table <- function(data_indicator,
 #' }
 #'
 filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
+  if (nrow(data) < 1) {
+    warning("Dataframe seems empty")
+  }
+
   # Filter LA & Regions
   result <- data |>
     dplyr::filter(`LA and Regions` %in% filter_col)
 
+  if (nrow(result) < 1) {
+    warning("Filter value doesn't exist in LA and Regions")
+  }
+
   # Slice max Year if latest is TRUE
   if (latest) {
     result <- result |>
-      dplyr::slice_max(Years)
+      dplyr::slice_max(Years, na_rm = TRUE)
   }
 
   # Return df or col
@@ -184,6 +99,10 @@ pretty_num_table <- function(data,
                              include_columns = NULL,
                              exclude_columns = NULL,
                              ...) {
+  if (nrow(data) < 1) {
+    warning("Data seems to be empty")
+  }
+
   # Determine the columns to include or exclude
   if (!is.null(include_columns)) {
     cols_to_include <- include_columns
