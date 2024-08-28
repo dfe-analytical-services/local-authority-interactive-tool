@@ -110,3 +110,95 @@ test_that("8. clean_snp_colnames with no SN and no SNP columns (both warnings ex
     "SN columns do not seem to be in the right format"
   )
 })
+
+
+# create_measure_key() --------------------------------------------------------
+test_that("1. create_measure_key with basic input", {
+  data <- data.frame(
+    Topic = c("Topic1", "Topic2"),
+    Measure_short = c("Measure1", "Measure2"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- create_measure_key(data)
+  expected <- data.frame(
+    Topic = c("Topic1", "Topic2"),
+    Measure_short = c("Measure1", "Measure2"),
+    measure_key = c("topic1_measure1", "topic2_measure2"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_equal(result, expected)
+})
+
+test_that("2. create_measure_key with spaces in Topic and Measure_short", {
+  data <- data.frame(
+    Topic = c("My Topic", "Another Topic"),
+    Measure_short = c("Short Measure", "Long Measure"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- create_measure_key(data)
+  expected <- data.frame(
+    Topic = c("My Topic", "Another Topic"),
+    Measure_short = c("Short Measure", "Long Measure"),
+    measure_key = c("my_topic_short_measure", "another_topic_long_measure"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_equal(result, expected)
+})
+
+test_that("3. create_measure_key with special characters", {
+  data <- data.frame(
+    Topic = c("Topic#1", "Topic@2"),
+    Measure_short = c("Measure*1", "Measure&2"),
+    stringsAsFactors = FALSE
+  )
+
+  result <- create_measure_key(data)
+  expected <- data.frame(
+    Topic = c("Topic#1", "Topic@2"),
+    Measure_short = c("Measure*1", "Measure&2"),
+    measure_key = c("topic#1_measure*1", "topic@2_measure&2"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_equal(result, expected)
+})
+
+test_that("4. create_measure_key with empty columns", {
+  data <- data.frame(
+    Topic = c("", "Topic2"),
+    Measure_short = c("Measure1", ""),
+    stringsAsFactors = FALSE
+  )
+
+  result <- create_measure_key(data)
+  expected <- data.frame(
+    Topic = c("", "Topic2"),
+    Measure_short = c("Measure1", ""),
+    measure_key = c("_measure1", "topic2_"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_equal(result, expected)
+})
+
+test_that("5. create_measure_key with all NA columns", {
+  data <- data.frame(
+    Topic = NA,
+    Measure_short = NA,
+    stringsAsFactors = FALSE
+  )
+
+  result <- create_measure_key(data)
+  expected <- data.frame(
+    Topic = NA,
+    Measure_short = NA,
+    measure_key = "na_na",
+    stringsAsFactors = FALSE
+  )
+
+  expect_equal(result, expected)
+})
