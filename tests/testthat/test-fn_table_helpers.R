@@ -256,3 +256,61 @@ test_that("7. pretty_num_table can take pretty_num arguements", {
     expected_result
   )
 })
+
+
+# dfe_reactable() -------------------------------------------------------------
+test_that("1. dfe_reactable basic functionality", {
+  data <- data.frame(
+    A = c(1, 2, 3),
+    B = c("X", "Y", "Z")
+  )
+
+  result <- dfe_reactable(data)
+
+  expect_s3_class(result, "reactable")
+  expect_true("reactable" %in% class(result))
+})
+
+test_that("2. dfe_reactable with custom options", {
+  data <- data.frame(
+    A = c(1, 2, 3),
+    B = c("X", "Y", "Z")
+  )
+
+  result <- dfe_reactable(data, sortable = TRUE, filterable = TRUE)
+
+  expect_s3_class(result, "reactable")
+
+  options <- result$x$tag
+
+  # Check if the 'sortable' and 'filterable' options are present and set correctly
+  expect_true(is.list(options))
+  expect_true(grepl('filterable="TRUE"', options))
+  expect_true(grepl("headerClassName = &quot;bar-sort-header&quot;", options))
+})
+
+
+test_that("3. dfe_reactable with an empty data frame", {
+  data <- data.frame(A = numeric(), B = character(), stringsAsFactors = FALSE)
+
+  result <- dfe_reactable(data)
+  result_data <- result$x$tag$attribs$data |>
+    jsonlite::fromJSON() |>
+    data.frame()
+
+  expect_s3_class(result, "reactable")
+  expect_true(nrow(result_data) == 0)
+})
+
+test_that("4. dfe_reactable with HTML content", {
+  data <- data.frame(
+    A = c("<b>Bold</b>", "<i>Italic</i>"),
+    B = c("<u>Underline</u>", "<span style='color:red;'>Red Text</span>")
+  )
+
+  result <- dfe_reactable(data)
+  options <- result$x$tag
+
+  expect_s3_class(result, "reactable")
+  expect_true(grepl("html = TRUE", options))
+})
