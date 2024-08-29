@@ -91,7 +91,7 @@ server <- function(input, output, session) {
 
   # LA level tables ===========================================================
   # Main table
-  LA_LevelTableServer(
+  la_main_tbl <- LA_LevelTableServer(
     "la_table",
     app_inputs,
     bds_metrics,
@@ -132,6 +132,10 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
+  # Export values for use in UI tests
+  shiny::exportTestValues(
+    la_main_tbl = la_main_tbl()
+  )
 
   # Stop app ------------------------------------------------------------------
   session$onSessionEnded(function() {
