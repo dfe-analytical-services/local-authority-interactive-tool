@@ -1,3 +1,13 @@
+# -----------------------------------------------------------------------------
+# This is an example integration test file
+#
+# Integration tests in Shiny allow you to test the server.R reactivity without
+# needing to load a full app and interact with the UI.
+#
+# This makes integration tests faster to run than UI tests and makes them a
+# more efficient alternative if you don't need to interact with the UI to test
+# what you want to.
+
 # BDS_FilteredServer ----------------------------------------------------------
 test_that("1. BDS_FilteredServer correctly filters bds_metrics", {
   # Simulate the app_inputs object with reactive values
