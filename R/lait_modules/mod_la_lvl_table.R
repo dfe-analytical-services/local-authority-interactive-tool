@@ -5,6 +5,10 @@
 #
 #' Shiny Server Function for Filtering BDS Metrics
 #'
+#' @description
+#' This only filters for Topic and Indicatro so that it can be reused across
+#' pages where location filters my differ.
+#'
 #' @param id A unique ID that identifies the server function
 #' @param app_inputs A list of inputs from the Shiny app
 #' @param bds_metrics A data frame of BDS metrics
