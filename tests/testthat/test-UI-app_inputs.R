@@ -1,16 +1,26 @@
 # -----------------------------------------------------------------------------
-# This is an example integration test file
+# This is an example UI test file
+# It includes some tests that show how to check the elements in the template
+# have loaded correctly.
 #
-# Integration tests in Shiny allow you to test the server.R reactivity without
-# needing to load a full app and interact with the UI.
+# In this script we show a two more way to test the UI of the app
+# 1. create 'snapshots' of the state of the app (easiest to set up)
+# 2. exporting values from the app and using here (recommended long term)
 #
-# This makes integration tests faster to run than UI tests and makes them a
-# more efficient alternative if you don't need to interact with the UI to test
-# what you want to.
+# Snapshots form the basic for future test runs to check to see if the app has
+# changed at all, if it has it will fail and suggest you review the changes.
 #
-# These examples show some ways you can make use of integration tests.
+# Deciding what to check for in snapshots is a tricky balance, often it's best
+# to test running the app in the console, and then running app$get_values() to
+# see what values exist to check.
 #
-# Add more scripts and checks as appropriate for your app.
+# Exporting values allows you to make tests that don't care about data updates
+# or package updates or any other noise, and you can purely focus on what you
+# want to check. They take more effort to set up but are worth it in the long
+# run.
+#
+# You should adapt this script, and create additional scripts as necessary to
+# match the needs for your app.
 # -----------------------------------------------------------------------------
 
 # Load global
@@ -29,6 +39,8 @@ minimal_server <- function(input, output, session) {
 minimal_app <- shinyApp(minimal_ui, minimal_server)
 
 shinytest_app <- shinytest2::AppDriver$new(minimal_app)
+
+shinytest_app$expect_values()
 
 test_that("Deafult inputs", {
   # LA
@@ -51,6 +63,7 @@ test_that("Deafult inputs", {
 })
 
 test_that("Change in topic input leads to a change in indicator input", {
+  # Set Topic input to Economic Factors
   shinytest_app$set_inputs(`la_level-topic_name` = "Economic Factors")
 
   # Top of the Economic Factors indicators
