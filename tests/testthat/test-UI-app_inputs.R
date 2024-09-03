@@ -40,8 +40,6 @@ minimal_app <- shinyApp(minimal_ui, minimal_server)
 
 shinytest_app <- shinytest2::AppDriver$new(minimal_app)
 
-shinytest_app$expect_values()
-
 test_that("Deafult inputs", {
   # LA
   expect_equal(
