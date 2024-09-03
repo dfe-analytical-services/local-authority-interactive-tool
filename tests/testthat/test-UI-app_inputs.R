@@ -38,7 +38,12 @@ minimal_server <- function(input, output, session) {
 
 minimal_app <- shinyApp(minimal_ui, minimal_server)
 
-shinytest_app <- shinytest2::AppDriver$new(minimal_app)
+shinytest_app <- shinytest2::AppDriver$new(
+  minimal_app,
+  load_timeout = 45 * 1000,
+  timeout = 20 * 1000,
+  wait = TRUE
+)
 
 test_that("Deafult inputs", {
   # LA
