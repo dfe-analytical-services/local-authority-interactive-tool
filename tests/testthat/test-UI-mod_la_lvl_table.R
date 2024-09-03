@@ -106,3 +106,17 @@ testthat::test_that("There are 4 rows in the LA main table", {
 })
 
 shinytest_app$stop()
+
+
+# Testing LA charts - made using shinytest2::record_test()
+test_that("{shinytest2} recording: local-authority-interactive-tool", {
+  app <- AppDriver$new(
+    name = "local-authority-interactive-tool",
+    height = 1059,
+    width = 1461
+  )
+  app$expect_values(output = "la_chart-line_chart")
+  app$set_inputs(la_charts = "Bar chart")
+  app$set_window_size(width = 1461, height = 1059)
+  app$expect_values(output = "la_chart-bar_chart")
+})
