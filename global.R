@@ -322,3 +322,7 @@ metric_topics <- pull_uniques(metrics_clean, "Topic")
 
 # Metric names
 metric_names <- pull_uniques(metrics_clean, "Measure")
+
+
+# Successful load of global.R message
+cat(crayon::green("global.R successfully loaded!"))
