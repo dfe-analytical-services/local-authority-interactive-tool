@@ -186,13 +186,15 @@ create_stats_table <- function(
     quartile,
     quartile_bands,
     indicator_polarity) {
-  if (any(is.na(c(selected_la, main_table$`LA Number`, quartile_bands)))) {
+  la_number <- main_table |>
+    filter_la_regions(selected_la, pull_col = "LA Number")
+
+  if (any(is.na(c(selected_la, la_number, quartile_bands)))) {
     warning("Suprise NA value in stats table")
   }
 
   data.frame(
-    "LA Number" = main_table |>
-      filter_la_regions(selected_la, pull_col = "LA Number"),
+    "LA Number" = la_number,
     "LA and Regions" = selected_la,
     "Trend" = trend,
     "Change from previous year" = change_since_prev,
