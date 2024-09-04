@@ -172,12 +172,12 @@ get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
   }
 
   # Filter the polarity_colours based on the given conditions
-  matching_colour <- polarity_colours %>%
+  matching_colour <- polarity_colours |>
     dplyr::filter(
       (is.na(polarity) & is.na(table_stats$Polarity)) |
         (polarity == table_stats$Polarity),
       quartile_band == table_stats$`Quartile Banding`
-    ) %>%
+    ) |>
     dplyr::pull(cell_colour)
 
   return(matching_colour)
