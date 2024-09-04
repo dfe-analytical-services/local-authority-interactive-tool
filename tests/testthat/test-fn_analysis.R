@@ -254,9 +254,9 @@ test_that("3. get_quartile_band_cell_colour returns empty vector and a warning w
   expect_warning(
     expect_equal(
       get_quartile_band_cell_colour(polarity_colours, table_stats_no_match),
-      character(0)
+      NULL
     ),
-    "Unexpected polarity value"
+    "Unexpected polarity value: Unknown"
   )
 })
 
@@ -270,9 +270,9 @@ test_that("4. get_quartile_band_cell_colour returns empty vector with warning wh
   expect_warning(
     expect_equal(
       get_quartile_band_cell_colour(polarity_colours, table_stats_no_match),
-      character(0)
+      NULL
     ),
-    "Unexpected Quartile Banding"
+    "Unexpected Quartile Banding: F"
   )
 })
 

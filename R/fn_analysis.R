@@ -156,22 +156,33 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
 #' to the given polarity and quartile band.
 #'
 get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
-  if (table_stats$Polarity %notin% c("High", "Low", "-", NA)) {
-    warning("Unexpected polarity value")
+  # Check for valid polarity values
+  valid_polarities <- c("High", "Low", "-", NA)
+  valid_quartiles <- c("A", "B", "C", "D", "Error", NA_character_)
+
+  if (!table_stats$Polarity %in% valid_polarities) {
+    warning("Unexpected polarity value: ", table_stats$Polarity)
+    return(NULL)
   }
 
-  if (table_stats$`Quartile Banding` %notin% c("A", "B", "C", "D")) {
-    warning("Unexpected Quartile Banding")
+  if (!table_stats$`Quartile Banding` %in% valid_quartiles &
+    table_stats$Polarity %in% valid_polarities) {
+    warning("Unexpected Quartile Banding: ", table_stats$`Quartile Banding`)
+    return(NULL)
   }
 
-  polarity_colours |>
+  # Filter the polarity_colours based on the given conditions
+  matching_colour <- polarity_colours %>%
     dplyr::filter(
       (is.na(polarity) & is.na(table_stats$Polarity)) |
         (polarity == table_stats$Polarity),
       quartile_band == table_stats$`Quartile Banding`
-    ) |>
+    ) %>%
     dplyr::pull(cell_colour)
+
+  return(matching_colour)
 }
+
 
 
 #' Calculate Rank Based on Numeric Values
