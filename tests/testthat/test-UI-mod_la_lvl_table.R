@@ -1,3 +1,5 @@
+# nolint start: commented_code
+
 # # 1. Uses root app for setup --------------------------------------------------
 # # Load global
 # source(here::here("global.R"))
@@ -51,7 +53,6 @@ testthat::test_that("There are 4 rows in the LA main table", {
 
   shinytest_app$stop()
 })
-
 
 
 # ### 3. Uses minimal test-app in-file for setup  -------------------------------
@@ -109,6 +110,8 @@ testthat::test_that("There are 4 rows in the LA main table", {
 # })
 #
 # shinytest_app$stop()
+
+# nolint end
 
 
 # Testing LA charts - made using shinytest2::record_test()

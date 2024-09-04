@@ -165,7 +165,7 @@ get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
     return(NULL)
   }
 
-  if (!table_stats$`Quartile Banding` %in% valid_quartiles &
+  if (!table_stats$`Quartile Banding` %in% valid_quartiles &&
     table_stats$Polarity %in% valid_polarities) {
     warning("Unexpected Quartile Banding: ", table_stats$`Quartile Banding`)
     return(NULL)
