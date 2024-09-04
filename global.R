@@ -68,8 +68,8 @@ lapply(list.files(here::here("R/ui_panels/"), full.names = TRUE), source)
 
 site_title <- "Local Authority Interactive Tool (LAIT)" # name of app
 parent_pub_name <- "LAIT publication" # name of source publication
-parent_publication <- # link to source publication
-  "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait"
+# link to source publication
+parent_publication <- "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait"
 
 # Set the URLs that the site will be published to
 site_primary <- "https://department-for-education.shinyapps.io/local-authority-interactive-tool/"

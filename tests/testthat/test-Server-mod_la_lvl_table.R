@@ -99,8 +99,6 @@ test_that("1. LA_LevelMetaServer correctly displays hyperlink", {
     # Get the source output
     source_output <- output$source
 
-    print(source_output)
-
     # Test that the output is a link
     expect_true(grepl("<a", source_output$html))
     expect_true(grepl("http", source_output$html))
