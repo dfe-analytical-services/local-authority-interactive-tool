@@ -26,7 +26,7 @@ la_sns <- filtered_sn |>
 la_region <- filtered_sn |>
   pull_uniques("GOReg")
 
-# Then for the respective National indicator (all schools or State funded)
+# Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic == selected_topic,
@@ -90,7 +90,7 @@ la_table <- la_long |>
 
 
 
-# - Local Authority specific stats table ---
+# - Local Authority specific stats table --------------------------------------
 
 # Extract change from prev year (from LA table)
 la_change_prev <- la_table |>
@@ -186,7 +186,7 @@ dfe_reactable(
 
 
 
-# LA line chart plot ----------------------------------
+# LA line chart plot ----------------------------------------------------------
 # Plot
 la_line_chart <- la_long |>
   ggplot2::ggplot() +
@@ -234,7 +234,7 @@ ggiraph::girafe(
 )
 
 
-# LA bar plot ----------------------------------
+# LA bar plot -----------------------------------------------------------------
 # Plot
 la_bar_chart <- la_long |>
   ggplot2::ggplot() +
@@ -269,7 +269,7 @@ ggiraph::girafe(
 
 
 
-# LA Metadata ----------------------------------
+# LA Metadata -----------------------------------------------------------------
 
 # Description
 metrics_clean |>
