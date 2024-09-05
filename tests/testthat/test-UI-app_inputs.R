@@ -24,7 +24,7 @@
 # -----------------------------------------------------------------------------
 
 # Load global
-source(here::here("global.R"))
+mute_cat(source(here::here("global.R")))
 
 # Create minimal app
 minimal_ui <- shiny::fluidRow(

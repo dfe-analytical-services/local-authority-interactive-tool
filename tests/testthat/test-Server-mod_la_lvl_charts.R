@@ -1,5 +1,5 @@
 testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct title", {
-  source(here::here("global.R"))
+  mute_cat(source(here::here("global.R")))
 
   # Mocking app_inputs and other required data
   app_inputs <- shiny::reactiveValues(

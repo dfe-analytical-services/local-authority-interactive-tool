@@ -300,3 +300,9 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output
   }
 }
+
+
+
+mute_cat <- function(input) {
+  spsUtil::quiet(input, print_cat = TRUE, warning = FALSE, message = FALSE)
+}
