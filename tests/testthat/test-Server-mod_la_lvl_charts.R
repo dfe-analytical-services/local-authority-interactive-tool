@@ -1,4 +1,6 @@
-testthat::test_that("LA_LineChartServer creates a line chart with correct data", {
+testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct title", {
+  source(here::here("global.R"))
+
   # Mocking app_inputs and other required data
   app_inputs <- shiny::reactiveValues(
     la = reactive({
@@ -27,7 +29,6 @@ testthat::test_that("LA_LineChartServer creates a line chart with correct data",
     plot_data <- output$line_chart
     plot_data_list <- jsonlite::fromJSON(plot_data)
 
-    # Find chart title?
     # Check title
     testthat::expect_true(
       grepl("Percentage of children in low income families", plot_data_list$x$html)
