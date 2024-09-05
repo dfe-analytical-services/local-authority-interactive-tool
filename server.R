@@ -91,7 +91,7 @@ server <- function(input, output, session) {
 
   # LA level tables ===========================================================
   # Main table
-  LA_LevelTableServer(
+  la_main_tbl <- LA_LevelTableServer(
     "la_table",
     app_inputs,
     bds_metrics,
@@ -109,7 +109,7 @@ server <- function(input, output, session) {
 
   # LA level charts ===========================================================
   # Line chart
-  LA_LineChartServer(
+  la_linechart <- LA_LineChartServer(
     "la_chart",
     app_inputs,
     bds_metrics,
@@ -117,7 +117,7 @@ server <- function(input, output, session) {
   )
 
   # Bar chart
-  LA_BarChartServer(
+  la_barchart <- LA_BarChartServer(
     "la_chart",
     app_inputs,
     bds_metrics,
@@ -132,6 +132,12 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
+  # Export values for use in UI tests
+  shiny::exportTestValues(
+    la_main_tbl = la_main_tbl(),
+    la_linechart = la_linechart(),
+    la_barchart = la_barchart()
+  )
 
   # Stop app ------------------------------------------------------------------
   session$onSessionEnded(function() {

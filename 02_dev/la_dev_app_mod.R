@@ -16,7 +16,7 @@ list.files("R/lait_modules/", full.names = TRUE) |>
 # UI
 ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
-  shiny::includeCSS(here::here("www/dfe_shiny_gov_styles.css")),
+  shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
   # Tab header ================================================================
   h1("Local Authority View"),

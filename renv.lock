@@ -1898,6 +1898,25 @@
       ],
       "Hash": "5f5a7629f956619d519205ec475fe647"
     },
+    "spsUtil": {
+      "Package": "spsUtil",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "R6",
+        "assertthat",
+        "crayon",
+        "glue",
+        "httr",
+        "magrittr",
+        "stats",
+        "stringr",
+        "utils"
+      ],
+      "Hash": "7e8e061a4b2dc1f29a88c1be075b6836"
+    },
     "stringi": {
       "Package": "stringi",
       "Version": "1.8.4",

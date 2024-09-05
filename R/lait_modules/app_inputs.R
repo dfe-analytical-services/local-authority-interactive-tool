@@ -58,11 +58,11 @@ appInputsServer <- function(id) {
       # Get indicator choices for selected topic
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(
-          Topic == input$topic_name
+          .data$Topic == input$topic_name
         ) |>
         pull_uniques("Measure")
 
-      # Not used: Using the server to power to the dropdown for increased speed
+      # Using the server to power to the dropdown for speed (not used currently)
       updateSelectInput(
         session = session,
         inputId = "indicator_name",
@@ -72,7 +72,7 @@ appInputsServer <- function(id) {
     })
 
     # Input outputs
-    list(
+    app_settings <- list(
       la = reactive({
         input$la_name
       }),
@@ -83,6 +83,8 @@ appInputsServer <- function(id) {
         input$indicator_name
       })
     )
+
+    app_settings
   })
 }
 

@@ -300,3 +300,32 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output
   }
 }
+
+
+#' Mute Warnings and Messages, but Allow cat Output
+#'
+#' This function uses `spsUtil::quiet` to suppress warnings and messages
+#' while still allowing printed `cat` output to appear.
+#'
+#' @param input A function or code block to be executed where warnings
+#' and messages are suppressed, but `cat` outputs are allowed.
+#'
+#' @return The result of the executed function or expression.
+#'
+#' @details This is a wrapper around the `spsUtil::quiet` function, with
+#'   predefined parameters to mute warnings and messages while allowing
+#'   `cat` output to be displayed.
+#'
+#' @examples
+#' \dontrun{
+#' mute_cat({
+#'   cat("This will be printed\n")
+#'   message("This message will be suppressed")
+#'   warning("This warning will be suppressed")
+#' })
+#' }
+#'
+#' @export
+mute_cat <- function(input) {
+  spsUtil::quiet(input, print_cat = TRUE, warning = FALSE, message = FALSE)
+}

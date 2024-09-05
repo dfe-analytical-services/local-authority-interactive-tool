@@ -122,6 +122,11 @@ test_that("10. Invalid icon in value_box", {
   )
 })
 
+testthat::test_that("11. Value box function errors when no value is given", {
+  # Expect an error if no value argument is given to value_box() function
+  testthat::expect_error(value_box())
+})
+
 
 # validate_color() ------------------------------------------------------------
 test_that("1. validate_color with valid colors", {
@@ -149,13 +154,19 @@ test_that("4. validate_color with NULL", {
   )
 })
 
+
 # set_css_style_sheet() -------------------------------------------------------
-# Can't be tested
 test_that("1. set_css_style_sheet deals with non css files", {
   expect_error(
     set_css_style_sheet("wrong_file"),
     "This doesn't look like a css file"
   )
+})
+
+testthat::test_that("2. Check set_css_style_sheet creates a shiny.tag", {
+  result <- set_css_style_sheet("styles.css")
+
+  expect_equal(class(result), "shiny.tag")
 })
 
 
