@@ -122,7 +122,8 @@ test_that("Check LA charts behave as expected", {
     width = 1461,
     load_timeout = 45 * 1000,
     timeout = 20 * 1000,
-    wait = TRUE
+    wait = TRUE,
+    variant = platform_variant()
   )
 
   # Get export values
@@ -150,8 +151,17 @@ test_that("Check LA charts behave as expected", {
     grepl("Infant Mortality - Rate per 1000 live births", la_linechart_list$x$html)
   )
 
+  # Check visual of line chart
+  app$expect_screenshot(
+    selector = "#la_chart-line_chart",
+    name = "la_line_chart"
+  )
+
   # Change to different topic
-  app$set_inputs(`la_level-topic_name` = "Key Stage 1")
+  app$set_inputs(
+    `la_level-topic_name` = "Key Stage 1",
+    la_charts = "Bar chart"
+  )
 
   # Get export values
   la_barchart <- app$get_values(export = c("la_barchart"))
@@ -179,6 +189,12 @@ test_that("Check LA charts behave as expected", {
       "Key Stage 1 Reading Expected Standard - % achieving expected level",
       la_barchart_list$x$html
     )
+  )
+
+  # Check visual of bar chart
+  app$expect_screenshot(
+    selector = "#la_chart-bar_chart",
+    name = "la_bar_chart"
   )
 
   app$stop()
