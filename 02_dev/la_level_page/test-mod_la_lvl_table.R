@@ -62,12 +62,6 @@
 #'       la_region <- filtered_sn |>
 #'         pull_uniques("GOReg")
 #'
-#'       # List of areas being compared
-#'       la_comparison <- c(
-#'         app_inputs$la(), la_region,
-#'         "Statistical Neighbours", "England"
-#'       )
-#'
 #'       # Get national term
 #'       la_national <- filtered_bds() |>
 #'         dplyr::filter(.data$`LA and Regions` %in% national_names_bds &

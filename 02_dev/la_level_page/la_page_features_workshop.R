@@ -26,10 +26,6 @@ la_sns <- filtered_sn |>
 la_region <- filtered_sn |>
   pull_uniques("GOReg")
 
-# List of areas being compared
-la_comparison <- c(selected_la, la_region, "Statistical Neighbours", "England")
-
-
 # Then for the respective National indicator (all schools or State funded)
 filtered_bds <- bds_metrics |>
   dplyr::filter(

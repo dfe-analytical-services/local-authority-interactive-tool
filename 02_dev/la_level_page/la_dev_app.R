@@ -169,9 +169,6 @@ server_dev <- function(input, output, session) {
     la_region <- filtered_sn |>
       pull_uniques("GOReg")
 
-    # List of areas being compared
-    la_comparison <- c(input$la_input, la_region, "Statistical Neighbours", "England")
-
     # Get national term
     la_national <- filtered_bds$data |>
       dplyr::filter(
