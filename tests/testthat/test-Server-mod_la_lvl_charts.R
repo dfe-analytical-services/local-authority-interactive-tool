@@ -1,3 +1,4 @@
+# LA_LineChartServer() --------------------------------------------------------
 testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct title", {
   mute_cat(source(here::here("global.R")))
 
@@ -37,6 +38,7 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
 })
 
 
+# LA_BarChartServer() ---------------------------------------------------------
 testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct title", {
   mute_cat(source(here::here("global.R")))
 
@@ -70,7 +72,10 @@ testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct 
 
     # Check title
     testthat::expect_true(
-      grepl("Newly issued statements and plans in LA maintained mainstream schools - % statements/plans", plot_data_list$x$html)
+      grepl(
+        "Newly issued statements and plans in LA maintained mainstream schools - % statements/plans",
+        plot_data_list$x$html
+      )
     )
   })
 })

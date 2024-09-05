@@ -1,4 +1,4 @@
-# calculate_change_from_prev_yr -----------------------------------------------
+# calculate_change_from_prev_yr() ---------------------------------------------
 # Sample data frame for testing
 data_change <- data.frame(
   `LA and Regions` = c(rep("Region1", 3), rep("Region2", 3)),
@@ -72,7 +72,7 @@ test_that("6. calculate_change_from_prev_yr processes multiple LAs and Regions c
 
 
 
-# calculate_trend -------------------------------------------------------------
+# calculate_trend() -----------------------------------------------------------
 # Test 1: Positive values
 test_that("1. calculate_trend returns 'Increase' for positive values", {
   positive_change <- c(5)
@@ -120,7 +120,7 @@ test_that("6. calculate_trend returns a warning for multiple values and no trend
 })
 
 
-# calculate_quartile_band -----------------------------------------------------
+# calculate_quartile_band() ---------------------------------------------------
 # Define quartile bands for testing
 quartile_bands <- c(
   "0%" = 0,
@@ -196,7 +196,7 @@ test_that("6. calculate_quartile_band returns an empty vector for an empty input
 })
 
 
-# get_quartile_band_cell_colour -----------------------------------------------
+# get_quartile_band_cell_colour() ---------------------------------------------
 # Sample data for table_stats
 table_stats <- data.frame(
   Polarity = c("Low", "High", NA, "-", "Low"),
@@ -291,7 +291,7 @@ test_that("5. get_quartile_band_cell_colour handles NA values in polarity_colour
 })
 
 
-# calculate_rank --------------------------------------------------------------
+# calculate_rank() ------------------------------------------------------------
 # 1. Test with normal ranking
 test_that("1. calculate_rank assigns correct ranks for normal values", {
   df_normal <- data.frame(

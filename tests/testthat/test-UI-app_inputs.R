@@ -23,6 +23,7 @@
 # match the needs for your app.
 # -----------------------------------------------------------------------------
 
+# appInputsServer() -----------------------------------------------------------
 # Load global
 mute_cat(source(here::here("global.R")))
 

@@ -1,4 +1,4 @@
-# LA_LevelMetaServer ----------------------------------------------------------
+# LA_LevelMetaServer() --------------------------------------------------------
 test_that("1. LA_LevelMetaServer correctly displays hyperlink", {
   # Simulate the app_inputs object with reactive values
   indicator_input <- shiny::reactive({
@@ -14,3 +14,6 @@ test_that("1. LA_LevelMetaServer correctly displays hyperlink", {
     expect_true(grepl("http", source_output$html))
   })
 })
+
+
+# MetadataServer() ------------------------------------------------------------
