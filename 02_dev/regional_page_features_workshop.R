@@ -16,6 +16,13 @@ selected_topic <- "Health and Wellbeing"
 selected_indicator <- "Low birth weight"
 selected_la <- "Barking and Dagenham"
 
+# Filter BDS for topic and indicator
+filtered_bds <- bds_metrics |>
+  dplyr::filter(
+    Topic == selected_topic,
+    Measure == selected_indicator
+  )
+
 # Get the LA region
 region_la <- stat_n_geog |>
   dplyr::filter(`LA Name` == selected_la) |>
@@ -25,14 +32,6 @@ region_la <- stat_n_geog |>
 region_la_la <- stat_n_geog |>
   dplyr::filter(GOReg == region_la) |>
   pull_uniques("LA Name")
-
-
-# Filter BDS for topic and indicator
-filtered_bds <- bds_metrics |>
-  dplyr::filter(
-    Topic == selected_topic,
-    Measure == selected_indicator
-  )
 
 # Then filter for selected LA and regional LAs
 region_la_filtered_bds <- filtered_bds |>
@@ -131,6 +130,21 @@ region_table <- region_long |>
 
 
 # Regional Level Stats table --------------------------------------------------
+# Determines which London to use
+# Some indicators are not provided at (Inner)/ (Outer) level
+region_la_ldn_clean <- if (grepl("^London", region_la)) {
+  ldn_values <- filtered_bds |>
+    dplyr::filter(`LA and Regions` == region_la) |>
+    dplyr::pull(values_num)
+
+  if (all(is.na(ldn_values))) {
+    "London"
+  }
+} else {
+  region_la
+}
+
+
 # Get LA numbers
 # Selected LA
 region_la_la_num <- region_la_table |>
@@ -138,7 +152,7 @@ region_la_la_num <- region_la_table |>
 
 # Region and England
 region_la_num <- region_table |>
-  filter_la_regions(c(region_la, region_national), pull_col = "LA Number")
+  filter_la_regions(c(region_la_ldn_clean, region_national), pull_col = "LA Number")
 
 # Get change in previous year
 # Selected LA
@@ -150,14 +164,14 @@ region_la_change_prev <- region_la_table |>
 
 # Region and England
 region_change_prev <- region_table |>
-  filter_la_regions(c(region_la, region_national),
+  filter_la_regions(c(region_la_ldn_clean, region_national),
     latest = FALSE,
     pull_col = "Change from previous year"
   )
 
 # Creating the stats table cols
 region_stats_la_num <- c(region_la_la_num, region_la_num)
-region_stats_name <- c(selected_la, region_la, region_national)
+region_stats_name <- c(selected_la, region_la_ldn_clean, region_national)
 region_stats_change <- c(region_la_change_prev, region_change_prev)
 
 # Creating the trend descriptions
@@ -174,4 +188,149 @@ region_stats_table <- data.frame(
   "LA and Regions" = region_stats_name,
   "Trend" = region_trend,
   "Change from previous year" = region_stats_change
+)
+
+
+# Region line chart plot ----------------------------------------------------------
+# Filter any regions with all NA values and England
+region_long_plot <- region_long |>
+  dplyr::group_by(`LA and Regions`) |>
+  dplyr::filter(
+    dplyr::n() == sum(!is.na(values_num)),
+    `LA and Regions` %notin% national_names_bds
+  ) |>
+  # Set selected region to last level so appears at front of plot
+  dplyr::mutate(`LA and Regions` = forcats::fct_relevel(`LA and Regions`, region_la_ldn_clean, after = Inf))
+
+# Plot - selected Regions
+region_line_chart <- region_long_plot |>
+  ggplot2::ggplot() +
+  ggiraph::geom_point_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      color = `LA and Regions`,
+      shape = `LA and Regions`,
+      data_id = `LA and Regions`
+    ),
+    na.rm = TRUE
+  ) +
+  ggiraph::geom_line_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      color = `LA and Regions`,
+      data_id = `LA and Regions`
+    ),
+    na.rm = TRUE
+  ) +
+  format_axes(region_long_plot) +
+  # set_plot_colours(region_long_plot) +
+  set_plot_labs(filtered_bds, selected_indicator) +
+  custom_theme()
+
+
+# Creating vertical geoms to make vertical hover tooltip
+vertical_hover <- lapply(
+  get_years(region_long_plot),
+  tooltip_vlines,
+  region_long_plot
+)
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = (region_line_chart + vertical_hover),
+  width_svg = 8,
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  )
+)
+
+# Focus plot
+region_line_chart <- region_long_plot |>
+  ggplot2::ggplot() +
+  ggiraph::geom_line_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      color = `LA and Regions`
+      # data_id = `LA and Regions`,
+    ),
+    na.rm = TRUE
+  ) +
+  format_axes(region_long_plot) +
+  set_plot_colours(region_long_plot, colour_type = "focus", focus_group = region_la_ldn_clean) +
+  set_plot_labs(filtered_bds, selected_indicator) +
+  ggrepel::geom_text_repel(
+    data = subset(region_long_plot, Years == current_year),
+    aes(
+      x = Years_num,
+      y = values_num,
+      label = `LA and Regions`
+    ),
+    color = "black",
+    nudge_x = 1.1,
+    direction = "y",
+    vjust = .5,
+    hjust = 0,
+    show.legend = FALSE
+  ) +
+  custom_theme() +
+  coord_cartesian(clip = "off") +
+  theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+  guides(color = "none")
+
+
+# Creating vertical geoms to make vertical hover tooltip
+vertical_hover <- lapply(
+  get_years(region_long_plot),
+  tooltip_vlines,
+  region_long_plot
+)
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = (region_line_chart + vertical_hover),
+  width_svg = 8,
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  )
+)
+
+
+# Region bar plot -----------------------------------------------------------------
+# Plot
+la_bar_chart <- region_long_plot |>
+  ggplot2::ggplot() +
+  ggiraph::geom_col_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      fill = `LA and Regions`,
+      tooltip = glue::glue_data(
+        region_long_plot |>
+          pretty_num_table(include_columns = "values_num", dp = 1),
+        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      ),
+      data_id = `LA and Regions`
+    ),
+    position = "dodge",
+    width = 0.6,
+    na.rm = TRUE,
+    colour = "black"
+  ) +
+  format_axes(region_long_plot) +
+  # set_plot_colours(region_long_plot, "fill") +
+  set_plot_labs(filtered_bds, selected_indicator) +
+  custom_theme()
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = la_bar_chart,
+  width_svg = 8,
+  options = generic_ggiraph_options()
 )
