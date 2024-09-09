@@ -426,10 +426,7 @@ generic_ggiraph_options <- function(...) {
     ggiraph::opts_toolbar(
       position = "topright",
       pngname = "lait-png-download",
-      tooltips = list(
-        saveaspng = "Download as .png"
-      ),
-      hidden = c("selection", "zoom")
+      hidden = c("selection", "zoom", "misc")
     ),
     ...
   )
