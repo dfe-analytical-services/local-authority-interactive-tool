@@ -19,7 +19,7 @@
 #
 # -----------------------------------------------------------------------------
 ui <- function(input, output, session) {
-  shiny::fluidPage(
+  bslib::page_fillable(
 
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
@@ -91,13 +91,13 @@ ui <- function(input, output, session) {
     # Start of app ============================================================
 
     # Nav panels --------------------------------------------------------------
-    shiny::navlistPanel(
+    bslib::navset_pill_list(
       "",
-      id = "navlistPanel",
+      id = "navsetpillslist",
       widths = c(2, 8),
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
-      shiny::tabPanel(
+      bslib::nav_panel(
         title = "Local Authority View",
 
         # Tab header ==============================================================
