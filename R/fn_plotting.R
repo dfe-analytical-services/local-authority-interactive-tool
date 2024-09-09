@@ -311,6 +311,7 @@ custom_theme <- function() {
     ggplot2::theme_minimal(),
     ggplot2::theme(
       plot.title = element_text(hjust = 0.5),
+      axis.title.y = element_text(angle = 0, vjust = 0.5),
       legend.position = "bottom",
       panel.grid.minor.x = element_blank()
     )
