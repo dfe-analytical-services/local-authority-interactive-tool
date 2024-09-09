@@ -331,7 +331,26 @@ mute_cat <- function(input) {
 }
 
 
-
+#' Determine Appropriate London Region
+#'
+#' This function determines which London region to use for reporting.
+#' Some indicators may not be provided at the Inner or Outer London level,
+#' so the function defaults to "London" if no data is available for a
+#' specific region.
+#'
+#' @param region A character string representing the region
+#' (e.g., "London", "London (Inner)", or "London (Outer)").
+#' @param filtered_bds A data frame containing the filtered dataset with
+#' region-specific values.
+#'
+#' @return A character string indicating either the input `region` or "London"
+#' if all values for the input region are missing (`NA`).
+#'
+#' @examples
+#' # Example usage:
+#' determine_london_region("London (Inner)", filtered_bds)
+#'
+#' @export
 determine_london_region <- function(region, filtered_bds) {
   # Return early if the region doesn't start with "London"
   if (!grepl("^London", region)) {
