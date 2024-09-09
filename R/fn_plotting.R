@@ -69,6 +69,23 @@ create_plot_colours <- function(data_long) {
 }
 
 
+create_focus_plot_colours <- function(data_long, focus_group) {
+  # Colours
+  plot_groups <- region_long |>
+    pull_uniques("LA and Regions")
+
+  plot_colours <- rep(
+    afcolours::af_colours(type = "focus")[2],
+    length(plot_groups)
+  )
+  names(plot_colours) <- plot_groups
+
+  plot_colours[focus_group] <- afcolours::af_colours(type = "focus")[1]
+
+  plot_colours
+}
+
+
 #' @title Calculate Y-Axis Range
 #' @description This function calculates the range of the 'values_num'
 #' column in the provided dataset.
@@ -222,13 +239,14 @@ format_axes <- function(data_long) {
 #' ensuring that each group in the data is assigned its corresponding color.
 #'
 set_plot_colours <- function(data_long,
-                             colour_type = "colour") {
-  colour_params <- create_plot_colours(data_long)
-
+                             colour_type = "colour",
+                             focus_group = NULL) {
   if (colour_type == "colour") {
-    ggplot2::scale_colour_manual(values = colour_params)
+    ggplot2::scale_colour_manual(values = create_plot_colours(data_long))
   } else if (colour_type == "fill") {
-    ggplot2::scale_fill_manual(values = colour_params)
+    ggplot2::scale_fill_manual(values = create_plot_colours(data_long))
+  } else if (colour_type == "focus") {
+    ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group))
   }
 }
 
