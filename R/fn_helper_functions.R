@@ -329,3 +329,24 @@ get_metadata <- function(data, input_indicator, metadata) {
 mute_cat <- function(input) {
   spsUtil::quiet(input, print_cat = TRUE, warning = FALSE, message = FALSE)
 }
+
+
+
+determine_london_region <- function(region, filtered_bds) {
+  # Return early if the region doesn't start with "London"
+  if (!grepl("^London", region)) {
+    return(region)
+  }
+
+  # Extract values for the given region
+  ldn_values <- filtered_bds |>
+    dplyr::filter(`LA and Regions` == region) |>
+    dplyr::pull(values_num)
+
+  # Return "London" if all values are NA, otherwise return the original region
+  if (all(is.na(ldn_values))) {
+    return("London")
+  } else {
+    return(region)
+  }
+}
