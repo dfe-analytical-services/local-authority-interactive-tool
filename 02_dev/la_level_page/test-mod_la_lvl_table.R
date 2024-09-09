@@ -194,7 +194,7 @@
 #'         )
 #'       ),
 #'       bslib::card(
-#'         bslib::card_header("Quatile bands"),
+#'         bslib::card_header("Quartile bands"),
 #'         bslib::card_body(
 #'           reactable::reactableOutput(ns("la_quartiles"))
 #'         )
