@@ -116,14 +116,14 @@ testthat::test_that("There are 4 rows in the LA main table", {
 
 # Testing LA charts - made using shinytest2::record_test()
 test_that("Check LA charts behave as expected", {
-  app <- AppDriver$new(
+  app <- shinytest2::AppDriver$new(
     name = "la-charts",
     height = 1059,
     width = 1461,
     load_timeout = 45 * 1000,
     timeout = 20 * 1000,
     wait = TRUE,
-    variant = platform_variant()
+    variant = shinytest2::platform_variant()
   )
 
   # Get export values

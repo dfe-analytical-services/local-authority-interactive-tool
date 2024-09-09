@@ -346,7 +346,7 @@ test_that("2. get_metadata with numeric metadata (date conversion)", {
   )
 
   result <- get_metadata(data, "mpg", "Last Update")
-  expect_equal(result, "2021-12-31")
+  expect_equal(result, "December 2021")
 })
 
 test_that("3. get_metadata with metadata that shouldn't be converted to a date", {
