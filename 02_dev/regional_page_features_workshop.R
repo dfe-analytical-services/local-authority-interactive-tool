@@ -132,18 +132,7 @@ region_table <- region_long |>
 # Regional Level Stats table --------------------------------------------------
 # Determines which London to use
 # Some indicators are not provided at (Inner)/ (Outer) level
-region_la_ldn_clean <- if (grepl("^London", region_la)) {
-  ldn_values <- filtered_bds |>
-    dplyr::filter(`LA and Regions` == region_la) |>
-    dplyr::pull(values_num)
-
-  if (all(is.na(ldn_values))) {
-    "London"
-  }
-} else {
-  region_la
-}
-
+region_la_ldn_clean <- determine_london_region(region_la, filtered_bds)
 
 # Get LA numbers
 # Selected LA
