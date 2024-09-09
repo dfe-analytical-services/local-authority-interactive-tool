@@ -62,6 +62,12 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       la_region <- filtered_sn |>
         pull_uniques("GOReg")
 
+      # Determine London region to use
+      la_region_ldn_clean <- determine_london_region(
+        la_region,
+        filtered_bds()
+      )
+
       # Get national term
       la_national <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% national_names_bds &
@@ -72,7 +78,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       la_filtered_bds <- filtered_bds() |>
         dplyr::filter(
           `LA and Regions` %in% c(
-            app_inputs$la(), la_region,
+            app_inputs$la(), la_region_ldn_clean,
             la_sns, la_national
           )
         )
@@ -99,7 +105,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           `LA and Regions` = factor(
             `LA and Regions`,
             levels = c(
-              app_inputs$la(), la_region,
+              app_inputs$la(), la_region_ldn_clean,
               "Statistical Neighbours", la_national
             )
           ),

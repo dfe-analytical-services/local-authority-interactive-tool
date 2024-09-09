@@ -12,7 +12,7 @@ list.files("R/", full.names = TRUE) |>
 ui_dev <- bslib::page_fillable(
 
   ## Custom CSS =============================================================
-  shiny::includeCSS(here::here("www/dfe_shiny_gov_styles.css")),
+  shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
   # Tab header ==============================================================
   h1("Local Authority View"),
@@ -169,6 +169,12 @@ server_dev <- function(input, output, session) {
     la_region <- filtered_sn |>
       pull_uniques("GOReg")
 
+    # Determine London region to use
+    la_region_ldn_clean <- determine_london_region(
+      la_region,
+      filtered_bds$data
+    )
+
     # Get national term
     la_national <- filtered_bds$data |>
       dplyr::filter(
@@ -180,7 +186,7 @@ server_dev <- function(input, output, session) {
     # Then filter for selected LA, region, stat neighbours and relevant national
     la_filtered_bds <- filtered_bds$data |>
       dplyr::filter(
-        `LA and Regions` %in% c(input$la_input, la_region, la_sns, la_national)
+        `LA and Regions` %in% c(input$la_input, la_region_ldn_clean, la_sns, la_national)
       )
 
     # SN average
@@ -205,7 +211,7 @@ server_dev <- function(input, output, session) {
         `LA and Regions` = factor(
           `LA and Regions`,
           levels = c(
-            input$la_input, la_region,
+            input$la_input, la_region_ldn_clean,
             "Statistical Neighbours", la_national
           )
         ),

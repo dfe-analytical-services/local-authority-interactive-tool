@@ -33,8 +33,7 @@ filtered_bds <- bds_metrics |>
     Measure == selected_indicator
   )
 
-# Determines which London to use
-# Some indicators are not provided at (Inner)/ (Outer) level
+# Determine London region to use
 la_region_ldn_clean <- determine_london_region(la_region, filtered_bds)
 
 # Get national term
