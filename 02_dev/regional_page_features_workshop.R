@@ -244,8 +244,8 @@ region_line_chart <- region_long_plot |>
     ggplot2::aes(
       x = Years_num,
       y = values_num,
-      color = `LA and Regions`
-      # data_id = `LA and Regions`,
+      color = `LA and Regions`,
+      data_id = `LA and Regions`,
     ),
     na.rm = TRUE
   ) +
