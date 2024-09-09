@@ -197,6 +197,15 @@ testthat::test_that(
     )
   }
 )
+# Using waldo to do same as test
+waldo::compare(
+  x = bds_clean |>
+    dplyr::filter(`Short Desc` %notin% metrics_discontinued) |>
+    nrow() |>
+    as.numeric(),
+  y = (nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)) |>
+    as.numeric()
+)
 
 # PROOF 2: The unique values of Measure Short + Topic are the same
 testthat::test_that(
