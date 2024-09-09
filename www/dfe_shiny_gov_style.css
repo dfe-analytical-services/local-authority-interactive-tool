@@ -414,6 +414,7 @@ html {
 /* Extends bslib page height */
 .bslib-page-fill {
   height: auto;
+  padding: 0;
 }
 
 
