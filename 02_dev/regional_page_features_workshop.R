@@ -263,7 +263,7 @@ region_line_chart <- region_long_plot |>
   format_axes(region_long_plot) +
   set_plot_colours(region_long_plot, colour_type = "focus", focus_group = region_la_ldn_clean) +
   set_plot_labs(filtered_bds, selected_indicator) +
-  ggrepel::geom_text_repel(
+  ggrepel::geom_label_repel(
     data = subset(region_long_plot, Years == current_year),
     aes(
       x = Years_num,
@@ -271,10 +271,11 @@ region_line_chart <- region_long_plot |>
       label = `LA and Regions`
     ),
     color = "black",
-    nudge_x = 1.1,
+    segment.colour = NA,
+    nudge_x = 1.5,
     direction = "y",
     vjust = .5,
-    hjust = 0,
+    hjust = 1,
     show.legend = FALSE
   ) +
   custom_theme() +
@@ -293,7 +294,7 @@ vertical_hover <- lapply(
 # Plotting interactive graph
 ggiraph::girafe(
   ggobj = (region_line_chart + vertical_hover),
-  width_svg = 8,
+  width_svg = 12,
   options = generic_ggiraph_options(
     opts_hover(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
