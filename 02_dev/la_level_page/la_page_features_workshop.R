@@ -33,6 +33,10 @@ filtered_bds <- bds_metrics |>
     Measure == selected_indicator
   )
 
+# Determines which London to use
+# Some indicators are not provided at (Inner)/ (Outer) level
+la_region_ldn_clean <- determine_london_region(la_region, filtered_bds)
+
 # Get national term
 la_national <- filtered_bds |>
   dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
@@ -41,7 +45,7 @@ la_national <- filtered_bds |>
 # Then filter for selected LA, region, stat neighbours and relevant national
 la_filtered_bds <- filtered_bds |>
   dplyr::filter(
-    `LA and Regions` %in% c(selected_la, la_region, la_sns, la_national)
+    `LA and Regions` %in% c(selected_la, la_region_ldn_clean, la_sns, la_national)
   )
 
 # SN average
@@ -66,7 +70,7 @@ la_long <- la_filtered_bds |>
     `LA and Regions` = factor(
       `LA and Regions`,
       levels = c(
-        selected_la, la_region,
+        selected_la, la_region_ldn_clean,
         "Statistical Neighbours", la_national
       )
     ),
