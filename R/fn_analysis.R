@@ -156,17 +156,26 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
 #' to the given polarity and quartile band.
 #'
 get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
-  # Check for valid polarity values
-  valid_polarities <- c("High", "Low", "-", NA)
-  valid_quartiles <- c("A", "B", "C", "D", "Error", NA_character_)
+  all_polarities <- c("High", "Low", "-", NA)
+  valid_polarities <- c("High", "Low")
+  all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
+  valid_quartiles <- c("A", "B", "C", "D")
 
-  if (!table_stats$Polarity %in% valid_polarities) {
+  # Check if polarity is not unexpected value
+  if (!table_stats$Polarity %in% all_polarities) {
     warning("Unexpected polarity value: ", table_stats$Polarity)
     return(NULL)
   }
 
+  # Check if Quartile band is unexpected value
+  if (!table_stats$`Quartile Banding` %in% all_quartiles) {
+    warning("Unexpected Quartile Banding value: ", table_stats$`Quartile Banding`)
+    return(NULL)
+  }
+
+  # Check if Quartile Band is unexpected if polarity is valid
   if (!table_stats$`Quartile Banding` %in% valid_quartiles && table_stats$Polarity %in% valid_polarities) {
-    warning("Unexpected Quartile Banding: ", table_stats$`Quartile Banding`)
+    warning("Unexpected Quartile Banding (with valid polarity): ", table_stats$`Quartile Banding`)
     return(NULL)
   }
 
