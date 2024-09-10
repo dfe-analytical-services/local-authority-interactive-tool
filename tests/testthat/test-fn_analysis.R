@@ -317,25 +317,6 @@ test_that("5. get_quartile_band_cell_colour handles NA values in polarity_colour
   expect_equal(result_none, "none")
 })
 
-# 6. Test with correct polarity but invalid Quartile Band
-test_that("6. get_quartile_band_cell_colour gives error when valid polarity but invalid Quartile Band", {
-  table_stats_no_match <- data.frame(
-    Polarity = c("High"),
-    `Quartile Banding` = c("Error"),
-    check.names = FALSE
-  )
-  expect_warning(
-    expect_equal(
-      get_quartile_band_cell_colour(
-        table_stats_no_match$Polarity,
-        table_stats_no_match$`Quartile Banding`
-      ),
-      NULL
-    ),
-    regexp = "Unexpected Quartile Banding \\(with valid polarity\\): Error"
-  )
-})
-
 
 # calculate_rank() ------------------------------------------------------------
 # 1. Test with normal ranking

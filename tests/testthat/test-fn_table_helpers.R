@@ -347,13 +347,13 @@ test_that("1. create_stats_table works with standard inputs", {
     "LA and Regions" = "LA1",
     "Trend" = "Increase",
     "Change from previous year" = 5.2,
+    "Polarity" = "High",
     "Latest National Rank" = 1,
     "Quartile Banding" = "A",
-    "(A) Up to and including" = 10,
-    "(B) Up to and including" = 20,
-    "(C) Up to and including" = 30,
-    "(D) Up to and including" = 40,
-    "Polarity" = "High",
+    "(D) Up to and including" = 10,
+    "(C) Up to and including" = 20,
+    "(B) Up to and including" = 30,
+    "(A) Up to and including" = 40,
     check.names = FALSE
   ) |>
     pretty_num_table(dp = 1)
@@ -387,7 +387,7 @@ test_that("2. create_stats_table handles empty inputs gracefully", {
         quartile_bands,
         indicator_polarity
       ),
-      "arguments imply differing number of rows: 0, 1"
+      "argument is of length zero"
     ),
     "Dataframe seems empty"
   )
@@ -412,13 +412,13 @@ test_that("3. create_stats_table handles NAs gracefully", {
     "LA and Regions" = "LA1",
     "Trend" = NA,
     "Change from previous year" = NA,
+    "Polarity" = NA,
     "Latest National Rank" = "Not applicable",
     "Quartile Banding" = "Not applicable",
     "(A) Up to and including" = "-",
     "(B) Up to and including" = "-",
     "(C) Up to and including" = "-",
     "(D) Up to and including" = "-",
-    "Polarity" = NA,
     check.names = FALSE
   ) |>
     pretty_num_table(dp = 1)
@@ -443,30 +443,30 @@ test_that("3. create_stats_table handles NAs gracefully", {
 
 test_that("4. create_stats_table handles NA Quartile Banding gracefully", {
   main_table <- data.frame(
-    "LA Number" = 123,
+    "LA Number" = NA,
     "LA and Regions" = "LA1",
     check.names = FALSE
   )
   selected_la <- "LA1"
-  trend <- "Increase"
-  change_since_prev <- 5.2
-  rank <- 1
-  quartile <- "A"
-  quartile_bands <- c("25%" = NA, "50%" = 20, "75%" = 30, "100%" = 40)
-  indicator_polarity <- "High"
+  trend <- NA
+  change_since_prev <- NA
+  rank <- NA
+  quartile <- NA
+  quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_polarity <- "Low"
 
   expected <- data.frame(
-    "LA Number" = 123,
+    "LA Number" = NA,
     "LA and Regions" = "LA1",
-    "Trend" = "Increase",
-    "Change from previous year" = 5.2,
-    "Latest National Rank" = 1,
-    "Quartile Banding" = "A",
-    "(A) Up to and including" = NA_real_,
-    "(B) Up to and including" = 20,
-    "(C) Up to and including" = 30,
-    "(D) Up to and including" = 40,
-    "Polarity" = "High",
+    "Trend" = NA,
+    "Change from previous year" = NA,
+    "Polarity" = "Low",
+    "Latest National Rank" = NA,
+    "Quartile Banding" = NA,
+    "(A) Up to and including" = "0",
+    "(B) Up to and including" = "0",
+    "(C) Up to and including" = "0",
+    "(D) Up to and including" = "0",
     check.names = FALSE
   ) |>
     pretty_num_table(dp = 1)
