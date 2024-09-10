@@ -247,6 +247,8 @@ set_plot_colours <- function(data_long,
     ggplot2::scale_fill_manual(values = create_plot_colours(data_long))
   } else if (colour_type == "focus") {
     ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group))
+  } else if (colour_type == "focus-fill") {
+    ggplot2::scale_fill_manual(values = create_focus_plot_colours(data_long, focus_group))
   }
 }
 

@@ -191,15 +191,26 @@ region_long_plot <- region_long |>
   # Set selected region to last level so appears at front of plot
   dplyr::mutate(`LA and Regions` = forcats::fct_relevel(`LA and Regions`, region_la_ldn_clean, after = Inf))
 
+# Randomly select up to 6 Regions for plotting
+set.seed(123) # Set seed for reproducibility (optional)
+region_random_selection <- region_long_plot |>
+  pull_uniques("LA and Regions") |>
+  as.character() |>
+  sample(size = 5) # Select up to 6 randomly
+
+region_line_chart_data <- region_long_plot |>
+  # Filter for random Regions - simulate user choosing up to 6 regions
+  dplyr::filter(`LA and Regions` %in% region_random_selection |
+    `LA and Regions` %in% region_la_ldn_clean)
+
 # Plot - selected Regions
-region_line_chart <- region_long_plot |>
+region_line_chart <- region_line_chart_data |>
   ggplot2::ggplot() +
   ggiraph::geom_point_interactive(
     ggplot2::aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`,
-      shape = `LA and Regions`,
       data_id = `LA and Regions`
     ),
     na.rm = TRUE
@@ -213,17 +224,17 @@ region_line_chart <- region_long_plot |>
     ),
     na.rm = TRUE
   ) +
-  format_axes(region_long_plot) +
-  # set_plot_colours(region_long_plot) +
+  format_axes(region_line_chart_data) +
+  set_plot_colours(region_line_chart_data) +
   set_plot_labs(filtered_bds, selected_indicator) +
   custom_theme()
 
 
 # Creating vertical geoms to make vertical hover tooltip
 vertical_hover <- lapply(
-  get_years(region_long_plot),
+  get_years(region_line_chart_data),
   tooltip_vlines,
-  region_long_plot
+  region_line_chart_data
 )
 
 # Plotting interactive graph
@@ -293,7 +304,7 @@ ggiraph::girafe(
 
 
 # Region bar plot -----------------------------------------------------------------
-# Plot
+# Focus plot
 la_bar_chart <- region_long_plot |>
   ggplot2::ggplot() +
   ggiraph::geom_col_interactive(
@@ -314,7 +325,7 @@ la_bar_chart <- region_long_plot |>
     colour = "black"
   ) +
   format_axes(region_long_plot) +
-  # set_plot_colours(region_long_plot, "fill") +
+  set_plot_colours(region_long_plot, "focus-fill", region_la_ldn_clean) +
   set_plot_labs(filtered_bds, selected_indicator) +
   custom_theme()
 
