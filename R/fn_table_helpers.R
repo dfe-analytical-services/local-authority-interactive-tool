@@ -261,7 +261,7 @@ create_stats_table <- function(
 polarity_colours_df <- function() {
   # Define the possible values for each column
   polarity_options <- c(NA, "-", "Low", "High")
-  quartile_band_options <- c("A", "B", "C", "D")
+  quartile_band_options <- c("A", "B", "C", "D", "Not applicable", NA_character_)
   cell_colour_options <- c("red", "green", "none")
 
   # Create all combinations of polarity and quartile band
@@ -277,18 +277,14 @@ polarity_colours_df <- function() {
   # Apply the conditions to determine the cell colour
   polarity_colours$cell_colour <- with(polarity_colours, ifelse(
     (is.na(polarity) | polarity == "-") | (quartile_band == "B" | quartile_band == "C"),
-    "none", ifelse(
-      (quartile_band == "A" & polarity == "Low"),
-      "green", ifelse(
-        (quartile_band == "D" & polarity == "Low"),
-        "red", ifelse(
-          (quartile_band == "A" & polarity == "High"),
-          "red", ifelse(
-            (quartile_band == "D" & polarity == "High"),
-            "green",
-            "none"
-          )
-        )
+    "none",
+    ifelse(
+      (quartile_band == "A"),
+      "green",
+      ifelse(
+        (quartile_band == "D"),
+        "red",
+        "none"
       )
     )
   ))
