@@ -412,12 +412,12 @@ test_that("3. create_stats_table handles NAs gracefully", {
     "LA and Regions" = "LA1",
     "Trend" = NA,
     "Change from previous year" = NA,
-    "Latest National Rank" = NA,
-    "Quartile Banding" = NA,
-    "(A) Up to and including" = 0,
-    "(B) Up to and including" = 0,
-    "(C) Up to and including" = 0,
-    "(D) Up to and including" = 0,
+    "Latest National Rank" = "Not applicable",
+    "Quartile Banding" = "Not applicable",
+    "(A) Up to and including" = "-",
+    "(B) Up to and including" = "-",
+    "(C) Up to and including" = "-",
+    "(D) Up to and including" = "-",
     "Polarity" = NA,
     check.names = FALSE
   ) |>

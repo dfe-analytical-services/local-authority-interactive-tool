@@ -272,7 +272,7 @@ test_that("4. get_quartile_band_cell_colour returns empty vector with warning wh
       get_quartile_band_cell_colour(polarity_colours, table_stats_no_match),
       NULL
     ),
-    "Unexpected Quartile Banding: F"
+    "Unexpected Quartile Banding value: F"
   )
 })
 
@@ -288,6 +288,22 @@ test_that("5. get_quartile_band_cell_colour handles NA values in polarity_colour
   )
   result_na <- get_quartile_band_cell_colour(polarity_colours_na, table_stats_with_na)
   expect_equal(result_na, c(NA_character_))
+})
+
+# 6. Test with correct polarity but invalid Quartile Band
+test_that("6. get_quartile_band_cell_colour gives error when valid polarity but invalid Quartile Band", {
+  table_stats_no_match <- data.frame(
+    Polarity = c("High"),
+    `Quartile Banding` = c("Error"),
+    check.names = FALSE
+  )
+  expect_warning(
+    expect_equal(
+      get_quartile_band_cell_colour(polarity_colours, table_stats_no_match),
+      NULL
+    ),
+    regexp = "Unexpected Quartile Banding \\(with valid polarity\\): Error"
+  )
 })
 
 
