@@ -107,34 +107,55 @@ calculate_trend <- function(change_since_prev) {
 #' @return A character vector indicating the quartile band: "A", "B", "C", "D",
 #' or "Error" if the value does not fit within the provided ranges.
 #'
-calculate_quartile_band <- function(indicator_val, quartile_bands) {
+calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_polarity) {
   # Check if all required quartile bands are present
   required_bands <- c("0%", "25%", "50%", "75%", "100%")
   missing_bands <- setdiff(required_bands, names(quartile_bands))
+
+  # Check for missing quartile bands
   if (length(missing_bands) > 0) {
     warning("Quartile bands are missing: ", paste(missing_bands, collapse = ", "))
     return(rep("Error", length(indicator_val)))
   }
 
+  # Check indicator value is present
   if (length(indicator_val) == 0) {
     warning("Indicator value is empty; returning an empty character vector.")
     return(character(0))
   }
 
-  quartile_band <- dplyr::case_when(
-    is.na(indicator_val) ~ NA_character_,
-    (indicator_val >= quartile_bands[["0%"]]) &
-      (indicator_val <= quartile_bands[["25%"]]) ~ "A",
-    (indicator_val > quartile_bands[["25%"]]) &
-      (indicator_val <= quartile_bands[["50%"]]) ~ "B",
-    (indicator_val > quartile_bands[["50%"]]) &
-      (indicator_val <= quartile_bands[["75%"]]) ~ "C",
-    (indicator_val > quartile_bands[["75%"]]) &
-      (indicator_val <= quartile_bands[["100%"]]) ~ "D",
-    TRUE ~ "Error"
-  )
+  # Set the Quartile Band (dependent on polarity)
+  if (indicator_polarity == "Low") {
+    quartile_band <- dplyr::case_when(
+      is.na(indicator_val) ~ NA_character_,
+      (indicator_val >= quartile_bands[["0%"]]) &
+        (indicator_val <= quartile_bands[["25%"]]) ~ "A",
+      (indicator_val > quartile_bands[["25%"]]) &
+        (indicator_val <= quartile_bands[["50%"]]) ~ "B",
+      (indicator_val > quartile_bands[["50%"]]) &
+        (indicator_val <= quartile_bands[["75%"]]) ~ "C",
+      (indicator_val > quartile_bands[["75%"]]) &
+        (indicator_val <= quartile_bands[["100%"]]) ~ "D",
+      TRUE ~ "Error"
+    )
+  } else if (indicator_polarity == "High") {
+    quartile_band <- dplyr::case_when(
+      is.na(indicator_val) ~ NA_character_,
+      (indicator_val >= quartile_bands[["0%"]]) &
+        (indicator_val <= quartile_bands[["25%"]]) ~ "D",
+      (indicator_val > quartile_bands[["25%"]]) &
+        (indicator_val <= quartile_bands[["50%"]]) ~ "C",
+      (indicator_val > quartile_bands[["50%"]]) &
+        (indicator_val <= quartile_bands[["75%"]]) ~ "B",
+      (indicator_val > quartile_bands[["75%"]]) &
+        (indicator_val <= quartile_bands[["100%"]]) ~ "A",
+      TRUE ~ "Error"
+    )
+  } else {
+    quartile_band <- "Not applicable"
+  }
 
-  if (quartile_band %notin% c("A", "B", "C", "D", NA_character_)) {
+  if (quartile_band %notin% c("A", "B", "C", "D", "Not applicable", NA_character_)) {
     warning("Unexpected Quartile Banding")
   }
 
