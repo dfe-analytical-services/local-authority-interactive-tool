@@ -215,12 +215,15 @@ get_quartile_band_cell_colour <- function(polarity, quartile_band) {
 #'
 #' @return A data frame with an additional column for the calculated rank.
 #'
-calculate_rank <- function(filtered_data) {
+calculate_rank <- function(filtered_data, indicator_polarity) {
   filtered_data |>
     dplyr::mutate(
       rank = dplyr::case_when(
         is.na(values_num) ~ NA,
-        TRUE ~ rank(values_num, ties.method = "min", na.last = TRUE)
+        # Rank in descending order
+        indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+        # Rank in ascending order
+        indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
       )
     )
 }
