@@ -44,8 +44,13 @@ ui_dev <- bslib::page_fillable(
     bslib::card(
       bslib::card_header("Regional Authorities"),
       bslib::card_body(
-        reactable::reactableOutput("region_la_table"),
-        reactable::reactableOutput("region_table")
+        div(
+          reactable::reactableOutput("region_la_table")
+        ),
+        div(
+          style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+          reactable::reactableOutput("region_table")
+        )
       )
     )
   )
