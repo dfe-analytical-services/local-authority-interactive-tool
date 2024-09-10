@@ -50,6 +50,10 @@ ui_dev <- bslib::page_fillable(
         div(
           style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
           reactable::reactableOutput("region_table")
+        ),
+        div(
+          style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+          reactable::reactableOutput("region_stats_table")
         )
       )
     )
@@ -161,16 +165,18 @@ server_dev <- function(input, output, session) {
       )
   })
 
-  # Long format Region LA data
-  region_la_long <- reactive({
-    # Get the LA region
-    region_la <- stat_n_geog |>
+  # Get the LA region
+  region_la <- reactive({
+    stat_n_geog |>
       dplyr::filter(`LA Name` == input$la_input) |>
       dplyr::pull(GOReg)
+  })
 
+  # Long format Region LA data
+  region_la_long <- reactive({
     # Get other LAs in the region
     region_la_la <- stat_n_geog |>
-      dplyr::filter(GOReg == region_la) |>
+      dplyr::filter(GOReg == region_la()) |>
       pull_uniques("LA Name")
 
     # Then filter for selected LA and regional LAs
@@ -219,18 +225,19 @@ server_dev <- function(input, output, session) {
     dfe_reactable(region_la_table())
   })
 
+  # Get national term
+  region_national <- reactive({
+    filtered_bds$data |>
+      dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
+      pull_uniques("LA and Regions")
+  })
 
   # Regional Level Regions table ----------------------------------------------
   region_table <- shiny::reactive({
-    # Get national term
-    region_national <- filtered_bds$data |>
-      dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
-      pull_uniques("LA and Regions")
-
     # Filter for all regions and England
     region_filtered_bds <- filtered_bds$data |>
       dplyr::filter(
-        `LA and Regions` %in% c(region_names_bds, region_national)
+        `LA and Regions` %in% c(region_names_bds, region_national())
       )
 
     # Region levels long
@@ -267,6 +274,64 @@ server_dev <- function(input, output, session) {
     dfe_reactable(region_table())
   })
 
+
+  # Regional Level Stats table --------------------------------------------------
+  # Determines which London to use
+  # Some indicators are not provided at (Inner)/ (Outer) level
+  region_la_ldn_clean <- reactive({
+    determine_london_region(region_la(), filtered_bds$data)
+  })
+
+  region_stats_table <- reactive({
+    # Get LA numbers
+    # Selected LA
+    region_la_la_num <- region_la_table() |>
+      filter_la_regions(input$la_input, pull_col = "LA Number")
+
+    # Region and England
+    region_la_num <- region_table() |>
+      filter_la_regions(c(region_la_ldn_clean(), region_national()), pull_col = "LA Number")
+
+    # Get change in previous year
+    # Selected LA
+    region_la_change_prev <- region_la_table() |>
+      filter_la_regions(input$la_input,
+        latest = FALSE,
+        pull_col = "Change from previous year"
+      )
+
+    # Region and England
+    region_change_prev <- region_table() |>
+      filter_la_regions(c(region_la_ldn_clean(), region_national()),
+        latest = FALSE,
+        pull_col = "Change from previous year"
+      )
+
+    # Creating the stats table cols
+    region_stats_la_num <- c(region_la_la_num, region_la_num)
+    region_stats_name <- c(input$la_input, region_la_ldn_clean(), region_national())
+    region_stats_change <- c(region_la_change_prev, region_change_prev)
+
+    # Creating the trend descriptions
+    region_trend <- dplyr::case_when(
+      is.na(region_stats_change) ~ NA_character_,
+      region_stats_change > 0 ~ "Increase",
+      region_stats_change < 0 ~ "Decrease",
+      TRUE ~ "No trend"
+    )
+
+    # Build stats table
+    region_stats_table <- data.frame(
+      "LA Number" = region_stats_la_num,
+      "LA and Regions" = region_stats_name,
+      "Trend" = region_trend,
+      "Change from previous year" = region_stats_change
+    )
+  })
+
+  output$region_stats_table <- reactable::renderReactable({
+    dfe_reactable(region_stats_table())
+  })
 
   # # LA Level line chart plot ----------------------------------
   # la_line_chart <- reactive({
