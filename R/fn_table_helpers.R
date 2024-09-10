@@ -193,7 +193,7 @@ create_stats_table <- function(
     warning("Suprise NA value in stats table")
   }
 
-  data.frame(
+  stats_table <- data.frame(
     "LA Number" = la_number,
     "LA and Regions" = selected_la,
     "Trend" = trend,
@@ -206,7 +206,21 @@ create_stats_table <- function(
     "(D) Up to and including" = quartile_bands[["100%"]],
     "Polarity" = indicator_polarity,
     check.names = FALSE
-  ) |>
+  )
+
+  if (indicator_polarity %notin% c("High", "Low")) {
+    stats_table <- stats_table |>
+      dplyr::mutate(
+        "Latest National Rank" = "Not applicable",
+        "Quartile Banding" = "Not applicable",
+        "(A) Up to and including" = "-",
+        "(B) Up to and including" = "-",
+        "(C) Up to and including" = "-",
+        "(D) Up to and including" = "-"
+      )
+  }
+
+  stats_table |>
     pretty_num_table(dp = 1)
 }
 
