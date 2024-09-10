@@ -264,15 +264,16 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           pull_col = "values_num"
         )
 
-      # Calculating which quartile this value sits in
-      la_quartile <- calculate_quartile_band(
-        la_indicator_val,
-        la_quartile_bands
-      )
-
       # Get polarity of indicator
       la_indicator_polarity <- filtered_bds() |>
         pull_uniques("Polarity")
+
+      # Calculating which quartile this value sits in
+      la_quartile <- calculate_quartile_band(
+        la_indicator_val,
+        la_quartile_bands,
+        la_indicator_polarity
+      )
 
       # Build stats LA Level table
       la_stats_table <- create_stats_table(
@@ -298,8 +299,8 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           `Quartile Banding` = reactable::colDef(
             style = reactablefmtr::cell_style(
               background_color = get_quartile_band_cell_colour(
-                polarity_colours_df(),
-                la_stats_table()
+                la_stats_table()$Polarity,
+                la_stats_table()$`Quartile Banding`
               )
             )
           )
