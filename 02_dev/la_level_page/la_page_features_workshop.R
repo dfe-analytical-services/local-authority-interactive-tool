@@ -162,7 +162,20 @@ la_stats_table <- data.frame(
   "(D) Up to and including" = la_quartile_bands[["100%"]],
   "Polarity" = la_indicator_polarity,
   check.names = FALSE
-)
+) |>
+  pretty_num_table(dp = 1)
+
+if (la_indicator_polarity %notin% c("High", "Low")) {
+  la_stats_table <- la_stats_table |>
+    dplyr::mutate(
+      "Latest National Rank" = "Not applicable",
+      "Quartile Banding" = "Not applicable",
+      "(A) Up to and including" = "-",
+      "(B) Up to and including" = "-",
+      "(C) Up to and including" = "-",
+      "(D) Up to and including" = "-"
+    )
+}
 
 # Format stats table
 dfe_reactable(
