@@ -205,8 +205,8 @@ dfe_reactable(
       style = reactablefmtr::cell_style(
         data = la_stats_table,
         background_color = get_quartile_band_cell_colour(
-          polarity_colours_df(),
-          la_stats_table
+          la_stats_table$Polarity,
+          la_stats_table$`Quartile Banding`
         )
       )
     )

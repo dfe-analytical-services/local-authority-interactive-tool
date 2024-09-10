@@ -176,38 +176,36 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
 #' @return A character vector representing the cell colour corresponding
 #' to the given polarity and quartile band.
 #'
-get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
+get_quartile_band_cell_colour <- function(polarity, quartile_band) {
   all_polarities <- c("High", "Low", "-", NA)
   valid_polarities <- c("High", "Low")
   all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
   valid_quartiles <- c("A", "B", "C", "D")
 
   # Check if polarity is not unexpected value
-  if (!table_stats$Polarity %in% all_polarities) {
-    warning("Unexpected polarity value: ", table_stats$Polarity)
+  if (!polarity %in% all_polarities) {
+    warning("Unexpected polarity value: ", polarity)
     return(NULL)
   }
 
   # Check if Quartile band is unexpected value
-  if (!table_stats$`Quartile Banding` %in% all_quartiles) {
-    warning("Unexpected Quartile Banding value: ", table_stats$`Quartile Banding`)
+  if (!quartile_band %in% all_quartiles) {
+    warning("Unexpected Quartile Banding value: ", quartile_band)
     return(NULL)
   }
 
   # Check if Quartile Band is unexpected if polarity is valid
-  if (!table_stats$`Quartile Banding` %in% valid_quartiles && table_stats$Polarity %in% valid_polarities) {
-    warning("Unexpected Quartile Banding (with valid polarity): ", table_stats$`Quartile Banding`)
+  if (!quartile_band %in% valid_quartiles && polarity %in% valid_polarities) {
+    warning("Unexpected Quartile Banding (with valid polarity): ", quartile_band)
     return(NULL)
   }
 
-  # Filter the polarity_colours based on the given conditions
-  matching_colour <- polarity_colours |>
-    dplyr::filter(
-      (is.na(polarity) & is.na(table_stats$Polarity)) |
-        (polarity == table_stats$Polarity),
-      quartile_band == table_stats$`Quartile Banding`
-    ) |>
-    dplyr::pull(cell_colour)
+  # Set cell colour based on Quartile Banding
+  matching_colour <- dplyr::case_when(
+    quartile_band == "A" & polarity %in% valid_polarities ~ "green",
+    quartile_band == "D" & polarity %in% valid_polarities ~ "red",
+    TRUE ~ "none"
+  )
 
   return(matching_colour)
 }
