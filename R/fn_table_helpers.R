@@ -193,32 +193,45 @@ create_stats_table <- function(
     warning("Suprise NA value in stats table")
   }
 
+  # Create the ranking and Quartile Banding based on polarity
+  rank_quartile_band_values <- if (indicator_polarity == "Low") {
+    list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "(A) Up to and including" = quartile_bands[["25%"]],
+      "(B) Up to and including" = quartile_bands[["50%"]],
+      "(C) Up to and including" = quartile_bands[["75%"]],
+      "(D) Up to and including" = quartile_bands[["100%"]]
+    )
+  } else if (indicator_polarity == "High") {
+    list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "(D) Up to and including" = quartile_bands[["25%"]],
+      "(C) Up to and including" = quartile_bands[["50%"]],
+      "(B) Up to and including" = quartile_bands[["75%"]],
+      "(A) Up to and including" = quartile_bands[["100%"]]
+    )
+  } else {
+    list(
+      "Latest National Rank" = "Not applicable",
+      "Quartile Banding" = "Not applicable",
+      "(A) Up to and including" = "-",
+      "(B) Up to and including" = "-",
+      "(C) Up to and including" = "-",
+      "(D) Up to and including" = "-"
+    )
+  }
+
   stats_table <- data.frame(
     "LA Number" = la_number,
     "LA and Regions" = selected_la,
     "Trend" = trend,
     "Change from previous year" = change_since_prev,
-    "Latest National Rank" = rank,
-    "Quartile Banding" = quartile,
-    "(A) Up to and including" = quartile_bands[["25%"]],
-    "(B) Up to and including" = quartile_bands[["50%"]],
-    "(C) Up to and including" = quartile_bands[["75%"]],
-    "(D) Up to and including" = quartile_bands[["100%"]],
     "Polarity" = indicator_polarity,
     check.names = FALSE
-  )
-
-  if (indicator_polarity %notin% c("High", "Low")) {
-    stats_table <- stats_table |>
-      dplyr::mutate(
-        "Latest National Rank" = "Not applicable",
-        "Quartile Banding" = "Not applicable",
-        "(A) Up to and including" = "-",
-        "(B) Up to and including" = "-",
-        "(C) Up to and including" = "-",
-        "(D) Up to and including" = "-"
-      )
-  }
+  ) |>
+    cbind(rank_quartile_band_values)
 
   stats_table |>
     pretty_num_table(dp = 1)
