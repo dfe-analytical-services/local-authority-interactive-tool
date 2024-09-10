@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Low birth weight"
-selected_la <- "Barking and Dagenham"
+selected_indicator <- "Prevalence of breastfeeding"
+selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -129,23 +129,42 @@ la_quartile_bands <- filtered_bds |>
 la_indicator_val <- filtered_bds |>
   filter_la_regions(selected_la, latest = TRUE, pull_col = "values_num")
 
-# Calculating which quartile this value sits in
-la_quartile <- dplyr::case_when(
-  is.na(la_indicator_val) ~ NA_character_,
-  (la_indicator_val >= la_quartile_bands[["0%"]]) &
-    (la_indicator_val <= la_quartile_bands[["25%"]]) ~ "A",
-  (la_indicator_val > la_quartile_bands[["25%"]]) &
-    (la_indicator_val <= la_quartile_bands[["50%"]]) ~ "B",
-  (la_indicator_val > la_quartile_bands[["50%"]]) &
-    (la_indicator_val <= la_quartile_bands[["75%"]]) ~ "C",
-  (la_indicator_val > la_quartile_bands[["75%"]]) &
-    (la_indicator_val <= la_quartile_bands[["100%"]]) ~ "D",
-  TRUE ~ "Error"
-)
-
 # Get polarity of indicator
 la_indicator_polarity <- filtered_bds |>
   pull_uniques("Polarity")
+
+
+# Calculating which quartile this value sits in
+if (la_indicator_polarity == "Low") {
+  la_quartile <- dplyr::case_when(
+    is.na(la_indicator_val) ~ NA_character_,
+    (la_indicator_val >= la_quartile_bands[["0%"]]) &
+      (la_indicator_val <= la_quartile_bands[["25%"]]) ~ "A",
+    (la_indicator_val > la_quartile_bands[["25%"]]) &
+      (la_indicator_val <= la_quartile_bands[["50%"]]) ~ "B",
+    (la_indicator_val > la_quartile_bands[["50%"]]) &
+      (la_indicator_val <= la_quartile_bands[["75%"]]) ~ "C",
+    (la_indicator_val > la_quartile_bands[["75%"]]) &
+      (la_indicator_val <= la_quartile_bands[["100%"]]) ~ "D",
+    TRUE ~ "Error"
+  )
+} else if (la_indicator_polarity == "High") {
+  la_quartile <- dplyr::case_when(
+    is.na(la_indicator_val) ~ NA_character_,
+    (la_indicator_val >= la_quartile_bands[["0%"]]) &
+      (la_indicator_val <= la_quartile_bands[["25%"]]) ~ "D",
+    (la_indicator_val > la_quartile_bands[["25%"]]) &
+      (la_indicator_val <= la_quartile_bands[["50%"]]) ~ "C",
+    (la_indicator_val > la_quartile_bands[["50%"]]) &
+      (la_indicator_val <= la_quartile_bands[["75%"]]) ~ "B",
+    (la_indicator_val > la_quartile_bands[["75%"]]) &
+      (la_indicator_val <= la_quartile_bands[["100%"]]) ~ "A",
+    TRUE ~ "Error"
+  )
+} else {
+  la_quartile <- "Not applicable"
+}
+
 
 # Build stats table
 la_stats_table <- data.frame(
