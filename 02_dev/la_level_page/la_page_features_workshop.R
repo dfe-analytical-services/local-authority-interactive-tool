@@ -102,6 +102,10 @@ la_change_prev <- la_table |>
     pull_col = "Change from previous year"
   )
 
+# Get polarity of indicator
+la_indicator_polarity <- filtered_bds |>
+  pull_uniques("Polarity")
+
 # Set the trend value
 la_trend <- dplyr::case_when(
   is.na(la_change_prev) ~ NA_character_,
@@ -116,7 +120,10 @@ la_rank <- filtered_bds |>
   dplyr::mutate(
     rank = dplyr::case_when(
       is.na(values_num) ~ NA,
-      TRUE ~ rank(values_num, ties.method = "min", na.last = TRUE)
+      # Rank in descending order
+      la_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+      # Rank in ascending order
+      la_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
     )
   ) |>
   filter_la_regions(selected_la, pull_col = "rank")
@@ -129,11 +136,6 @@ la_quartile_bands <- filtered_bds |>
 # Extracting LA latest value
 la_indicator_val <- filtered_bds |>
   filter_la_regions(selected_la, latest = TRUE, pull_col = "values_num")
-
-# Get polarity of indicator
-la_indicator_polarity <- filtered_bds |>
-  pull_uniques("Polarity")
-
 
 # Calculating which quartile this value sits in
 if (la_indicator_polarity == "Low") {

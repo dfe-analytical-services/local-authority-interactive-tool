@@ -259,10 +259,14 @@ server_dev <- function(input, output, session) {
     # Set the trend value
     la_trend <- calculate_trend(la_change_prev)
 
+    # Get polarity of indicator
+    la_indicator_polarity <- filtered_bds$data |>
+      pull_uniques("Polarity")
+
     # Get latest rank, ties are set to min & NA vals to NA rank
     la_rank <- filtered_bds$data |>
       filter_la_regions(la_names_bds, latest = TRUE) |>
-      calculate_rank() |>
+      calculate_rank(la_indicator_polarity) |>
       filter_la_regions(input$la_input, pull_col = "rank")
 
     # Calculate quartile bands for indicator
@@ -273,10 +277,6 @@ server_dev <- function(input, output, session) {
     # Extracting LA latest value
     la_indicator_val <- filtered_bds$data |>
       filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
-
-    # Get polarity of indicator
-    la_indicator_polarity <- filtered_bds$data |>
-      pull_uniques("Polarity")
 
     # Calculating which quartile this value sits in
     la_quartile <- calculate_quartile_band(
