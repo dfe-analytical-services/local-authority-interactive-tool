@@ -101,6 +101,7 @@ la_change_prev <- la_table |>
     latest = FALSE,
     pull_col = "Change from previous year"
   )
+
 # Set the trend value
 la_trend <- dplyr::case_when(
   is.na(la_change_prev) ~ NA_character_,
@@ -164,6 +165,17 @@ if (la_indicator_polarity == "Low") {
 } else {
   la_quartile <- "Not applicable"
 }
+
+la_stats_table <- create_stats_table(
+  la_table,
+  selected_la,
+  la_trend,
+  la_change_prev,
+  la_rank,
+  la_quartile,
+  la_quartile_bands,
+  la_indicator_polarity
+)
 
 
 # Build stats table

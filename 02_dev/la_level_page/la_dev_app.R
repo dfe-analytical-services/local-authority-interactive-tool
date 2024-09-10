@@ -219,7 +219,6 @@ server_dev <- function(input, output, session) {
       )
   })
 
-
   # Difference between last two years
   la_diff <- reactive({
     la_long() |>
@@ -275,15 +274,16 @@ server_dev <- function(input, output, session) {
     la_indicator_val <- filtered_bds$data |>
       filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
 
-    # Calculating which quartile this value sits in
-    la_quartile <- calculate_quartile_band(
-      la_indicator_val,
-      la_quartile_bands
-    )
-
     # Get polarity of indicator
     la_indicator_polarity <- filtered_bds$data |>
       pull_uniques("Polarity")
+
+    # Calculating which quartile this value sits in
+    la_quartile <- calculate_quartile_band(
+      la_indicator_val,
+      la_quartile_bands,
+      la_indicator_polarity
+    )
 
     # Build stats LA Level table
     la_stats_table <- create_stats_table(
@@ -308,8 +308,8 @@ server_dev <- function(input, output, session) {
         `Quartile Banding` = reactable::colDef(
           style = reactablefmtr::cell_style(
             background_color = get_quartile_band_cell_colour(
-              polarity_colours_df(),
-              la_stats_table()
+              la_stats_table()$Polarity,
+              la_stats_table()$`Quartile Banding`
             )
           )
         )
