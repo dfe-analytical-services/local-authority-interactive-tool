@@ -189,12 +189,12 @@ create_stats_table <- function(
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
-  if (any(is.na(c(selected_la, la_number, quartile_bands)))) {
+  if (any(is.na(c(selected_la, la_number)))) {
     warning("Suprise NA value in stats table")
   }
 
   # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- if (indicator_polarity == "Low") {
+  rank_quartile_band_values <- if (indicator_polarity == "Low" & !is.na(indicator_polarity)) {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
@@ -203,7 +203,7 @@ create_stats_table <- function(
       "(C) Up to and including" = quartile_bands[["75%"]],
       "(D) Up to and including" = quartile_bands[["100%"]]
     )
-  } else if (indicator_polarity == "High") {
+  } else if (indicator_polarity == "High" & !is.na(indicator_polarity)) {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,

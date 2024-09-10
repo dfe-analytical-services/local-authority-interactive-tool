@@ -194,12 +194,6 @@ get_quartile_band_cell_colour <- function(polarity, quartile_band) {
     return(NULL)
   }
 
-  # Check if Quartile Band is unexpected if polarity is valid
-  if (!quartile_band %in% valid_quartiles && polarity %in% valid_polarities) {
-    warning("Unexpected Quartile Banding (with valid polarity): ", quartile_band)
-    return(NULL)
-  }
-
   # Set cell colour based on Quartile Banding
   matching_colour <- dplyr::case_when(
     quartile_band == "A" & polarity %in% valid_polarities ~ "green",
