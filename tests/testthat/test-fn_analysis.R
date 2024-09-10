@@ -210,7 +210,7 @@ table_stats <- data.frame(
 )
 
 # Expected results
-expected_colours <- c("green", "green", "none", "none", "red")
+expected_colours <- c("#00703c", "#00703c", "none", "none", "#d4351c")
 
 # 1. Test with matching polarity and quartile bands
 test_that("1. get_quartile_band_cell_colour returns correct colours for matching polarity and quartile bands", {
