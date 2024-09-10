@@ -328,7 +328,7 @@ test_that("1. calculate_rank assigns correct ranks for normal values", {
     values_num = c(10, 20, 30, 40, 50),
     rank = c(1, 2, 3, 4, 5)
   )
-  result_normal <- calculate_rank(df_normal)
+  result_normal <- calculate_rank(df_normal, "Low")
   expect_equal(result_normal, expected_normal)
 })
 
@@ -339,9 +339,9 @@ test_that("2. calculate_rank handles ties correctly", {
   )
   expected_ties <- data.frame(
     values_num = c(10, 20, 20, 30, 40),
-    rank = c(1, 2, 2, 4, 5)
+    rank = c(5, 3, 3, 2, 1)
   )
-  result_ties <- calculate_rank(df_ties)
+  result_ties <- calculate_rank(df_ties, "High")
   expect_equal(result_ties, expected_ties)
 })
 
@@ -354,7 +354,7 @@ test_that("3. calculate_rank handles missing values properly", {
     values_num = c(10, NA, 30, 20, NA),
     rank = c(1, NA, 3, 2, NA)
   )
-  result_missing <- calculate_rank(df_missing)
+  result_missing <- calculate_rank(df_missing, "Low")
   expect_equal(result_missing, expected_missing)
 })
 
@@ -367,7 +367,7 @@ test_that("4. calculate_rank returns an empty data frame when input is empty", {
     values_num = numeric(0),
     rank = numeric(0)
   )
-  result_empty <- calculate_rank(df_empty)
+  result_empty <- calculate_rank(df_empty, "High")
   expect_equal(result_empty, expected_empty)
 })
 
@@ -380,6 +380,6 @@ test_that("5. calculate_rank returns NA for rank when all values are missing", {
     values_num = c(NA, NA, NA),
     rank = c(NA_real_, NA_real_, NA_real_)
   )
-  result_all_missing <- calculate_rank(df_all_missing)
+  result_all_missing <- calculate_rank(df_all_missing, "Low")
   expect_equal(result_all_missing, expected_all_missing)
 })
