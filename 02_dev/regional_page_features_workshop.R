@@ -124,7 +124,7 @@ region_table <- region_long |>
   pretty_num_table(dp = 1) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`) |>
   # Places England row at the bottom of the table
-  dplyr::mutate(is_england = ifelse(grepl("England \\(", `LA and Regions`), 1, 0)) |>
+  dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
   dplyr::arrange(is_england, .by_group = FALSE) |>
   dplyr::select(-is_england)
 
