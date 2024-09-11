@@ -280,14 +280,13 @@ region_line_chart <- region_long_plot |>
     label.size = NA,
     nudge_x = 2,
     direction = "y",
-    vjust = .5,
     hjust = 1,
     show.legend = FALSE
   ) +
   custom_theme() +
   coord_cartesian(clip = "off") +
   theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
-  guides(color = "none")
+  guides(color = "none", size = "none")
 
 
 # Creating vertical geoms to make vertical hover tooltip

@@ -391,7 +391,7 @@ server_dev <- function(input, output, session) {
         colour_type = "focus",
         focus_group = region_la_ldn_clean()
       ) +
-      set_plot_labs(filtered_bds$data, input$la_input) +
+      set_plot_labs(filtered_bds$data, input$indicator_input) +
       ggrepel::geom_label_repel(
         data = subset(region_long_plot(), Years == current_year()),
         aes(
@@ -407,11 +407,11 @@ server_dev <- function(input, output, session) {
         vjust = .5,
         hjust = 1,
         show.legend = FALSE
-      )
-    custom_theme() +
+      ) +
+      custom_theme() +
       coord_cartesian(clip = "off") +
       theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
-      guides(color = "none")
+      guides(colour = "none", size = "none")
 
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
@@ -469,7 +469,7 @@ server_dev <- function(input, output, session) {
       ) +
       format_axes(region_line_chart_data) +
       set_plot_colours(region_line_chart_data) +
-      set_plot_labs(filtered_bds$data, input$la_input) +
+      set_plot_labs(filtered_bds$data, input$indicator_input) +
       custom_theme()
 
 
