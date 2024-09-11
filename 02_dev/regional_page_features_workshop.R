@@ -13,7 +13,7 @@ list.files("R/", full.names = TRUE) |>
 # - Regional Authorities
 # Set user inputs
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Low birth weight"
+selected_indicator <- "Infant Mortality"
 selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
@@ -180,16 +180,18 @@ region_stats_table <- data.frame(
 )
 
 
-# Region line chart plot ----------------------------------------------------------
+# Region line chart plot ------------------------------------------------------
 # Filter any regions with all NA values and England
 region_long_plot <- region_long |>
   dplyr::group_by(`LA and Regions`) |>
+  # Remove any "London (" regions where all values_num are NA
   dplyr::filter(
-    dplyr::n() == sum(!is.na(values_num)),
+    !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
     `LA and Regions` %notin% national_names_bds
   ) |>
   # Set selected region to last level so appears at front of plot
   dplyr::mutate(`LA and Regions` = forcats::fct_relevel(`LA and Regions`, region_la_ldn_clean, after = Inf))
+
 
 # Randomly select up to 6 Regions for plotting
 set.seed(123) # Set seed for reproducibility (optional)
