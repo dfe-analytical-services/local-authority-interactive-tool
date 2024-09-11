@@ -200,8 +200,10 @@ region_random_selection <- region_long_plot |>
 
 region_line_chart_data <- region_long_plot |>
   # Filter for random Regions - simulate user choosing up to 6 regions
-  dplyr::filter(`LA and Regions` %in% region_random_selection |
-    `LA and Regions` %in% region_la_ldn_clean)
+  dplyr::filter(
+    (`LA and Regions` %in% region_random_selection) |
+      (`LA and Regions` %in% region_la_ldn_clean)
+  )
 
 # Plot - selected Regions
 region_line_chart <- region_line_chart_data |>
