@@ -105,41 +105,41 @@ ui_dev <- bslib::page_fillable(
         )
       )
     )
-  ) # ,
-  # div(
-  #   class = "well",
-  #   style = "overflow-y: visible;",
-  #   bslib::card(
-  #     bslib::card_body(
-  #       h3("Description:"),
-  #       textOutput("description"),
-  #       h3("Methodology:"),
-  #       uiOutput("methodology"),
-  #       div(
-  #         # Creates a flex container where the items are centered vertically
-  #         style = "display: flex; align-items: baseline;",
-  #         h3("Last Updated:",
-  #            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
-  #         ),
-  #         textOutput("last_update")
-  #       ),
-  #       div(
-  #         style = "display: flex; align-items: baseline;",
-  #         h3("Next Updated:",
-  #            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
-  #         ),
-  #         uiOutput("next_update")
-  #       ),
-  #       div(
-  #         style = "display: flex; align-items: baseline;",
-  #         h3("Source:",
-  #            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
-  #         ),
-  #         uiOutput("source")
-  #       )
-  #     )
-  #   )
-  # )
+  ),
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::card(
+      bslib::card_body(
+        h3("Description:"),
+        textOutput("description"),
+        h3("Methodology:"),
+        uiOutput("methodology"),
+        div(
+          # Creates a flex container where the items are centered vertically
+          style = "display: flex; align-items: baseline;",
+          h3("Last Updated:",
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
+          textOutput("last_update")
+        ),
+        div(
+          style = "display: flex; align-items: baseline;",
+          h3("Next Updated:",
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
+          uiOutput("next_update")
+        ),
+        div(
+          style = "display: flex; align-items: baseline;",
+          h3("Source:",
+            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
+          ),
+          uiOutput("source")
+        )
+      )
+    )
+  )
 )
 
 # Server
@@ -391,7 +391,7 @@ server_dev <- function(input, output, session) {
         colour_type = "focus",
         focus_group = region_la_ldn_clean()
       ) +
-      set_plot_labs(filtered_bds$data, input$indicator_input) +
+      set_plot_labs(filtered_bds$data, input$indicator) +
       ggrepel::geom_label_repel(
         data = subset(region_long_plot(), Years == current_year()),
         aes(
@@ -446,6 +446,13 @@ server_dev <- function(input, output, session) {
           (`LA and Regions` %in% region_la_ldn_clean())
       )
 
+    # Create named vector for colours
+    la_regions <- c(region_la_ldn_clean(), input$chart_region_input)
+    colour_values <- afcolours::af_colours(type = "categorical", n = 6)[1:length(la_regions)]
+    # Assign colours to specific LA and Regions
+    colour_mapping <- setNames(colour_values, la_regions)
+
+
     # Build plot based on user choice of regions
     region_multi_line_chart <- region_line_chart_data |>
       ggplot2::ggplot() +
@@ -468,8 +475,8 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE
       ) +
       format_axes(region_line_chart_data) +
-      set_plot_colours(region_line_chart_data) +
-      set_plot_labs(filtered_bds$data, input$indicator_input) +
+      scale_colour_manual(values = colour_mapping) +
+      set_plot_labs(filtered_bds$data, input$indicator) +
       custom_theme()
 
 
@@ -496,80 +503,42 @@ server_dev <- function(input, output, session) {
     region_multi_line_chart()
   })
 
-  # # LA Level bar plot ----------------------------------
-  # la_bar_chart <- reactive({
-  #   # Build plot
-  #   la_bar_chart <- la_long() |>
-  #     ggplot2::ggplot() +
-  #     ggiraph::geom_col_interactive(
-  #       ggplot2::aes(
-  #         x = Years_num,
-  #         y = values_num,
-  #         fill = `LA and Regions`,
-  #         tooltip = glue::glue_data(
-  #           la_long() |>
-  #             pretty_num_table(include_columns = "values_num", dp = 1),
-  #           "Year: {Years}\n{`LA and Regions`}: {values_num}"
-  #         ),
-  #         data_id = `LA and Regions`
-  #       ),
-  #       position = "dodge",
-  #       width = 0.6,
-  #       na.rm = TRUE,
-  #       colour = "black"
-  #     ) +
-  #     format_axes(la_long()) +
-  #     set_plot_colours(la_long(), "fill") +
-  #     set_plot_labs(filtered_bds$data, input$indicator) +
-  #     custom_theme()
-  #
-  #   # Plotting interactive graph
-  #   ggiraph::girafe(
-  #     ggobj = la_bar_chart,
-  #     width_svg = 8,
-  #     options = generic_ggiraph_options()
-  #   )
-  # })
-  #
-  #
-  # output$la_bar_chart <- ggiraph::renderGirafe({
-  #   la_bar_chart()
-  # })
-  #
-  #
-  # # LA Metadata ----------------------------------
-  #
-  # # Description
-  # output$description <- renderText({
-  #   metrics_clean |>
-  #     get_metadata(input$indicator, "Description")
-  # })
-  #
-  # # Methodology
-  # output$methodology <- renderUI({
-  #   metrics_clean |>
-  #     get_metadata(input$indicator, "Methodology")
-  # })
-  #
-  # # Last updated
-  # output$last_update <- renderText({
-  #   metrics_clean |>
-  #     get_metadata(input$indicator, "Last Update")
-  # })
-  #
-  # # Next updated
-  # output$next_update <- renderUI({
-  #   metrics_clean |>
-  #     get_metadata(input$indicator, "Next Update")
-  # })
-  #
-  # # Source (hyperlink)
-  # output$source <- renderUI({
-  #   hyperlink <- metrics_clean |>
-  #     get_metadata(input$indicator, "Hyperlink(s)")
-  #   label <- input$indicator
-  #   tags$a(href = hyperlink, class = "btn btn-default", label)
-  # })
+  # LA Level bar plot ----------------------------------
+
+
+  # LA Metadata ----------------------------------
+
+  # Description
+  output$description <- renderText({
+    metrics_clean |>
+      get_metadata(input$indicator, "Description")
+  })
+
+  # Methodology
+  output$methodology <- renderUI({
+    metrics_clean |>
+      get_metadata(input$indicator, "Methodology")
+  })
+
+  # Last updated
+  output$last_update <- renderText({
+    metrics_clean |>
+      get_metadata(input$indicator, "Last Update")
+  })
+
+  # Next updated
+  output$next_update <- renderUI({
+    metrics_clean |>
+      get_metadata(input$indicator, "Next Update")
+  })
+
+  # Source (hyperlink)
+  output$source <- renderUI({
+    hyperlink <- metrics_clean |>
+      get_metadata(input$indicator, "Hyperlink(s)")
+    label <- input$indicator
+    tags$a(href = hyperlink, class = "btn btn-default", label)
+  })
 }
 
 # App
