@@ -194,7 +194,7 @@ create_stats_table <- function(
   }
 
   # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- if (indicator_polarity == "Low" && !is.na(indicator_polarity)) {
+  rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
@@ -203,7 +203,7 @@ create_stats_table <- function(
       "(C) Up to and including" = quartile_bands[["75%"]],
       "(D) Up to and including" = quartile_bands[["100%"]]
     )
-  } else if (indicator_polarity == "High" && !is.na(indicator_polarity)) {
+  } else if (indicator_polarity %in% "High") {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
