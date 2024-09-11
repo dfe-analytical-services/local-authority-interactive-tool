@@ -372,6 +372,24 @@ determine_london_region <- function(region, filtered_bds) {
 }
 
 
+#' Retrieve AF Colours without Warning Message
+#'
+#' This function retrieves the "focus" color palette from the
+#' `afcolours` package and suppresses the informational message that typically
+#' accompanies it.
+#'
+#' The suppressed message advises that the palette should only be used
+#' to highlight specific elements to help users understand the information.
+#'
+#' @return A character vector of hex color codes representing the
+#' "focus" colour palette.
+#'
+#' @importFrom afcolours af_colours
+#' @examples
+#' # Retrieve the "focus" palette without the message
+#' af_colours_focus()
+#'
+#' @export
 af_colours_focus <- function() {
   withCallingHandlers(
     afcolours::af_colours(type = "focus"),

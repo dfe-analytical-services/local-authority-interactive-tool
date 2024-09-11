@@ -69,6 +69,30 @@ create_plot_colours <- function(data_long) {
 }
 
 
+#' Create Plot Colours with Focus Group Highlight
+#'
+#' This function generates a colour mapping for plot groups,
+#' where all groups are assigned a neutral colour,
+#' except for a specified focus group that is highlighted with a distinct
+#' colour from the `af_colours_focus` palette.
+#'
+#' @param data_long A data frame in long format, containing a column
+#' `LA and Regions` representing the groups for the plot.
+#' @param focus_group A character string representing the group that should
+#' be highlighted in the plot.
+#'
+#' @return A named character vector of hex colour codes, where names
+#' correspond to the groups in `LA and Regions`
+#' and values are the associated colours. The focus group will have
+#' a distinct colour.
+#'
+#' @seealso [af_colours_focus()] for the colour palette used.
+#'
+#' @examples
+#' # Create plot colours with a focus on "London"
+#' create_focus_plot_colours(data_long, "London")
+#'
+#' @export
 create_focus_plot_colours <- function(data_long, focus_group) {
   # Colours
   plot_groups <- data_long |>
