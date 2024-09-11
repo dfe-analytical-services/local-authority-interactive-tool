@@ -370,3 +370,21 @@ determine_london_region <- function(region, filtered_bds) {
     return(region)
   }
 }
+
+
+af_colours_focus <- function() {
+  withCallingHandlers(
+    afcolours::af_colours(type = "focus"),
+    message = function(m) {
+      if (grepl(
+        paste0(
+          "This palette should only be used to highlight specific ",
+          "elements to help users understand the information."
+        ),
+        m$message
+      )) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+}

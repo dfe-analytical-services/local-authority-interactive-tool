@@ -75,12 +75,12 @@ create_focus_plot_colours <- function(data_long, focus_group) {
     pull_uniques("LA and Regions")
 
   plot_colours <- rep(
-    afcolours::af_colours(type = "focus")[2],
+    af_colours_focus()[2],
     length(plot_groups)
   )
   names(plot_colours) <- plot_groups
 
-  plot_colours[focus_group] <- afcolours::af_colours(type = "focus")[1]
+  plot_colours[focus_group] <- af_colours_focus()[1]
 
   plot_colours
 }
