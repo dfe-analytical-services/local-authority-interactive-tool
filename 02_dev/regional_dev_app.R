@@ -80,17 +80,30 @@ ui_dev <- bslib::page_fillable(
           ),
           full_screen = TRUE
         ),
-      ) # ,
-      # bslib::nav_panel(
-      #   title = "Bar chart",
-      #   bslib::card(
-      #     id = "la_bar_body",
-      #     bslib::card_body(
-      #       ggiraph::girafeOutput("la_bar_chart")
-      #     ),
-      #     full_screen = TRUE
-      #   )
-      # )
+      ),
+      bslib::nav_panel(
+        title = "Line chart - user selection",
+        bslib::card(
+          id = "region_multi_line",
+          bslib::card_body(
+            bslib::layout_sidebar(
+              sidebar = bslib::sidebar(
+                title = "Filter options",
+                position = "left",
+                shiny::selectizeInput(
+                  inputId = "chart_region_input",
+                  label = "Select region to compare (max 6)",
+                  choices = region_names_bds,
+                  multiple = TRUE,
+                  options = list(maxItems = 6)
+                )
+              ),
+              ggiraph::girafeOutput("region_multi_line_chart")
+            )
+          ),
+          full_screen = TRUE
+        )
+      )
     )
   ) # ,
   # div(
@@ -368,6 +381,7 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           color = `LA and Regions`,
+          size = `LA and Regions`,
           data_id = `LA and Regions`,
         ),
         na.rm = TRUE
@@ -387,13 +401,14 @@ server_dev <- function(input, output, session) {
         ),
         color = "black",
         segment.colour = NA,
-        nudge_x = 1.5,
+        label.size = NA,
+        nudge_x = 2,
         direction = "y",
         vjust = .5,
         hjust = 1,
         show.legend = FALSE
-      ) +
-      custom_theme() +
+      )
+    custom_theme() +
       coord_cartesian(clip = "off") +
       theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
       guides(color = "none")
@@ -421,6 +436,65 @@ server_dev <- function(input, output, session) {
     region_focus_line_chart()
   })
 
+  # Region multi-choice line chart plot ---------------------------------------
+  region_multi_line_chart <- reactive({
+    # Filtering plotting data for selected LA region and others user choses
+    region_line_chart_data <- region_long_plot() |>
+      # Filter for random Regions - simulate user choosing up to 6 regions
+      dplyr::filter(
+        (`LA and Regions` %in% input$chart_region_input) |
+          (`LA and Regions` %in% region_la_ldn_clean())
+      )
+
+    # Build plot based on user choice of regions
+    region_multi_line_chart <- region_line_chart_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_point_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          data_id = `LA and Regions`
+        ),
+        na.rm = TRUE
+      ) +
+      ggiraph::geom_line_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          data_id = `LA and Regions`
+        ),
+        na.rm = TRUE
+      ) +
+      format_axes(region_line_chart_data) +
+      set_plot_colours(region_line_chart_data) +
+      set_plot_labs(filtered_bds$data, input$la_input) +
+      custom_theme()
+
+
+    # Creating vertical geoms to make vertical hover tooltip
+    vertical_hover <- lapply(
+      get_years(region_line_chart_data),
+      tooltip_vlines,
+      region_line_chart_data
+    )
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = (region_multi_line_chart + vertical_hover),
+      width_svg = 8,
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      )
+    )
+  })
+
+  output$region_multi_line_chart <- ggiraph::renderGirafe({
+    region_multi_line_chart()
+  })
 
   # # LA Level bar plot ----------------------------------
   # la_bar_chart <- reactive({
