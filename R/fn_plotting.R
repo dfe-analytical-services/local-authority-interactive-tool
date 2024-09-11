@@ -110,6 +110,22 @@ create_focus_plot_colours <- function(data_long, focus_group) {
 }
 
 
+create_focus_plot_sizes <- function(data_long, focus_group) {
+  # Get plot groups
+  plot_groups <- data_long |>
+    pull_uniques("LA and Regions")
+
+  # Set default line size
+  plot_sizes <- rep(0.5, length(plot_groups))
+  names(plot_sizes) <- plot_groups
+
+  # Set focus line size
+  plot_sizes[focus_group] <- 1
+
+  plot_sizes
+}
+
+
 #' @title Calculate Y-Axis Range
 #' @description This function calculates the range of the 'values_num'
 #' column in the provided dataset.
@@ -270,7 +286,10 @@ set_plot_colours <- function(data_long,
   } else if (colour_type == "fill") {
     ggplot2::scale_fill_manual(values = create_plot_colours(data_long))
   } else if (colour_type == "focus") {
-    ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group))
+    list(
+      ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group)),
+      ggplot2::scale_size_manual(values = create_focus_plot_sizes(data_long, focus_group))
+    )
   } else if (colour_type == "focus-fill") {
     ggplot2::scale_fill_manual(values = create_focus_plot_colours(data_long, focus_group))
   }
