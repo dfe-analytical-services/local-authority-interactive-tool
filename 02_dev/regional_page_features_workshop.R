@@ -260,6 +260,7 @@ region_line_chart <- region_long_plot |>
       x = Years_num,
       y = values_num,
       color = `LA and Regions`,
+      size = `LA and Regions`,
       data_id = `LA and Regions`,
     ),
     na.rm = TRUE
