@@ -71,7 +71,7 @@ create_plot_colours <- function(data_long) {
 
 create_focus_plot_colours <- function(data_long, focus_group) {
   # Colours
-  plot_groups <- region_long |>
+  plot_groups <- data_long |>
     pull_uniques("LA and Regions")
 
   plot_colours <- rep(
