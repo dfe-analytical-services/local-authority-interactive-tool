@@ -339,7 +339,8 @@ custom_theme <- function() {
       plot.title = element_text(hjust = 0.5),
       axis.title.y = element_text(angle = 0, vjust = 0.5),
       legend.position = "bottom",
-      panel.grid.minor.x = element_blank()
+      panel.grid.minor = element_blank(),
+      panel.grid.major.x = element_blank()
     )
   )
 }
