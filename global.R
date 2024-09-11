@@ -243,8 +243,9 @@ testthat::test_that("Number of topics per duplicate is 2", {
 
 # Join stat nieghbours LA names to SN dataframe
 stat_n_la <- stat_n_long |>
-  dplyr::right_join(
+  dplyr::left_join(
     stat_n_geog |>
+      dplyr::mutate(`LA num` = as.character(`LA num`)) |>
       dplyr::select(`LA num`,
         `LA Name_sn` = `LA Name`
       ),

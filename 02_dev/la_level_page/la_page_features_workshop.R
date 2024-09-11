@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Prevalence of breastfeeding"
-selected_la <- "Barnsley"
+selected_indicator <- "Infant Mortality"
+selected_la <- "Westmorland and Furness"
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
