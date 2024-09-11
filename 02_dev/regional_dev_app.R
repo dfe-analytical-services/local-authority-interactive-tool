@@ -57,7 +57,7 @@ ui_dev <- bslib::page_fillable(
         )
       )
     )
-  )
+  ),
   # div(
   #   class = "well",
   #   style = "overflow-y: visible;",
@@ -67,32 +67,32 @@ ui_dev <- bslib::page_fillable(
   #     )
   #   )
   # ),
-  # div(
-  #   class = "well",
-  #   style = "overflow-y: visible;",
-  #   bslib::navset_card_underline(
-  #     id = "la_charts",
-  #     bslib::nav_panel(
-  #       title = "Line chart",
-  #       bslib::card(
-  #         bslib::card_body(
-  #           ggiraph::girafeOutput("la_line_chart")
-  #         ),
-  #         full_screen = TRUE
-  #       ),
-  #     ),
-  #     bslib::nav_panel(
-  #       title = "Bar chart",
-  #       bslib::card(
-  #         id = "la_bar_body",
-  #         bslib::card_body(
-  #           ggiraph::girafeOutput("la_bar_chart")
-  #         ),
-  #         full_screen = TRUE
-  #       )
-  #     )
-  #   )
-  # ),
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_underline(
+      id = "region_charts",
+      bslib::nav_panel(
+        title = "Focus line chart",
+        bslib::card(
+          bslib::card_body(
+            ggiraph::girafeOutput("region_focus_line_chart")
+          ),
+          full_screen = TRUE
+        ),
+      ) # ,
+      # bslib::nav_panel(
+      #   title = "Bar chart",
+      #   bslib::card(
+      #     id = "la_bar_body",
+      #     bslib::card_body(
+      #       ggiraph::girafeOutput("la_bar_chart")
+      #     ),
+      #     full_screen = TRUE
+      #   )
+      # )
+    )
+  ) # ,
   # div(
   #   class = "well",
   #   style = "overflow-y: visible;",
@@ -232,8 +232,8 @@ server_dev <- function(input, output, session) {
       pull_uniques("LA and Regions")
   })
 
-  # Regional Level Regions table ----------------------------------------------
-  region_table <- shiny::reactive({
+  # Get long data format for Regions
+  region_long <- reactive({
     # Filter for all regions and England
     region_filtered_bds <- filtered_bds$data |>
       dplyr::filter(
@@ -248,12 +248,17 @@ server_dev <- function(input, output, session) {
         Years_num = as.numeric(substr(Years, start = 1, stop = 4))
       )
 
+    region_long
+  })
+
+  # Regional Level Regions table ----------------------------------------------
+  region_table <- shiny::reactive({
     # Difference between last two years
-    region_diff <- region_long |>
+    region_diff <- region_long() |>
       calculate_change_from_prev_yr()
 
     # Join difference and pivot wider to recreate Region table
-    region_table <- region_long |>
+    region_table <- region_long() |>
       dplyr::bind_rows(region_diff) |>
       tidyr::pivot_wider(
         id_cols = c("LA Number", "LA and Regions"),
@@ -333,60 +338,90 @@ server_dev <- function(input, output, session) {
     dfe_reactable(region_stats_table())
   })
 
-  # # LA Level line chart plot ----------------------------------
-  # la_line_chart <- reactive({
-  #   # Build plot
-  #   la_line_chart <- la_long() |>
-  #     ggplot2::ggplot() +
-  #     ggiraph::geom_point_interactive(
-  #       ggplot2::aes(
-  #         x = Years_num,
-  #         y = values_num,
-  #         color = `LA and Regions`,
-  #         shape = `LA and Regions`,
-  #         data_id = `LA and Regions`
-  #       ),
-  #       na.rm = TRUE
-  #     ) +
-  #     ggiraph::geom_line_interactive(
-  #       ggplot2::aes(
-  #         x = Years_num,
-  #         y = values_num,
-  #         color = `LA and Regions`,
-  #         data_id = `LA and Regions`
-  #       ),
-  #       na.rm = TRUE
-  #     ) +
-  #     format_axes(la_long()) +
-  #     set_plot_colours(la_long()) +
-  #     set_plot_labs(filtered_bds$data, input$indicator) +
-  #     custom_theme()
-  #
-  #
-  #   # Creating vertical geoms to make vertical hover tooltip
-  #   vertical_hover <- lapply(
-  #     get_years(la_long()),
-  #     tooltip_vlines,
-  #     la_long()
-  #   )
-  #
-  #   # Plotting interactive graph
-  #   ggiraph::girafe(
-  #     ggobj = (la_line_chart + vertical_hover),
-  #     width_svg = 8,
-  #     options = generic_ggiraph_options(
-  #       opts_hover(
-  #         css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
-  #       )
-  #     )
-  #   )
-  # })
-  #
-  # output$la_line_chart <- ggiraph::renderGirafe({
-  #   la_line_chart()
-  # })
-  #
-  #
+  # Region charts -------------------------------------------------------------
+  # Build data for plotting
+  # Filter any regions with all NA values and England
+  region_long_plot <- reactive({
+    region_long() |>
+      dplyr::group_by(`LA and Regions`) |>
+      # Remove any London () regions that are all NA
+      dplyr::filter(
+        !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
+        `LA and Regions` %notin% national_names_bds
+      ) |>
+      # Set selected region to last level so appears at front of plot
+      dplyr::mutate(
+        `LA and Regions` = forcats::fct_relevel(`LA and Regions`,
+          region_la_ldn_clean(),
+          after = Inf
+        )
+      )
+  })
+
+  # Region Focus line chart plot ----------------------------------------------
+  region_focus_line_chart <- reactive({
+    # Built focus plot
+    region_line_chart <- region_long_plot() |>
+      ggplot2::ggplot() +
+      ggiraph::geom_line_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          data_id = `LA and Regions`,
+        ),
+        na.rm = TRUE
+      ) +
+      format_axes(region_long_plot()) +
+      set_plot_colours(region_long_plot(),
+        colour_type = "focus",
+        focus_group = region_la_ldn_clean()
+      ) +
+      set_plot_labs(filtered_bds$data, input$la_input) +
+      ggrepel::geom_label_repel(
+        data = subset(region_long_plot(), Years == current_year()),
+        aes(
+          x = Years_num,
+          y = values_num,
+          label = `LA and Regions`
+        ),
+        color = "black",
+        segment.colour = NA,
+        nudge_x = 1.5,
+        direction = "y",
+        vjust = .5,
+        hjust = 1,
+        show.legend = FALSE
+      ) +
+      custom_theme() +
+      coord_cartesian(clip = "off") +
+      theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+      guides(color = "none")
+
+    # Creating vertical geoms to make vertical hover tooltip
+    vertical_hover <- lapply(
+      get_years(region_long_plot()),
+      tooltip_vlines,
+      region_long_plot()
+    )
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = (region_line_chart + vertical_hover),
+      width_svg = 12,
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      )
+    )
+  })
+
+  output$region_focus_line_chart <- ggiraph::renderGirafe({
+    region_focus_line_chart()
+  })
+
+
   # # LA Level bar plot ----------------------------------
   # la_bar_chart <- reactive({
   #   # Build plot
