@@ -25,14 +25,16 @@ source(here::here("R/fn_load_data.R"))
 ```{r pull-latest-bds-data}
 # Load raw BDS wide from shared folder
 bds_wide_raw_sf <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/BDS - Wide.xlsx"),
-  sheet = "BigDataSheet",
+  path = paste0(shared_folder, "/../Project Documentation/BDS - 2024 (JAKE).xlsx"),
+  sheet = "BDS",
   col_names = TRUE,
   skip = 1,
   # Replace multi-space with single-space
   .name_repair = clean_spaces,
   col_types = "text"
 )
+
+
 
 # Save to data folder
 write.csv(
@@ -62,7 +64,7 @@ bds_wide <- bds_wide_raw |>
 # Pivot BDS long on geographic cols
 bds_long <- bds_wide |>
   tidyr::pivot_longer(
-    cols = `Barking and Dagenham`:`England (State-funded)`,
+    cols = `Barking and Dagenham`:`England (discontinued)`,
     names_to = "LA and Regions",
     values_to = "Values"
   ) |>
@@ -137,6 +139,8 @@ data_dict <- readxl::read_xlsx(
   path = paste0(shared_folder, "/LAIT Data Dictionary (To QA!).xlsx"),
   sheet = "Data_prod"
 ) |>
+  dplyr::mutate(Measure_short = trimws(Measure_short)) |>
+  dplyr::filter(!grepl("DISCONTINUE", Table_status)) |>
   pull_uniques("Measure_short")
 
 # Filter BDS for only measures in the data dict
@@ -148,7 +152,7 @@ bds_long_public <- bds_long_la |>
 ```{r bds-save}
 # Save BDS long as .csv
 write.csv(bds_long_public,
-  here::here("01_data/02_prod/bds/bds_long.csv"),
+  here::here("01_data/02_prod/bds_long.csv"),
   row.names = FALSE
 )
 ```
