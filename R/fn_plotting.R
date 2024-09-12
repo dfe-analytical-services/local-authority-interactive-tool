@@ -481,7 +481,34 @@ generic_ggiraph_options <- function(...) {
 }
 
 
-
+#' Reorder Local Authority (LA) Regions in a Dataset
+#'
+#' This function reorders the `LA and Regions` column of a given dataset based
+#' on a specified factor order.
+#' It uses `forcats::fct_relevel` to reorder the factor levels and then
+#' arranges the dataset accordingly.
+#'
+#' @param chart_data A data frame that contains the `LA and Regions` column.
+#' @param factor_order A vector specifying the desired order
+#' of `LA and Regions`.
+#' @param ... Additional arguments passed to `forcats::fct_relevel`,
+#' such as `after = Inf`.
+#'
+#' @return A reordered data frame where the `LA and Regions` column is
+#' arranged according to the specified order.
+#'
+#' @import dplyr
+#' @import forcats
+#'
+#' @examples
+#' chart_data <- data.frame(`LA and Regions` = c(
+#'   "London", "East Midlands",
+#'   "North West"
+#' ))
+#' factor_order <- c("London", "North West", "East Midlands")
+#' reordered_data <- reorder_la_regions(chart_data, factor_order)
+#' print(reordered_data)
+#'
 reorder_la_regions <- function(chart_data, factor_order, ...) {
   chart_data |>
     dplyr::mutate(
@@ -491,7 +518,33 @@ reorder_la_regions <- function(chart_data, factor_order, ...) {
 }
 
 
-# Function to create a named vector for color mapping
+#' Create a Named Vector for Color Mapping in Charts
+#'
+#' This function creates a named vector for color mapping based on a set
+#' of chart groups and the type of chart (line or bar).
+#' It uses the `afcolours::af_colours` palette to generate a categorical
+#' color palette and assigns colors to each group.
+#' Depending on the chart type, it returns the appropriate color scale function
+#' for use in ggplot (either `scale_colour_manual` for line charts or
+#' `scale_fill_manual` for bar charts).
+#'
+#' @param chart_groups A character vector of groups (e.g., `LA and Regions`)
+#' that require color mapping.
+#' @param type A string indicating the chart type. Use `"line"` for line charts
+#' or `"bar"` for bar charts.
+#'
+#' @return A `ggplot2` scale function (`scale_colour_manual` for line charts or
+#' `scale_fill_manual` for bar charts) that maps the specified groups
+#' to corresponding colors.
+#'
+#' @import ggplot2
+#' @import afcolours
+#'
+#' @examples
+#' chart_groups <- c("London", "North East", "South East")
+#' color_scale <- manual_colour_mapping(chart_groups, type = "line")
+#' # Use the `color_scale` in a ggplot plot
+#'
 manual_colour_mapping <- function(chart_groups, type) {
   # Get the required number of colors from af_colours
   colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(chart_groups)]
