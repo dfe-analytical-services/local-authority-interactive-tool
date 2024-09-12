@@ -208,6 +208,12 @@ server_dev <- function(input, output, session) {
       dplyr::pull(GOReg)
   })
 
+  # Determines which London to use
+  # Some indicators are not provided at (Inner)/ (Outer) level
+  region_la_ldn_clean <- reactive({
+    determine_london_region(region_la(), filtered_bds$data)
+  })
+
   # Long format Region LA data
   region_la_long <- reactive({
     # Get other LAs in the region
@@ -258,7 +264,12 @@ server_dev <- function(input, output, session) {
   })
 
   output$region_la_table <- reactable::renderReactable({
-    dfe_reactable(region_la_table())
+    dfe_reactable(
+      region_la_table(),
+      rowStyle = function(index) {
+        highlight_selected_row(index, region_la_table(), input$la_input)
+      }
+    )
   })
 
   # Get national term
@@ -312,17 +323,16 @@ server_dev <- function(input, output, session) {
   })
 
   output$region_table <- reactable::renderReactable({
-    dfe_reactable(region_table())
+    dfe_reactable(
+      region_table(),
+      rowStyle = function(index) {
+        highlight_selected_row(index, region_table(), region_la_ldn_clean())
+      }
+    )
   })
 
 
   # Regional Level Stats table --------------------------------------------------
-  # Determines which London to use
-  # Some indicators are not provided at (Inner)/ (Outer) level
-  region_la_ldn_clean <- reactive({
-    determine_london_region(region_la(), filtered_bds$data)
-  })
-
   region_stats_table <- reactive({
     # Get LA numbers
     # Selected LA

@@ -75,6 +75,14 @@ region_la_table <- region_la_long |>
   pretty_num_table(dp = 1) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`)
 
+# Render reactable table
+dfe_reactable(
+  region_la_table,
+  rowStyle = function(index) {
+    highlight_selected_row(index, region_la_table, selected_la)
+  }
+)
+
 
 # Regional Level Regions table ------------------------------------------------
 # Get national term
