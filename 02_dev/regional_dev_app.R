@@ -389,14 +389,9 @@ server_dev <- function(input, output, session) {
 
   # Region Focus line chart plot ----------------------------------------------
   region_focus_line_chart <- reactive({
+    # Set selected region to last level so appears at front of plot
     region_focus_line_data <- region_long_plot() |>
-      # Set selected region to last level so appears at front of plot
-      dplyr::mutate(
-        `LA and Regions` = forcats::fct_relevel(`LA and Regions`,
-          region_la_ldn_clean(),
-          after = Inf
-        )
-      )
+      reorder_la_regions(region_la_ldn_clean(), after = Inf)
 
     # Built focus plot
     region_line_chart <- region_focus_line_data |>
@@ -469,13 +464,10 @@ server_dev <- function(input, output, session) {
         (`LA and Regions` %in% input$chart_line_input) |
           (`LA and Regions` %in% region_la_ldn_clean())
       ) |>
-      dplyr::mutate(`LA and Regions` = factor(`LA and Regions`,
-        levels = rev(c(
-          region_la_ldn_clean(),
-          input$chart_line_input
-        ))
-      )) |>
-      dplyr::arrange(`LA and Regions`)
+      # Reordering so lines are layered by selection choice
+      reorder_la_regions(
+        rev(c(region_la_ldn_clean(), input$chart_line_input))
+      )
 
     # Create named vector for colours
     la_regions <- c(region_la_ldn_clean(), input$chart_line_input)
@@ -537,14 +529,9 @@ server_dev <- function(input, output, session) {
 
   # Region focus bar plot -----------------------------------------------------
   region_focus_bar_chart <- reactive({
+    # Reorder so that focus bar is first
     region_focus_bar_data <- region_long_plot() |>
-      # Set selected region to last level so appears at front of plot
-      dplyr::mutate(
-        `LA and Regions` = forcats::fct_relevel(
-          `LA and Regions`,
-          region_la_ldn_clean()
-        )
-      )
+      reorder_la_regions(region_la_ldn_clean())
 
     focus_bar_chart <- region_focus_bar_data |>
       ggplot2::ggplot() +
@@ -591,13 +578,8 @@ server_dev <- function(input, output, session) {
         (`LA and Regions` %in% input$chart_bar_input) |
           (`LA and Regions` %in% region_la_ldn_clean())
       ) |>
-      dplyr::mutate(`LA and Regions` = factor(`LA and Regions`,
-        levels = c(
-          region_la_ldn_clean(),
-          input$chart_bar_input
-        )
-      )) |>
-      dplyr::arrange(`LA and Regions`)
+      # Reordering so bars are ordered by selection choice
+      reorder_la_regions(c(region_la_ldn_clean(), input$chart_line_input))
 
     # Create named vector for colours
     la_regions <- c(region_la_ldn_clean(), input$chart_bar_input)
