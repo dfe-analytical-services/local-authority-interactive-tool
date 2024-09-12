@@ -489,3 +489,20 @@ reorder_la_regions <- function(chart_data, factor_order, ...) {
     ) |>
     dplyr::arrange(`LA and Regions`)
 }
+
+
+# Function to create a named vector for color mapping
+manual_colour_mapping <- function(chart_groups, type) {
+  # Get the required number of colors from af_colours
+  colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(chart_groups)]
+
+  # Create a named vector of colors corresponding to the groups
+  colour_mapping <- setNames(colour_values, chart_groups)
+
+  # Whether line or bar chart
+  if (type == "line") {
+    ggplot2::scale_colour_manual(values = colour_mapping)
+  } else if (type == "bar") {
+    ggplot2::scale_fill_manual(values = colour_mapping)
+  }
+}

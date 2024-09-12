@@ -229,7 +229,10 @@ region_line_chart <- region_line_chart_data |>
     na.rm = TRUE
   ) +
   format_axes(region_line_chart_data) +
-  set_plot_colours(region_line_chart_data) +
+  manual_colour_mapping(
+    c(region_la_ldn_clean, region_random_selection),
+    type = "bar"
+  ) +
   set_plot_labs(filtered_bds, selected_indicator) +
   custom_theme()
 

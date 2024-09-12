@@ -469,13 +469,6 @@ server_dev <- function(input, output, session) {
         rev(c(region_la_ldn_clean(), input$chart_line_input))
       )
 
-    # Create named vector for colours
-    la_regions <- c(region_la_ldn_clean(), input$chart_line_input)
-    colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(la_regions)]
-    # Assign colours to specific LA and Regions
-    colour_mapping <- setNames(colour_values, la_regions)
-
-
     # Build plot based on user choice of regions
     region_multi_line_chart <- region_multi_choice_data |>
       ggplot2::ggplot() +
@@ -498,7 +491,10 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE
       ) +
       format_axes(region_multi_choice_data) +
-      scale_colour_manual(values = colour_mapping) +
+      manual_colour_mapping(
+        c(region_la_ldn_clean(), input$chart_line_input),
+        type = "line"
+      ) +
       set_plot_labs(filtered_bds$data, input$indicator) +
       custom_theme()
 
@@ -579,15 +575,9 @@ server_dev <- function(input, output, session) {
           (`LA and Regions` %in% region_la_ldn_clean())
       ) |>
       # Reordering so bars are ordered by selection choice
-      reorder_la_regions(c(region_la_ldn_clean(), input$chart_line_input))
+      reorder_la_regions(c(region_la_ldn_clean(), input$chart_bar_input))
 
-    # Create named vector for colours
-    la_regions <- c(region_la_ldn_clean(), input$chart_bar_input)
-    colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(la_regions)]
-    # Assign colours to specific LA and Regions
-    colour_mapping <- setNames(colour_values, la_regions)
-
-    focus_bar_chart <- region_multi_choice_data |>
+    multi_bar_chart <- region_multi_choice_data |>
       ggplot2::ggplot() +
       ggiraph::geom_col_interactive(
         ggplot2::aes(
@@ -607,13 +597,16 @@ server_dev <- function(input, output, session) {
         colour = "black"
       ) +
       format_axes(region_multi_choice_data) +
-      scale_fill_manual(values = colour_mapping) +
+      manual_colour_mapping(
+        c(region_la_ldn_clean(), input$chart_bar_input),
+        type = "bar"
+      ) +
       set_plot_labs(filtered_bds$data, input$indicator) +
       custom_theme()
 
     # Plotting interactive graph
     ggiraph::girafe(
-      ggobj = focus_bar_chart,
+      ggobj = multi_bar_chart,
       width_svg = 8,
       options = generic_ggiraph_options()
     )
