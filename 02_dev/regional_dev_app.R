@@ -58,15 +58,6 @@ ui_dev <- bslib::page_fillable(
       )
     )
   ),
-  # div(
-  #   class = "well",
-  #   style = "overflow-y: visible;",
-  #   bslib::card(
-  #     bslib::card_body(
-  #       reactable::reactableOutput("la_stats_table")
-  #     )
-  #   )
-  # ),
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -91,14 +82,46 @@ ui_dev <- bslib::page_fillable(
                 title = "Filter options",
                 position = "left",
                 shiny::selectizeInput(
-                  inputId = "chart_region_input",
-                  label = "Select region to compare (max 6)",
+                  inputId = "chart_line_input",
+                  label = "Select region to compare (max 3)",
                   choices = region_names_bds,
                   multiple = TRUE,
-                  options = list(maxItems = 6)
+                  options = list(maxItems = 3)
                 )
               ),
               ggiraph::girafeOutput("region_multi_line_chart")
+            )
+          ),
+          full_screen = TRUE
+        )
+      ),
+      bslib::nav_panel(
+        title = "Focus bar chart",
+        bslib::card(
+          bslib::card_body(
+            ggiraph::girafeOutput("region_focus_bar_chart")
+          ),
+          full_screen = TRUE
+        ),
+      ),
+      bslib::nav_panel(
+        title = "Bar chart - user selection",
+        bslib::card(
+          id = "region_multi_bar",
+          bslib::card_body(
+            bslib::layout_sidebar(
+              sidebar = bslib::sidebar(
+                title = "Filter options",
+                position = "left",
+                shiny::selectizeInput(
+                  inputId = "chart_bar_input",
+                  label = "Select region to compare (max 3)",
+                  choices = region_names_bds,
+                  multiple = TRUE,
+                  options = list(maxItems = 3)
+                )
+              ),
+              ggiraph::girafeOutput("region_multi_bar_chart")
             )
           ),
           full_screen = TRUE
@@ -361,7 +384,12 @@ server_dev <- function(input, output, session) {
       dplyr::filter(
         !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
         `LA and Regions` %notin% national_names_bds
-      ) |>
+      )
+  })
+
+  # Region Focus line chart plot ----------------------------------------------
+  region_focus_line_chart <- reactive({
+    region_focus_line_data <- region_long_plot() |>
       # Set selected region to last level so appears at front of plot
       dplyr::mutate(
         `LA and Regions` = forcats::fct_relevel(`LA and Regions`,
@@ -369,12 +397,9 @@ server_dev <- function(input, output, session) {
           after = Inf
         )
       )
-  })
 
-  # Region Focus line chart plot ----------------------------------------------
-  region_focus_line_chart <- reactive({
     # Built focus plot
-    region_line_chart <- region_long_plot() |>
+    region_line_chart <- region_focus_line_data |>
       ggplot2::ggplot() +
       ggiraph::geom_line_interactive(
         ggplot2::aes(
@@ -386,14 +411,14 @@ server_dev <- function(input, output, session) {
         ),
         na.rm = TRUE
       ) +
-      format_axes(region_long_plot()) +
-      set_plot_colours(region_long_plot(),
+      format_axes(region_focus_line_data) +
+      set_plot_colours(region_focus_line_data,
         colour_type = "focus",
         focus_group = region_la_ldn_clean()
       ) +
       set_plot_labs(filtered_bds$data, input$indicator) +
       ggrepel::geom_label_repel(
-        data = subset(region_long_plot(), Years == current_year()),
+        data = subset(region_focus_line_data, Years == current_year()),
         aes(
           x = Years_num,
           y = values_num,
@@ -415,9 +440,9 @@ server_dev <- function(input, output, session) {
 
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
-      get_years(region_long_plot()),
+      get_years(region_focus_line_data),
       tooltip_vlines,
-      region_long_plot()
+      region_focus_line_data
     )
 
     # Plotting interactive graph
@@ -438,23 +463,29 @@ server_dev <- function(input, output, session) {
 
   # Region multi-choice line chart plot ---------------------------------------
   region_multi_line_chart <- reactive({
-    # Filtering plotting data for selected LA region and others user choses
-    region_line_chart_data <- region_long_plot() |>
-      # Filter for random Regions - simulate user choosing up to 6 regions
+    # Filtering plotting data for selected LA region and others user choices
+    region_multi_choice_data <- region_long_plot() |>
       dplyr::filter(
-        (`LA and Regions` %in% input$chart_region_input) |
+        (`LA and Regions` %in% input$chart_line_input) |
           (`LA and Regions` %in% region_la_ldn_clean())
-      )
+      ) |>
+      dplyr::mutate(`LA and Regions` = factor(`LA and Regions`,
+        levels = rev(c(
+          region_la_ldn_clean(),
+          input$chart_line_input
+        ))
+      )) |>
+      dplyr::arrange(`LA and Regions`)
 
     # Create named vector for colours
-    la_regions <- c(region_la_ldn_clean(), input$chart_region_input)
-    colour_values <- afcolours::af_colours(type = "categorical", n = 6)[1:length(la_regions)]
+    la_regions <- c(region_la_ldn_clean(), input$chart_line_input)
+    colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(la_regions)]
     # Assign colours to specific LA and Regions
     colour_mapping <- setNames(colour_values, la_regions)
 
 
     # Build plot based on user choice of regions
-    region_multi_line_chart <- region_line_chart_data |>
+    region_multi_line_chart <- region_multi_choice_data |>
       ggplot2::ggplot() +
       ggiraph::geom_point_interactive(
         ggplot2::aes(
@@ -474,7 +505,7 @@ server_dev <- function(input, output, session) {
         ),
         na.rm = TRUE
       ) +
-      format_axes(region_line_chart_data) +
+      format_axes(region_multi_choice_data) +
       scale_colour_manual(values = colour_mapping) +
       set_plot_labs(filtered_bds$data, input$indicator) +
       custom_theme()
@@ -482,9 +513,9 @@ server_dev <- function(input, output, session) {
 
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
-      get_years(region_line_chart_data),
+      get_years(region_multi_choice_data),
       tooltip_vlines,
-      region_line_chart_data
+      region_multi_choice_data
     )
 
     # Plotting interactive graph
@@ -503,11 +534,115 @@ server_dev <- function(input, output, session) {
     region_multi_line_chart()
   })
 
-  # LA Level bar plot ----------------------------------
+
+  # Region focus bar plot -----------------------------------------------------
+  region_focus_bar_chart <- reactive({
+    region_focus_bar_data <- region_long_plot() |>
+      # Set selected region to last level so appears at front of plot
+      dplyr::mutate(
+        `LA and Regions` = forcats::fct_relevel(
+          `LA and Regions`,
+          region_la_ldn_clean()
+        )
+      )
+
+    focus_bar_chart <- region_focus_bar_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_col_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          fill = `LA and Regions`,
+          tooltip = glue::glue_data(
+            region_focus_bar_data |>
+              pretty_num_table(include_columns = "values_num", dp = 1),
+            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+          ),
+          data_id = `LA and Regions`
+        ),
+        position = "dodge",
+        width = 0.6,
+        na.rm = TRUE,
+        colour = "black"
+      ) +
+      format_axes(region_focus_bar_data) +
+      set_plot_colours(region_focus_bar_data, "focus-fill", region_la_ldn_clean()) +
+      set_plot_labs(filtered_bds$data, input$indicator) +
+      custom_theme() +
+      guides(fill = "none")
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = focus_bar_chart,
+      width_svg = 8,
+      options = generic_ggiraph_options()
+    )
+  })
+
+  output$region_focus_bar_chart <- ggiraph::renderGirafe({
+    region_focus_bar_chart()
+  })
+
+  # Region multi-choice bar plot ----------------------------------------------
+  region_multi_bar_chart <- reactive({
+    # Filtering plotting data for selected LA region and others user choices
+    region_multi_choice_data <- region_long_plot() |>
+      dplyr::filter(
+        (`LA and Regions` %in% input$chart_bar_input) |
+          (`LA and Regions` %in% region_la_ldn_clean())
+      ) |>
+      dplyr::mutate(`LA and Regions` = factor(`LA and Regions`,
+        levels = c(
+          region_la_ldn_clean(),
+          input$chart_bar_input
+        )
+      )) |>
+      dplyr::arrange(`LA and Regions`)
+
+    # Create named vector for colours
+    la_regions <- c(region_la_ldn_clean(), input$chart_bar_input)
+    colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(la_regions)]
+    # Assign colours to specific LA and Regions
+    colour_mapping <- setNames(colour_values, la_regions)
+
+    focus_bar_chart <- region_multi_choice_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_col_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          fill = `LA and Regions`,
+          tooltip = glue::glue_data(
+            region_multi_choice_data |>
+              pretty_num_table(include_columns = "values_num", dp = 1),
+            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+          ),
+          data_id = `LA and Regions`
+        ),
+        position = "dodge",
+        width = 0.6,
+        na.rm = TRUE,
+        colour = "black"
+      ) +
+      format_axes(region_multi_choice_data) +
+      scale_fill_manual(values = colour_mapping) +
+      set_plot_labs(filtered_bds$data, input$indicator) +
+      custom_theme()
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = focus_bar_chart,
+      width_svg = 8,
+      options = generic_ggiraph_options()
+    )
+  })
+
+  output$region_multi_bar_chart <- ggiraph::renderGirafe({
+    region_multi_bar_chart()
+  })
 
 
-  # LA Metadata ----------------------------------
-
+  # LA Metadata ---------------------------------------------------------------
   # Description
   output$description <- renderText({
     metrics_clean |>
