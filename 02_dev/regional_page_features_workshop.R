@@ -188,9 +188,7 @@ region_long_plot <- region_long |>
   dplyr::filter(
     !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
     `LA and Regions` %notin% national_names_bds
-  ) |>
-  # Set selected region to last level so appears at front of plot
-  dplyr::mutate(`LA and Regions` = forcats::fct_relevel(`LA and Regions`, region_la_ldn_clean, after = Inf))
+  )
 
 
 # Randomly select up to 6 Regions for plotting
@@ -198,14 +196,16 @@ set.seed(123) # Set seed for reproducibility (optional)
 region_random_selection <- region_long_plot |>
   pull_uniques("LA and Regions") |>
   as.character() |>
-  sample(size = 5) # Select up to 6 randomly
+  sample(size = 3) # Select up to 6 randomly
 
 region_line_chart_data <- region_long_plot |>
   # Filter for random Regions - simulate user choosing up to 6 regions
   dplyr::filter(
     (`LA and Regions` %in% region_random_selection) |
       (`LA and Regions` %in% region_la_ldn_clean)
-  )
+  ) |>
+  # Set region orders so selection order starts on top of plot
+  reorder_la_regions(rev(c(region_la_ldn_clean, region_random_selection)), after = Inf)
 
 # Plot - selected Regions
 region_line_chart <- region_line_chart_data |>
@@ -253,7 +253,11 @@ ggiraph::girafe(
 )
 
 # Focus plot
-region_line_chart <- region_long_plot |>
+# Set selected region to last level so appears at front of plot
+focus_line_data <- region_long_plot |>
+  reorder_la_regions(region_la_ldn_clean, after = Inf)
+
+region_line_chart <- focus_line_data |>
   ggplot2::ggplot() +
   ggiraph::geom_line_interactive(
     ggplot2::aes(
@@ -265,11 +269,11 @@ region_line_chart <- region_long_plot |>
     ),
     na.rm = TRUE
   ) +
-  format_axes(region_long_plot) +
-  set_plot_colours(region_long_plot, colour_type = "focus", focus_group = region_la_ldn_clean) +
+  format_axes(focus_line_data) +
+  set_plot_colours(focus_line_data, colour_type = "focus", focus_group = region_la_ldn_clean) +
   set_plot_labs(filtered_bds, selected_indicator) +
   ggrepel::geom_label_repel(
-    data = subset(region_long_plot, Years == current_year),
+    data = subset(focus_line_data, Years == current_year),
     aes(
       x = Years_num,
       y = values_num,
@@ -291,9 +295,9 @@ region_line_chart <- region_long_plot |>
 
 # Creating vertical geoms to make vertical hover tooltip
 vertical_hover <- lapply(
-  get_years(region_long_plot),
+  get_years(focus_line_data),
   tooltip_vlines,
-  region_long_plot
+  focus_line_data
 )
 
 # Plotting interactive graph
@@ -310,7 +314,10 @@ ggiraph::girafe(
 
 # Region bar plot -----------------------------------------------------------------
 # Focus plot
-la_bar_chart <- region_long_plot |>
+focus_bar_data <- region_long_plot |>
+  reorder_la_regions(region_la_ldn_clean)
+
+la_bar_chart <- focus_bar_data |>
   ggplot2::ggplot() +
   ggiraph::geom_col_interactive(
     ggplot2::aes(
@@ -318,7 +325,7 @@ la_bar_chart <- region_long_plot |>
       y = values_num,
       fill = `LA and Regions`,
       tooltip = glue::glue_data(
-        region_long_plot |>
+        focus_bar_data |>
           pretty_num_table(include_columns = "values_num", dp = 1),
         "Year: {Years}\n{`LA and Regions`}: {values_num}"
       ),
@@ -329,8 +336,8 @@ la_bar_chart <- region_long_plot |>
     na.rm = TRUE,
     colour = "black"
   ) +
-  format_axes(region_long_plot) +
-  set_plot_colours(region_long_plot, "focus-fill", region_la_ldn_clean) +
+  format_axes(focus_bar_data) +
+  set_plot_colours(focus_bar_data, "focus-fill", region_la_ldn_clean) +
   set_plot_labs(filtered_bds, selected_indicator) +
   custom_theme() +
   guides(fill = "none")

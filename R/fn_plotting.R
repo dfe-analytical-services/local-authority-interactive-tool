@@ -479,3 +479,13 @@ generic_ggiraph_options <- function(...) {
     ...
   )
 }
+
+
+
+reorder_la_regions <- function(chart_data, factor_order, ...) {
+  chart_data |>
+    dplyr::mutate(
+      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...)
+    ) |>
+    dplyr::arrange(`LA and Regions`)
+}
