@@ -375,8 +375,9 @@ server_dev <- function(input, output, session) {
   })
 
   # Region charts -------------------------------------------------------------
+
   # Build data for plotting
-  # Filter any regions with all NA values and England
+  # Filter region_long data for any (Ldn) regions with all NA values, and England
   region_long_plot <- reactive({
     region_long() |>
       dplyr::group_by(`LA and Regions`) |>
@@ -385,6 +386,29 @@ server_dev <- function(input, output, session) {
         !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
         `LA and Regions` %notin% national_names_bds
       )
+  })
+
+  # Restrict the user input choices to only elgible Regions
+  # Not England, Ldn () where missing, and default Region
+  shiny::observeEvent(input$la_input, {
+    # Get indicator choices for selected topic
+    multi_chart_data <- region_long_plot() |>
+      dplyr::filter(
+        `LA and Regions` != region_la_ldn_clean()
+      ) |>
+      pull_uniques("LA and Regions")
+
+    updateSelectInput(
+      session = session,
+      inputId = "chart_line_input",
+      choices = multi_chart_data
+    )
+
+    updateSelectInput(
+      session = session,
+      inputId = "chart_bar_input",
+      choices = multi_chart_data
+    )
   })
 
   # Region Focus line chart plot ----------------------------------------------
