@@ -95,7 +95,7 @@ RegionLA_TableUI <- function(id) {
 }
 
 # Region LA Level table -------------------------------------------------------
-RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
+RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -117,7 +117,7 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     })
 
     # Build Region LA table
-    region_la_table <- shiny::reactive({
+    shiny::reactive({
       # Join difference and pivot wider
       region_la_long() |>
         dplyr::bind_rows(region_la_diff()) |>
@@ -129,6 +129,17 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
         pretty_num_table(dp = 1) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`)
     })
+  })
+}
+
+
+RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
+  moduleServer(id, function(input, output, session) {
+    # Get Region LA table
+    region_la_table <- RegionLA_DataServer("region_la_table", app_inputs, bds_metrics, stat_n_geog)
+
+    # Get LA region
+    region_la <- LA_RegionServer("region_la", app_inputs$la, stat_n_geog)
 
     output$region_la_table <- reactable::renderReactable({
       dfe_reactable(
@@ -140,9 +151,6 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     })
   })
 }
-
-
-
 
 
 # Get long data format for Regions
@@ -185,7 +193,7 @@ Region_TableUI <- function(id) {
 }
 
 # Regional Level Regions table ----------------------------------------------
-Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -196,14 +204,11 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, nationa
     # Long format Region LA data
     region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds, region_national)
 
-    # Get clean Regions
-    region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
-
     # Current year
     current_year <- Current_YearServer("current_year", region_long)
 
     # Build Region table
-    region_table <- shiny::reactive({
+    shiny::reactive({
       # Difference between last two years
       region_diff <- region_long() |>
         calculate_change_from_prev_yr()
@@ -225,6 +230,22 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, nationa
 
       region_table
     })
+  })
+}
+
+Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+  moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Region table
+    region_table <- Region_DataServer(
+      "region_table",
+      app_inputs, bds_metrics, national_names_bds, region_names_bds
+    )
+
+    # Get clean Regions
+    region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
 
     output$region_table <- reactable::renderReactable({
       dfe_reactable(
@@ -233,6 +254,100 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, nationa
           highlight_selected_row(index, region_table(), region_clean())
         }
       )
+    })
+  })
+}
+
+
+# Region Stats table ==========================================================
+Region_StatsTableUI <- function(id) {
+  ns <- NS(id)
+
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::card(
+      bslib::card_header("Regional Authorities"),
+      bslib::card_body(
+        reactable::reactableOutput(ns("region_stats_table"))
+      )
+    )
+  )
+}
+
+
+Region_StatsTableServer <- function(
+    id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+  moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Get Region LA table
+    region_la_table <- RegionLA_DataServer("region_la", app_inputs, bds_metrics, stat_n_geog)
+
+    # Region table
+    region_table <- Region_DataServer(
+      "region_table",
+      app_inputs, bds_metrics, national_names_bds, region_names_bds
+    )
+
+    # Get clean Regions
+    region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
+
+    # Get relevant National
+    region_national <- Region_NationalServer("region_national", national_names_bds, filtered_bds)
+
+    # Build stats table
+    region_stats_table <- reactive({
+      # Get LA numbers
+      # Selected LA
+      region_la_la_num <- region_la_table() |>
+        filter_la_regions(app_inputs$la(), pull_col = "LA Number")
+
+      # Region and England
+      region_la_num <- region_table() |>
+        filter_la_regions(c(region_clean(), region_national()), pull_col = "LA Number")
+
+      # Get change in previous year
+      # Selected LA
+      region_la_change_prev <- region_la_table() |>
+        filter_la_regions(app_inputs$la(),
+          latest = FALSE,
+          pull_col = "Change from previous year"
+        )
+
+      # Region and England
+      region_change_prev <- region_table() |>
+        filter_la_regions(c(region_clean(), region_national()),
+          latest = FALSE,
+          pull_col = "Change from previous year"
+        )
+
+      # Creating the stats table cols
+      region_stats_la_num <- c(region_la_la_num, region_la_num)
+      region_stats_name <- c(app_inputs$la(), region_clean(), region_national())
+      region_stats_change <- c(region_la_change_prev, region_change_prev)
+
+      # Creating the trend descriptions
+      region_trend <- dplyr::case_when(
+        is.na(region_stats_change) ~ NA_character_,
+        region_stats_change > 0 ~ "Increase",
+        region_stats_change < 0 ~ "Decrease",
+        TRUE ~ "No trend"
+      )
+
+      # Build stats table
+      data.frame(
+        "LA Number" = region_stats_la_num,
+        "LA and Regions" = region_stats_name,
+        "Trend" = region_trend,
+        "Change from previous year" = region_stats_change,
+        check.names = FALSE
+      )
+    })
+
+    output$region_stats_table <- reactable::renderReactable({
+      dfe_reactable(region_stats_table())
     })
   })
 }

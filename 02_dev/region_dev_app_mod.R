@@ -29,7 +29,10 @@ ui_mod <- bslib::page_fillable(
   RegionLA_TableUI("la_table"),
 
   # Region Table --------------------------------------------------------------
-  Region_TableUI("region_table")
+  Region_TableUI("region_table"),
+
+  # Region Stats Table --------------------------------------------------------
+  Region_StatsTableUI("stats_table")
 )
 
 
@@ -50,6 +53,15 @@ server_mod <- function(input, output, session) {
   # Region table --------------------------------------------------------------
   Region_TableServer(
     "region_table",
+    app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
+  )
+
+  Region_StatsTableServer(
+    "stats_table",
     app_inputs,
     bds_metrics,
     stat_n_geog,
