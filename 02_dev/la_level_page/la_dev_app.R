@@ -246,7 +246,12 @@ server_dev <- function(input, output, session) {
   })
 
   output$la_table <- reactable::renderReactable({
-    dfe_reactable(la_table())
+    dfe_reactable(
+      la_table(),
+      rowStyle = function(index) {
+        highlight_selected_row(index, la_table(), input$la_input)
+      }
+    )
   })
 
 

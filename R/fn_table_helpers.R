@@ -241,7 +241,7 @@ create_stats_table <- function(
 highlight_selected_row <- function(index, data, selected_area) {
   if (data[index, "LA and Regions"] == selected_area) {
     list(
-      background = "#6BACE6",
+      color = "#6BACE6",
       fontWeight = "bold"
     )
   }

@@ -176,7 +176,12 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     })
 
     output$la_table <- reactable::renderReactable({
-      dfe_reactable(la_table())
+      dfe_reactable(
+        la_table(),
+        rowStyle = function(index) {
+          highlight_selected_row(index, la_table(), app_inputs$la())
+        }
+      )
     })
   })
 }
