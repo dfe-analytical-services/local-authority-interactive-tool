@@ -1,3 +1,5 @@
+# nolint start: object_name
+#
 # Get the LA region
 LA_RegionServer <- function(id, la_input, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
@@ -351,3 +353,5 @@ Region_StatsTableServer <- function(
     })
   })
 }
+
+# nolint end

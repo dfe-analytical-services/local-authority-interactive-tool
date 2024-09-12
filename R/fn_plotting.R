@@ -547,7 +547,10 @@ reorder_la_regions <- function(chart_data, factor_order, ...) {
 #'
 manual_colour_mapping <- function(chart_groups, type) {
   # Get the required number of colors from af_colours
-  colour_values <- afcolours::af_colours(type = "categorical", n = 4)[1:length(chart_groups)]
+  colour_values <- afcolours::af_colours(
+    type = "categorical",
+    n = 4
+  )[seq_along(chart_groups)]
 
   # Create a named vector of colors corresponding to the groups
   colour_mapping <- setNames(colour_values, chart_groups)
