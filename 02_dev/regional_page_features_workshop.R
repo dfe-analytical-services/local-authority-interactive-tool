@@ -332,7 +332,8 @@ la_bar_chart <- region_long_plot |>
   format_axes(region_long_plot) +
   set_plot_colours(region_long_plot, "focus-fill", region_la_ldn_clean) +
   set_plot_labs(filtered_bds, selected_indicator) +
-  custom_theme()
+  custom_theme() +
+  guides(fill = "none")
 
 # Plotting interactive graph
 ggiraph::girafe(
