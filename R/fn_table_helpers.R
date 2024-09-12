@@ -238,6 +238,29 @@ create_stats_table <- function(
 }
 
 
+#' Highlight a selected row in a reactable
+#'
+#' This function applies a specific style to a row if the value in the
+#' "LA and Regions" column matches the selected area.
+#'
+#' @param index The index of the row (automatically passed by `reactable`).
+#' @param data A data frame containing the table data.
+#' @param selected_area The specific area to highlight in the
+#' "LA and Regions" column.
+#'
+#' @return A list of CSS styles to apply to the row (if the condition matches),
+#' otherwise NULL.
+#'
+#' @examples
+#' \dontrun{
+#' # Use in a reactable table
+#' dfe_reactable(
+#'   region_la_table,
+#'   rowStyle = function(index) {
+#'     highlight_selected_row(index, region_la_table, selected_area)
+#'   }
+#' )
+#' }
 highlight_selected_row <- function(index, data, selected_area) {
   if (data[index, "LA and Regions"] == selected_area) {
     list(
