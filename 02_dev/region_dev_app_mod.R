@@ -25,24 +25,36 @@ ui_mod <- bslib::page_fillable(
   # Start of app  =============================================================
   appInputsUI("region_inputs"),
 
-  # Region LA Table ----------------------------------
-  RegionLA_TableUI("la_table")
+  # Region LA Table -----------------------------------------------------------
+  RegionLA_TableUI("la_table"),
+
+  # Region Table --------------------------------------------------------------
+  Region_TableUI("region_table")
 )
 
 
 # Server
 server_mod <- function(input, output, session) {
-  # Getting inputs ----------------------------------
+  # Getting inputs  ===========================================================
   # Extract selected LA, Topic and Indicator
   app_inputs <- appInputsServer("region_inputs")
 
-
-  # Region LA table ----------------------------------
+  # Region LA table -----------------------------------------------------------
   RegionLA_TableServer(
     "la_table",
     app_inputs,
     bds_metrics,
     stat_n_geog
+  )
+
+  # Region table --------------------------------------------------------------
+  Region_TableServer(
+    "region_table",
+    app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
   )
 }
 

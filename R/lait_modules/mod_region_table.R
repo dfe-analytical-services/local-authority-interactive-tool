@@ -12,8 +12,11 @@ LA_RegionServer <- function(id, la_input, stat_n_geog) {
 
 
 # Get clean LA Region
-Clean_RegionServer <- function(id, region_la, filtered_bds) {
+Clean_RegionServer <- function(id, la_input, stat_n_geog, filtered_bds) {
   moduleServer(id, function(input, output, session) {
+    # Get LA region
+    region_la <- LA_RegionServer("region_la", la_input, stat_n_geog)
+
     reactive({
       # Cleans Regions for which London to use
       # Some indicators are not provided at (Inner)/ (Outer) level
@@ -22,8 +25,17 @@ Clean_RegionServer <- function(id, region_la, filtered_bds) {
   })
 }
 
-# Get clean LA Region
-# region_clean <- Clean_RegionServer("region_clean", region_la, filtered_bds)
+# Get national term
+Region_NationalServer <- function(id, national_names_bds, filtered_bds) {
+  moduleServer(id, function(input, output, session) {
+    reactive({
+      # Filter for national terms that are do not have all NA values
+      filtered_bds() |>
+        dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
+        pull_uniques("LA and Regions")
+    })
+  })
+}
 
 
 # Long format Region LA data
@@ -54,7 +66,6 @@ RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
   })
 }
 
-
 # Most recent year
 Current_YearServer <- function(id, region_la_long) {
   moduleServer(id, function(input, output, session) {
@@ -67,11 +78,7 @@ Current_YearServer <- function(id, region_la_long) {
   })
 }
 
-# LA Level table ==============================================================
-#' Shiny Module UI for Displaying the LA Level Table
-#'
-#' @param id A unique ID that identifies the UI element
-#' @return A div object that contains the UI elements for the module
+# Region LA table =============================================================
 RegionLA_TableUI <- function(id) {
   ns <- NS(id)
 
@@ -128,6 +135,102 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
         region_la_table(),
         rowStyle = function(index) {
           highlight_selected_row(index, region_la_table(), app_inputs$la())
+        }
+      )
+    })
+  })
+}
+
+
+
+
+
+# Get long data format for Regions
+Region_LongDataServer <- function(id, filtered_bds, region_names_bds, region_national) {
+  moduleServer(id, function(input, output, session) {
+    reactive({
+      # Filter for all regions and England
+      region_filtered_bds <- filtered_bds() |>
+        dplyr::filter(
+          `LA and Regions` %in% c(region_names_bds, region_national())
+        )
+
+      # Region levels long
+      region_long <- region_filtered_bds |>
+        dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+        dplyr::mutate(
+          `LA and Regions` = factor(`LA and Regions`),
+          Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+        )
+
+      region_long
+    })
+  })
+}
+
+# Region table ================================================================
+Region_TableUI <- function(id) {
+  ns <- NS(id)
+
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::card(
+      bslib::card_header("Regional Authorities"),
+      bslib::card_body(
+        reactable::reactableOutput(ns("region_table"))
+      )
+    )
+  )
+}
+
+# Regional Level Regions table ----------------------------------------------
+Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+  moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Get relevant National
+    region_national <- Region_NationalServer("region_national", national_names_bds, filtered_bds)
+
+    # Long format Region LA data
+    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds, region_national)
+
+    # Get clean Regions
+    region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
+
+    # Current year
+    current_year <- Current_YearServer("current_year", region_long)
+
+    # Build Region table
+    region_table <- shiny::reactive({
+      # Difference between last two years
+      region_diff <- region_long() |>
+        calculate_change_from_prev_yr()
+
+      # Join difference and pivot wider to recreate Region table
+      region_table <- region_long() |>
+        dplyr::bind_rows(region_diff) |>
+        tidyr::pivot_wider(
+          id_cols = c("LA Number", "LA and Regions"),
+          names_from = Years,
+          values_from = values_num
+        ) |>
+        pretty_num_table(dp = 1) |>
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        # Places England row at the bottom of the table
+        dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
+        dplyr::arrange(is_england, .by_group = FALSE) |>
+        dplyr::select(-is_england)
+
+      region_table
+    })
+
+    output$region_table <- reactable::renderReactable({
+      dfe_reactable(
+        region_table(),
+        rowStyle = function(index) {
+          highlight_selected_row(index, region_table(), region_clean())
         }
       )
     })
