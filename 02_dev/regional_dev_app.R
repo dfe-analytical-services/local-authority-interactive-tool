@@ -211,7 +211,7 @@ server_dev <- function(input, output, session) {
   # Determines which London to use
   # Some indicators are not provided at (Inner)/ (Outer) level
   region_la_ldn_clean <- reactive({
-    determine_london_region(region_la(), filtered_bds$data)
+    clean_ldn_region(region_la(), filtered_bds$data)
   })
 
   # Long format Region LA data

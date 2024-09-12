@@ -140,7 +140,7 @@ region_table <- region_long |>
 # Regional Level Stats table --------------------------------------------------
 # Determines which London to use
 # Some indicators are not provided at (Inner)/ (Outer) level
-region_la_ldn_clean <- determine_london_region(region_la, filtered_bds)
+region_la_ldn_clean <- clean_ldn_region(region_la, filtered_bds)
 
 # Get LA numbers
 # Selected LA

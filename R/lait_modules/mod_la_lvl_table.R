@@ -63,7 +63,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         pull_uniques("GOReg")
 
       # Determine London region to use
-      la_region_ldn_clean <- determine_london_region(
+      la_region_ldn_clean <- clean_ldn_region(
         la_region,
         filtered_bds()
       )

@@ -34,7 +34,7 @@ filtered_bds <- bds_metrics |>
   )
 
 # Determine London region to use
-la_region_ldn_clean <- determine_london_region(la_region, filtered_bds)
+la_region_ldn_clean <- clean_ldn_region(la_region, filtered_bds)
 
 # Get national term
 la_national <- filtered_bds |>

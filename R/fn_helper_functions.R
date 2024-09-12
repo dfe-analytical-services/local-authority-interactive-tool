@@ -349,10 +349,10 @@ mute_cat <- function(input) {
 #'
 #' @examples
 #' # Example usage:
-#' determine_london_region("London (Inner)", filtered_bds)
+#' clean_ldn_region("London (Inner)", filtered_bds)
 #'
 #' @export
-determine_london_region <- function(region, filtered_bds) {
+clean_ldn_region <- function(region, filtered_bds) {
   # Return early if the region doesn't start with "London"
   if (!grepl("^London", region)) {
     return(region)
