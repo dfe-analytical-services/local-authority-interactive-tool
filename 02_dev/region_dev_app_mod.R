@@ -47,7 +47,7 @@ ui_mod <- bslib::page_fillable(
     class = "well",
     style = "overflow-y: visible;",
     bslib::navset_card_underline(
-      id = "la_charts",
+      id = "region_charts",
       Region_FocusLine_chartUI("region_focus_line"),
       Region_Multi_chartUI("region_multi_line")
     )

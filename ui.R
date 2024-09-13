@@ -98,7 +98,7 @@ ui <- function(input, output, session) {
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
       bslib::nav_panel(
-        title = "Local Authority View",
+        title = "LA Level",
 
         # Tab header ==============================================================
         h1("Local Authority View"),
@@ -118,6 +118,43 @@ ui <- function(input, output, session) {
 
         # LA Metadata =============================================================
         LA_LevelMetaUI("la_meta")
+      ),
+      bslib::nav_panel(
+        title = "Regional Level",
+
+        # Tab header ==============================================================
+        h1("Regional View"),
+
+        # User Inputs =============================================================
+        appInputsUI("region_level"),
+
+        # Region tables =============================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::card(
+            bslib::card_header("Regional Authorities"),
+            bslib::card_body(
+              # Region LA Table -------------------------------------------------------
+              RegionLA_TableUI("region_la_table"),
+              # Region Table ----------------------------------------------------------
+              Region_TableUI("region_table"),
+              # Region Stats Table ----------------------------------------------------
+              Region_StatsTableUI("stats_table")
+            )
+          )
+        ),
+
+        # Region charts =============================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::navset_card_underline(
+            id = "region_charts",
+            Region_FocusLine_chartUI("region_focus_line"),
+            Region_Multi_chartUI("region_multi_line")
+          )
+        )
       ),
       user_guide_panel(),
       a11y_panel(),

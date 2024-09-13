@@ -86,14 +86,18 @@ server <- function(input, output, session) {
   # Start of LAIT
   # ===========================================================================
 
+  # ===========================================================================
+  # LA Level Page
+  # ===========================================================================
+
   # User Inputs ===============================================================
-  app_inputs <- appInputsServer("la_level")
+  la_app_inputs <- appInputsServer("la_level")
 
   # LA level tables ===========================================================
   # Main table
   la_main_tbl <- LA_LevelTableServer(
     "la_table",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
@@ -101,17 +105,16 @@ server <- function(input, output, session) {
   # Stats table
   LA_StatsTableServer(
     "la_stats",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
-
 
   # LA level charts ===========================================================
   # Line chart
   la_linechart <- LA_LineChartServer(
     "la_chart",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
@@ -119,16 +122,15 @@ server <- function(input, output, session) {
   # Bar chart
   la_barchart <- LA_BarChartServer(
     "la_chart",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
 
-
   # LA Metadata ===============================================================
   LA_LevelMetaServer(
     "la_meta",
-    app_inputs$indicator,
+    la_app_inputs$indicator,
     metrics_clean
   )
 
@@ -137,6 +139,63 @@ server <- function(input, output, session) {
     la_main_tbl = la_main_tbl(),
     la_linechart = la_linechart(),
     la_barchart = la_barchart()
+  )
+
+
+  # ===========================================================================
+  # Regional Level Page
+  # ===========================================================================
+  # User Inputs ===============================================================
+  region_app_inputs <- appInputsServer("region_level")
+
+  # Region tables =============================================================
+  # Region LA table -----------------------------------------------------------
+  RegionLA_TableServer(
+    "region_la_table",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog
+  )
+
+  # Region table --------------------------------------------------------------
+  Region_TableServer(
+    "region_table",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
+  )
+
+  # Region stats table --------------------------------------------------------
+  Region_StatsTableServer(
+    "stats_table",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
+  )
+
+  # Region charts =============================================================
+  # Region focus line chart ---------------------------------------------------
+  Region_FocusLine_chartServer(
+    "region_focus_line",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
+  )
+
+  # Region multi-choice line chart --------------------------------------------
+  Region_Multi_chartServer(
+    "region_multi_line",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
   )
 
   # Stop app ------------------------------------------------------------------
