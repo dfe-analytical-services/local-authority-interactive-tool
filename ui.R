@@ -100,52 +100,52 @@ ui <- function(input, output, session) {
       bslib::nav_panel(
         title = "LA Level",
 
-        # Tab header ==============================================================
+        # Tab header ==========================================================
         h1("Local Authority View"),
 
-        # User Inputs =============================================================
+        # User Inputs =========================================================
         appInputsUI("la_level"),
 
-        # LA Tables ===============================================================
+        # LA Tables ===========================================================
         # Main table
         LA_LevelTableUI("la_table"),
 
         # Stats table
         LA_StatsTableUI("la_stats"),
 
-        # LA Charts ===============================================================
+        # LA Charts ===========================================================
         LA_ChartUI("la_chart"),
 
-        # LA Metadata =============================================================
+        # LA Metadata =========================================================
         LA_LevelMetaUI("la_meta")
       ),
       bslib::nav_panel(
         title = "Regional Level",
 
-        # Tab header ==============================================================
+        # Tab header ==========================================================
         h1("Regional View"),
 
-        # User Inputs =============================================================
+        # User Inputs =========================================================
         appInputsUI("region_level"),
 
-        # Region tables =============================================================
+        # Region tables =======================================================
         div(
           class = "well",
           style = "overflow-y: visible;",
           bslib::card(
             bslib::card_header("Regional Authorities"),
             bslib::card_body(
-              # Region LA Table -------------------------------------------------------
+              # Region LA Table -----------------------------------------------
               RegionLA_TableUI("region_la_table"),
-              # Region Table ----------------------------------------------------------
+              # Region Table --------------------------------------------------
               Region_TableUI("region_table"),
-              # Region Stats Table ----------------------------------------------------
+              # Region Stats Table --------------------------------------------
               Region_StatsTableUI("stats_table")
             )
           )
         ),
 
-        # Region charts =============================================================
+        # Region charts =======================================================
         div(
           class = "well",
           style = "overflow-y: visible;",
@@ -154,7 +154,10 @@ ui <- function(input, output, session) {
             Region_FocusLine_chartUI("region_focus_line"),
             Region_Multi_chartUI("region_multi_line")
           )
-        )
+        ),
+
+        # Region Metadata =====================================================
+        LA_LevelMetaUI("region_meta")
       ),
       user_guide_panel(),
       a11y_panel(),

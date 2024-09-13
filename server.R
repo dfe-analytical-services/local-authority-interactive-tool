@@ -198,6 +198,13 @@ server <- function(input, output, session) {
     region_names_bds
   )
 
+  # Region Metadata ===========================================================
+  LA_LevelMetaServer(
+    "region_meta",
+    region_app_inputs$indicator,
+    metrics_clean
+  )
+
   # Stop app ------------------------------------------------------------------
   session$onSessionEnded(function() {
     shiny::stopApp()
