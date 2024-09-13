@@ -12,15 +12,16 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Regional Level LA table ------------------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
+selected_topic <- "Children's Service Finance"
+selected_indicator <- "Looked after children - S251/Outturn weekly unit costs"
 selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic == selected_topic,
-    Measure == selected_indicator
+    Measure == selected_indicator,
+    !is.na(Years)
   )
 
 # Get the LA region

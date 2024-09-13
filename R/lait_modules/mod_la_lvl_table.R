@@ -25,7 +25,8 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
       filtered_bds$data <- bds_metrics |>
         dplyr::filter(
           Topic == app_inputs$topic(),
-          Measure == app_inputs$indicator()
+          Measure == app_inputs$indicator(),
+          !is.na(Years)
         )
     })
 
