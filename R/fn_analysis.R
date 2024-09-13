@@ -125,7 +125,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
   }
 
   # Set the Quartile Band (dependent on polarity)
-  if (indicator_polarity == "Low") {
+  if (indicator_polarity %in% "Low") {
     quartile_band <- dplyr::case_when(
       is.na(indicator_val) ~ NA_character_,
       (indicator_val >= quartile_bands[["0%"]]) &
@@ -138,7 +138,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
         (indicator_val <= quartile_bands[["100%"]]) ~ "D",
       TRUE ~ "Error"
     )
-  } else if (indicator_polarity == "High") {
+  } else if (indicator_polarity %in% "High") {
     quartile_band <- dplyr::case_when(
       is.na(indicator_val) ~ NA_character_,
       (indicator_val >= quartile_bands[["0%"]]) &

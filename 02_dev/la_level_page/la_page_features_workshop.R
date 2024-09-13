@@ -11,9 +11,9 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
-selected_la <- "Westmorland and Furness"
+selected_topic <- "Children's Service Finance"
+selected_indicator <- "Looked after children - S251/Outturn weekly unit costs"
+selected_la <- "Barking and Dagenham"
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -138,7 +138,7 @@ la_indicator_val <- filtered_bds |>
   filter_la_regions(selected_la, latest = TRUE, pull_col = "values_num")
 
 # Calculating which quartile this value sits in
-if (la_indicator_polarity == "Low") {
+if (la_indicator_polarity %in% "Low") {
   la_quartile <- dplyr::case_when(
     is.na(la_indicator_val) ~ NA_character_,
     (la_indicator_val >= la_quartile_bands[["0%"]]) &
@@ -151,7 +151,7 @@ if (la_indicator_polarity == "Low") {
       (la_indicator_val <= la_quartile_bands[["100%"]]) ~ "D",
     TRUE ~ "Error"
   )
-} else if (la_indicator_polarity == "High") {
+} else if (la_indicator_polarity %in% "High") {
   la_quartile <- dplyr::case_when(
     is.na(la_indicator_val) ~ NA_character_,
     (la_indicator_val >= la_quartile_bands[["0%"]]) &
