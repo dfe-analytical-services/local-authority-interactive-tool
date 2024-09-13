@@ -39,7 +39,15 @@ ui_mod <- bslib::page_fillable(
       )
     )
   ),
-  Region_FocusLine_chartUI("region_focus_line")
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_underline(
+      id = "la_charts",
+      Region_FocusLine_chartUI("region_focus_line"),
+      Region_Multi_chartUI("region_multi_line")
+    )
+  )
 )
 
 
@@ -78,6 +86,15 @@ server_mod <- function(input, output, session) {
 
   Region_FocusLine_chartServer(
     "region_focus_line",
+    app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
+  )
+
+  Region_Multi_chartServer(
+    "region_multi_line",
     app_inputs,
     bds_metrics,
     stat_n_geog,
