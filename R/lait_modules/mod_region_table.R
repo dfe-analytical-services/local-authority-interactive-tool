@@ -85,10 +85,9 @@ RegionLA_TableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    class = "well",
     style = "overflow-y: visible;",
     bslib::card(
-      bslib::card_header("Regional Authorities"),
+      # bslib::card_header(""),
       bslib::card_body(
         reactable::reactableOutput(ns("region_la_table"))
       )
@@ -183,10 +182,10 @@ Region_TableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    class = "well",
-    style = "overflow-y: visible;",
+    # Add black border between the tables
+    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
     bslib::card(
-      bslib::card_header("Regional Authorities"),
+      # bslib::card_header(""),
       bslib::card_body(
         reactable::reactableOutput(ns("region_table"))
       )
@@ -266,10 +265,10 @@ Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    class = "well",
-    style = "overflow-y: visible;",
+    # Add black border between the tables
+    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
     bslib::card(
-      bslib::card_header("Regional Authorities"),
+      # bslib::card_header(""),
       bslib::card_body(
         reactable::reactableOutput(ns("region_stats_table"))
       )
@@ -287,7 +286,7 @@ Region_StatsTableServer <- function(
     # Get Region LA table
     region_la_table <- RegionLA_DataServer("region_la", app_inputs, bds_metrics, stat_n_geog)
 
-    # Region table
+    # Get Region table
     region_table <- Region_DataServer(
       "region_table",
       app_inputs, bds_metrics, national_names_bds, region_names_bds
