@@ -80,7 +80,7 @@ Current_YearServer <- function(id, region_la_long) {
   })
 }
 
-# Region LA table =============================================================
+# Region LA table UI ==========================================================
 RegionLA_TableUI <- function(id) {
   ns <- NS(id)
 
@@ -95,7 +95,7 @@ RegionLA_TableUI <- function(id) {
   )
 }
 
-# Region LA Level table -------------------------------------------------------
+# Region LA table data --------------------------------------------------------
 RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -133,15 +133,13 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   })
 }
 
-
+# Region LA table Server ------------------------------------------------------
 RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
     # Get Region LA table
     region_la_table <- RegionLA_DataServer("region_la_table", app_inputs, bds_metrics, stat_n_geog)
 
-    # Get LA region
-    region_la <- LA_RegionServer("region_la", app_inputs$la, stat_n_geog)
-
+    # Table output
     output$region_la_table <- reactable::renderReactable({
       dfe_reactable(
         region_la_table(),
@@ -152,6 +150,7 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     })
   })
 }
+
 
 
 # Get long data format for Regions
@@ -177,7 +176,8 @@ Region_LongDataServer <- function(id, filtered_bds, region_names_bds, region_nat
   })
 }
 
-# Region table ================================================================
+
+# Region table UI =============================================================
 Region_TableUI <- function(id) {
   ns <- NS(id)
 
@@ -193,7 +193,7 @@ Region_TableUI <- function(id) {
   )
 }
 
-# Regional Level Regions table ----------------------------------------------
+# Region table data -----------------------------------------------------------
 Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -234,6 +234,7 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
   })
 }
 
+# Region table Server ---------------------------------------------------------
 Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -248,6 +249,7 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, nationa
     # Get clean Regions
     region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
 
+    # Table output
     output$region_table <- reactable::renderReactable({
       dfe_reactable(
         region_table(),
@@ -260,7 +262,7 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, nationa
 }
 
 
-# Region Stats table ==========================================================
+# Region Stats table UI =======================================================
 Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
@@ -276,7 +278,7 @@ Region_StatsTableUI <- function(id) {
   )
 }
 
-
+# Region Stats table Server ---------------------------------------------------
 Region_StatsTableServer <- function(
     id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
@@ -347,6 +349,7 @@ Region_StatsTableServer <- function(
       )
     })
 
+    # Table output
     output$region_stats_table <- reactable::renderReactable({
       dfe_reactable(region_stats_table())
     })
