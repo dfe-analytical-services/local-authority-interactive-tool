@@ -14,10 +14,13 @@ LA_RegionServer <- function(id, la_input, stat_n_geog) {
 
 
 # Get clean LA Region
-Clean_RegionServer <- function(id, la_input, stat_n_geog, filtered_bds) {
+Clean_RegionServer <- function(id, app_inputs, stat_n_geog, bds_metrics) {
   moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
     # Get LA region
-    region_la <- LA_RegionServer("region_la", la_input, stat_n_geog)
+    region_la <- LA_RegionServer("region_la", app_inputs$la, stat_n_geog)
 
     reactive({
       # Cleans Regions for which London to use
@@ -237,9 +240,6 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
 # Region table Server ---------------------------------------------------------
 Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Filter for selected topic and indicator
-    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
-
     # Region table
     region_table <- Region_DataServer(
       "region_table",
@@ -247,7 +247,7 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, nationa
     )
 
     # Get clean Regions
-    region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
+    region_clean <- Clean_RegionServer("region_clean", app_inputs, stat_n_geog, bds_metrics)
 
     # Table output
     output$region_table <- reactable::renderReactable({
@@ -295,7 +295,7 @@ Region_StatsTableServer <- function(
     )
 
     # Get clean Regions
-    region_clean <- Clean_RegionServer("region_clean", app_inputs$la, stat_n_geog, filtered_bds)
+    region_clean <- Clean_RegionServer("region_clean", app_inputs, stat_n_geog, bds_metrics)
 
     # Get relevant National
     region_national <- Region_NationalServer("region_national", national_names_bds, filtered_bds)

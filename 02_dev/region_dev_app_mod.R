@@ -38,7 +38,8 @@ ui_mod <- bslib::page_fillable(
         Region_StatsTableUI("stats_table")
       )
     )
-  )
+  ),
+  Region_FocusLine_chartUI("region_focus_line")
 )
 
 
@@ -68,6 +69,15 @@ server_mod <- function(input, output, session) {
 
   Region_StatsTableServer(
     "stats_table",
+    app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    national_names_bds,
+    region_names_bds
+  )
+
+  Region_FocusLine_chartServer(
+    "region_focus_line",
     app_inputs,
     bds_metrics,
     stat_n_geog,
