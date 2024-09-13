@@ -24,6 +24,8 @@ ui_mod <- bslib::page_fillable(
 
   # Start of app  =============================================================
   appInputsUI("region_inputs"),
+
+  # Region tables =============================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -39,6 +41,8 @@ ui_mod <- bslib::page_fillable(
       )
     )
   ),
+
+  # Region charts =============================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -57,6 +61,7 @@ server_mod <- function(input, output, session) {
   # Extract selected LA, Topic and Indicator
   app_inputs <- appInputsServer("region_inputs")
 
+  # Region tables =============================================================
   # Region LA table -----------------------------------------------------------
   RegionLA_TableServer(
     "la_table",
@@ -75,6 +80,7 @@ server_mod <- function(input, output, session) {
     region_names_bds
   )
 
+  # Region stats table --------------------------------------------------------
   Region_StatsTableServer(
     "stats_table",
     app_inputs,
@@ -84,6 +90,8 @@ server_mod <- function(input, output, session) {
     region_names_bds
   )
 
+  # Region charts =============================================================
+  # Region focus line chart ---------------------------------------------------
   Region_FocusLine_chartServer(
     "region_focus_line",
     app_inputs,
@@ -93,6 +101,7 @@ server_mod <- function(input, output, session) {
     region_names_bds
   )
 
+  # Region multi-choice line chart --------------------------------------------
   Region_Multi_chartServer(
     "region_multi_line",
     app_inputs,
