@@ -34,6 +34,10 @@ filtered_bds <- bds_metrics |>
     !is.na(Years)
   )
 
+# Decimal point setting
+indicator_dps <- la_filtered_bds |>
+  pull_uniques("dps")
+
 # Determine London region to use
 la_region_ldn_clean <- clean_ldn_region(la_region, filtered_bds)
 
@@ -84,7 +88,7 @@ la_diff <- la_long |>
 # Join difference and pivot wider to recreate LAIT table
 la_table <- la_long |>
   dplyr::bind_rows(la_diff) |>
-  pretty_num_table(dp = 1) |>
+  pretty_num_table(dp = indicator_dps) |>
   dplyr::mutate(Values = dplyr::case_when(
     is.na(values_num) ~ Values,
     `Years` == "Change from previous year" ~ as.character(values_num),
@@ -209,7 +213,7 @@ la_stats_table <- data.frame(
   "Polarity" = la_indicator_polarity,
   check.names = FALSE
 ) |>
-  pretty_num_table(dp = 1)
+  pretty_num_table(dp = indicator_dps)
 
 if (la_indicator_polarity %notin% c("High", "Low")) {
   la_stats_table <- la_stats_table |>
