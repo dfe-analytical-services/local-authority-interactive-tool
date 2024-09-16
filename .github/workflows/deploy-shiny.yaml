@@ -3,7 +3,7 @@ on:
     branches:
       - main
 
-name: shinyapps.io deploy
+name: Shinyapps.io deploy
 
 jobs:
   deployShiny:
