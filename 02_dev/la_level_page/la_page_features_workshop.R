@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Adoption"
-selected_indicator <- "Number LAC Adopted - application unopposed"
+selected_topic <- "Foundation Stage"
+selected_indicator <- "Foundation Stage - % achieving a good level of development"
 selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA
@@ -93,10 +93,17 @@ la_table <- la_long |>
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions"),
     names_from = Years,
-    values_from = Values,
+    values_from = values_num,
   ) |>
   dplyr::arrange(`LA and Regions`)
 
+# Output table
+dfe_reactable(
+  la_table,
+  rowStyle = function(index) {
+    highlight_selected_row(index, la_table, selected_la)
+  }
+)
 
 
 # - Local Authority specific stats table --------------------------------------

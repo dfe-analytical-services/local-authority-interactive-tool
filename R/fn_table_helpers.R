@@ -143,7 +143,8 @@ dfe_reactable <- function(data, ...) {
     style = list(fontSize = "16px"),
     defaultColDef = reactable::colDef(
       headerClass = "bar-sort-header",
-      html = TRUE
+      html = TRUE,
+      na = "NA"
     ),
     ...
   )
