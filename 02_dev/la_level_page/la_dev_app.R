@@ -328,6 +328,7 @@ server_dev <- function(input, output, session) {
   la_line_chart <- reactive({
     # Build plot
     la_line_chart <- la_long() |>
+      dplyr::filter(!is.na(values_num)) |>
       ggplot2::ggplot() +
       ggiraph::geom_point_interactive(
         ggplot2::aes(

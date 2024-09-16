@@ -100,6 +100,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     la_line_chart <- reactive({
       # Plot
       la_line_chart <- la_long() |>
+        dplyr::filter(!is.na(values_num)) |>
         ggplot2::ggplot() +
         ggiraph::geom_point_interactive(
           ggplot2::aes(

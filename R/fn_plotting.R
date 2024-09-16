@@ -396,7 +396,7 @@ tooltip_vlines <- function(x, data) {
       glue::glue_data(
         data |>
           pretty_num_table(include_columns = "values_num", dp = 1) |>
-          dplyr::filter(Years_num == x, !is.na(values_num)) |>
+          dplyr::filter(Years_num == x) |>
           dplyr::arrange(dplyr::desc(values_num)),
         "{`LA and Regions`}: {values_num}"
       ),

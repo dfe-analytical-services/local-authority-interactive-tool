@@ -11,9 +11,9 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Children's Service Finance"
-selected_indicator <- "Looked after children - S251/Outturn weekly unit costs"
-selected_la <- "Barking and Dagenham"
+selected_topic <- "Adoption"
+selected_indicator <- "Number LAC Adopted - application unopposed"
+selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -64,7 +64,7 @@ sn_avg <- la_filtered_bds |>
 # LA levels long
 la_long <- la_filtered_bds |>
   dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+  dplyr::select(`LA Number`, `LA and Regions`, Years, values_num, Values) |>
   dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
@@ -84,12 +84,17 @@ la_diff <- la_long |>
 # Join difference and pivot wider to recreate LAIT table
 la_table <- la_long |>
   dplyr::bind_rows(la_diff) |>
+  pretty_num_table(dp = 1) |>
+  dplyr::mutate(Values = dplyr::case_when(
+    is.na(values_num) ~ Values,
+    `Years` == "Change from previous year" ~ as.character(values_num),
+    TRUE ~ as.character(values_num)
+  )) |>
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions"),
     names_from = Years,
-    values_from = values_num
+    values_from = Values,
   ) |>
-  pretty_num_table(dp = 1) |>
   dplyr::arrange(`LA and Regions`)
 
 
@@ -239,6 +244,9 @@ dfe_reactable(
 # LA line chart plot ----------------------------------------------------------
 # Plot
 la_line_chart <- la_long |>
+  # Filter out NAs to stop warning
+  # "Failed setting attribute 'data-id', mismatched lengths of ids and values"
+  dplyr::filter(!is.na(values_num)) |>
   ggplot2::ggplot() +
   ggiraph::geom_point_interactive(
     ggplot2::aes(
