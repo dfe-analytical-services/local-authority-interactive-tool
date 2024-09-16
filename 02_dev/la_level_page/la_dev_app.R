@@ -156,6 +156,19 @@ server_dev <- function(input, output, session) {
       )
   })
 
+  # Get decimal places for indicator selected
+  indicator_dps <- reactiveValues(data = NULL)
+
+  observeEvent(input$indicator, {
+    indicator_dps$data <- bds_metrics |>
+      dplyr::filter(
+        Topic == input$topic_input,
+        Measure == input$indicator
+      ) |>
+      pull_uniques("dps") |>
+      as.numeric()
+  })
+
   # Long format LA data
   la_long <- reactive({
     # Filter stat neighbour for selected LA
@@ -242,7 +255,10 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(dp = 1) |>
+      pretty_num_table(
+        dp = indicator_dps$data,
+        exclude_columns = "LA Number"
+      ) |>
       dplyr::arrange(`LA and Regions`)
   })
 
@@ -301,7 +317,11 @@ server_dev <- function(input, output, session) {
       la_quartile,
       la_quartile_bands,
       la_indicator_polarity
-    )
+    ) |>
+      pretty_num_table(
+        dp = indicator_dps$data,
+        exclude_columns = c("LA Number", "Latest National Rank")
+      )
 
     la_stats_table
   })
