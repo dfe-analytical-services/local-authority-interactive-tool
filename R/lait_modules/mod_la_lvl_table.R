@@ -37,6 +37,32 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
 }
 
 
+
+Indicator_DPServer <- function(id, app_inputs, bds_metrics) {
+  moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    # Define filtered_bds outside of observeEvent
+    indicator_dps <- reactiveValues(data = NULL)
+
+    # Must ensure filtering only done when Indicator is changed
+    # Otherwise it will filter immediately on Topic change
+    observeEvent(app_inputs$indicator(), {
+      indicator_dps$data <- bds_metrics |>
+        dplyr::filter(
+          Topic == app_inputs$topic(),
+          Measure == app_inputs$indicator()
+        ) |>
+        pull_uniques("dps") |>
+        as.numeric()
+    })
+
+    reactive({
+      indicator_dps$data
+    })
+  })
+}
+
+
 #' Shiny Server Function for Creating Long Format LA Data
 #'
 #' @param id A unique ID that identifies the server function
@@ -162,6 +188,13 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         calculate_change_from_prev_yr()
     })
 
+    # Number of decimal places to use in table
+    indicator_dps <- Indicator_DPServer(
+      "indicator_dps",
+      app_inputs,
+      bds_metrics
+    )
+
     # Build Main LA Level table
     # Join difference and pivot wider to recreate LAIT table
     la_table <- reactive({
@@ -172,7 +205,10 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           names_from = Years,
           values_from = values_num
         ) |>
-        pretty_num_table(dp = 1) |>
+        pretty_num_table(
+          dp = indicator_dps(),
+          exclude_columns = "LA Number"
+        ) |>
         dplyr::arrange(`LA and Regions`)
     })
 
@@ -240,6 +276,13 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         calculate_change_from_prev_yr()
     })
 
+    # Number of decimal places to use in table
+    indicator_dps <- Indicator_DPServer(
+      "indicator_dps",
+      app_inputs,
+      bds_metrics
+    )
+
     # Build Stats LA Level table ----------------------------------
     la_stats_table <- shiny::reactive({
       # Extract change from prev year (from LA table)
@@ -291,7 +334,11 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_quartile,
         la_quartile_bands,
         la_indicator_polarity
-      )
+      ) |>
+        pretty_num_table(
+          dp = indicator_dps(),
+          exclude_columns = c("LA Number", "Latest National Rank")
+        )
 
       la_stats_table
     })
