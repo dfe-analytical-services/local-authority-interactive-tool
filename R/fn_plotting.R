@@ -387,7 +387,7 @@ custom_theme <- function() {
 #' The line is dashed and only becomes visible upon hovering,
 #' enhancing the interactivity of the plot.
 #'
-tooltip_vlines <- function(x, data) {
+tooltip_vlines <- function(x, data, indicator_dp = 1) {
   geom_vline_interactive(
     xintercept = x,
     data_id = x,
@@ -395,7 +395,7 @@ tooltip_vlines <- function(x, data) {
       "\n",
       glue::glue_data(
         data |>
-          pretty_num_table(include_columns = "values_num", dp = 1) |>
+          pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
           dplyr::filter(Years_num == x) |>
           dplyr::arrange(dplyr::desc(values_num)),
         "{`LA and Regions`}: {values_num}"

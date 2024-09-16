@@ -157,14 +157,8 @@ server_dev <- function(input, output, session) {
   })
 
   # Get decimal places for indicator selected
-  indicator_dps <- reactiveValues(data = NULL)
-
-  observeEvent(input$indicator, {
-    indicator_dps$data <- bds_metrics |>
-      dplyr::filter(
-        Topic == input$topic_input,
-        Measure == input$indicator
-      ) |>
+  indicator_dps <- reactive({
+    filtered_bds$data |>
       pull_uniques("dps") |>
       as.numeric()
   })
@@ -256,7 +250,7 @@ server_dev <- function(input, output, session) {
         values_from = values_num
       ) |>
       pretty_num_table(
-        dp = indicator_dps$data,
+        dp = indicator_dps(),
         exclude_columns = "LA Number"
       ) |>
       dplyr::arrange(`LA and Regions`)
@@ -319,7 +313,7 @@ server_dev <- function(input, output, session) {
       la_indicator_polarity
     ) |>
       pretty_num_table(
-        dp = indicator_dps$data,
+        dp = indicator_dps(),
         exclude_columns = c("LA Number", "Latest National Rank")
       )
 
@@ -379,7 +373,8 @@ server_dev <- function(input, output, session) {
     vertical_hover <- lapply(
       get_years(la_long()),
       tooltip_vlines,
-      la_long()
+      la_long(),
+      indicator_dps()
     )
 
     # Plotting interactive graph
@@ -411,7 +406,7 @@ server_dev <- function(input, output, session) {
           fill = `LA and Regions`,
           tooltip = glue::glue_data(
             la_long() |>
-              pretty_num_table(include_columns = "values_num", dp = 1),
+              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
             "Year: {Years}\n{`LA and Regions`}: {values_num}"
           ),
           data_id = `LA and Regions`
