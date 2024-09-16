@@ -41,23 +41,13 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
 Indicator_DPServer <- function(id, app_inputs, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
-    # Define filtered_bds outside of observeEvent
-    indicator_dps <- reactiveValues(data = NULL)
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
-    # Must ensure filtering only done when Indicator is changed
-    # Otherwise it will filter immediately on Topic change
-    observeEvent(app_inputs$indicator(), {
-      indicator_dps$data <- bds_metrics |>
-        dplyr::filter(
-          Topic == app_inputs$topic(),
-          Measure == app_inputs$indicator()
-        ) |>
+    # Pull decimal place for indicator
+    reactive({
+      filtered_bds() |>
         pull_uniques("dps") |>
         as.numeric()
-    })
-
-    reactive({
-      indicator_dps$data
     })
   })
 }
