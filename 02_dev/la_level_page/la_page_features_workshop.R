@@ -35,7 +35,7 @@ filtered_bds <- bds_metrics |>
   )
 
 # Decimal point setting
-indicator_dps <- la_filtered_bds |>
+indicator_dps <- filtered_bds |>
   pull_uniques("dps")
 
 # Determine London region to use
@@ -88,7 +88,10 @@ la_diff <- la_long |>
 # Join difference and pivot wider to recreate LAIT table
 la_table <- la_long |>
   dplyr::bind_rows(la_diff) |>
-  pretty_num_table(dp = indicator_dps) |>
+  pretty_num_table(
+    dp = indicator_dps,
+    exclude_columns = "LA Number"
+  ) |>
   dplyr::mutate(Values = dplyr::case_when(
     is.na(values_num) ~ Values,
     `Years` == "Change from previous year" ~ as.character(values_num),
@@ -213,7 +216,10 @@ la_stats_table <- data.frame(
   "Polarity" = la_indicator_polarity,
   check.names = FALSE
 ) |>
-  pretty_num_table(dp = indicator_dps)
+  pretty_num_table(
+    dp = indicator_dps,
+    exclude_columns = c("LA Number", "Latest National Rank")
+  )
 
 if (la_indicator_polarity %notin% c("High", "Low")) {
   la_stats_table <- la_stats_table |>
@@ -288,7 +294,8 @@ la_line_chart <- la_long |>
 vertical_hover <- lapply(
   get_years(la_long),
   tooltip_vlines,
-  la_long
+  la_long,
+  indicator_dps
 )
 
 # Plotting interactive graph
@@ -314,7 +321,7 @@ la_bar_chart <- la_long |>
       fill = `LA and Regions`,
       tooltip = glue::glue_data(
         la_long |>
-          pretty_num_table(include_columns = "values_num", dp = 1),
+          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
         "Year: {Years}\n{`LA and Regions`}: {values_num}"
       ),
       data_id = `LA and Regions`
