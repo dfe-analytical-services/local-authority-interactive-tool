@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - main
-      - development
 
 name: shinyapps.io deploy
 
@@ -20,16 +19,9 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Set env vars (dev)
-        if: endsWith(github.ref, '/development')
-        run: |
-          echo "SHINYAPP_NAME='dev-local-authority-interactive-tool'" >> $GITHUB_ENV
-          echo "SHINYAPP_OVERFLOW_NAME='dev-local-authority-interactive-tool-overflow'">> $GITHUB_ENV
       - name: Set env vars (prod)
-        if: endsWith(github.ref, '/main')
         run: |
           echo "SHINYAPP_NAME='local-authority-interactive-tool'">> $GITHUB_ENV
-          echo "SHINYAPP_OVERFLOW_NAME='local-authority-interactive-tool-overflow'">> $GITHUB_ENV
         
       - name: Restore renv snapshot
         shell: Rscript {0}
@@ -52,4 +44,3 @@ jobs:
           Rscript
           -e "rsconnect::setAccountInfo(name = 'department-for-education', token = '${{secrets.SHINYAPPS_TOKEN}}', secret = '${{secrets.SHINYAPPS_SECRET}}')"
           -e "rsconnect::deployApp(appName=${{env.SHINYAPP_NAME}}, forceUpdate = TRUE)"
-          -e "rsconnect::deployApp(appName=${{env.SHINYAPP_OVERFLOW_NAME}}, forceUpdate = TRUE)"
