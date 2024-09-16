@@ -406,3 +406,91 @@ af_colours_focus <- function() {
     }
   )
 }
+
+
+pretty_num <- function(
+    value,
+    prefix = "",
+    gbp = FALSE,
+    suffix = "",
+    dp = 2,
+    ignore_na = FALSE,
+    alt_na = FALSE,
+    nsmall = NULL) { # Add nsmall argument
+  # Check we're only trying to prettify a single value
+  if (length(value) > 1) {
+    stop("value must be a single value, multiple values were detected")
+  }
+
+  # Force to numeric
+  num_value <- suppressWarnings(as.numeric(value))
+
+  # Check if should skip function
+  if (is.na(num_value)) {
+    if (ignore_na == TRUE) {
+      return(value) # return original value
+    } else if (alt_na != FALSE) {
+      return(alt_na) # return custom NA value
+    } else {
+      return(num_value) # return NA
+    }
+  }
+
+  # Convert GBP to pound symbol
+  if (gbp == TRUE) {
+    currency <- "\U00a3"
+  } else {
+    currency <- ""
+  }
+
+  # Add + / - symbols depending on size of value
+  if (prefix == "+/-") {
+    if (value >= 0) {
+      prefix <- "+"
+    } else {
+      prefix <- "-"
+    }
+    # Add in negative symbol if appropriate and not auto added with +/-
+  } else if (value < 0) {
+    prefix <- paste0("-", prefix)
+  }
+
+  # If nsmall is not given, make same value as dp
+  if (is.null(nsmall)) {
+    nsmall <- dp
+  }
+
+  # Format the number with rounding and minimum decimal places
+  format_num <- function(num, dp, nsmall) {
+    # Round the number
+    rounded_num <- dfeR::round_five_up(num, dp = dp)
+    # Format the number with the specified minimum decimal places
+    format(rounded_num, nsmall = nsmall, big.mark = ",")
+  }
+
+  # Add suffix and prefix, plus convert to million or billion
+  if (abs(num_value) >= 1.e9) {
+    paste0(
+      prefix,
+      currency,
+      format_num(abs(num_value) / 1.e9, dp = dp, nsmall = nsmall),
+      " billion",
+      suffix
+    )
+  } else if (abs(num_value) >= 1.e6) {
+    paste0(
+      prefix,
+      currency,
+      format_num(abs(num_value) / 1.e6, dp = dp, nsmall = nsmall),
+      " million",
+      suffix
+    )
+  } else {
+    paste0(
+      prefix,
+      currency,
+      format_num(abs(num_value), dp = dp, nsmall = nsmall),
+      suffix
+    )
+  }
+}
