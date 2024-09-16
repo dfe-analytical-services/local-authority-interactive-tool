@@ -116,7 +116,7 @@ pretty_num_table <- function(data,
   data |>
     dplyr::mutate(dplyr::across(
       .cols = dplyr::all_of(cols_to_include),
-      ~ sapply(., dfeR::pretty_num, ...)
+      ~ sapply(., pretty_num, ...)
     ))
 }
 
@@ -234,8 +234,7 @@ create_stats_table <- function(
   ) |>
     cbind(rank_quartile_band_values)
 
-  stats_table |>
-    pretty_num_table(dp = 1)
+  stats_table
 }
 
 
