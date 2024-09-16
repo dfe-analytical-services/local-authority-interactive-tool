@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Foundation Stage"
-selected_indicator <- "Foundation Stage - % achieving a good level of development"
+selected_topic <- "Health and Wellbeing"
+selected_indicator <- "Child Road Traffic Casualties"
 selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA

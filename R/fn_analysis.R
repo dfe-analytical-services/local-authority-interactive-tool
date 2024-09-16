@@ -52,11 +52,7 @@ calculate_change_from_prev_yr <- function(data) {
       .by_group = TRUE
     ) |>
     dplyr::mutate(
-      values_num = ifelse(
-        dplyr::lag(Years_num) - Years_num != 1,
-        NA,
-        dplyr::lag(values_num) - values_num
-      ),
+      values_num = dplyr::lag(values_num) - values_num,
       Years = "Change from previous year"
     ) |>
     dplyr::filter(dplyr::row_number() == 2) |>
