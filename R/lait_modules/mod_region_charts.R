@@ -60,19 +60,16 @@ Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
       shiny::updateSelectizeInput(
         session = session,
         inputId = "chart_input",
-        choices = multi_chart_data()
+        choices = multi_chart_data(),
+        selected = setdiff(input$chart_input, region_clean())
       )
     })
 
     # Return valid selected chart input
     reactive({
-      # Check if input$chart_input still holds old Region, if so force as NULL
-      # Deals with shiny storing input$chart_input despite choices being changed
-      if (input$chart_input == region_clean() || length(input$chart_input) == 0) {
-        NULL
-      } else {
-        input$chart_input
-      }
+      # Remove region_clean() (default region from selected LA) from
+      # chart selected Regions
+      setdiff(input$chart_input, region_clean())
     })
   })
 }

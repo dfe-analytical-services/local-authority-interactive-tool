@@ -113,13 +113,6 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Current year
     current_year <- Current_YearServer("current_year", region_la_long)
 
-    # Number of decimal places to use in table
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # Difference between last two years
     region_la_diff <- reactive({
       region_la_long() |>

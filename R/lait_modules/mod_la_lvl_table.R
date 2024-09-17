@@ -246,13 +246,6 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         calculate_change_from_prev_yr()
     })
 
-    # Number of decimal places to use in table
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # Build Stats LA Level table ----------------------------------
     la_stats_table <- shiny::reactive({
       # Extract change from prev year (from LA table)
