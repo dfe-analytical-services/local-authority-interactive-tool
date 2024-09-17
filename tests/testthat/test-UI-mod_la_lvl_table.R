@@ -148,7 +148,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check title
   testthat::expect_true(
-    grepl("Infant Mortality - Rate per 1000 live births", la_linechart_list$x$html)
+    grepl("Infant Mortality rate per 1000 live births", la_linechart_list$x$html)
   )
 
   # Check visual of line chart
@@ -186,8 +186,9 @@ test_that("Check LA charts behave as expected", {
   # Check title
   testthat::expect_true(
     grepl(
-      "Key Stage 1 Reading Expected Standard - % achieving expected level",
-      la_barchart_list$x$html
+      "Pupils achieving Key Stage 1 Reading Expected Standard (%)",
+      la_barchart_list$x$html,
+      fixed = TRUE
     )
   )
 

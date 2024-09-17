@@ -32,7 +32,7 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
 
     # Check title
     testthat::expect_true(
-      grepl("LAC Key Stage 4 - AVG Attainment 8 score - Average Score", plot_data_list$x$html)
+      grepl("LAC - KS4 Average Attainment 8 Score", plot_data_list$x$html)
     )
   })
 })
@@ -73,8 +73,9 @@ testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct 
     # Check title
     testthat::expect_true(
       grepl(
-        "Newly issued statements and plans in LA maintained mainstream schools - % statements/plans",
-        plot_data_list$x$html
+        "Newly issued EHC plans with a placement in LA maintained mainstream schools (%)",
+        plot_data_list$x$html,
+        fixed = TRUE
       )
     )
   })

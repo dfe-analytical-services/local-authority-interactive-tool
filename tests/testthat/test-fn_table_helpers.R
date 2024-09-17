@@ -241,7 +241,7 @@ test_that("7. pretty_num_table can take pretty_num arguements", {
   # Empty data frame
   result <- pretty_num_table(pretty_tbl_data,
     suffix = "_test",
-    dp = 5,
+    dp = 2,
     gbp = TRUE
   )
 
@@ -355,8 +355,7 @@ test_that("1. create_stats_table works with standard inputs", {
     "(B) Up to and including" = 30,
     "(A) Up to and including" = 40,
     check.names = FALSE
-  ) |>
-    pretty_num_table(dp = 1)
+  )
 
   expect_equal(result, expected)
 })
@@ -420,8 +419,7 @@ test_that("3. create_stats_table handles NAs gracefully", {
     "(C) Up to and including" = "-",
     "(D) Up to and including" = "-",
     check.names = FALSE
-  ) |>
-    pretty_num_table(dp = 1)
+  )
 
   expect_warning(
     expect_equal(
@@ -463,13 +461,12 @@ test_that("4. create_stats_table handles NA Quartile Banding gracefully", {
     "Polarity" = "Low",
     "Latest National Rank" = NA,
     "Quartile Banding" = NA,
-    "(A) Up to and including" = "0",
-    "(B) Up to and including" = "0",
-    "(C) Up to and including" = "0",
-    "(D) Up to and including" = "0",
+    "(A) Up to and including" = 0,
+    "(B) Up to and including" = 0,
+    "(C) Up to and including" = 0,
+    "(D) Up to and including" = 0,
     check.names = FALSE
-  ) |>
-    pretty_num_table(dp = 1)
+  )
 
   expect_warning(
     expect_equal(
