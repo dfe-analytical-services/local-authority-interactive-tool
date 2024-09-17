@@ -44,31 +44,39 @@ Chart_InputUI <- function(id) {
 
 # Restrict the user input choices to only eligible Regions
 # Not England, Ldn () where missing, and default Region
-Chart_InputServer <- function(id, la_input, region_long_plot, region_clean) {
+Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
   moduleServer(id, function(input, output, session) {
-    # Update chart input selection choice of Regions
-    shiny::observeEvent(la_input(), {
-      # Get Region choices for selected LA (& Region)
-      multi_chart_data <- region_long_plot() |>
+    # Reactive expression to generate multi_chart_data
+    multi_chart_data <- reactive({
+      region_long_plot() |>
         dplyr::filter(
           `LA and Regions` != region_clean()
         ) |>
         pull_uniques("LA and Regions")
+    })
 
-      # Update chart input selection
-      shiny::updateSelectInput(
+    # Update chart input selection when region_clean changes
+    shiny::observeEvent(region_clean(), {
+      shiny::updateSelectizeInput(
         session = session,
         inputId = "chart_input",
-        choices = multi_chart_data
+        choices = multi_chart_data(),
+        selected = NULL # Reset selection if current values are no longer valid
       )
     })
 
+    # Return valid selected chart input
     reactive({
-      input$chart_input
+      # Check if input$chart_input still holds old Region, if so force as NULL
+      # Deals with shiny storing input$chart_input despite choices being changed
+      if (input$chart_input %in% region_clean() || length(input$chart_input) == 0) {
+        NULL
+      } else {
+        input$chart_input
+      }
     })
   })
 }
-
 
 
 
@@ -113,6 +121,13 @@ Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geo
 
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
+
+    # Number of decimal places to use in tooltip
+    indicator_dps <- Indicator_DPServer(
+      "indicator_dps",
+      app_inputs,
+      bds_metrics
+    )
 
     # Build focus line plot
     region_focus_line_chart <- reactive({
@@ -164,7 +179,8 @@ Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geo
       vertical_hover <- lapply(
         get_years(region_focus_line_data),
         tooltip_vlines,
-        region_focus_line_data
+        region_focus_line_data,
+        indicator_dps()
       )
 
       # Plotting interactive graph
@@ -237,16 +253,22 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Pulling specific choices available for selected app &
-    # organisational level
+    # Number of decimal places to use in tooltip
+    indicator_dps <- Indicator_DPServer(
+      "indicator_dps",
+      app_inputs,
+      bds_metrics
+    )
+
+    # Pulling specific choices available for selected app & organisational level
     chart_input <- Chart_InputServer(
       "chart_input",
-      app_inputs$la,
+      app_inputs,
       region_long_plot,
       region_clean
     )
 
-    # Build Multi Plot
+    # Built multi-choice plot
     region_multi_line_chart <- reactive({
       # Filtering plotting data for selected LA region and others user choices
       region_multi_choice_data <- region_long_plot() |>
@@ -254,13 +276,13 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
           (`LA and Regions` %in% chart_input()) |
             (`LA and Regions` %in% region_clean())
         ) |>
-        # Reordering so lines are layered by selection choice
+        # Reordering so lines are layered by selection choice, ensuring no duplicates
         reorder_la_regions(
           rev(c(region_clean(), chart_input()))
         )
 
-      # Build plot based on user choice of regions
-      region_multi_line_chart <- region_multi_choice_data |>
+      # Reactive expression to handle plot building
+      region_multi_line <- region_multi_choice_data |>
         ggplot2::ggplot() +
         ggiraph::geom_point_interactive(
           ggplot2::aes(
@@ -282,7 +304,7 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
         ) +
         format_axes(region_multi_choice_data) +
         manual_colour_mapping(
-          c(region_clean(), chart_input()),
+          unique(c(region_clean(), chart_input())),
           type = "line"
         ) +
         set_plot_labs(filtered_bds(), app_inputs$indicator()) +
@@ -290,17 +312,17 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
         # Revert order of the legend so goes from right to left
         ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
-
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(region_multi_choice_data),
         tooltip_vlines,
-        region_multi_choice_data
+        region_multi_choice_data,
+        indicator_dps()
       )
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = (region_multi_line_chart + vertical_hover),
+        ggobj = region_multi_line + vertical_hover,
         width_svg = 8,
         options = generic_ggiraph_options(
           opts_hover(
@@ -310,6 +332,7 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
       )
     })
 
+    # Render the reactive plot output separately
     output$region_multi_line_chart <- ggiraph::renderGirafe({
       region_multi_line_chart()
     })
