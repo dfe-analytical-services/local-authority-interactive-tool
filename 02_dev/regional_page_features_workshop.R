@@ -24,6 +24,10 @@ filtered_bds <- bds_metrics |>
     !is.na(Years)
   )
 
+# Decimal point setting
+indicator_dps <- filtered_bds |>
+  pull_uniques("dps")
+
 # Get the LA region
 region_la <- stat_n_geog |>
   dplyr::filter(`LA Name` == selected_la) |>
@@ -73,7 +77,10 @@ region_la_table <- region_la_long |>
     names_from = Years,
     values_from = values_num
   ) |>
-  pretty_num_table(dp = 1) |>
+  pretty_num_table(
+    dp = indicator_dps,
+    exclude_columns = "LA Number"
+  ) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`)
 
 # Render reactable table
@@ -130,7 +137,10 @@ region_table <- region_long |>
     names_from = Years,
     values_from = values_num
   ) |>
-  pretty_num_table(dp = 1) |>
+  pretty_num_table(
+    dp = indicator_dps,
+    exclude_columns = "LA Number"
+  ) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`) |>
   # Places England row at the bottom of the table
   dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
@@ -185,7 +195,8 @@ region_stats_table <- data.frame(
   "LA Number" = region_stats_la_num,
   "LA and Regions" = region_stats_name,
   "Trend" = region_trend,
-  "Change from previous year" = region_stats_change
+  "Change from previous year" = region_stats_change,
+  check.names = FALSE
 )
 
 
@@ -240,17 +251,20 @@ region_line_chart <- region_line_chart_data |>
   format_axes(region_line_chart_data) +
   manual_colour_mapping(
     c(region_la_ldn_clean, region_random_selection),
-    type = "bar"
+    type = "line"
   ) +
   set_plot_labs(filtered_bds, selected_indicator) +
-  custom_theme()
+  custom_theme() +
+  # Revert order of the legend so goes from right to left
+  ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
 
 # Creating vertical geoms to make vertical hover tooltip
 vertical_hover <- lapply(
   get_years(region_line_chart_data),
   tooltip_vlines,
-  region_line_chart_data
+  region_line_chart_data,
+  indicator_dps
 )
 
 # Plotting interactive graph
@@ -309,7 +323,8 @@ region_line_chart <- focus_line_data |>
 vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
-  focus_line_data
+  focus_line_data,
+  indicator_dps
 )
 
 # Plotting interactive graph
@@ -338,7 +353,7 @@ la_bar_chart <- focus_bar_data |>
       fill = `LA and Regions`,
       tooltip = glue::glue_data(
         focus_bar_data |>
-          pretty_num_table(include_columns = "values_num", dp = 1),
+          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
         "Year: {Years}\n{`LA and Regions`}: {values_num}"
       ),
       data_id = `LA and Regions`

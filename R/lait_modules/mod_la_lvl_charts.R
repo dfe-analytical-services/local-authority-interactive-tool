@@ -209,8 +209,6 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics
     )
 
-
-
     # LA Level bar plot ----------------------------------
     la_bar_chart <- reactive({
       # Build plot

@@ -202,6 +202,13 @@ server_dev <- function(input, output, session) {
       )
   })
 
+  # Get decimal places for indicator selected
+  indicator_dps <- reactive({
+    filtered_bds$data |>
+      pull_uniques("dps") |>
+      as.numeric()
+  })
+
   # Get the LA region
   region_la <- reactive({
     stat_n_geog |>
@@ -260,7 +267,10 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(dp = 1) |>
+      pretty_num_table(
+        dp = indicator_dps(),
+        exclude_columns = "LA Number"
+      ) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`)
   })
 
@@ -313,7 +323,10 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(dp = 1) |>
+      pretty_num_table(
+        dp = indicator_dps(),
+        exclude_columns = "LA Number"
+      ) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
       # Places England row at the bottom of the table
       dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
@@ -472,7 +485,8 @@ server_dev <- function(input, output, session) {
     vertical_hover <- lapply(
       get_years(region_focus_line_data),
       tooltip_vlines,
-      region_focus_line_data
+      region_focus_line_data,
+      indicator_dps()
     )
 
     # Plotting interactive graph
@@ -531,14 +545,17 @@ server_dev <- function(input, output, session) {
         type = "line"
       ) +
       set_plot_labs(filtered_bds$data, input$indicator) +
-      custom_theme()
+      custom_theme() +
+      # Revert order of the legend so goes from right to left
+      ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
 
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
       get_years(region_multi_choice_data),
       tooltip_vlines,
-      region_multi_choice_data
+      region_multi_choice_data,
+      indicator_dps()
     )
 
     # Plotting interactive graph
@@ -573,7 +590,7 @@ server_dev <- function(input, output, session) {
           fill = `LA and Regions`,
           tooltip = glue::glue_data(
             region_focus_bar_data |>
-              pretty_num_table(include_columns = "values_num", dp = 1),
+              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
             "Year: {Years}\n{`LA and Regions`}: {values_num}"
           ),
           data_id = `LA and Regions`
@@ -621,7 +638,7 @@ server_dev <- function(input, output, session) {
           fill = `LA and Regions`,
           tooltip = glue::glue_data(
             region_multi_choice_data |>
-              pretty_num_table(include_columns = "values_num", dp = 1),
+              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
             "Year: {Years}\n{`LA and Regions`}: {values_num}"
           ),
           data_id = `LA and Regions`
