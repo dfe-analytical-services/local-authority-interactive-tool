@@ -68,12 +68,12 @@ server <- function(input, output, session) {
   # })
 
   # Cookies logic =============================================================
-  output$cookie_status <- dfeshiny::cookie_banner_server(
+  output$cookie_status <- dfeshiny::cookies_banner_server(
     "cookie-banner",
     input_cookies = shiny::reactive(input$cookies),
     parent_session = session,
     google_analytics_key = google_analytics_key,
-    cookie_link_panel = "cookies_panel_ui"
+    cookies_link_panel = "cookies_panel_ui"
   )
 
   dfeshiny::cookies_panel_server(

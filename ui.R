@@ -57,8 +57,8 @@ ui <- function(input, output, session) {
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
     # https://book.javascript-for-r.com/shiny-cookies.html
-    dfeshiny::dfe_cookie_script(),
-    dfeshiny::cookie_banner_ui(
+    dfeshiny::dfe_cookies_script(),
+    dfeshiny::cookies_banner_ui(
       "cookie-banner",
       "Local Authority Interactive Tool (LAIT)"
     ),
@@ -159,21 +159,29 @@ ui <- function(input, output, session) {
         # Region Metadata =====================================================
         LA_LevelMetaUI("region_meta")
       ),
+      # User guide ============================================================
       user_guide_panel(),
+      # Accessibility =========================================================
       a11y_panel(),
-      dfeshiny::support_panel(
-        team_email = "jake.tufts@education.gov.uk",
-        repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-        form_url = "https://forms.office.com"
+      # Support and feedback ==================================================
+      bslib::nav_panel(
+        value = "support_panel",
+        title = "Support and feedback",
+        dfeshiny::support_panel(
+          team_email = "jake.tufts@education.gov.uk",
+          repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
+          form_url = "https://forms.office.com"
+        )
       ),
-      # Cookies info
-      dfeshiny::cookies_panel_ui(
-        id = "cookie-panel",
-        google_analytics_key = google_analytics_key
+      # Cookies info ==========================================================
+      bslib::nav_panel(
+        value = "cookies_panel_ui",
+        title = "Cookies",
+        cookies_panel_ui(google_analytics_key = google_analytics_key)
       )
     ),
 
-    # Footer ------------------------------------------------------------------
+    # Footer ==================================================================
     shinyGovstyle::footer(full = TRUE)
   )
 }
