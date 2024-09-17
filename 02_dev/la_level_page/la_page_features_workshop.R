@@ -286,7 +286,7 @@ la_line_chart <- la_long |>
   ) +
   format_axes(la_long) +
   set_plot_colours(la_long) +
-  set_plot_labs(filtered_bds, selected_indicator) +
+  set_plot_labs(filtered_bds) +
   custom_theme()
 
 
@@ -333,7 +333,7 @@ la_bar_chart <- la_long |>
   ) +
   format_axes(la_long) +
   set_plot_colours(la_long, "fill") +
-  set_plot_labs(filtered_bds, selected_indicator) +
+  set_plot_labs(filtered_bds) +
   custom_theme()
 
 # Plotting interactive graph

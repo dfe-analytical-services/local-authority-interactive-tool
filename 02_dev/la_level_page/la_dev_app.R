@@ -365,7 +365,7 @@ server_dev <- function(input, output, session) {
       ) +
       format_axes(la_long()) +
       set_plot_colours(la_long()) +
-      set_plot_labs(filtered_bds$data, input$indicator) +
+      set_plot_labs(filtered_bds$data) +
       custom_theme()
 
 
@@ -418,7 +418,7 @@ server_dev <- function(input, output, session) {
       ) +
       format_axes(la_long()) +
       set_plot_colours(la_long(), "fill") +
-      set_plot_labs(filtered_bds$data, input$indicator) +
+      set_plot_labs(filtered_bds$data) +
       custom_theme()
 
     # Plotting interactive graph

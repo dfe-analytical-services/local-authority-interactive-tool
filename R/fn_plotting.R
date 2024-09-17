@@ -26,10 +26,9 @@ get_yaxis_title <- function(data_full) {
 #' get_plot_title(selected_indicator = "GDP", axis_indicator = "Population")
 #' }
 #' @export
-get_plot_title <- function(selected_indicator, axis_indicator) {
-  glue::glue(
-    "{selected_indicator} - {axis_indicator}"
-  )
+get_plot_title <- function(data_full) {
+  data_full |>
+    pull_uniques("Chart_title")
 }
 
 
@@ -322,9 +321,9 @@ set_plot_colours <- function(data_long,
 #' }
 #'
 #' @export
-set_plot_labs <- function(filtered_bds, selected_indicator) {
+set_plot_labs <- function(filtered_bds) {
   y_title <- get_yaxis_title(filtered_bds)
-  plot_title <- get_plot_title(selected_indicator, y_title)
+  plot_title <- get_plot_title(filtered_bds)
 
   ggplot2::labs(
     x = "",

@@ -152,7 +152,7 @@ Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geo
           colour_type = "focus",
           focus_group = region_clean()
         ) +
-        set_plot_labs(filtered_bds(), app_inputs$indicator()) +
+        set_plot_labs(filtered_bds()) +
         ggrepel::geom_label_repel(
           data = subset(region_focus_line_data, Years == current_year()),
           aes(
@@ -306,7 +306,7 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
           unique(c(region_clean(), chart_input())),
           type = "line"
         ) +
-        set_plot_labs(filtered_bds(), app_inputs$indicator()) +
+        set_plot_labs(filtered_bds()) +
         custom_theme() +
         # Revert order of the legend so goes from right to left
         ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))

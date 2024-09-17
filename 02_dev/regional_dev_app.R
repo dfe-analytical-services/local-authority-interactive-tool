@@ -459,7 +459,7 @@ server_dev <- function(input, output, session) {
         colour_type = "focus",
         focus_group = region_la_ldn_clean()
       ) +
-      set_plot_labs(filtered_bds$data, input$indicator) +
+      set_plot_labs(filtered_bds$data) +
       ggrepel::geom_label_repel(
         data = subset(region_focus_line_data, Years == current_year()),
         aes(
@@ -544,7 +544,7 @@ server_dev <- function(input, output, session) {
         c(region_la_ldn_clean(), input$chart_line_input),
         type = "line"
       ) +
-      set_plot_labs(filtered_bds$data, input$indicator) +
+      set_plot_labs(filtered_bds$data) +
       custom_theme() +
       # Revert order of the legend so goes from right to left
       ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
@@ -602,7 +602,7 @@ server_dev <- function(input, output, session) {
       ) +
       format_axes(region_focus_bar_data) +
       set_plot_colours(region_focus_bar_data, "focus-fill", region_la_ldn_clean()) +
-      set_plot_labs(filtered_bds$data, input$indicator) +
+      set_plot_labs(filtered_bds$data) +
       custom_theme() +
       guides(fill = "none")
 
@@ -653,7 +653,7 @@ server_dev <- function(input, output, session) {
         c(region_la_ldn_clean(), input$chart_bar_input),
         type = "bar"
       ) +
-      set_plot_labs(filtered_bds$data, input$indicator) +
+      set_plot_labs(filtered_bds$data) +
       custom_theme()
 
     # Plotting interactive graph

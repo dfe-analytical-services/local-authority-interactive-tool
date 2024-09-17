@@ -253,7 +253,7 @@ region_line_chart <- region_line_chart_data |>
     c(region_la_ldn_clean, region_random_selection),
     type = "line"
   ) +
-  set_plot_labs(filtered_bds, selected_indicator) +
+  set_plot_labs(filtered_bds) +
   custom_theme() +
   # Revert order of the legend so goes from right to left
   ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
@@ -297,7 +297,7 @@ region_line_chart <- focus_line_data |>
   ) +
   format_axes(focus_line_data) +
   set_plot_colours(focus_line_data, colour_type = "focus", focus_group = region_la_ldn_clean) +
-  set_plot_labs(filtered_bds, selected_indicator) +
+  set_plot_labs(filtered_bds) +
   ggrepel::geom_label_repel(
     data = subset(focus_line_data, Years == current_year),
     aes(
@@ -365,7 +365,7 @@ la_bar_chart <- focus_bar_data |>
   ) +
   format_axes(focus_bar_data) +
   set_plot_colours(focus_bar_data, "focus-fill", region_la_ldn_clean) +
-  set_plot_labs(filtered_bds, selected_indicator) +
+  set_plot_labs(filtered_bds) +
   custom_theme() +
   guides(fill = "none")
 
