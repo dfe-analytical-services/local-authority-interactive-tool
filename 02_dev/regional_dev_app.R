@@ -205,8 +205,7 @@ server_dev <- function(input, output, session) {
   # Get decimal places for indicator selected
   indicator_dps <- reactive({
     filtered_bds$data |>
-      pull_uniques("dps") |>
-      as.numeric()
+      get_indicator_dps()
   })
 
   # Get the LA region

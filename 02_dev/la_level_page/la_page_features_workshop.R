@@ -36,7 +36,7 @@ filtered_bds <- bds_metrics |>
 
 # Decimal point setting
 indicator_dps <- filtered_bds |>
-  pull_uniques("dps")
+  get_indicator_dps()
 
 # Determine London region to use
 la_region_ldn_clean <- clean_ldn_region(la_region, filtered_bds)

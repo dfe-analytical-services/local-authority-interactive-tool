@@ -269,3 +269,11 @@ highlight_selected_row <- function(index, data, selected_area) {
     )
   }
 }
+
+
+
+get_indicator_dps <- function(data_full) {
+  data_full |>
+    pull_uniques("dps") |>
+    as.numeric()
+}

@@ -96,13 +96,6 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics, stat_n_la
     )
 
-    # Number of decimal places to use in tooltip
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # LA Level line chart plot ----------------------------------
     la_line_chart <- reactive({
       # Plot
@@ -139,7 +132,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         get_years(la_long()),
         tooltip_vlines,
         la_long(),
-        indicator_dps()
+        get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph
@@ -221,7 +214,10 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             fill = `LA and Regions`,
             tooltip = glue::glue_data(
               la_long() |>
-                pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
+                pretty_num_table(
+                  include_columns = "values_num",
+                  dp = get_indicator_dps(filtered_bds())
+                ),
               "Year: {Years}\n{`LA and Regions`}: {values_num}"
             ),
             data_id = `LA and Regions`

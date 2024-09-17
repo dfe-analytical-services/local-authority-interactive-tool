@@ -121,13 +121,6 @@ Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geo
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Number of decimal places to use in tooltip
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # Build focus line plot
     region_focus_line_chart <- reactive({
       # Set selected region to last level so appears at front of plot
@@ -179,7 +172,7 @@ Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geo
         get_years(region_focus_line_data),
         tooltip_vlines,
         region_focus_line_data,
-        indicator_dps()
+        get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph
@@ -252,13 +245,6 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Number of decimal places to use in tooltip
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # Pulling specific choices available for selected app & organisational level
     chart_input <- Chart_InputServer(
       "chart_input",
@@ -316,7 +302,7 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
         get_years(region_multi_choice_data),
         tooltip_vlines,
         region_multi_choice_data,
-        indicator_dps()
+        get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph

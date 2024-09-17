@@ -26,7 +26,7 @@ filtered_bds <- bds_metrics |>
 
 # Decimal point setting
 indicator_dps <- filtered_bds |>
-  pull_uniques("dps")
+  get_indicator_dps()
 
 # Get the LA region
 region_la <- stat_n_geog |>

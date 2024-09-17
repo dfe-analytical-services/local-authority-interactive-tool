@@ -137,7 +137,7 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
           values_from = values_num
         ) |>
         pretty_num_table(
-          dp = indicator_dps(),
+          dp = get_indicator_dps(filtered_bds()),
           exclude_columns = "LA Number"
         ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`)
@@ -220,13 +220,6 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
     # Current year
     current_year <- Current_YearServer("current_year", region_long)
 
-    # Number of decimal places to use in table
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # Build Region table
     shiny::reactive({
       # Difference between last two years
@@ -242,7 +235,7 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
           values_from = values_num
         ) |>
         pretty_num_table(
-          dp = indicator_dps(),
+          dp = get_indicator_dps(filtered_bds()),
           exclude_columns = "LA Number"
         ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>

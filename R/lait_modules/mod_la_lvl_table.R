@@ -37,22 +37,6 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
 }
 
 
-
-Indicator_DPServer <- function(id, app_inputs, bds_metrics) {
-  moduleServer(id, function(input, output, session) {
-    # Filter for selected topic and indicator
-    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
-
-    # Pull decimal place for indicator
-    reactive({
-      filtered_bds() |>
-        pull_uniques("dps") |>
-        as.numeric()
-    })
-  })
-}
-
-
 #' Shiny Server Function for Creating Long Format LA Data
 #'
 #' @param id A unique ID that identifies the server function
@@ -165,6 +149,9 @@ LA_LevelTableUI <- function(id) {
 #' @return A list of outputs for the UI, including a data table of the LA levels
 LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
     # Main LA Level table ----------------------------------
     # Long format LA data
     la_long <- LA_LongDataServer(
@@ -178,13 +165,6 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         calculate_change_from_prev_yr()
     })
 
-    # Number of decimal places to use in table
-    indicator_dps <- Indicator_DPServer(
-      "indicator_dps",
-      app_inputs,
-      bds_metrics
-    )
-
     # Build Main LA Level table
     # Join difference and pivot wider to recreate LAIT table
     la_table <- reactive({
@@ -196,7 +176,7 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           values_from = values_num
         ) |>
         pretty_num_table(
-          dp = indicator_dps(),
+          dp = get_indicator_dps(filtered_bds()),
           exclude_columns = "LA Number"
         ) |>
         dplyr::arrange(`LA and Regions`)
@@ -326,7 +306,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_indicator_polarity
       ) |>
         pretty_num_table(
-          dp = indicator_dps(),
+          dp = get_indicator_dps(filtered_bds()),
           exclude_columns = c("LA Number", "Latest National Rank")
         )
 
