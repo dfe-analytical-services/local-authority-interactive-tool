@@ -177,7 +177,7 @@ ui <- function(input, output, session) {
       bslib::nav_panel(
         value = "cookies_panel_ui",
         title = "Cookies",
-        cookies_panel_ui(google_analytics_key = google_analytics_key)
+        dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
       )
     ),
 
