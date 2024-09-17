@@ -33,11 +33,12 @@ MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
 
       if (grepl("link", metadata_type)) {
         label <- indicator_input()
-        metadata <- tags$a(
-          href = metadata,
-          class = "btn btn-default",
-          label,
-          target = "_blank"
+        metadata <- shiny::div(
+          dfeshiny::external_link(
+            href = metadata,
+            link_text = label
+          ),
+          class = "action-button"
         )
       }
 
