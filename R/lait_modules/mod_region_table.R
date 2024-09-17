@@ -113,6 +113,12 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Current year
     current_year <- Current_YearServer("current_year", region_la_long)
 
+    # Number of decimal places to use in table
+    indicator_dps <- Indicator_DPServer(
+      "indicator_dps",
+      app_inputs,
+      bds_metrics
+    )
 
     # Difference between last two years
     region_la_diff <- reactive({
@@ -130,7 +136,10 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
           names_from = Years,
           values_from = values_num
         ) |>
-        pretty_num_table(dp = 1) |>
+        pretty_num_table(
+          dp = indicator_dps(),
+          exclude_columns = "LA Number"
+        ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`)
     })
   })
@@ -211,6 +220,13 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
     # Current year
     current_year <- Current_YearServer("current_year", region_long)
 
+    # Number of decimal places to use in table
+    indicator_dps <- Indicator_DPServer(
+      "indicator_dps",
+      app_inputs,
+      bds_metrics
+    )
+
     # Build Region table
     shiny::reactive({
       # Difference between last two years
@@ -225,7 +241,10 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
           names_from = Years,
           values_from = values_num
         ) |>
-        pretty_num_table(dp = 1) |>
+        pretty_num_table(
+          dp = indicator_dps(),
+          exclude_columns = "LA Number"
+        ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
         # Places England row at the bottom of the table
         dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
