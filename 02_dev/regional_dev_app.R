@@ -698,12 +698,9 @@ server_dev <- function(input, output, session) {
     hyperlink <- metrics_clean |>
       get_metadata(input$indicator, "Hyperlink(s)")
     label <- input$indicator
-    shiny::div(
-      dfeshiny::external_link(
-        href = hyperlink,
-        link_text = label
-      ),
-      class = "action-button"
+    dfeshiny::external_link(
+      href = hyperlink,
+      link_text = label
     )
   })
 }
