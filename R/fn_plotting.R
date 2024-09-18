@@ -155,10 +155,21 @@ calculate_y_range <- function(data_long) {
 #' @export
 get_ylim_low <- function(data_long) {
   y_range <- calculate_y_range(data_long)
+
   if (y_range[1] >= 0) {
     0
   } else {
-    y_range[1] * 1.1
+    # Generate a sequence of pretty breaks based on the range
+    pretty_breaks <- pretty(c(y_range[1], y_range[2]))
+
+    # Find the first break that is greater than the min data point
+    min_break <- pretty_breaks[pretty_breaks < y_range[1]][1]
+
+    if (!is.na(min_break)) {
+      return(min_break)
+    } else {
+      return(y_range[1] * 1.1) # Default if no valid break
+    }
   }
 }
 
@@ -173,14 +184,27 @@ get_ylim_low <- function(data_long) {
 #' get_ylim_high(data_long = my_data)
 #' }
 #' @export
+# Calculate the pretty break just above the max data point
 get_ylim_high <- function(data_long) {
   y_range <- calculate_y_range(data_long)
+
   if (y_range[2] <= 0) {
     0
   } else {
-    y_range[2] * 1.1
+    # Generate a sequence of pretty breaks based on the range
+    pretty_breaks <- pretty(c(y_range[1], y_range[2]))
+
+    # Find the first break that is greater than the max data point
+    max_break <- pretty_breaks[pretty_breaks > y_range[2]][1]
+
+    if (!is.na(max_break)) {
+      return(max_break)
+    } else {
+      return(y_range[2] * 1.1) # Default if no valid break
+    }
   }
 }
+
 
 
 #' @title Get Unique Years from Dataset
