@@ -129,13 +129,21 @@ test_that("Check LA charts behave as expected", {
   # Get export values
   la_linechart <- app$get_values(export = c("la_linechart"))
   la_linechart_list <- jsonlite::fromJSON(la_linechart$export$la_linechart)
+  la_linechart_str <- la_linechart_list$x$html
+
+  # Extract all text content from <text> tags
+  cleaned_plot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", la_linechart_str)
+
+  # Remove any extra whitespace
+  cleaned_plot_str <- gsub("\n", " ", cleaned_plot_str)
+  cleaned_plot_str <- gsub("\\s+", " ", cleaned_plot_str)
 
   # Check is a line chart
   testthat::expect_true(
-    grepl("stroke='none'", la_linechart_list$x$html)
+    grepl("stroke='none'", la_linechart_str)
   )
   testthat::expect_false(
-    grepl("linejoin='miter'", la_linechart_list$x$html)
+    grepl("linejoin='miter'", la_linechart_str)
   )
 
   # Check hover css
@@ -148,7 +156,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check title
   testthat::expect_true(
-    grepl("Infant Mortality rate per 1000 live births", la_linechart_list$x$html)
+    grepl("Infant Mortality rate per 1000 live births", cleaned_plot_str)
   )
 
   # Check visual of line chart
@@ -166,13 +174,21 @@ test_that("Check LA charts behave as expected", {
   # Get export values
   la_barchart <- app$get_values(export = c("la_barchart"))
   la_barchart_list <- jsonlite::fromJSON(la_barchart$export$la_barchart)
+  la_barchart_str <- la_barchart_list$x$html
+
+  # Extract all text content from <text> tags
+  cleaned_plot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", la_barchart_str)
+
+  # Remove any extra whitespace
+  cleaned_plot_str <- gsub("\n", " ", cleaned_plot_str)
+  cleaned_plot_str <- gsub("\\s+", " ", cleaned_plot_str)
 
   # Check is a bar chart
   testthat::expect_true(
-    grepl("linejoin='miter'", la_barchart_list$x$html)
+    grepl("linejoin='miter'", la_barchart_str)
   )
   testthat::expect_false(
-    grepl("stroke='none'", la_barchart_list$x$html)
+    grepl("stroke='none'", la_barchart_str)
   )
 
   # Check hover css
@@ -187,7 +203,7 @@ test_that("Check LA charts behave as expected", {
   testthat::expect_true(
     grepl(
       "Pupils achieving Key Stage 1 Reading Expected Standard (%)",
-      la_barchart_list$x$html,
+      cleaned_plot_str,
       fixed = TRUE
     )
   )
