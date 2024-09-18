@@ -185,6 +185,7 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_table <- reactable::renderReactable({
       dfe_reactable(
         la_table(),
+        columns = align_reactable_cols(la_table(), exclude = "LA Number"),
         rowStyle = function(index) {
           highlight_selected_row(index, la_table(), app_inputs$la())
         }
@@ -311,12 +312,20 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(!dplyr::ends_with("including"), -Polarity),
-        columns = list(
-          `Quartile Banding` = reactable::colDef(
-            style = reactablefmtr::cell_style(
-              background_color = get_quartile_band_cell_colour(
-                la_stats_table()$Polarity,
-                la_stats_table()$`Quartile Banding`
+        columns = append(
+          # Create the reactable with specific column alignments
+          align_reactable_cols(la_stats_table() |> dplyr::select(-Polarity),
+            exclude = "LA Number"
+          ),
+          # Style Quartile Banding column with colour
+          list(
+            `Quartile Banding` = reactable::colDef(
+              style = reactablefmtr::cell_style(
+                data = la_stats_table(),
+                background_color = get_quartile_band_cell_colour(
+                  la_stats_table()$Polarity,
+                  la_stats_table()$`Quartile Banding`
+                )
               )
             )
           )
@@ -329,12 +338,18 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(dplyr::ends_with("including"), -Polarity),
-        columns = list(
-          `Quartile Banding` = reactable::colDef(
-            style = reactablefmtr::cell_style(
-              background_color = get_quartile_band_cell_colour(
-                polarity_colours_df(),
-                la_stats_table()
+        columns = append(
+          # Create the reactable with specific column alignments
+          align_reactable_cols(la_stats_table() |> dplyr::select(-Polarity)),
+          # Style Quartile Banding column with colour
+          list(
+            `Quartile Banding` = reactable::colDef(
+              style = reactablefmtr::cell_style(
+                data = la_stats_table(),
+                background_color = get_quartile_band_cell_colour(
+                  la_stats_table()$Polarity,
+                  la_stats_table()$`Quartile Banding`
+                )
               )
             )
           )

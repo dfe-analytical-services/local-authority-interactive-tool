@@ -135,6 +135,7 @@ pretty_num_table <- function(data,
 #' @return A reactable object representing the input data frame.
 #'
 dfe_reactable <- function(data, ...) {
+  # Generate the reactable
   reactable::reactable(
     data,
     highlight = TRUE,
@@ -149,6 +150,44 @@ dfe_reactable <- function(data, ...) {
     ...
   )
 }
+
+
+# Create column alignment definitions
+align_reactable_cols <- function(data, exclude = NULL) {
+  # Right-align numeric columns by default unless excluded
+  column_defs <- lapply(names(data), function(col) {
+    # Check if the column contains numeric values
+    is_numeric <- any(suppressWarnings(!is.na(as.numeric(as.character(data[[col]])))))
+    # # Use regex to check if the column contains any numeric values
+    # contains_numeric <- any(grepl("[0-9]", as.character(data[[col]])))
+
+    # Exclude columns that are explicitly mentioned in the `exclude` argument
+    if (is_numeric && !(col %in% exclude)) {
+      # Right-align numeric columns unless they are excluded
+      reactable::colDef(
+        align = "right",
+        headerClass = "bar-sort-header",
+        html = TRUE,
+        na = "NA"
+      )
+    } else {
+      # Default left-alignment for non-numeric or excluded columns
+      reactable::colDef(
+        align = "left",
+        headerClass = "bar-sort-header",
+        html = TRUE,
+        na = "NA"
+      )
+    }
+  })
+
+  # Create a named list for the colDef argument
+  names(column_defs) <- names(data)
+
+  column_defs
+}
+
+
 
 
 #' Create a Statistics Table for Local Authorities and Regions

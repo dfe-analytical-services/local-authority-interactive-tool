@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Child Road Traffic Casualties"
+selected_topic <- "Foundation Stage"
+selected_indicator <- "Foundation Stage - % achieving a good level of development"
 selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA
@@ -107,6 +107,18 @@ la_table <- la_long |>
 # Output table
 dfe_reactable(
   la_table,
+  # Create the reactable with specific column alignments
+  columns = align_reactable_cols(la_table, exclude = "LA Number"),
+  rowStyle = function(index) {
+    highlight_selected_row(index, la_table, selected_la)
+  }
+)
+
+# Output table
+dfe_reactable(
+  la_table,
+  # Create the reactable with specific column alignments
+  columns = align_reactable_cols(la_table),
   rowStyle = function(index) {
     highlight_selected_row(index, la_table, selected_la)
   }
@@ -235,15 +247,21 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
 
 # Format stats table
 dfe_reactable(
-  la_stats_table |>
-    dplyr::select(-Polarity),
-  columns = list(
-    `Quartile Banding` = reactable::colDef(
-      style = reactablefmtr::cell_style(
-        data = la_stats_table,
-        background_color = get_quartile_band_cell_colour(
-          la_stats_table$Polarity,
-          la_stats_table$`Quartile Banding`
+  la_stats_table |> dplyr::select(-Polarity),
+  columns = append(
+    # Create the reactable with specific column alignments
+    align_reactable_cols(la_stats_table |> dplyr::select(-Polarity),
+      exclude = "LA Number"
+    ),
+    # Style Quartile Banding column with colour
+    list(
+      `Quartile Banding` = reactable::colDef(
+        style = reactablefmtr::cell_style(
+          data = la_stats_table,
+          background_color = get_quartile_band_cell_colour(
+            la_stats_table$Polarity,
+            la_stats_table$`Quartile Banding`
+          )
         )
       )
     )
