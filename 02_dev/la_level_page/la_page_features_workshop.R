@@ -326,7 +326,7 @@ ggiraph::girafe(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
     )
   ),
-  fonts = list(sans = "Open Sans")
+  fonts = list(sans = "Arial")
 )
 
 

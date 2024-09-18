@@ -276,7 +276,8 @@ ggiraph::girafe(
     opts_hover(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
     )
-  )
+  ),
+  fonts = list(sans = "Arial")
 )
 
 # Focus plot
@@ -336,7 +337,8 @@ ggiraph::girafe(
     opts_hover(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
     )
-  )
+  ),
+  fonts = list(sans = "Arial")
 )
 
 
@@ -374,5 +376,6 @@ la_bar_chart <- focus_bar_data |>
 ggiraph::girafe(
   ggobj = la_bar_chart,
   width_svg = 8,
-  options = generic_ggiraph_options()
+  options = generic_ggiraph_options(),
+  fonts = list(sans = "Arial")
 )

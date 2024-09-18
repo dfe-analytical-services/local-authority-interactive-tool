@@ -230,7 +230,8 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       ggiraph::girafe(
         ggobj = la_bar_chart,
         width_svg = 8,
-        options = generic_ggiraph_options()
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
       )
     })
 

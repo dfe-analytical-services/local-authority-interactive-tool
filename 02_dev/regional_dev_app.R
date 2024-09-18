@@ -621,7 +621,8 @@ server_dev <- function(input, output, session) {
     ggiraph::girafe(
       ggobj = focus_bar_chart,
       width_svg = 8,
-      options = generic_ggiraph_options()
+      options = generic_ggiraph_options(),
+      fonts = list(sans = "Arial")
     )
   })
 
@@ -671,7 +672,8 @@ server_dev <- function(input, output, session) {
     ggiraph::girafe(
       ggobj = multi_bar_chart,
       width_svg = 8,
-      options = generic_ggiraph_options()
+      options = generic_ggiraph_options(),
+      fonts = list(sans = "Arial")
     )
   })
 

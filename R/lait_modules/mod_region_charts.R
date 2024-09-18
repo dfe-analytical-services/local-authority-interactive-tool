@@ -180,7 +180,8 @@ Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geo
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
           )
-        )
+        ),
+        fonts = list(sans = "Arial")
       )
     })
 
@@ -310,7 +311,8 @@ Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, n
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
           )
-        )
+        ),
+        fonts = list(sans = "Arial")
       )
     })
 
