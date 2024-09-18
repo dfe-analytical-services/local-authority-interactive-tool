@@ -276,6 +276,9 @@ server_dev <- function(input, output, session) {
   output$region_la_table <- reactable::renderReactable({
     dfe_reactable(
       region_la_table(),
+      columns = align_reactable_cols(region_la_table(),
+        exclude = "LA Number"
+      ),
       rowStyle = function(index) {
         highlight_selected_row(index, region_la_table(), input$la_input)
       }
@@ -338,6 +341,9 @@ server_dev <- function(input, output, session) {
   output$region_table <- reactable::renderReactable({
     dfe_reactable(
       region_table(),
+      columns = align_reactable_cols(region_table(),
+        exclude = "LA Number"
+      ),
       rowStyle = function(index) {
         highlight_selected_row(index, region_table(), region_la_ldn_clean())
       }
@@ -389,12 +395,18 @@ server_dev <- function(input, output, session) {
       "LA Number" = region_stats_la_num,
       "LA and Regions" = region_stats_name,
       "Trend" = region_trend,
-      "Change from previous year" = region_stats_change
+      "Change from previous year" = region_stats_change,
+      check.names = FALSE
     )
   })
 
   output$region_stats_table <- reactable::renderReactable({
-    dfe_reactable(region_stats_table())
+    dfe_reactable(
+      region_stats_table(),
+      columns = align_reactable_cols(region_stats_table(),
+        exclude = "LA Number"
+      )
+    )
   })
 
   # Region charts -------------------------------------------------------------
