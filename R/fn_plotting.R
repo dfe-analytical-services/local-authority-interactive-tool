@@ -354,7 +354,13 @@ custom_theme <- function() {
   list(
     ggplot2::theme_minimal(),
     ggplot2::theme(
-      plot.title = element_text(hjust = 0.5),
+      # Keeps title within chart
+      plot.title = ggtext::element_textbox(
+        hjust = 0.5,
+        width = unit(0.9, "npc"),
+        halign = 0.5,
+        margin = margin(b = unit(15, "lines"))
+      ),
       axis.title.y = element_text(angle = 0, vjust = 0.5),
       legend.position = "bottom",
       panel.grid = element_line(colour = "#D9D9D9"),

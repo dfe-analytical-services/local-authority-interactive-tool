@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Foundation Stage"
-selected_indicator <- "Foundation Stage - % achieving a good level of development"
+selected_topic <- "Child Protection"
+selected_indicator <- "Percentage of child protection conferences held within 15 days"
 selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA
@@ -268,13 +268,6 @@ dfe_reactable(
   )
 )
 
-
-
-
-
-
-gdtools::register_gfont("Open Sans")
-gdtools::addGFontHtmlDependency(family = "Open Sans")
 
 
 # LA line chart plot ----------------------------------------------------------
