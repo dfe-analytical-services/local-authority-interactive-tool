@@ -363,6 +363,7 @@ custom_theme <- function() {
       ),
       axis.title.y = element_text(angle = 0, vjust = 0.5),
       legend.position = "bottom",
+      legend.title = element_blank(),
       panel.grid = element_line(colour = "#D9D9D9"),
       panel.grid.minor = element_blank(),
       panel.grid.major.x = element_blank()
