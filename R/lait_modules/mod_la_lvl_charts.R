@@ -143,7 +143,8 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
           )
-        )
+        ),
+        fonts = list(sans = "Arial")
       )
     })
 

@@ -8,6 +8,9 @@ list.files("R/", full.names = TRUE) |>
   })() |>
   purrr::walk(source)
 
+gdtools::register_gfont("Open Sans")
+gdtools::addGFontHtmlDependency(family = "Open Sans")
+
 # UI
 ui_dev <- bslib::page_fillable(
 
@@ -393,7 +396,8 @@ server_dev <- function(input, output, session) {
         opts_hover(
           css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
         )
-      )
+      ),
+      fonts = list(sans = "Arial")
     )
   })
 

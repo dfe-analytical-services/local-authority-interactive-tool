@@ -273,7 +273,8 @@ dfe_reactable(
 
 
 
-
+gdtools::register_gfont("Open Sans")
+gdtools::addGFontHtmlDependency(family = "Open Sans")
 
 
 # LA line chart plot ----------------------------------------------------------
@@ -324,7 +325,8 @@ ggiraph::girafe(
     opts_hover(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
     )
-  )
+  ),
+  fonts = list(sans = "Open Sans")
 )
 
 
@@ -358,7 +360,8 @@ la_bar_chart <- la_long |>
 ggiraph::girafe(
   ggobj = la_bar_chart,
   width_svg = 8,
-  options = generic_ggiraph_options()
+  options = generic_ggiraph_options(),
+  fonts = list(sans = "Arial")
 )
 
 
