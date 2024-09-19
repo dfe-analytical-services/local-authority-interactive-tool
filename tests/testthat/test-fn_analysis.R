@@ -2,6 +2,7 @@
 # Sample data frame for testing
 data_change <- data.frame(
   `LA and Regions` = c(rep("Region1", 3), rep("Region2", 3)),
+  Measure = rep("Measure1", 6),
   Years = c("2023", "2022", "2021", "2023", "2022", "2021"),
   Years_num = c(2023, 2022, 2021, 2023, 2022, 2021),
   values_num = c(100, 90, 80, 190, 195, 200),
@@ -11,6 +12,7 @@ data_change <- data.frame(
 test_that("1. calculate_change_from_prev_yr computes changes correctly", {
   expected_result <- data.frame(
     `LA and Regions` = c("Region1", "Region2"),
+    Measure = rep("Measure1", 2),
     Years = c("Change from previous year", "Change from previous year"),
     Years_num = c(2022, 2022),
     values_num = c(10, -5), # 2022-2021 change: Region1 = 90-80, Region2 = 195-190
@@ -26,6 +28,7 @@ test_that("2. calculate_change_from_prev_yr handles NA values in values_num", {
   data_with_na$values_num[2] <- NA
   expected_result_na <- data.frame(
     `LA and Regions` = c("Region1", "Region2"),
+    Measure = rep("Measure1", 2),
     Years = c("Change from previous year", "Change from previous year"),
     Years_num = c(2022, 2022),
     values_num = c(NA, -5), # NA handling should propagate to the calculation
@@ -36,19 +39,26 @@ test_that("2. calculate_change_from_prev_yr handles NA values in values_num", {
 })
 
 # Test 3: Test with NA values in `Years_num`
-# test_that("3. calculate_change_from_prev_yr handles NA values in Years_num", {
-#   data_with_na_years <- data_change
-#   data_with_na_years$Years_num[2] <- NA # Introduce an NA in the Years_num column for Region1
-#   expected_result_na_years <- data.frame(
-#     `LA and Regions` = c("Region1", "Region2"),
-#     Years = c("Change from previous year"),
-#     Years_num = c(2021, 2022),
-#     values_num = c(NA, -5), # Region2 should still be calculated correctly
-#     check.names = FALSE
-#   )
-#   result_na_years <- calculate_change_from_prev_yr(data_with_na_years)
-#   expect_equal(result_na_years, expected_result_na_years)
-# })
+test_that("3. calculate_change_from_prev_yr handles NA values in Years_num", {
+  data_with_na_years <- data_change
+  data_with_na_years$Years_num[2] <- NA # Introduce an NA in the Years_num column for Region1
+  expected_result_na_years <- data.frame(
+    `LA and Regions` = c("Region1", "Region2"),
+    Measure = rep("Measure1", 2),
+    Years = c("Change from previous year"),
+    Years_num = c(2021, 2022),
+    values_num = c(20, -5),
+    check.names = FALSE
+  )
+
+  expect_warning(
+    expect_equal(
+      calculate_change_from_prev_yr(data_with_na_years),
+      expected_result_na_years
+    ),
+    "Missing year found in the change from previous year calculation,"
+  )
+})
 
 # Test 4: Test with only one year of data
 test_that("4. calculate_change_from_prev_yr returns empty result with only one year of data", {

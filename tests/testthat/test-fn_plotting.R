@@ -23,8 +23,10 @@ test_that("2. get_yaxis_title handles data frame with no y_axis_name column", {
 # get_plot_title() ------------------------------------------------------------
 # Test 1: Check if the function returns the correct plot title
 test_that("1. get_plot_title returns the correct plot title", {
-  result <- get_plot_title(y_axis_data |>
-    dplyr::filter(y_axis_name == "Temperature"))
+  result <- get_plot_title(
+    y_axis_data |>
+      dplyr::filter(y_axis_name == "Temperature")
+  )
   expected <- "Title Temperature"
   expect_equal(result, expected)
 })

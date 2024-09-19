@@ -45,6 +45,17 @@
 #' }
 #' #
 calculate_change_from_prev_yr <- function(data) {
+  if (any(is.na(data$Years_num))) {
+    warning(
+      paste0(
+        "Missing year found in the change from previous year ",
+        "calculation, may cause incorrect value for indicator: ",
+        data |>
+          pull_uniques("Measure")
+      )
+    )
+  }
+
   data |>
     dplyr::group_by(`LA and Regions`) |>
     dplyr::arrange(`LA and Regions`,
