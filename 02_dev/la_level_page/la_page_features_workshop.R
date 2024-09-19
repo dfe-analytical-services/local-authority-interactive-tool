@@ -41,15 +41,10 @@ indicator_dps <- filtered_bds |>
 # Determine London region to use
 la_region_ldn_clean <- clean_ldn_region(la_region, filtered_bds)
 
-# Get national term
-la_national <- filtered_bds |>
-  dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
-  pull_uniques("LA and Regions")
-
-# Then filter for selected LA, region, stat neighbours and relevant national
+# Then filter for selected LA, region, stat neighbours and national
 la_filtered_bds <- filtered_bds |>
   dplyr::filter(
-    `LA and Regions` %in% c(selected_la, la_region_ldn_clean, la_sns, la_national)
+    `LA and Regions` %in% c(selected_la, la_region_ldn_clean, la_sns, "England")
   )
 
 # SN average
@@ -75,7 +70,7 @@ la_long <- la_filtered_bds |>
       `LA and Regions`,
       levels = c(
         selected_la, la_region_ldn_clean,
-        "Statistical Neighbours", la_national
+        "Statistical Neighbours", "England"
       )
     ),
     Years_num = as.numeric(substr(Years, start = 1, stop = 4))
@@ -109,16 +104,6 @@ dfe_reactable(
   la_table,
   # Create the reactable with specific column alignments
   columns = align_reactable_cols(la_table, exclude = "LA Number"),
-  rowStyle = function(index) {
-    highlight_selected_row(index, la_table, selected_la)
-  }
-)
-
-# Output table
-dfe_reactable(
-  la_table,
-  # Create the reactable with specific column alignments
-  columns = align_reactable_cols(la_table),
   rowStyle = function(index) {
     highlight_selected_row(index, la_table, selected_la)
   }
