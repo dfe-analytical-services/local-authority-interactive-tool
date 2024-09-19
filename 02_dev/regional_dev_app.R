@@ -285,19 +285,13 @@ server_dev <- function(input, output, session) {
     )
   })
 
-  # Get national term
-  region_national <- reactive({
-    filtered_bds$data |>
-      dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
-      pull_uniques("LA and Regions")
-  })
-
+  # Region long format data ---------------------------------------------------
   # Get long data format for Regions
   region_long <- reactive({
     # Filter for all regions and England
     region_filtered_bds <- filtered_bds$data |>
       dplyr::filter(
-        `LA and Regions` %in% c(region_names_bds, region_national())
+        `LA and Regions` %in% c(region_names_bds, "England")
       )
 
     # Region levels long
@@ -360,7 +354,7 @@ server_dev <- function(input, output, session) {
 
     # Region and England
     region_la_num <- region_table() |>
-      filter_la_regions(c(region_la_ldn_clean(), region_national()), pull_col = "LA Number")
+      filter_la_regions(c(region_la_ldn_clean(), "England"), pull_col = "LA Number")
 
     # Get change in previous year
     # Selected LA
@@ -372,14 +366,14 @@ server_dev <- function(input, output, session) {
 
     # Region and England
     region_change_prev <- region_table() |>
-      filter_la_regions(c(region_la_ldn_clean(), region_national()),
+      filter_la_regions(c(region_la_ldn_clean(), "England"),
         latest = FALSE,
         pull_col = "Change from previous year"
       )
 
     # Creating the stats table cols
     region_stats_la_num <- c(region_la_la_num, region_la_num)
-    region_stats_name <- c(input$la_input, region_la_ldn_clean(), region_national())
+    region_stats_name <- c(input$la_input, region_la_ldn_clean(), "England")
     region_stats_change <- c(region_la_change_prev, region_change_prev)
 
     # Creating the trend descriptions
@@ -419,7 +413,7 @@ server_dev <- function(input, output, session) {
       # Remove any London () regions that are all NA
       dplyr::filter(
         !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
-        `LA and Regions` %notin% national_names_bds
+        `LA and Regions` %notin% "England"
       )
   })
 

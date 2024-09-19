@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Regional Level LA table ------------------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Children's Service Finance"
-selected_indicator <- "Looked after children - S251/Outturn weekly unit costs"
+selected_topic <- "Key Stage 2"
+selected_indicator <- "Progress between age 7 and age 11 - KS2 Reading"
 selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
@@ -94,15 +94,10 @@ dfe_reactable(
 
 
 # Regional Level Regions table ------------------------------------------------
-# Get national term
-region_national <- filtered_bds |>
-  dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
-  pull_uniques("LA and Regions")
-
 # Filter for all regions and England
 region_filtered_bds <- filtered_bds |>
   dplyr::filter(
-    `LA and Regions` %in% c(region_names_bds, region_national)
+    `LA and Regions` %in% c(region_names_bds, "England")
   )
 
 # Region levels long
@@ -161,7 +156,7 @@ region_la_la_num <- region_la_table |>
 
 # Region and England
 region_la_num <- region_table |>
-  filter_la_regions(c(region_la_ldn_clean, region_national), pull_col = "LA Number")
+  filter_la_regions(c(region_la_ldn_clean, "England"), pull_col = "LA Number")
 
 # Get change in previous year
 # Selected LA
@@ -173,14 +168,14 @@ region_la_change_prev <- region_la_table |>
 
 # Region and England
 region_change_prev <- region_table |>
-  filter_la_regions(c(region_la_ldn_clean, region_national),
+  filter_la_regions(c(region_la_ldn_clean, "England"),
     latest = FALSE,
     pull_col = "Change from previous year"
   )
 
 # Creating the stats table cols
 region_stats_la_num <- c(region_la_la_num, region_la_num)
-region_stats_name <- c(selected_la, region_la_ldn_clean, region_national)
+region_stats_name <- c(selected_la, region_la_ldn_clean, "England")
 region_stats_change <- c(region_la_change_prev, region_change_prev)
 
 # Creating the trend descriptions
@@ -208,7 +203,7 @@ region_long_plot <- region_long |>
   # Remove any "London (" regions where all values_num are NA
   dplyr::filter(
     !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
-    `LA and Regions` %notin% national_names_bds
+    `LA and Regions` %notin% "England"
   )
 
 

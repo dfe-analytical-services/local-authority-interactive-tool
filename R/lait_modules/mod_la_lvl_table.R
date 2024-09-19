@@ -69,18 +69,12 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         filtered_bds()
       )
 
-      # Get national term
-      la_national <- filtered_bds() |>
-        dplyr::filter(`LA and Regions` %in% national_names_bds &
-          !is.na(values_num)) |>
-        pull_uniques("LA and Regions")
-
       # Then filter for selected LA, region, stat neighbours and national
       la_filtered_bds <- filtered_bds() |>
         dplyr::filter(
           `LA and Regions` %in% c(
             app_inputs$la(), la_region_ldn_clean,
-            la_sns, la_national
+            la_sns, "England"
           )
         )
 
@@ -107,7 +101,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             `LA and Regions`,
             levels = c(
               app_inputs$la(), la_region_ldn_clean,
-              "Statistical Neighbours", la_national
+              "Statistical Neighbours", "England"
             )
           ),
           Years_num = as.numeric(substr(Years, start = 1, stop = 4))
