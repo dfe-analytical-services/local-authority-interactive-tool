@@ -185,18 +185,10 @@ server_dev <- function(input, output, session) {
       filtered_bds$data
     )
 
-    # Get national term
-    la_national <- filtered_bds$data |>
-      dplyr::filter(
-        `LA and Regions` %in% national_names_bds &
-          !is.na(values_num)
-      ) |>
-      pull_uniques("LA and Regions")
-
     # Then filter for selected LA, region, stat neighbours and relevant national
     la_filtered_bds <- filtered_bds$data |>
       dplyr::filter(
-        `LA and Regions` %in% c(input$la_input, la_region_ldn_clean, la_sns, la_national)
+        `LA and Regions` %in% c(input$la_input, la_region_ldn_clean, la_sns, "England")
       )
 
     # SN average
@@ -222,7 +214,7 @@ server_dev <- function(input, output, session) {
           `LA and Regions`,
           levels = c(
             input$la_input, la_region_ldn_clean,
-            "Statistical Neighbours", la_national
+            "Statistical Neighbours", "England"
           )
         ),
         Years_num = as.numeric(substr(Years, start = 1, stop = 4))
@@ -353,7 +345,6 @@ server_dev <- function(input, output, session) {
   la_line_chart <- reactive({
     # Build plot
     la_line_chart <- la_long() |>
-      dplyr::filter(!is.na(values_num)) |>
       ggplot2::ggplot() +
       ggiraph::geom_point_interactive(
         ggplot2::aes(
