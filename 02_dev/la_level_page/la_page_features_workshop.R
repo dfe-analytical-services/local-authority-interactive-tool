@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Child Protection"
-selected_indicator <- "Percentage of child protection conferences held within 15 days"
+selected_topic <- "Key Stage 2"
+selected_indicator <- "Progress between age 7 and age 11 - KS2 Reading"
 selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA

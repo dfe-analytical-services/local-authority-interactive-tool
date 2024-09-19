@@ -160,16 +160,16 @@ get_ylim_low <- function(data_long) {
     0
   } else {
     # Generate a sequence of pretty breaks based on the range
-    pretty_breaks <- pretty(c(y_range[1], y_range[2]))
+    pretty_breaks <- pretty(y_range)
+    min_pretty_break <- min(pretty_breaks)
 
-    # Find the first break that is greater than the min data point
-    min_break <- pretty_breaks[pretty_breaks < y_range[1]][1]
-
-    if (!is.na(min_break)) {
-      return(min_break)
-    } else {
-      return(y_range[1] * 1.1) # Default if no valid break
+    # Ensure there's a break below the min value
+    if (min_pretty_break >= y_range[1]) {
+      min_pretty_break <- min_pretty_break - diff(pretty_breaks[1:2])
     }
+
+    # Return min break
+    min_pretty_break
   }
 }
 
@@ -192,17 +192,48 @@ get_ylim_high <- function(data_long) {
     0
   } else {
     # Generate a sequence of pretty breaks based on the range
-    pretty_breaks <- pretty(c(y_range[1], y_range[2]))
+    pretty_breaks <- pretty(y_range)
+    max_pretty_break <- max(pretty_breaks)
 
-    # Find the first break that is greater than the max data point
-    max_break <- pretty_breaks[pretty_breaks > y_range[2]][1]
-
-    if (!is.na(max_break)) {
-      return(max_break)
-    } else {
-      return(y_range[2] * 1.1) # Default if no valid break
+    # Ensure there's a break above the max value
+    if (max_pretty_break <= y_range[2]) {
+      max_pretty_break <- max_pretty_break + diff(pretty_breaks[1:2])
     }
+
+    # Return max break
+    max_pretty_break
   }
+}
+
+# Function to calculate y-range and ensure gridline above max and below min
+pretty_y_gridlines <- function(data_long) {
+  # Get the range of the data
+  y_range <- calculate_y_range(data_long)
+
+  # Zero axes if needed
+  if (y_range[2] <= 0) {
+    y_range[2] <- 0
+  }
+
+  if (y_range[1] >= 0) {
+    y_range[1] <- 0
+  }
+
+  # Generate 'pretty' breaks covering the range
+  pretty_breaks <- pretty(y_range)
+
+  # Ensure there's a break above the max value
+  if (max(pretty_breaks) <= y_range[2] && y_range[2] != 0) {
+    pretty_breaks <- c(pretty_breaks, max(pretty_breaks) + 1.1 * diff(pretty_breaks[1:2]))
+  }
+
+  # Ensure there's a break below the min value
+  if (min(pretty_breaks) >= y_range[1] && y_range[1] != 0) {
+    pretty_breaks <- c(min(pretty_breaks) - 1.1 * diff(pretty_breaks[1:2]), pretty_breaks)
+  }
+
+  # Return the expanded range for y-limits
+  pretty_breaks
 }
 
 
@@ -262,15 +293,14 @@ get_num_years <- function(data_long) {
 #'
 #' @export
 format_axes <- function(data_long) {
-  y_lim_low <- get_ylim_low(data_long)
-  y_lim_high <- get_ylim_high(data_long)
   num_years <- get_num_years(data_long)
+  y_breaks <- pretty_y_gridlines(data_long)
 
   list(
     ggplot2::scale_y_continuous(
-      limits = c(y_lim_low, y_lim_high),
+      limits = range(y_breaks),
       expand = expansion(0, 0),
-      breaks = scales::breaks_pretty()
+      breaks = pretty(y_breaks)
     ),
     ggplot2::scale_x_continuous(
       breaks = scales::breaks_pretty(n = num_years)
