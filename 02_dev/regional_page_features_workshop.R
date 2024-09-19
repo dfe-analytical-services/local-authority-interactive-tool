@@ -86,7 +86,7 @@ region_la_table <- region_la_long |>
 # Render reactable table
 dfe_reactable(
   region_la_table,
-  columns = align_reactable_cols(region_la_table, exclude = "LA Number"),
+  columns = align_reactable_cols(region_la_table, num_exclude = "LA Number"),
   rowStyle = function(index) {
     highlight_selected_row(index, region_la_table, selected_la)
   }

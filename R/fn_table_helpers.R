@@ -153,7 +153,7 @@ dfe_reactable <- function(data, ...) {
 
 
 # Create column alignment definitions
-align_reactable_cols <- function(data, exclude = NULL) {
+align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
   # Right-align columns that contain numeric values or are all NA, unless excluded
   column_defs <- lapply(names(data), function(col) {
     # Check if the column contains numeric values (using regex)
@@ -162,8 +162,8 @@ align_reactable_cols <- function(data, exclude = NULL) {
     # Check if all values in the column are NA
     all_na <- all(is.na(data[[col]]))
 
-    # Exclude columns that are explicitly mentioned in the `exclude` argument
-    if ((contains_numeric || all_na) && !(col %in% exclude)) {
+    # Exclude columns that are explicitly mentioned in the `num_exclude` argument
+    if (((contains_numeric || all_na) && !(col %in% num_exclude)) || (col %in% categorical)) {
       # Right-align columns that contain numbers or are all NA
       reactable::colDef(
         align = "right",

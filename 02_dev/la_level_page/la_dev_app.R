@@ -253,7 +253,7 @@ server_dev <- function(input, output, session) {
   output$la_table <- reactable::renderReactable({
     dfe_reactable(
       la_table(),
-      columns = align_reactable_cols(la_table(), exclude = "LA Number"),
+      columns = align_reactable_cols(la_table(), num_exclude = "LA Number"),
       rowStyle = function(index) {
         highlight_selected_row(index, la_table(), input$la_input)
       }
@@ -321,8 +321,11 @@ server_dev <- function(input, output, session) {
         dplyr::select(-Polarity),
       columns = append(
         # Create the reactable with specific column alignments
-        align_reactable_cols(la_stats_table() |> dplyr::select(-Polarity),
-          exclude = "LA Number"
+        align_reactable_cols(
+          la_stats_table() |>
+            dplyr::select(-Polarity),
+          num_exclude = "LA Number",
+          categorical = c("Trend", "Quartile Banding")
         ),
         # Style Quartile Banding column with colour
         list(

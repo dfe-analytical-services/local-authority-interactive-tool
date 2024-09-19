@@ -136,8 +136,9 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     output$region_la_table <- reactable::renderReactable({
       dfe_reactable(
         region_la_table(),
-        columns = align_reactable_cols(region_la_table(),
-          exclude = "LA Number"
+        columns = align_reactable_cols(
+          region_la_table(),
+          num_exclude = "LA Number"
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, region_la_table(), app_inputs$la())
@@ -246,8 +247,9 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_
     output$region_table <- reactable::renderReactable({
       dfe_reactable(
         region_table(),
-        columns = align_reactable_cols(region_table(),
-          exclude = "LA Number"
+        columns = align_reactable_cols(
+          region_table(),
+          num_exclude = "LA Number"
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, region_table(), region_clean())
@@ -346,8 +348,10 @@ Region_StatsTableServer <- function(
     output$region_stats_table <- reactable::renderReactable({
       dfe_reactable(
         region_stats_table(),
-        columns = align_reactable_cols(region_stats_table(),
-          exclude = "LA Number"
+        columns = align_reactable_cols(
+          region_stats_table(),
+          num_exclude = "LA Number",
+          categorical = c("Trend")
         )
       )
     })

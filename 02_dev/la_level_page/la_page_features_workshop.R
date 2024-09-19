@@ -103,7 +103,7 @@ la_table <- la_long |>
 dfe_reactable(
   la_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(la_table, exclude = "LA Number"),
+  columns = align_reactable_cols(la_table, num_exclude = "LA Number"),
   rowStyle = function(index) {
     highlight_selected_row(index, la_table, selected_la)
   }
@@ -235,8 +235,11 @@ dfe_reactable(
   la_stats_table |> dplyr::select(-Polarity),
   columns = append(
     # Create the reactable with specific column alignments
-    align_reactable_cols(la_stats_table |> dplyr::select(-Polarity),
-      exclude = "LA Number"
+    align_reactable_cols(
+      la_stats_table |>
+        dplyr::select(-Polarity),
+      num_exclude = "LA Number",
+      categorical = c("Trend", "Quartile Banding")
     ),
     # Style Quartile Banding column with colour
     list(
