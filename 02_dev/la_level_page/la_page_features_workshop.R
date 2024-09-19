@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Key Stage 2"
-selected_indicator <- "KS2 % reading, writing and mathematics - Expected standard - All Pupils"
+selected_topic <- "Child Protection"
+selected_indicator <- "Duration subject to a child protection plan - number"
 selected_la <- "Barnsley"
 
 # Filter stat neighbour for selected LA
@@ -260,13 +260,13 @@ dfe_reactable(
 la_line_chart <- la_long |>
   # Filter out NAs to stop warning
   # "Failed setting attribute 'data-id', mismatched lengths of ids and values"
+  # dplyr::filter(!is.na(values_num)) |>
   ggplot2::ggplot() +
   ggiraph::geom_point_interactive(
     ggplot2::aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`,
-      shape = `LA and Regions`,
       data_id = `LA and Regions`
     ),
     na.rm = TRUE
