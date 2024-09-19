@@ -64,7 +64,7 @@ bds_wide <- bds_wide_raw |>
 # Pivot BDS long on geographic cols
 bds_long <- bds_wide |>
   tidyr::pivot_longer(
-    cols = `Barking and Dagenham`:`England (discontinued)`,
+    cols = `Barking and Dagenham`:`South West`,
     names_to = "LA and Regions",
     values_to = "Values"
   ) |>
@@ -150,85 +150,6 @@ bds_long_public <- bds_long_la |>
 
 
 ```{r bds-save}
-# Save BDS long as .csv
-write.csv(bds_long_public,
-  here::here("01_data/02_prod/bds_long.csv"),
-  row.names = FALSE
-)
-```
-
-
-```{r bds-region}
-# Regions
-bds_region <- bds_long_public |>
-  dplyr::filter(
-    `LA and Regions` %in% c(
-      "North East",
-      "North West",
-      "Yorkshire and the Humber",
-      "East Midlands",
-      "West Midlands",
-      "East of England",
-      "London",
-      "Inner London",
-      "Outer London",
-      "South East",
-      "South West"
-    )
-  )
-write.csv(
-  bds_region,
-  here::here("01_data/02_prod/bds/bds_regions_long.csv"),
-  row.names = FALSE
-)
-
-# England (All schools)
-bds_eng_all <- bds_long_public |>
-  dplyr::filter(`LA and Regions` == "England (All schools)")
-
-write.csv(bds_eng_all,
-  here::here("01_data/02_prod/bds/bds_eng_all_schools_long.csv"),
-  row.names = FALSE
-)
-
-# LAs
-bds_la <- bds_long_public |>
-  dplyr::filter(
-    `LA and Regions` %notin% c(
-      "England (All schools)",
-      "North East",
-      "North West",
-      "Yorkshire and the Humber",
-      "East Midlands",
-      "West Midlands",
-      "East of England",
-      "London",
-      "Inner London",
-      "Outer London",
-      "South East",
-      "South West",
-      "England (State-funded)"
-    )
-  )
-
-write.csv(bds_la, here::here("01_data/02_prod/bds/bds_la_long.csv"),
-  row.names = FALSE
-)
-
-# England (State-funded)
-
-bds_eng_state <- bds_long_public |>
-  dplyr::filter(`LA and Regions` == "England (State-funded)")
-
-write.csv(bds_eng_state,
-  here::here("01_data/02_prod/bds/bds_eng_state_funded_long.csv"),
-  row.names = FALSE
-)
-```
-
-
-
-```{r}
 # Write out parquet version
 arrow::write_dataset(
   bds_long_public,
@@ -237,4 +158,3 @@ arrow::write_dataset(
   basename_template = "bds_long_{i}.parquet"
 )
 ```
-

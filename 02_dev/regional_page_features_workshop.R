@@ -54,7 +54,7 @@ region_la_long <- region_la_filtered_bds |>
       `LA and Regions`
       # levels = c(
       #   selected_la, la_region,
-      #   "Statistical Neighbours", la_national
+      #   "Statistical Neighbours", "England"
       # )
     ),
     Years_num = as.numeric(substr(Years, start = 1, stop = 4))
@@ -110,7 +110,7 @@ region_long <- region_filtered_bds |>
       `LA and Regions`
       # levels = c(
       #   selected_la, la_region,
-      #   "Statistical Neighbours", la_national
+      #   "Statistical Neighbours", "England"
       # )
     ),
     Years_num = as.numeric(substr(Years, start = 1, stop = 4))

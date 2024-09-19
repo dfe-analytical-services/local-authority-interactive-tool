@@ -30,18 +30,6 @@ Clean_RegionServer <- function(id, app_inputs, stat_n_geog, bds_metrics) {
   })
 }
 
-# Get national term
-Region_NationalServer <- function(id, national_names_bds, filtered_bds) {
-  moduleServer(id, function(input, output, session) {
-    reactive({
-      # Filter for national terms that are do not have all NA values
-      filtered_bds() |>
-        dplyr::filter(`LA and Regions` %in% national_names_bds & !is.na(values_num)) |>
-        pull_uniques("LA and Regions")
-    })
-  })
-}
-
 
 # Long format Region LA data
 RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
@@ -162,13 +150,13 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 
 
 # Get long data format for Regions
-Region_LongDataServer <- function(id, filtered_bds, region_names_bds, region_national) {
+Region_LongDataServer <- function(id, filtered_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     reactive({
       # Filter for all regions and England
       region_filtered_bds <- filtered_bds() |>
         dplyr::filter(
-          `LA and Regions` %in% c(region_names_bds, region_national())
+          `LA and Regions` %in% c(region_names_bds, "England")
         )
 
       # Region levels long
@@ -202,16 +190,13 @@ Region_TableUI <- function(id) {
 }
 
 # Region table data -----------------------------------------------------------
-Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, region_names_bds) {
+Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
-    # Get relevant National
-    region_national <- Region_NationalServer("region_national", national_names_bds, filtered_bds)
-
     # Long format Region LA data
-    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds, region_national)
+    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
 
     # Current year
     current_year <- Current_YearServer("current_year", region_long)
@@ -246,12 +231,12 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, national_names_bds, r
 }
 
 # Region table Server ---------------------------------------------------------
-Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Region table
     region_table <- Region_DataServer(
       "region_table",
-      app_inputs, bds_metrics, national_names_bds, region_names_bds
+      app_inputs, bds_metrics, region_names_bds
     )
 
     # Get clean Regions
@@ -291,7 +276,7 @@ Region_StatsTableUI <- function(id) {
 
 # Region Stats table Server ---------------------------------------------------
 Region_StatsTableServer <- function(
-    id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+    id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -302,14 +287,11 @@ Region_StatsTableServer <- function(
     # Get Region table
     region_table <- Region_DataServer(
       "region_table",
-      app_inputs, bds_metrics, national_names_bds, region_names_bds
+      app_inputs, bds_metrics, region_names_bds
     )
 
     # Get clean Regions
     region_clean <- Clean_RegionServer("region_clean", app_inputs, stat_n_geog, bds_metrics)
-
-    # Get relevant National
-    region_national <- Region_NationalServer("region_national", national_names_bds, filtered_bds)
 
     # Build stats table
     region_stats_table <- reactive({
@@ -320,7 +302,7 @@ Region_StatsTableServer <- function(
 
       # Region and England
       region_la_num <- region_table() |>
-        filter_la_regions(c(region_clean(), region_national()), pull_col = "LA Number")
+        filter_la_regions(c(region_clean(), "England"), pull_col = "LA Number")
 
       # Get change in previous year
       # Selected LA
@@ -332,14 +314,14 @@ Region_StatsTableServer <- function(
 
       # Region and England
       region_change_prev <- region_table() |>
-        filter_la_regions(c(region_clean(), region_national()),
+        filter_la_regions(c(region_clean(), "England"),
           latest = FALSE,
           pull_col = "Change from previous year"
         )
 
       # Creating the stats table cols
       region_stats_la_num <- c(region_la_la_num, region_la_num)
-      region_stats_name <- c(app_inputs$la(), region_clean(), region_national())
+      region_stats_name <- c(app_inputs$la(), region_clean(), "England")
       region_stats_change <- c(region_la_change_prev, region_change_prev)
 
       # Creating the trend descriptions

@@ -1,16 +1,13 @@
 # nolint start: object_name
 #
 # Build data for plotting
-Region_LongPlotServer <- function(id, app_inputs, bds_metrics, national_names_bds, region_names_bds) {
+Region_LongPlotServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
-    # Get relevant National
-    region_national <- Region_NationalServer("region_national", national_names_bds, filtered_bds)
-
     # Long format Region LA data
-    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds, region_national)
+    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
 
     # Filter region_long data for any (Ldn) regions with all NA values, and England
     reactive({
@@ -18,7 +15,7 @@ Region_LongPlotServer <- function(id, app_inputs, bds_metrics, national_names_bd
         dplyr::group_by(`LA and Regions`) |>
         dplyr::filter(
           !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
-          `LA and Regions` %notin% national_names_bds
+          `LA and Regions` %notin% "England"
         ) |>
         dplyr::ungroup()
     })
@@ -93,14 +90,17 @@ Region_FocusLine_chartUI <- function(id) {
 }
 
 # Region Focus line chart Server ----------------------------------------------
-Region_FocusLine_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+Region_FocusLine_chartServer <- function(id,
+                                         app_inputs,
+                                         bds_metrics,
+                                         stat_n_geog,
+                                         region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
       app_inputs,
       bds_metrics,
-      national_names_bds,
       region_names_bds
     )
 
@@ -218,14 +218,13 @@ Region_Multi_chartUI <- function(id) {
 }
 
 # Region multi-choice line chart Server ---------------------------------------
-Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, national_names_bds, region_names_bds) {
+Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
       app_inputs,
       bds_metrics,
-      national_names_bds,
       region_names_bds
     )
 

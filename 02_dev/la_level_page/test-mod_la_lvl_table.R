@@ -62,18 +62,12 @@
 #'       la_region <- filtered_sn |>
 #'         pull_uniques("GOReg")
 #'
-#'       # Get national term
-#'       la_national <- filtered_bds() |>
-#'         dplyr::filter(.data$`LA and Regions` %in% national_names_bds &
-#'           !is.na(.data$values_num)) |>
-#'         pull_uniques("LA and Regions")
-#'
 #'       # Then filter for selected LA, region, stat neighbours and national
 #'       la_filtered_bds <- filtered_bds() |>
 #'         dplyr::filter(
 #'           .data$`LA and Regions` %in% c(
 #'             app_inputs$la(), la_region,
-#'             la_sns, la_national
+#'             la_sns, "England"
 #'           )
 #'         )
 #'
@@ -100,7 +94,7 @@
 #'             .data$`LA and Regions`,
 #'             levels = c(
 #'               app_inputs$la(), la_region,
-#'               "Statistical Neighbours", la_national
+#'               "Statistical Neighbours", "England"
 #'             )
 #'           ),
 #'           Years_num = as.numeric(substr(.data$Years, start = 1, stop = 4))

@@ -163,7 +163,6 @@ server <- function(input, output, session) {
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
-    national_names_bds,
     region_names_bds
   )
 
@@ -173,7 +172,6 @@ server <- function(input, output, session) {
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
-    national_names_bds,
     region_names_bds
   )
 
@@ -184,7 +182,6 @@ server <- function(input, output, session) {
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
-    national_names_bds,
     region_names_bds
   )
 
@@ -194,7 +191,6 @@ server <- function(input, output, session) {
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
-    national_names_bds,
     region_names_bds
   )
 
