@@ -300,7 +300,8 @@ format_axes <- function(data_long) {
     ggplot2::scale_y_continuous(
       limits = range(y_breaks),
       expand = expansion(0, 0),
-      breaks = pretty(y_breaks)
+      breaks = pretty(y_breaks),
+      labels = unlist(lapply(pretty(y_breaks), dfeR::pretty_num))
     ),
     ggplot2::scale_x_continuous(
       breaks = scales::breaks_pretty(n = num_years)
