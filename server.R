@@ -86,12 +86,19 @@ server <- function(input, output, session) {
   # Start of LAIT
   # ===========================================================================
 
+  # reactiveValues object to store shared input values across pages
+  shared_values <- reactiveValues(
+    la = NULL,
+    topic = NULL,
+    indicator = NULL
+  )
+
   # ===========================================================================
   # LA Level Page
   # ===========================================================================
 
   # User Inputs ===============================================================
-  la_app_inputs <- appInputsServer("la_level")
+  la_app_inputs <- appInputsServer("la_level", shared_values)
 
   # LA level tables ===========================================================
   # Main table
@@ -146,7 +153,7 @@ server <- function(input, output, session) {
   # Regional Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  region_app_inputs <- appInputsServer("region_level")
+  region_app_inputs <- appInputsServer("region_level", shared_values)
 
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------

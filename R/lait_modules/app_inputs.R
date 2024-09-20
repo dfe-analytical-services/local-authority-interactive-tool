@@ -38,40 +38,65 @@ appInputsUI <- function(id) {
 }
 
 
-#' Shiny Server Function for Handling the App Inputs
+#' Shiny Server Function for Handling the App Inputs with Synchronization
 #'
-#' This function creates a Shiny server module for handling the app inputs.
+#' This function creates a Shiny server module for handling the app inputs
+#' and synchronizing them across multiple pages.
 #' It observes the selected topic name and updates the choices for the
-#' indicator name based on the selected topic.
-#' It returns a list of reactive expressions for the selected LA name,
-#' topic name, and indicator name.
+#' indicator name based on the selected topic, and also updates the shared
+#' reactive values to keep the inputs in sync between pages.
 #'
-#' @param id A unique ID that identifies the server function
-#' @return A list of reactive expressions for the app inputs,
-#' including the selected LA name, topic name, and indicator name
+#' @param id A unique ID that identifies the server function.
+#' @param shared_values A `reactiveValues` object to store shared input values
+#' that can be accessed and modified across different modules.
+#' @return A list of reactive expressions for the app inputs, including
+#' the selected LA name, topic name, and indicator name.
 #'
-appInputsServer <- function(id) {
+appInputsServer <- function(id, shared_values) {
   moduleServer(id, function(input, output, session) {
-    # Input ----------------------------------
-    # Update Indicator dropdown for Topic selected
+    # Observe and synchronize LA input across pages
+    observe({
+      updateSelectInput(session, "la_name", selected = shared_values$la)
+    })
+
+    observe({
+      updateSelectInput(session, "topic_name", selected = shared_values$topic)
+    })
+
+    observe({
+      updateSelectInput(session, "indicator_name", selected = shared_values$indicator)
+    })
+
+    # Update Indicator dropdown for selected Topic
     shiny::observeEvent(input$topic_name, {
       # Get indicator choices for selected topic
       filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(
-          .data$Topic == input$topic_name
-        ) |>
+        dplyr::filter(.data$Topic == input$topic_name) |>
         pull_uniques("Measure")
 
-      # Using the server to power to the dropdown for speed (not used currently)
+      # Update the Indicator dropdown based on selected Topic
       updateSelectInput(
         session = session,
         inputId = "indicator_name",
         label = "Indicator:",
         choices = filtered_topic_bds
       )
+
+      # Update the shared reactive value for the topic
+      shared_values$topic <- input$topic_name
     })
 
-    # Input outputs
+    # Observe and synchronize LA input changes
+    observeEvent(input$la_name, {
+      shared_values$la <- input$la_name
+    })
+
+    # Observe and synchronize Indicator input changes
+    observeEvent(input$indicator_name, {
+      shared_values$indicator <- input$indicator_name
+    })
+
+    # Return reactive settings
     app_settings <- list(
       la = reactive({
         input$la_name
@@ -84,7 +109,7 @@ appInputsServer <- function(id) {
       })
     )
 
-    app_settings
+    return(app_settings)
   })
 }
 
