@@ -124,12 +124,7 @@ la_indicator_polarity <- filtered_bds |>
   pull_uniques("Polarity")
 
 # Set the trend value
-la_trend <- dplyr::case_when(
-  is.na(la_change_prev) ~ NA_character_,
-  la_change_prev > 0 ~ "Increase",
-  la_change_prev < 0 ~ "Decrease",
-  TRUE ~ "No trend"
-)
+la_trend <- as.numeric(la_change_prev)
 
 # Get latest rank, ties are set to min & NA vals to NA rank
 la_rank <- filtered_bds |>
@@ -202,7 +197,7 @@ la_stats_table <- data.frame(
   "LA Number" = la_table |>
     filter_la_regions(selected_la, pull_col = "LA Number"),
   "LA and Regions" = selected_la,
-  "Trend" = la_trend,
+  "Trend" = -la_trend,
   "Change from previous year" = la_change_prev,
   "Latest National Rank" = la_rank,
   "Quartile Banding" = la_quartile,
@@ -215,7 +210,7 @@ la_stats_table <- data.frame(
 ) |>
   pretty_num_table(
     dp = indicator_dps,
-    exclude_columns = c("LA Number", "Latest National Rank")
+    exclude_columns = c("LA Number", "Trend", "Latest National Rank")
   )
 
 if (la_indicator_polarity %notin% c("High", "Low")) {
@@ -230,10 +225,13 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
     )
 }
 
+
 # Format stats table
-dfe_reactable(
+# Format stats table
+# Use modifyList to merge the lists properly
+reactable::reactable(
   la_stats_table |> dplyr::select(-Polarity),
-  columns = append(
+  columns = modifyList(
     # Create the reactable with specific column alignments
     align_reactable_cols(
       la_stats_table |>
@@ -241,7 +239,7 @@ dfe_reactable(
       num_exclude = "LA Number",
       categorical = c("Trend", "Quartile Banding")
     ),
-    # Style Quartile Banding column with colour
+    # Define specific formatting for the Trend and Quartile Banding columns
     list(
       `Quartile Banding` = reactable::colDef(
         style = reactablefmtr::cell_style(
@@ -251,10 +249,15 @@ dfe_reactable(
             la_stats_table$`Quartile Banding`
           )
         )
+      ),
+      Trend = reactable::colDef(
+        cell = trend_icon_renderer
       )
     )
   )
 )
+
+
 
 
 

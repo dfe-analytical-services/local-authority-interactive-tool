@@ -319,7 +319,7 @@ server_dev <- function(input, output, session) {
     dfe_reactable(
       la_stats_table() |>
         dplyr::select(-Polarity),
-      columns = append(
+      columns = modifyList(
         # Create the reactable with specific column alignments
         align_reactable_cols(
           la_stats_table() |>
@@ -337,6 +337,9 @@ server_dev <- function(input, output, session) {
                 la_stats_table()$`Quartile Banding`
               )
             )
+          ),
+          Trend = reactable::colDef(
+            cell = trend_icon_renderer
           )
         )
       )

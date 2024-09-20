@@ -318,3 +318,18 @@ get_indicator_dps <- function(data_full) {
     pull_uniques("dps") |>
     as.numeric()
 }
+
+
+
+# Function to render trend icons based on the value
+trend_icon_renderer <- function(value) {
+  trend_icon <- dplyr::case_when(
+    is.na(value) ~ NA_character_,
+    value > 0 ~ "arrow-up",
+    value < 0 ~ "arrow-down",
+    TRUE ~ "minus"
+  )
+
+  # Return Font Awesome icon for the Trend column
+  shiny::icon(trend_icon)
+}

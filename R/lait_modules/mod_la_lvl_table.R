@@ -252,7 +252,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         pull_uniques("Polarity")
 
       # Set the trend value
-      la_trend <- calculate_trend(la_change_prev)
+      la_trend <- as.numeric(la_change_prev)
 
       # Get latest rank, ties are set to min & NA vals to NA rank
       la_rank <- filtered_bds() |>
@@ -295,7 +295,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       ) |>
         pretty_num_table(
           dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = c("LA Number", "Latest National Rank")
+          exclude_columns = c("LA Number", "Trend", "Latest National Rank")
         )
 
       la_stats_table
@@ -306,7 +306,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(!dplyr::ends_with("including"), -Polarity),
-        columns = append(
+        columns = modifyList(
           # Create the reactable with specific column alignments
           align_reactable_cols(
             la_stats_table() |>
@@ -324,6 +324,9 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
                   la_stats_table()$`Quartile Banding`
                 )
               )
+            ),
+            Trend = reactable::colDef(
+              cell = trend_icon_renderer
             )
           )
         )
@@ -335,7 +338,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(dplyr::ends_with("including"), -Polarity),
-        columns = append(
+        columns = modifyList(
           # Create the reactable with specific column alignments
           align_reactable_cols(
             la_stats_table() |>
@@ -351,6 +354,9 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
                   la_stats_table()$`Quartile Banding`
                 )
               )
+            ),
+            Trend = reactable::colDef(
+              cell = trend_icon_renderer
             )
           )
         )
