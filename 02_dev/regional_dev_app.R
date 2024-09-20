@@ -479,6 +479,7 @@ server_dev <- function(input, output, session) {
         color = "black",
         segment.colour = NA,
         label.size = NA,
+        max.overlaps = Inf,
         nudge_x = 2,
         direction = "y",
         vjust = .5,

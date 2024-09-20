@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Regional Level LA table ------------------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Key Stage 2"
-selected_indicator <- "Progress between age 7 and age 11 - KS2 Reading"
+selected_topic <- "Foundation Stage"
+selected_indicator <- "Foundation Stage - % achieving a good level of development"
 selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
@@ -305,6 +305,7 @@ region_line_chart <- focus_line_data |>
     color = "black",
     segment.colour = NA,
     label.size = NA,
+    max.overlaps = Inf,
     nudge_x = 2,
     direction = "y",
     hjust = 1,
