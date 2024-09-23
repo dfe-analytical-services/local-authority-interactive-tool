@@ -29,10 +29,18 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
     # Check that the plot contains the expected data
     plot_data <- output$line_chart
     plot_data_list <- jsonlite::fromJSON(plot_data)
+    plot_data_str <- plot_data_list$x$html
+
+    # Extract all text content from <text> tags
+    extracted_text <- gsub("<text[^>]*>([^<]*)</text>", "\\1", plot_data_str)
+
+    # Remove any extra whitespace
+    extracted_text <- gsub("\n", " ", extracted_text)
+    extracted_text <- gsub("\\s+", " ", extracted_text)
 
     # Check title
     testthat::expect_true(
-      grepl("LAC Key Stage 4 - AVG Attainment 8 score - Average Score", plot_data_list$x$html)
+      grepl("LAC - KS4 Average Attainment 8 Score", extracted_text)
     )
   })
 })
@@ -69,12 +77,21 @@ testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct 
     # Check that the plot contains the expected data
     plot_data <- output$bar_chart
     plot_data_list <- jsonlite::fromJSON(plot_data)
+    plot_data_str <- plot_data_list$x$html
+
+    # Extract all text content from <text> tags
+    cleaned_plot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", plot_data_str)
+
+    # Remove any extra whitespace
+    cleaned_plot_str <- gsub("\n", " ", cleaned_plot_str)
+    cleaned_plot_str <- gsub("\\s+", " ", cleaned_plot_str)
 
     # Check title
     testthat::expect_true(
       grepl(
-        "Newly issued statements and plans in LA maintained mainstream schools - % statements/plans",
-        plot_data_list$x$html
+        "Newly issued EHC plans with a placement in LA maintained mainstream schools (%)",
+        cleaned_plot_str,
+        fixed = TRUE
       )
     )
   })

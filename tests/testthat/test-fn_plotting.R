@@ -2,7 +2,8 @@
 # Dummy data
 y_axis_data <- data.frame(
   y_axis_name = c("Temperature", "Pressure", "Temperature", "Humidity"),
-  other_column = c(1, 2, 3, 4)
+  other_column = c(1, 2, 3, 4),
+  Chart_title = c("Title Temperature", "Title Pressure", "Title Temperature", "Title Humidity")
 )
 
 # Test 1: Check if the function returns unique y_axis_name values
@@ -22,29 +23,35 @@ test_that("2. get_yaxis_title handles data frame with no y_axis_name column", {
 # get_plot_title() ------------------------------------------------------------
 # Test 1: Check if the function returns the correct plot title
 test_that("1. get_plot_title returns the correct plot title", {
-  result <- get_plot_title("Temperature", "Time")
-  expected <- "Temperature - Time"
+  result <- get_plot_title(
+    y_axis_data |>
+      dplyr::filter(y_axis_name == "Temperature")
+  )
+  expected <- "Title Temperature"
   expect_equal(result, expected)
 })
 
 # Test 2: Check if the function handles empty strings
 test_that("2. get_plot_title handles empty strings", {
-  result <- get_plot_title("", "")
-  expected <- " - "
+  y_axis_data$Chart_title <- ""
+  result <- get_plot_title(y_axis_data)
+  expected <- ""
   expect_equal(result, expected)
 })
 
 # Test 3: Check if the function handles NULL values
 test_that("3. get_plot_title handles NULL values", {
-  result <- get_plot_title(NA, NA)
-  expected <- "NA - NA"
+  y_axis_data$Chart_title <- NA
+  result <- get_plot_title(y_axis_data)
+  expected <- NA
   expect_equal(result, expected)
 })
 
 # Test 4: Check if the function handles numeric values
 test_that("4. get_plot_title handles numeric values", {
-  result <- get_plot_title(123, 456)
-  expected <- "123 - 456"
+  y_axis_data$Chart_title <- 123
+  result <- get_plot_title(y_axis_data)
+  expected <- 123
   expect_equal(result, expected)
 })
 

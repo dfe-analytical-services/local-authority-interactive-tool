@@ -45,6 +45,17 @@
 #' }
 #' #
 calculate_change_from_prev_yr <- function(data) {
+  if (any(is.na(data$Years_num))) {
+    warning(
+      paste0(
+        "Missing year found in the change from previous year ",
+        "calculation, may cause incorrect value for indicator: ",
+        data |>
+          pull_uniques("Measure")
+      )
+    )
+  }
+
   data |>
     dplyr::group_by(`LA and Regions`) |>
     dplyr::arrange(`LA and Regions`,
@@ -52,11 +63,7 @@ calculate_change_from_prev_yr <- function(data) {
       .by_group = TRUE
     ) |>
     dplyr::mutate(
-      values_num = ifelse(
-        dplyr::lag(Years_num) - Years_num != 1,
-        NA,
-        dplyr::lag(values_num) - values_num
-      ),
+      values_num = dplyr::lag(values_num) - values_num,
       Years = "Change from previous year"
     ) |>
     dplyr::filter(dplyr::row_number() == 2) |>
@@ -65,76 +72,94 @@ calculate_change_from_prev_yr <- function(data) {
 }
 
 
-#' Calculate Trend Based on Change Since Previous Value
+#' Calculate Quartile Bands for Indicator Values
 #'
-#' This function determines the trend (increase, decrease, or no trend)
-#' based on the change since the previous value.
+#' This function calculates the quartile band for a given set of indicator
+#' values based on specified quartile bands and the polarity of the indicator.
+#' The function supports both "Low" and "High" polarity, which affects how the
+#' bands are assigned.
 #'
-#' @param change_since_prev Numeric vector representing the change since
-#' the previous value.
+#' @param indicator_val A numeric vector of indicator values to be
+#' categorised into quartile bands.
+#' @param quartile_bands A named vector or list containing quartile bands with
+#' names "0%", "25%", "50%", "75%", and "100%".
+#' @param indicator_polarity A string indicating the polarity of the indicator.
+#' Should be either "Low" or "High".
 #'
-#' @return A character vector indicating the trend: "Increase", "Decrease",
-#' "No trend", or `NA` if the input is missing.
+#' @return A character vector with quartile bands assigned ("A", "B", "C", "D")
+#' based on the indicator values,
+#' or "Error" if the input is invalid or missing quartile bands.
+#' If the indicator value is NA, it returns NA_character_.
+#' If the indicator value is empty, it returns an empty character vector.
 #'
-calculate_trend <- function(change_since_prev) {
-  # Check if change_since_prev is empty or has a length greater than one
-  if (length(change_since_prev) == 0 || length(change_since_prev) > 1) {
-    warning(
-      "The change_since_prev value looks wrong: ",
-      "length is either 0 or greater than 1."
-    )
-  }
-
-  dplyr::case_when(
-    change_since_prev == 0 ~ "No change",
-    change_since_prev > 0 ~ "Increase",
-    change_since_prev < 0 ~ "Decrease",
-    TRUE ~ NA_character_
-  )
-}
-
-
-#' Calculate Quartile Band Based on Indicator Value
+#' @examples
+#' # Example usage
+#' calculate_quartile_band(
+#'   c(5, 10, 15),
+#'   c(
+#'     "0%" = 0, "25%" = 10, "50%" = 20,
+#'     "75%" = 30, "100%" = 40
+#'   ),
+#'   "Low"
+#' )
+#' calculate_quartile_band(
+#'   c(5, 10, 15),
+#'   c(
+#'     "0%" = 0, "25%" = 10, "50%" = 20,
+#'     "75%" = 30, "100%" = 40
+#'   ),
+#'   "High"
+#' )
 #'
-#' This function assigns a quartile band (A, B, C, D) to an indicator value
-#' based on its position within specified quartile bands.
-#'
-#' @param indicator_val Numeric value representing the indicator to be
-#' classified.
-#' @param quartile_bands A named numeric vector specifying the
-#' quartile band thresholds.
-#'
-#' @return A character vector indicating the quartile band: "A", "B", "C", "D",
-#' or "Error" if the value does not fit within the provided ranges.
-#'
-calculate_quartile_band <- function(indicator_val, quartile_bands) {
+calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_polarity) {
   # Check if all required quartile bands are present
   required_bands <- c("0%", "25%", "50%", "75%", "100%")
   missing_bands <- setdiff(required_bands, names(quartile_bands))
+
+  # Check for missing quartile bands
   if (length(missing_bands) > 0) {
     warning("Quartile bands are missing: ", paste(missing_bands, collapse = ", "))
     return(rep("Error", length(indicator_val)))
   }
 
+  # Check indicator value is present
   if (length(indicator_val) == 0) {
     warning("Indicator value is empty; returning an empty character vector.")
     return(character(0))
   }
 
-  quartile_band <- dplyr::case_when(
-    is.na(indicator_val) ~ NA_character_,
-    (indicator_val >= quartile_bands[["0%"]]) &
-      (indicator_val <= quartile_bands[["25%"]]) ~ "A",
-    (indicator_val > quartile_bands[["25%"]]) &
-      (indicator_val <= quartile_bands[["50%"]]) ~ "B",
-    (indicator_val > quartile_bands[["50%"]]) &
-      (indicator_val <= quartile_bands[["75%"]]) ~ "C",
-    (indicator_val > quartile_bands[["75%"]]) &
-      (indicator_val <= quartile_bands[["100%"]]) ~ "D",
-    TRUE ~ "Error"
-  )
+  # Set the Quartile Band (dependent on polarity)
+  if (indicator_polarity %in% "Low") {
+    quartile_band <- dplyr::case_when(
+      is.na(indicator_val) ~ NA_character_,
+      (indicator_val >= quartile_bands[["0%"]]) &
+        (indicator_val <= quartile_bands[["25%"]]) ~ "A",
+      (indicator_val > quartile_bands[["25%"]]) &
+        (indicator_val <= quartile_bands[["50%"]]) ~ "B",
+      (indicator_val > quartile_bands[["50%"]]) &
+        (indicator_val <= quartile_bands[["75%"]]) ~ "C",
+      (indicator_val > quartile_bands[["75%"]]) &
+        (indicator_val <= quartile_bands[["100%"]]) ~ "D",
+      TRUE ~ "Error"
+    )
+  } else if (indicator_polarity %in% "High") {
+    quartile_band <- dplyr::case_when(
+      is.na(indicator_val) ~ NA_character_,
+      (indicator_val >= quartile_bands[["0%"]]) &
+        (indicator_val <= quartile_bands[["25%"]]) ~ "D",
+      (indicator_val > quartile_bands[["25%"]]) &
+        (indicator_val <= quartile_bands[["50%"]]) ~ "C",
+      (indicator_val > quartile_bands[["50%"]]) &
+        (indicator_val <= quartile_bands[["75%"]]) ~ "B",
+      (indicator_val > quartile_bands[["75%"]]) &
+        (indicator_val <= quartile_bands[["100%"]]) ~ "A",
+      TRUE ~ "Error"
+    )
+  } else {
+    quartile_band <- "Not applicable"
+  }
 
-  if (quartile_band %notin% c("A", "B", "C", "D", NA_character_)) {
+  if (quartile_band %notin% c("A", "B", "C", "D", "Not applicable", NA_character_)) {
     warning("Unexpected Quartile Banding")
   }
 
@@ -155,29 +180,30 @@ calculate_quartile_band <- function(indicator_val, quartile_bands) {
 #' @return A character vector representing the cell colour corresponding
 #' to the given polarity and quartile band.
 #'
-get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
-  # Check for valid polarity values
-  valid_polarities <- c("High", "Low", "-", NA)
-  valid_quartiles <- c("A", "B", "C", "D", "Error", NA_character_)
+get_quartile_band_cell_colour <- function(polarity, quartile_band) {
+  all_polarities <- c("High", "Low", "-", NA)
+  valid_polarities <- c("High", "Low")
+  all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
+  valid_quartiles <- c("A", "B", "C", "D")
 
-  if (!table_stats$Polarity %in% valid_polarities) {
-    warning("Unexpected polarity value: ", table_stats$Polarity)
+  # Check if polarity is not unexpected value
+  if (!polarity %in% all_polarities) {
+    warning("Unexpected polarity value: ", polarity)
     return(NULL)
   }
 
-  if (!table_stats$`Quartile Banding` %in% valid_quartiles && table_stats$Polarity %in% valid_polarities) {
-    warning("Unexpected Quartile Banding: ", table_stats$`Quartile Banding`)
+  # Check if Quartile band is unexpected value
+  if (!quartile_band %in% all_quartiles) {
+    warning("Unexpected Quartile Banding value: ", quartile_band)
     return(NULL)
   }
 
-  # Filter the polarity_colours based on the given conditions
-  matching_colour <- polarity_colours |>
-    dplyr::filter(
-      (is.na(polarity) & is.na(table_stats$Polarity)) |
-        (polarity == table_stats$Polarity),
-      quartile_band == table_stats$`Quartile Banding`
-    ) |>
-    dplyr::pull(cell_colour)
+  # Set cell colour based on Quartile Banding
+  matching_colour <- dplyr::case_when(
+    quartile_band == "A" & polarity %in% valid_polarities ~ "#00703c",
+    quartile_band == "D" & polarity %in% valid_polarities ~ "#d4351c",
+    TRUE ~ "none"
+  )
 
   return(matching_colour)
 }
@@ -193,12 +219,15 @@ get_quartile_band_cell_colour <- function(polarity_colours, table_stats) {
 #'
 #' @return A data frame with an additional column for the calculated rank.
 #'
-calculate_rank <- function(filtered_data) {
+calculate_rank <- function(filtered_data, indicator_polarity) {
   filtered_data |>
     dplyr::mutate(
       rank = dplyr::case_when(
         is.na(values_num) ~ NA,
-        TRUE ~ rank(values_num, ties.method = "min", na.last = TRUE)
+        # Rank in descending order
+        indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+        # Rank in ascending order
+        indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
       )
     )
 }

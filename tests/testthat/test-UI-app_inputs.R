@@ -34,7 +34,12 @@ minimal_ui <- shiny::fluidRow(
 )
 
 minimal_server <- function(input, output, session) {
-  appInputsServer("la_level")
+  shared_values <- reactiveValues(
+    la = NULL,
+    topic = NULL,
+    indicator = NULL
+  )
+  appInputsServer("la_level", shared_values)
 }
 
 minimal_app <- shinyApp(minimal_ui, minimal_server)

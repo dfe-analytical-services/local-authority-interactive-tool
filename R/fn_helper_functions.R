@@ -96,7 +96,7 @@ suppressMessages(
 #' This function generates an HTML `head` tag that includes a
 #' link to a specified CSS stylesheet.
 #' It can be used to dynamically set or include a CSS file in a Shiny
-#' application or any other HTML-based interface that utilizes R.
+#' application or any other HTML-based interface that utilises R.
 #'
 #' @param css_filename A character string specifying the path or
 #' URL to the CSS file.
@@ -284,7 +284,8 @@ filter_and_pull <- function(data, filter_col, filter_var, pull_col) {
 #'
 get_metadata <- function(data, input_indicator, metadata) {
   metadata_output <- data |>
-    filter_and_pull("Measure", input_indicator, metadata)
+    filter_and_pull("Measure", input_indicator, metadata) |>
+    unique()
 
   if (length(metadata_output) < 1) {
     warning("No matching metadata for ", metadata)
@@ -295,6 +296,7 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output |>
       as.numeric() |>
       as.Date(origin = "1899-12-30") |>
+      format("%B %Y") |>
       as.character()
   } else {
     metadata_output
@@ -328,4 +330,172 @@ get_metadata <- function(data, input_indicator, metadata) {
 #' @export
 mute_cat <- function(input) {
   spsUtil::quiet(input, print_cat = TRUE, warning = FALSE, message = FALSE)
+}
+
+
+#' Determine Appropriate London Region
+#'
+#' This function determines which London region to use for reporting.
+#' Some indicators may not be provided at the Inner or Outer London level,
+#' so the function defaults to "London" if no data is available for a
+#' specific region.
+#'
+#' @param region A character string representing the region
+#' (e.g., "London", "London (Inner)", or "London (Outer)").
+#' @param filtered_bds A data frame containing the filtered dataset with
+#' region-specific values.
+#'
+#' @return A character string indicating either the input `region` or "London"
+#' if all values for the input region are missing (`NA`).
+#'
+#' @examples
+#' # Example usage:
+#' clean_ldn_region("London (Inner)", filtered_bds)
+#'
+#' @export
+clean_ldn_region <- function(region, filtered_bds) {
+  # Return early if the region doesn't start with "London"
+  if (!grepl("^London", region)) {
+    return(region)
+  }
+
+  # Extract values for the given region
+  ldn_values <- filtered_bds |>
+    dplyr::filter(`LA and Regions` == region) |>
+    dplyr::pull(values_num)
+
+  # Return "London" if all values are NA, otherwise return the original region
+  if (all(is.na(ldn_values))) {
+    return("London")
+  } else {
+    return(region)
+  }
+}
+
+
+#' Retrieve AF Colours without Warning Message
+#'
+#' This function retrieves the "focus" color palette from the
+#' `afcolours` package and suppresses the informational message that typically
+#' accompanies it.
+#'
+#' The suppressed message advises that the palette should only be used
+#' to highlight specific elements to help users understand the information.
+#'
+#' @return A character vector of hex color codes representing the
+#' "focus" colour palette.
+#'
+#' @importFrom afcolours af_colours
+#' @examples
+#' # Retrieve the "focus" palette without the message
+#' af_colours_focus()
+#'
+#' @export
+af_colours_focus <- function() {
+  withCallingHandlers(
+    afcolours::af_colours(type = "focus"),
+    message = function(m) {
+      if (grepl(
+        paste0(
+          "This palette should only be used to highlight specific ",
+          "elements to help users understand the information."
+        ),
+        m$message
+      )) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+}
+
+
+# Temp function to replace the dfeR::pretty_num()
+# Extra functionality means that it can be specified the decimal places to
+# show, e.g., instead of 3.00 getting rounded to 3, if nsmall = 2 then
+# it wil appear as 3.00, useful for table formatting in Shiny
+pretty_num <- function(
+    value,
+    prefix = "",
+    gbp = FALSE,
+    suffix = "",
+    dp = 2,
+    ignore_na = FALSE,
+    alt_na = FALSE,
+    nsmall = NULL) { # Add nsmall argument
+  # Check we're only trying to prettify a single value
+  if (length(value) > 1) {
+    stop("value must be a single value, multiple values were detected")
+  }
+
+  # Force to numeric
+  num_value <- suppressWarnings(as.numeric(value))
+
+  # Check if should skip function
+  if (is.na(num_value)) {
+    if (ignore_na == TRUE) {
+      return(value) # return original value
+    } else if (alt_na != FALSE) {
+      return(alt_na) # return custom NA value
+    } else {
+      return(num_value) # return NA
+    }
+  }
+
+  # Convert GBP to pound symbol
+  if (gbp == TRUE) {
+    currency <- "\U00a3"
+  } else {
+    currency <- ""
+  }
+
+  # Add + / - symbols depending on size of value
+  if (prefix == "+/-") {
+    if (value >= 0) {
+      prefix <- "+"
+    } else {
+      prefix <- "-"
+    }
+    # Add in negative symbol if appropriate and not auto added with +/-
+  } else if (value < 0) {
+    prefix <- paste0("-", prefix)
+  }
+
+  # If nsmall is not given, make same value as dp
+  if (is.null(nsmall)) {
+    nsmall <- dp
+  }
+
+  # Format the number with rounding and minimum decimal places
+  format_num <- function(num, dp, nsmall) {
+    # Round the number
+    rounded_num <- dfeR::round_five_up(num, dp = dp)
+    # Format the number with the specified minimum decimal places
+    format(rounded_num, nsmall = nsmall, big.mark = ",")
+  }
+
+  # Add suffix and prefix, plus convert to million or billion
+  if (abs(num_value) >= 1.e9) {
+    paste0(
+      prefix,
+      currency,
+      format_num(abs(num_value) / 1.e9, dp = dp, nsmall = nsmall),
+      " billion",
+      suffix
+    )
+  } else if (abs(num_value) >= 1.e6) {
+    paste0(
+      prefix,
+      currency,
+      format_num(abs(num_value) / 1.e6, dp = dp, nsmall = nsmall),
+      " million",
+      suffix
+    )
+  } else {
+    paste0(
+      prefix,
+      currency,
+      format_num(abs(num_value), dp = dp, nsmall = nsmall),
+      suffix
+    )
+  }
 }

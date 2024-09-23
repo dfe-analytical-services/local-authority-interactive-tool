@@ -46,34 +46,34 @@ server <- function(input, output, session) {
     shiny::updateQueryString(url)
   })
 
-  # shiny::observe({
-  #   if (input$navlistPanel == "Example tab 1") {
-  #     shinytitle::change_window_title(
-  #       session,
-  #       paste0(
-  #         site_title, " - ",
-  #         input$selectPhase, ", ",
-  #         input$selectArea
-  #       )
-  #     )
-  #   } else {
-  #     shinytitle::change_window_title(
-  #       session,
-  #       paste0(
-  #         site_title, " - ",
-  #         input$navlistPanel
-  #       )
-  #     )
-  #   }
-  # })
+  shiny::observe({
+    if (input$navsetpillslist == "LA Level") {
+      shinytitle::change_window_title(
+        session,
+        paste0(
+          site_title, " - ",
+          la_app_inputs$indicator(), ", ",
+          la_app_inputs$la()
+        )
+      )
+    } else {
+      shinytitle::change_window_title(
+        session,
+        paste0(
+          site_title, " - ",
+          input$navsetpillslist
+        )
+      )
+    }
+  })
 
   # Cookies logic =============================================================
-  output$cookie_status <- dfeshiny::cookie_banner_server(
+  output$cookie_status <- dfeshiny::cookies_banner_server(
     "cookie-banner",
     input_cookies = shiny::reactive(input$cookies),
     parent_session = session,
     google_analytics_key = google_analytics_key,
-    cookie_link_panel = "cookies_panel_ui"
+    cookies_link_panel = "cookies_panel_ui"
   )
 
   dfeshiny::cookies_panel_server(
@@ -86,14 +86,28 @@ server <- function(input, output, session) {
   # Start of LAIT
   # ===========================================================================
 
+  # reactiveValues object to store shared input values across pages
+  shared_values <- reactiveValues(
+    la = NULL,
+    topic = NULL,
+    indicator = NULL
+  )
+
+  # ===========================================================================
+  # LA Level Page
+  # ===========================================================================
+
   # User Inputs ===============================================================
-  app_inputs <- appInputsServer("la_level")
+  la_app_inputs <- appInputsServer("la_level", shared_values)
+
+  # Page header
+  PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
 
   # LA level tables ===========================================================
   # Main table
   la_main_tbl <- LA_LevelTableServer(
     "la_table",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
@@ -101,17 +115,16 @@ server <- function(input, output, session) {
   # Stats table
   LA_StatsTableServer(
     "la_stats",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
-
 
   # LA level charts ===========================================================
   # Line chart
   la_linechart <- LA_LineChartServer(
     "la_chart",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
@@ -119,16 +132,15 @@ server <- function(input, output, session) {
   # Bar chart
   la_barchart <- LA_BarChartServer(
     "la_chart",
-    app_inputs,
+    la_app_inputs,
     bds_metrics,
     stat_n_la
   )
 
-
   # LA Metadata ===============================================================
   LA_LevelMetaServer(
     "la_meta",
-    app_inputs$indicator,
+    la_app_inputs$indicator,
     metrics_clean
   )
 
@@ -137,6 +149,69 @@ server <- function(input, output, session) {
     la_main_tbl = la_main_tbl(),
     la_linechart = la_linechart(),
     la_barchart = la_barchart()
+  )
+
+
+  # ===========================================================================
+  # Regional Level Page
+  # ===========================================================================
+  # User Inputs ===============================================================
+  region_app_inputs <- appInputsServer("region_level", shared_values)
+
+  # Header
+  PageHeaderServer("region_header", region_app_inputs, "Regional View")
+
+  # Region tables =============================================================
+  # Region LA table -----------------------------------------------------------
+  RegionLA_TableServer(
+    "region_la_table",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog
+  )
+
+  # Region table --------------------------------------------------------------
+  Region_TableServer(
+    "region_table",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    region_names_bds
+  )
+
+  # Region stats table --------------------------------------------------------
+  Region_StatsTableServer(
+    "stats_table",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    region_names_bds
+  )
+
+  # Region charts =============================================================
+  # Region focus line chart ---------------------------------------------------
+  Region_FocusLine_chartServer(
+    "region_focus_line",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    region_names_bds
+  )
+
+  # Region multi-choice line chart --------------------------------------------
+  Region_Multi_chartServer(
+    "region_multi_line",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    region_names_bds
+  )
+
+  # Region Metadata ===========================================================
+  LA_LevelMetaServer(
+    "region_meta",
+    region_app_inputs$indicator,
+    metrics_clean
   )
 
   # Stop app ------------------------------------------------------------------

@@ -25,7 +25,8 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
       filtered_bds$data <- bds_metrics |>
         dplyr::filter(
           Topic == app_inputs$topic(),
-          Measure == app_inputs$indicator()
+          Measure == app_inputs$indicator(),
+          !is.na(Years)
         )
     })
 
@@ -62,24 +63,18 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       la_region <- filtered_sn |>
         pull_uniques("GOReg")
 
-      # List of areas being compared
-      la_comparison <- c(
-        app_inputs$la(), la_region,
-        "Statistical Neighbours", "England"
+      # Determine London region to use
+      la_region_ldn_clean <- clean_ldn_region(
+        la_region,
+        filtered_bds()
       )
-
-      # Get national term
-      la_national <- filtered_bds() |>
-        dplyr::filter(`LA and Regions` %in% national_names_bds &
-          !is.na(values_num)) |>
-        pull_uniques("LA and Regions")
 
       # Then filter for selected LA, region, stat neighbours and national
       la_filtered_bds <- filtered_bds() |>
         dplyr::filter(
           `LA and Regions` %in% c(
-            app_inputs$la(), la_region,
-            la_sns, la_national
+            app_inputs$la(), la_region_ldn_clean,
+            la_sns, "England"
           )
         )
 
@@ -105,8 +100,8 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           `LA and Regions` = factor(
             `LA and Regions`,
             levels = c(
-              app_inputs$la(), la_region,
-              "Statistical Neighbours", la_national
+              app_inputs$la(), la_region_ldn_clean,
+              "Statistical Neighbours", "England"
             )
           ),
           Years_num = as.numeric(substr(Years, start = 1, stop = 4))
@@ -148,6 +143,9 @@ LA_LevelTableUI <- function(id) {
 #' @return A list of outputs for the UI, including a data table of the LA levels
 LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
     # Main LA Level table ----------------------------------
     # Long format LA data
     la_long <- LA_LongDataServer(
@@ -171,12 +169,21 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           names_from = Years,
           values_from = values_num
         ) |>
-        pretty_num_table(dp = 1) |>
+        pretty_num_table(
+          dp = get_indicator_dps(filtered_bds()),
+          exclude_columns = "LA Number"
+        ) |>
         dplyr::arrange(`LA and Regions`)
     })
 
     output$la_table <- reactable::renderReactable({
-      dfe_reactable(la_table())
+      dfe_reactable(
+        la_table(),
+        columns = align_reactable_cols(la_table(), num_exclude = "LA Number"),
+        rowStyle = function(index) {
+          highlight_selected_row(index, la_table(), app_inputs$la())
+        }
+      )
     })
   })
 }
@@ -200,7 +207,7 @@ LA_StatsTableUI <- function(id) {
         )
       ),
       bslib::card(
-        bslib::card_header("Quatile bands"),
+        bslib::card_header("Quartile bands"),
         bslib::card_body(
           reactable::reactableOutput(ns("la_quartiles"))
         )
@@ -240,13 +247,17 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       la_change_prev <- la_diff() |>
         filter_la_regions(app_inputs$la(), pull_col = "values_num")
 
+      # Get polarity of indicator
+      la_indicator_polarity <- filtered_bds() |>
+        pull_uniques("Polarity")
+
       # Set the trend value
-      la_trend <- calculate_trend(la_change_prev)
+      la_trend <- as.numeric(la_change_prev)
 
       # Get latest rank, ties are set to min & NA vals to NA rank
       la_rank <- filtered_bds() |>
         filter_la_regions(la_names_bds, latest = TRUE) |>
-        calculate_rank() |>
+        calculate_rank(la_indicator_polarity) |>
         filter_la_regions(app_inputs$la(), pull_col = "rank")
 
       # Calculate quartile bands for indicator
@@ -267,15 +278,12 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       # Calculating which quartile this value sits in
       la_quartile <- calculate_quartile_band(
         la_indicator_val,
-        la_quartile_bands
+        la_quartile_bands,
+        la_indicator_polarity
       )
 
-      # Get polarity of indicator
-      la_indicator_polarity <- filtered_bds() |>
-        pull_uniques("Polarity")
-
       # Build stats LA Level table
-      la_stats_table <- create_stats_table(
+      la_stats_table <- build_la_stats_table(
         la_diff(),
         app_inputs$la(),
         la_trend,
@@ -284,7 +292,11 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_quartile,
         la_quartile_bands,
         la_indicator_polarity
-      )
+      ) |>
+        pretty_num_table(
+          dp = get_indicator_dps(filtered_bds()),
+          exclude_columns = c("LA Number", "Trend", "Latest National Rank")
+        )
 
       la_stats_table
     })
@@ -294,13 +306,21 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(!dplyr::ends_with("including"), -Polarity),
-        columns = list(
-          `Quartile Banding` = reactable::colDef(
-            style = reactablefmtr::cell_style(
-              background_color = get_quartile_band_cell_colour(
-                polarity_colours_df(),
-                la_stats_table()
-              )
+        columns = modifyList(
+          # Create the reactable with specific column alignments
+          align_reactable_cols(
+            la_stats_table() |>
+              dplyr::select(-Polarity),
+            num_exclude = "LA Number",
+            categorical = c("Trend", "Quartile Banding")
+          ),
+          # Style Quartile Banding column with colour
+          list(
+            `Quartile Banding` = reactable::colDef(
+              style = quartile_banding_col_def(la_stats_table())
+            ),
+            Trend = reactable::colDef(
+              cell = trend_icon_renderer
             )
           )
         )
@@ -312,15 +332,9 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(dplyr::ends_with("including"), -Polarity),
-        columns = list(
-          `Quartile Banding` = reactable::colDef(
-            style = reactablefmtr::cell_style(
-              background_color = get_quartile_band_cell_colour(
-                polarity_colours_df(),
-                la_stats_table()
-              )
-            )
-          )
+        columns = align_reactable_cols(
+          la_stats_table() |>
+            dplyr::select(dplyr::ends_with("including"), -Polarity)
         )
       )
     })

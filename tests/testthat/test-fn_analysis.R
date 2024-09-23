@@ -2,6 +2,7 @@
 # Sample data frame for testing
 data_change <- data.frame(
   `LA and Regions` = c(rep("Region1", 3), rep("Region2", 3)),
+  Measure = rep("Measure1", 6),
   Years = c("2023", "2022", "2021", "2023", "2022", "2021"),
   Years_num = c(2023, 2022, 2021, 2023, 2022, 2021),
   values_num = c(100, 90, 80, 190, 195, 200),
@@ -11,6 +12,7 @@ data_change <- data.frame(
 test_that("1. calculate_change_from_prev_yr computes changes correctly", {
   expected_result <- data.frame(
     `LA and Regions` = c("Region1", "Region2"),
+    Measure = rep("Measure1", 2),
     Years = c("Change from previous year", "Change from previous year"),
     Years_num = c(2022, 2022),
     values_num = c(10, -5), # 2022-2021 change: Region1 = 90-80, Region2 = 195-190
@@ -26,6 +28,7 @@ test_that("2. calculate_change_from_prev_yr handles NA values in values_num", {
   data_with_na$values_num[2] <- NA
   expected_result_na <- data.frame(
     `LA and Regions` = c("Region1", "Region2"),
+    Measure = rep("Measure1", 2),
     Years = c("Change from previous year", "Change from previous year"),
     Years_num = c(2022, 2022),
     values_num = c(NA, -5), # NA handling should propagate to the calculation
@@ -41,13 +44,20 @@ test_that("3. calculate_change_from_prev_yr handles NA values in Years_num", {
   data_with_na_years$Years_num[2] <- NA # Introduce an NA in the Years_num column for Region1
   expected_result_na_years <- data.frame(
     `LA and Regions` = c("Region1", "Region2"),
+    Measure = rep("Measure1", 2),
     Years = c("Change from previous year"),
     Years_num = c(2021, 2022),
-    values_num = c(NA, -5), # Region2 should still be calculated correctly
+    values_num = c(20, -5),
     check.names = FALSE
   )
-  result_na_years <- calculate_change_from_prev_yr(data_with_na_years)
-  expect_equal(result_na_years, expected_result_na_years)
+
+  expect_warning(
+    expect_equal(
+      calculate_change_from_prev_yr(data_with_na_years),
+      expected_result_na_years
+    ),
+    "Missing year found in the change from previous year calculation,"
+  )
 })
 
 # Test 4: Test with only one year of data
@@ -71,55 +81,6 @@ test_that("6. calculate_change_from_prev_yr processes multiple LAs and Regions c
 })
 
 
-
-# calculate_trend() -----------------------------------------------------------
-# Test 1: Positive values
-test_that("1. calculate_trend returns 'Increase' for positive values", {
-  positive_change <- c(5)
-  expected_positive <- c("Increase")
-  expect_equal(calculate_trend(positive_change), expected_positive)
-})
-
-# Test 2: Negative values
-test_that("2. calculate_trend returns 'Decrease' for negative values", {
-  negative_change <- c(-2)
-  expected_negative <- c("Decrease")
-  expect_equal(calculate_trend(negative_change), expected_negative)
-})
-
-# Test 3: Zero values
-test_that("3. calculate_trend returns 'No change' for zero values", {
-  zero_change <- c(0)
-  expected_zero <- c("No change") # Adjusted to match the function output
-  expect_equal(calculate_trend(zero_change), expected_zero)
-})
-
-# Test 4: NA values
-test_that("4. calculate_trend returns NA_character_ for NA values", {
-  na_change <- c(NA)
-  expected_na <- NA_character_
-  expect_equal(calculate_trend(na_change), expected_na)
-})
-
-# Test 5: Empty vector
-test_that("5.calculate_trend returns an empty vector for an empty input and warns", {
-  empty_change <- numeric(0)
-  expected_empty <- character(0)
-  expected_warning <- "The change_since_prev value looks wrong:"
-  expect_warning(
-    expect_equal(calculate_trend(empty_change), expected_empty),
-    expected_warning
-  )
-})
-
-# Test 6: Multiple values
-test_that("6. calculate_trend returns a warning for multiple values and no trend", {
-  multiple_val <- c(-3, 5)
-  expected_warning <- "The change_since_prev value looks wrong:"
-  expect_warning(calculate_trend(multiple_val), expected_warning)
-})
-
-
 # calculate_quartile_band() ---------------------------------------------------
 # Define quartile bands for testing
 quartile_bands <- c(
@@ -132,34 +93,38 @@ quartile_bands <- c(
 
 # 1. Test when indicator_val is within each quartile
 test_that("1. calculate_quartile_band returns correct quartile band for values within each quartile", {
-  expect_equal(calculate_quartile_band(10, quartile_bands), "A") # within 0%-25%
-  expect_equal(calculate_quartile_band(30, quartile_bands), "B") # within 25%-50%
-  expect_equal(calculate_quartile_band(60, quartile_bands), "C") # within 50%-75%
-  expect_equal(calculate_quartile_band(80, quartile_bands), "D") # within 75%-100%
+  expect_equal(calculate_quartile_band(10, quartile_bands, "Low"), "A") # within 0%-25%
+  expect_equal(calculate_quartile_band(30, quartile_bands, "Low"), "B") # within 25%-50%
+  expect_equal(calculate_quartile_band(60, quartile_bands, "Low"), "C") # within 50%-75%
+  expect_equal(calculate_quartile_band(80, quartile_bands, "Low"), "D") # within 75%-100%
+  expect_equal(calculate_quartile_band(10, quartile_bands, "High"), "D")
+  expect_equal(calculate_quartile_band(30, quartile_bands, "High"), "C")
+  expect_equal(calculate_quartile_band(60, quartile_bands, "High"), "B")
+  expect_equal(calculate_quartile_band(80, quartile_bands, "High"), "A")
 })
 
 # 2. Test edge cases at the boundaries
 test_that("2. calculate_quartile_band handles boundary values correctly", {
-  expect_equal(calculate_quartile_band(0, quartile_bands), "A") # exactly 0%
-  expect_equal(calculate_quartile_band(25, quartile_bands), "A") # exactly 25%
-  expect_equal(calculate_quartile_band(50, quartile_bands), "B") # exactly 50%
-  expect_equal(calculate_quartile_band(75, quartile_bands), "C") # exactly 75%
-  expect_equal(calculate_quartile_band(100, quartile_bands), "D") # exactly 100%
+  expect_equal(calculate_quartile_band(0, quartile_bands, "Low"), "A") # exactly 0%
+  expect_equal(calculate_quartile_band(25, quartile_bands, "Low"), "A") # exactly 25%
+  expect_equal(calculate_quartile_band(50, quartile_bands, "Low"), "B") # exactly 50%
+  expect_equal(calculate_quartile_band(75, quartile_bands, "Low"), "C") # exactly 75%
+  expect_equal(calculate_quartile_band(100, quartile_bands, "Low"), "D") # exactly 100%
 })
 
 # 3. Test when indicator_val is NA
 test_that("3. calculate_quartile_band returns NA_character_ for NA values", {
-  expect_equal(calculate_quartile_band(NA, quartile_bands), NA_character_)
+  expect_equal(calculate_quartile_band(NA, quartile_bands, "High"), NA_character_)
 })
 
 # 4. Test when indicator_val is outside the defined quartile bands
 test_that("4. calculate_quartile_band returns 'Error' for values outside the defined quartile bands", {
   expect_warning(
-    expect_equal(calculate_quartile_band(-10, quartile_bands), "Error"), # less than 0%
+    expect_equal(calculate_quartile_band(-10, quartile_bands, "Low"), "Error"), # less than 0%
     "Unexpected Quartile Banding"
   )
   expect_warning(
-    expect_equal(calculate_quartile_band(110, quartile_bands), "Error"), # more than 100%
+    expect_equal(calculate_quartile_band(110, quartile_bands, "High"), "Error"), # more than 100%
     "Unexpected Quartile Banding"
   )
 })
@@ -176,12 +141,13 @@ test_that("5. calculate_quartile_band handles non-standard quartile bands correc
 
   expect_warning(
     {
-      expect_equal(calculate_quartile_band(15, custom_quartile_bands), "A") # within 10%-20%
-      expect_equal(calculate_quartile_band(25, custom_quartile_bands), "Error") # within 20%-NA%
-      expect_equal(calculate_quartile_band(35, custom_quartile_bands), "Error") # within NA%-40%
-      expect_equal(calculate_quartile_band(45, custom_quartile_bands), "D") # within 40%-50%
-      expect_equal(calculate_quartile_band(5, custom_quartile_bands), "Error") # less than 10%
-      expect_equal(calculate_quartile_band(55, custom_quartile_bands), "Error") # more than 50%
+      expect_equal(calculate_quartile_band(15, custom_quartile_bands, "Low"), "A") # within 10%-20%
+      expect_equal(calculate_quartile_band(25, custom_quartile_bands, "Low"), "Error") # within 20%-NA%
+      expect_equal(calculate_quartile_band(35, custom_quartile_bands, "High"), "Error") # within NA%-40%
+      expect_equal(calculate_quartile_band(45, custom_quartile_bands, "Low"), "D") # within 40%-50%
+      expect_equal(calculate_quartile_band(5, custom_quartile_bands, "High"), "Error") # less than 10%
+      expect_equal(calculate_quartile_band(55, custom_quartile_bands, "Low"), "Error") # more than 50%
+      expect_equal(calculate_quartile_band(20, custom_quartile_bands, "High"), "D") # more than 50%
     },
     "Unexpected Quartile Banding"
   )
@@ -190,7 +156,7 @@ test_that("5. calculate_quartile_band handles non-standard quartile bands correc
 # 6. Test with an empty vector
 test_that("6. calculate_quartile_band returns an empty vector for an empty input and warns", {
   expect_warning(
-    expect_equal(calculate_quartile_band(numeric(0), quartile_bands), character(0)),
+    expect_equal(calculate_quartile_band(numeric(0), quartile_bands, "High"), character(0)),
     regexp = "Indicator value is empty; returning an empty character vector."
   )
 })
@@ -200,35 +166,48 @@ test_that("6. calculate_quartile_band returns an empty vector for an empty input
 # Sample data for table_stats
 table_stats <- data.frame(
   Polarity = c("Low", "High", NA, "-", "Low"),
-  `Quartile Banding` = c("A", "D", "B", "C", "D"),
+  `Quartile Banding` = c("A", "A", "B", "C", "D"),
   check.names = FALSE
 )
 
-polarity_colours <- polarity_colours_df() # Assuming this function is defined elsewhere
-
 # Expected results
-expected_colours <- c("green", "green", "none", "none", "red")
+expected_colours <- c("#00703c", "#00703c", "none", "none", "#d4351c")
 
 # 1. Test with matching polarity and quartile bands
 test_that("1. get_quartile_band_cell_colour returns correct colours for matching polarity and quartile bands", {
   # Low A
-  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[1, ])
+  result <- get_quartile_band_cell_colour(
+    table_stats[1, "Polarity"],
+    table_stats[1, "Quartile Banding"]
+  )
   expect_equal(result, expected_colours[1])
 
   # High D
-  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[2, ])
+  result <- get_quartile_band_cell_colour(
+    table_stats[2, "Polarity"],
+    table_stats[2, "Quartile Banding"]
+  )
   expect_equal(result, expected_colours[2])
 
   # NA B
-  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[3, ])
+  result <- get_quartile_band_cell_colour(
+    table_stats[3, "Polarity"],
+    table_stats[3, "Quartile Banding"]
+  )
   expect_equal(result, expected_colours[3])
 
   # - C
-  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[4, ])
+  result <- get_quartile_band_cell_colour(
+    table_stats[4, "Polarity"],
+    table_stats[4, "Quartile Banding"]
+  )
   expect_equal(result, expected_colours[4])
 
   # Low D
-  result <- get_quartile_band_cell_colour(polarity_colours, table_stats[5, ])
+  result <- get_quartile_band_cell_colour(
+    table_stats[5, "Polarity"],
+    table_stats[5, "Quartile Banding"]
+  )
   expect_equal(result, expected_colours[5])
 })
 
@@ -239,7 +218,10 @@ test_that("2. get_quartile_band_cell_colour throws error when multiple polaritie
     # Missing `Quartile Banding` column
   )
   expect_error(
-    get_quartile_band_cell_colour(polarity_colours, table_stats_multiple_polarity),
+    get_quartile_band_cell_colour(
+      table_stats_multiple_polarity$Polarity,
+      table_stats_multiple_polarity$`Quartile Banding`
+    ),
     "the condition has length > 1"
   )
 })
@@ -253,7 +235,10 @@ test_that("3. get_quartile_band_cell_colour returns empty vector and a warning w
   )
   expect_warning(
     expect_equal(
-      get_quartile_band_cell_colour(polarity_colours, table_stats_no_match),
+      get_quartile_band_cell_colour(
+        table_stats_no_match$Polarity,
+        table_stats_no_match$`Quartile Banding`
+      ),
       NULL
     ),
     "Unexpected polarity value: Unknown"
@@ -269,25 +254,28 @@ test_that("4. get_quartile_band_cell_colour returns empty vector with warning wh
   )
   expect_warning(
     expect_equal(
-      get_quartile_band_cell_colour(polarity_colours, table_stats_no_match),
+      get_quartile_band_cell_colour(
+        table_stats_no_match$Polarity,
+        table_stats_no_match$`Quartile Banding`
+      ),
       NULL
     ),
-    "Unexpected Quartile Banding: F"
+    "Unexpected Quartile Banding value: F"
   )
 })
 
 # 5. Test with missing values in polarity_colours
 test_that("5. get_quartile_band_cell_colour handles NA values in polarity_colours correctly", {
-  polarity_colours_na <- polarity_colours
-  polarity_colours_na$cell_colour[is.na(polarity_colours_na$polarity)] <- NA
-
   table_stats_with_na <- data.frame(
     Polarity = c(NA),
     `Quartile Banding` = c("D"),
     check.names = FALSE
   )
-  result_na <- get_quartile_band_cell_colour(polarity_colours_na, table_stats_with_na)
-  expect_equal(result_na, c(NA_character_))
+  result_none <- get_quartile_band_cell_colour(
+    table_stats_with_na$Polarity,
+    table_stats_with_na$`Quartile Banding`
+  )
+  expect_equal(result_none, "none")
 })
 
 
@@ -301,7 +289,7 @@ test_that("1. calculate_rank assigns correct ranks for normal values", {
     values_num = c(10, 20, 30, 40, 50),
     rank = c(1, 2, 3, 4, 5)
   )
-  result_normal <- calculate_rank(df_normal)
+  result_normal <- calculate_rank(df_normal, "Low")
   expect_equal(result_normal, expected_normal)
 })
 
@@ -312,9 +300,9 @@ test_that("2. calculate_rank handles ties correctly", {
   )
   expected_ties <- data.frame(
     values_num = c(10, 20, 20, 30, 40),
-    rank = c(1, 2, 2, 4, 5)
+    rank = c(5, 3, 3, 2, 1)
   )
-  result_ties <- calculate_rank(df_ties)
+  result_ties <- calculate_rank(df_ties, "High")
   expect_equal(result_ties, expected_ties)
 })
 
@@ -327,7 +315,7 @@ test_that("3. calculate_rank handles missing values properly", {
     values_num = c(10, NA, 30, 20, NA),
     rank = c(1, NA, 3, 2, NA)
   )
-  result_missing <- calculate_rank(df_missing)
+  result_missing <- calculate_rank(df_missing, "Low")
   expect_equal(result_missing, expected_missing)
 })
 
@@ -340,7 +328,7 @@ test_that("4. calculate_rank returns an empty data frame when input is empty", {
     values_num = numeric(0),
     rank = numeric(0)
   )
-  result_empty <- calculate_rank(df_empty)
+  result_empty <- calculate_rank(df_empty, "High")
   expect_equal(result_empty, expected_empty)
 })
 
@@ -353,6 +341,6 @@ test_that("5. calculate_rank returns NA for rank when all values are missing", {
     values_num = c(NA, NA, NA),
     rank = c(NA_real_, NA_real_, NA_real_)
   )
-  result_all_missing <- calculate_rank(df_all_missing)
+  result_all_missing <- calculate_rank(df_all_missing, "Low")
   expect_equal(result_all_missing, expected_all_missing)
 })

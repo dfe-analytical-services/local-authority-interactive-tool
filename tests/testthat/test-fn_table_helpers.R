@@ -241,7 +241,7 @@ test_that("7. pretty_num_table can take pretty_num arguements", {
   # Empty data frame
   result <- pretty_num_table(pretty_tbl_data,
     suffix = "_test",
-    dp = 5,
+    dp = 2,
     gbp = TRUE
   )
 
@@ -316,8 +316,8 @@ test_that("4. dfe_reactable with HTML content", {
 })
 
 
-# create_stats_table() --------------------------------------------------------
-test_that("1. create_stats_table works with standard inputs", {
+# build_la_stats_table() --------------------------------------------------------
+test_that("1. build_la_stats_table works with standard inputs", {
   main_table <- data.frame(
     "LA Number" = 123,
     "LA and Regions" = "LA1",
@@ -331,7 +331,7 @@ test_that("1. create_stats_table works with standard inputs", {
   quartile_bands <- c("25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
   indicator_polarity <- "High"
 
-  result <- create_stats_table(
+  result <- build_la_stats_table(
     main_table,
     selected_la,
     trend,
@@ -347,21 +347,20 @@ test_that("1. create_stats_table works with standard inputs", {
     "LA and Regions" = "LA1",
     "Trend" = "Increase",
     "Change from previous year" = 5.2,
+    "Polarity" = "High",
     "Latest National Rank" = 1,
     "Quartile Banding" = "A",
-    "(A) Up to and including" = 10,
-    "(B) Up to and including" = 20,
-    "(C) Up to and including" = 30,
-    "(D) Up to and including" = 40,
-    "Polarity" = "High",
+    "(D) Up to and including" = 10,
+    "(C) Up to and including" = 20,
+    "(B) Up to and including" = 30,
+    "(A) Up to and including" = 40,
     check.names = FALSE
-  ) |>
-    pretty_num_table(dp = 1)
+  )
 
   expect_equal(result, expected)
 })
 
-test_that("2. create_stats_table handles empty inputs gracefully", {
+test_that("2. build_la_stats_table handles empty inputs gracefully", {
   main_table <- data.frame(
     "LA Number" = numeric(0),
     "LA and Regions" = character(0),
@@ -377,7 +376,7 @@ test_that("2. create_stats_table handles empty inputs gracefully", {
 
   expect_warning(
     expect_error(
-      create_stats_table(
+      build_la_stats_table(
         main_table,
         selected_la,
         trend,
@@ -387,13 +386,13 @@ test_that("2. create_stats_table handles empty inputs gracefully", {
         quartile_bands,
         indicator_polarity
       ),
-      "arguments imply differing number of rows: 0, 1"
+      "argument is of length zero"
     ),
     "Dataframe seems empty"
   )
 })
 
-test_that("3. create_stats_table handles NAs gracefully", {
+test_that("3. build_la_stats_table handles NAs gracefully", {
   main_table <- data.frame(
     "LA Number" = NA,
     "LA and Regions" = "LA1",
@@ -412,20 +411,66 @@ test_that("3. create_stats_table handles NAs gracefully", {
     "LA and Regions" = "LA1",
     "Trend" = NA,
     "Change from previous year" = NA,
+    "Polarity" = NA,
+    "Latest National Rank" = "Not applicable",
+    "Quartile Banding" = "Not applicable",
+    "(A) Up to and including" = "-",
+    "(B) Up to and including" = "-",
+    "(C) Up to and including" = "-",
+    "(D) Up to and including" = "-",
+    check.names = FALSE
+  )
+
+  expect_warning(
+    expect_equal(
+      build_la_stats_table(
+        main_table,
+        selected_la,
+        trend,
+        change_since_prev,
+        rank,
+        quartile,
+        quartile_bands,
+        indicator_polarity
+      ),
+      expected
+    ),
+    "Suprise NA value in stats table"
+  )
+})
+
+test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
+  main_table <- data.frame(
+    "LA Number" = NA,
+    "LA and Regions" = "LA1",
+    check.names = FALSE
+  )
+  selected_la <- "LA1"
+  trend <- NA
+  change_since_prev <- NA
+  rank <- NA
+  quartile <- NA
+  quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_polarity <- "Low"
+
+  expected <- data.frame(
+    "LA Number" = NA,
+    "LA and Regions" = "LA1",
+    "Trend" = NA,
+    "Change from previous year" = NA,
+    "Polarity" = "Low",
     "Latest National Rank" = NA,
     "Quartile Banding" = NA,
     "(A) Up to and including" = 0,
     "(B) Up to and including" = 0,
     "(C) Up to and including" = 0,
     "(D) Up to and including" = 0,
-    "Polarity" = NA,
     check.names = FALSE
-  ) |>
-    pretty_num_table(dp = 1)
+  )
 
   expect_warning(
     expect_equal(
-      create_stats_table(
+      build_la_stats_table(
         main_table,
         selected_la,
         trend,
@@ -439,122 +484,4 @@ test_that("3. create_stats_table handles NAs gracefully", {
     ),
     "Suprise NA value in stats table"
   )
-})
-
-test_that("4. create_stats_table handles NA Quartile Banding gracefully", {
-  main_table <- data.frame(
-    "LA Number" = 123,
-    "LA and Regions" = "LA1",
-    check.names = FALSE
-  )
-  selected_la <- "LA1"
-  trend <- "Increase"
-  change_since_prev <- 5.2
-  rank <- 1
-  quartile <- "A"
-  quartile_bands <- c("25%" = NA, "50%" = 20, "75%" = 30, "100%" = 40)
-  indicator_polarity <- "High"
-
-  expected <- data.frame(
-    "LA Number" = 123,
-    "LA and Regions" = "LA1",
-    "Trend" = "Increase",
-    "Change from previous year" = 5.2,
-    "Latest National Rank" = 1,
-    "Quartile Banding" = "A",
-    "(A) Up to and including" = NA_real_,
-    "(B) Up to and including" = 20,
-    "(C) Up to and including" = 30,
-    "(D) Up to and including" = 40,
-    "Polarity" = "High",
-    check.names = FALSE
-  ) |>
-    pretty_num_table(dp = 1)
-
-  expect_warning(
-    expect_equal(
-      create_stats_table(
-        main_table,
-        selected_la,
-        trend,
-        change_since_prev,
-        rank,
-        quartile,
-        quartile_bands,
-        indicator_polarity
-      ),
-      expected
-    ),
-    "Suprise NA value in stats table"
-  )
-})
-
-
-# polarity_colours_df() ------------------------------------------------------
-test_that("1. polarity_colours_df returns a df with the correct structure", {
-  result <- polarity_colours_df()
-
-  # Check that result is a data frame
-  expect_true(is.data.frame(result))
-
-  # Check that the df has three cols: polarity, quartile_band, and cell_colour
-  expect_equal(names(result), c("polarity", "quartile_band", "cell_colour"))
-
-  # Check the dimensions of the df (16 rows for 4 polarities * 4 quartile bands)
-  expect_equal(nrow(result), 16)
-  expect_equal(ncol(result), 3)
-})
-
-test_that("2. polarity_colours_df assigns 'none' when polarity is NA or '-'", {
-  result <- polarity_colours_df()
-
-  # Filter rows where polarity is NA or "-"
-  na_or_dash <- result[result$polarity %in% c(NA, "-"), ]
-
-  # Expect all cell_colour values to be "none"
-  expect_true(all(na_or_dash$cell_colour == "none"))
-})
-
-test_that("3. polarity_colours_df assigns 'none' for B and C", {
-  result <- polarity_colours_df()
-
-  # Filter rows where quartile_band is B or C
-  bands_b_c <- result[result$quartile_band %in% c("B", "C"), ]
-
-  # Expect all cell_colour values to be "none"
-  expect_true(all(bands_b_c$cell_colour == "none"))
-})
-
-test_that("4. polarity_colours_df assigns 'green' for Low and A", {
-  result <- polarity_colours_df()
-
-  # Filter rows where quartile_band is A and polarity is Low
-  green_cells <- result |>
-    dplyr::filter(quartile_band == "A" & polarity == "Low")
-
-  # Expect all cell_colour values to be "green"
-  expect_true(all(green_cells$cell_colour == "green"))
-})
-
-test_that("5. polarity_colours_df assigns 'red' for Low and D", {
-  result <- polarity_colours_df()
-
-  # Filter rows where quartile_band is D and polarity is Low
-  red_cells_low <- result |>
-    dplyr::filter(quartile_band == "D" & polarity == "Low")
-
-  # Expect all cell_colour values to be "red"
-  expect_true(all(red_cells_low$cell_colour == "red"))
-})
-
-test_that("5. polarity_colours_df is empty for NA quartile band", {
-  result <- polarity_colours_df()
-  qb_filter_val <- NA
-
-  # Filter rows where quartile_band is D and polarity is Low
-  red_cells_low <- result |>
-    dplyr::filter(quartile_band == qb_filter_val & polarity == "Low")
-
-  # Expect all cell_colour values to be "red"
-  expect_equal(red_cells_low$cell_colour, character(0))
 })

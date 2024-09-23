@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!-- This is a template README for a DfE dashboard, use this as a starting point for creating your own readme, making sure to replace or delete wherevere there is three dots (...) with the content appropriate for your dashboard -->
 
 <!-- Add the title of your of application -->
@@ -57,10 +56,7 @@ The following requirements are necessary for running the application yourself or
 
 <!-- Detail any access requirements, e.g. database access for source data, including what level of access is required and how to request it.-->
 
-Currently, access to the necessary data for the tool is restricted while we confirm exactly what data can be shared publicly.
-This should be resolved soon.
-
-Once this is resolved, there are no other access requirements as all data will be available in the repository.
+There are no access requirements as all data is available in the repository.
 
 To contribute to the repo you will need to be given access to create new branches, commit and push / pull, contact explore.statistics@education.gov.uk or jake.tufts@education.gov.uk for this.
   

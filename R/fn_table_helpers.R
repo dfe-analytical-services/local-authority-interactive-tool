@@ -116,25 +116,35 @@ pretty_num_table <- function(data,
   data |>
     dplyr::mutate(dplyr::across(
       .cols = dplyr::all_of(cols_to_include),
-      ~ sapply(., dfeR::pretty_num, ...)
+      ~ sapply(., pretty_num, ...)
     ))
 }
 
 
-#' DFE Reactable Function
+#' Create a Reactable Table
 #'
-#' This function creates a reactable table from a given data frame.
-#' The table has several predefined settings:
-#' it has highlighting enabled, no borders,
-#' no sort icon, a font size of 16px, and a default column definition
-#' with a specific header class and HTML enabled.
+#' This function generates a customisable reactable table from the provided
+#' data. It enhances the display with features such as highlighting,
+#' borderless design, and adjustable font size.
 #'
-#' @param data A data frame.
-#' The data frame to be displayed as a reactable table.
+#' The function applies default column definitions, including styling for
+#' headers and handling of missing values. Additional parameters can be
+#' passed for further customisation of the reactable.
 #'
-#' @return A reactable object representing the input data frame.
+#' @param data A data frame or tibble that contains the data to be displayed
+#'   in the reactable table.
+#' @param ... Additional arguments to customise the reactable table, such as
+#'   column definitions, styling options, or any other reactable parameters.
+#'
+#' @return A reactable object that can be rendered in a Shiny application or
+#'   a static HTML document.
+#'
+#' @examples
+#' # Example usage:
+#' dfe_reactable(data)
 #'
 dfe_reactable <- function(data, ...) {
+  # Generate the reactable
   reactable::reactable(
     data,
     highlight = TRUE,
@@ -143,41 +153,124 @@ dfe_reactable <- function(data, ...) {
     style = list(fontSize = "16px"),
     defaultColDef = reactable::colDef(
       headerClass = "bar-sort-header",
-      html = TRUE
+      html = TRUE,
+      na = "NA"
     ),
     ...
   )
 }
 
 
-#' Create a Statistics Table for Local Authorities and Regions
+#' Check if a column contains numeric or NA values
 #'
-#' This function creates a data frame that summarizes key statistics for
-#' local authorities (LAs) and regions.
-#' It includes columns for LA numbers, names, trends, changes, rankings,
-#' quartile bandings, and other relevant metrics.
+#' This function checks whether a column contains numeric values, is entirely
+#' composed of `NA` values, or includes string representations of missing
+#' numeric values (e.g., a hyphen `"-"`). It returns `TRUE` if any of these
+#' conditions are met, and `FALSE` otherwise.
+#' Mainly for aligning cols in reactable()
 #'
-#' @param main_table A data frame containing the main data with information
-#' on local authorities.
-#' @param selected_la A character vector specifying the selected local
-#' authorities and regions to be included in the table.
-#' @param trend A character vector representing the trend for each local
-#' authority (e.g., "Increase", "Decrease").
-#' @param change_since_prev A numeric vector indicating the change from the
-#' previous year for each local authority.
-#' @param rank A numeric vector representing the national rank of each
-#' local authority.
-#' @param quartile A character vector indicating the quartile band
-#' ("A", "B", "C", or "D") for each local authority.
-#' @param quartile_bands A named numeric vector specifying the thresholds for
-#' each quartile band.
-#' @param indicator_polarity A character vector indicating the polarity of the
-#' indicator (e.g., "low", "high").
+#' @param col_data A vector or column of data to check.
 #'
-#' @return A data frame with formatted columns summarizing the statistics
-#' for the selected local authorities and regions.
+#' @return A logical value indicating whether the column contains numeric
+#' values, all `NA` values, or string representations of missing numeric values.
 #'
-create_stats_table <- function(
+#' @examples
+#' is_numeric_or_na(c(1, 2, NA))
+#' is_numeric_or_na(c("-", "-", "-"))
+#' is_numeric_or_na(c("text", "text"))
+is_numeric_or_na <- function(col_data) {
+  contains_numeric <- any(grepl("[0-9]", as.character(col_data)))
+  all_na <- all(is.na(col_data))
+  str_na_num_col <- any(grepl("^(-|Not applicable)$", as.character(col_data)))
+  contains_numeric || all_na || str_na_num_col
+}
+
+
+#' Align columns in a reactable based on data type
+#'
+#' This function generates alignment settings for each column in a reactable
+#' table. Columns containing numeric values or `NA` values will be right-aligned
+#' unless excluded. Categorical columns are also aligned according to the
+#' provided argument.
+#'
+#' @param data A data frame containing the table data.
+#' @param num_exclude A vector of column names to exclude from right alignment
+#' for numeric values or `NA` values. Default is `NULL`.
+#' @param categorical A vector of column names to be treated as categorical for
+#' alignment. Default is `NULL`.
+#'
+#' @return A named list of `colDef` objects defining alignment for each column
+#' in the reactable.
+#'
+#' @examples
+#' align_reactable_cols(mtcars)
+#' align_reactable_cols(mtcars, num_exclude = c("mpg"), categorical = c("cyl"))
+align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
+  lapply(names(data), function(col) {
+    col_data <- data[[col]]
+    if ((is_numeric_or_na(col_data) && !(col %in% num_exclude)) || (col %in% categorical)) {
+      # Right-align columns that contain numbers or are all NA
+      reactable::colDef(
+        align = "right",
+        headerClass = "bar-sort-header",
+        html = TRUE,
+        na = "NA"
+      )
+    } else {
+      # Default left-alignment for other columns
+      reactable::colDef(
+        align = "left",
+        headerClass = "bar-sort-header",
+        html = TRUE,
+        na = "NA"
+      )
+    }
+  }) |>
+    setNames(names(data))
+}
+
+
+#' Create a Statistics Table
+#'
+#' This function generates a statistics table for a specified local authority
+#' (LA), including relevant metrics such as trends, changes from the previous
+#' year, rankings, and quartile banding based on the indicator's polarity.
+#'
+#' The function filters the main data table for the selected LA and creates
+#' a summary table that combines key statistics with appropriate ranking and
+#' quartile banding values. It handles cases where the indicator polarity
+#' affects how quartiles are assigned.
+#'
+#' @param main_table A data frame containing the main data used for filtering
+#'   and calculating statistics.
+#' @param selected_la A character string representing the selected local
+#'   authority for which to generate the statistics table.
+#' @param trend A numeric value or character string indicating the trend of the
+#'   selected authority's indicator.
+#' @param change_since_prev A numeric value representing the change in the
+#'   indicator from the previous year.
+#' @param rank A numeric value representing the latest national rank of the
+#'   selected local authority.
+#' @param quartile A character string indicating the quartile of the selected
+#'   authority based on the indicator.
+#' @param quartile_bands A named list or vector containing the quartile
+#'   boundaries for the indicator.
+#' @param indicator_polarity A character string indicating the polarity of the
+#'   indicator (e.g., "Low" or "High").
+#'
+#' @return A data frame summarising the statistics for the selected local
+#'   authority, including the LA number, name, trend, change from the previous
+#'   year, polarity, ranking, and quartile banding.
+#'
+#' @examples
+#' # Example usage:
+#' stats_table <- build_la_stats_table(
+#'   main_table, "Barking and Dagenham",
+#'   trend, change_since_prev, rank,
+#'   quartile, quartile_bands, "Low"
+#' )
+#'
+build_la_stats_table <- function(
     main_table,
     selected_la,
     trend,
@@ -189,95 +282,228 @@ create_stats_table <- function(
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
-  if (any(is.na(c(selected_la, la_number, quartile_bands)))) {
+  if (any(is.na(c(selected_la, la_number)))) {
     warning("Suprise NA value in stats table")
   }
 
-  data.frame(
+  # Create the ranking and Quartile Banding based on polarity
+  rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
+    list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "(A) Up to and including" = quartile_bands[["25%"]],
+      "(B) Up to and including" = quartile_bands[["50%"]],
+      "(C) Up to and including" = quartile_bands[["75%"]],
+      "(D) Up to and including" = quartile_bands[["100%"]]
+    )
+  } else if (indicator_polarity %in% "High") {
+    list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "(D) Up to and including" = quartile_bands[["25%"]],
+      "(C) Up to and including" = quartile_bands[["50%"]],
+      "(B) Up to and including" = quartile_bands[["75%"]],
+      "(A) Up to and including" = quartile_bands[["100%"]]
+    )
+  } else {
+    list(
+      "Latest National Rank" = "Not applicable",
+      "Quartile Banding" = "Not applicable",
+      "(A) Up to and including" = "-",
+      "(B) Up to and including" = "-",
+      "(C) Up to and including" = "-",
+      "(D) Up to and including" = "-"
+    )
+  }
+
+  stats_table <- data.frame(
     "LA Number" = la_number,
     "LA and Regions" = selected_la,
     "Trend" = trend,
     "Change from previous year" = change_since_prev,
-    "Latest National Rank" = rank,
-    "Quartile Banding" = quartile,
-    "(A) Up to and including" = quartile_bands[["25%"]],
-    "(B) Up to and including" = quartile_bands[["50%"]],
-    "(C) Up to and including" = quartile_bands[["75%"]],
-    "(D) Up to and including" = quartile_bands[["100%"]],
     "Polarity" = indicator_polarity,
     check.names = FALSE
   ) |>
-    pretty_num_table(dp = 1)
+    cbind(rank_quartile_band_values)
+
+  stats_table
 }
 
 
-#' Create Indicator Polarity Cell Colour Data Frame
+#' Build a formatted statistics table for regions
 #'
-#' This function generates a data frame that associates combinations of
-#' indicator polarity and quartile bands with specific cell colours.
-#' The function uses predefined rules to assign colours based on the polarity
-#' ("Low", "High", or "-") and the quartile band ("A", "B", "C", "D").
+#' This function creates a data frame containing statistics for local
+#' authorities (LAs) and regions, and formats it using the `pretty_num_table`
+#' function.
 #'
-#' @details
-#' The function creates a data frame with all combinations of polarity and
-#' quartile bands.
-#' It assigns a cell colour according to the following rules:
-#' \itemize{
-#'   \item "Low" polarity in quartile band "A" results in "green".
-#'   \item "Low" polarity in quartile band "D" results in "red".
-#'   \item "High" polarity in quartile band "A" results in "red".
-#'   \item "High" polarity in quartile band "D" results in "green".
-#'   \item Quartile bands "B" and "C" and any `NA` or "-" polarity result in "none".
-#' }
+#' @param region_stats_la_num A vector of Local Authority numbers.
+#' @param region_stats_name A vector of names corresponding to the
+#' Local Authorities and regions.
+#' @param region_trend A vector indicating the trend for each Local Authority.
+#' @param region_stats_change A vector showing the change from the previous
+#' year for each Local Authority.
+#' @param filtered_bds A data frame used to determine the decimal places for
+#' formatting.
 #'
-#' @return A data frame with the following columns:
-#' \describe{
-#'   \item{polarity}{Character vector indicating the polarity of the indicator.
-#'   Values can be \code{NA}, "-", "Low", or "High".}
-#'   \item{quartile_band}{Character vector indicating the quartile band.
-#'   Values are "A", "B", "C", or "D".}
-#'   \item{cell_colour}{Character vector indicating the assigned cell colour.
-#'   Values are "red", "green", or "none".}
-#' }
+#' @return A formatted statistics table with specific columns and pretty
+#' number formatting.
 #'
 #' @examples
-#' # Generate the polarity colour data frame
-#' polarity_colours_df()
+#' build_region_stats_table(
+#'   c("LA1", "LA2"), c("Region A", "Region B"),
+#'   c("Up", "Down"), c(10, -5), some_filtered_data
+#' )
 #'
-polarity_colours_df <- function() {
-  # Define the possible values for each column
-  polarity_options <- c(NA, "-", "Low", "High")
-  quartile_band_options <- c("A", "B", "C", "D")
-  cell_colour_options <- c("red", "green", "none")
+build_region_stats_table <- function(la_number,
+                                     area_name,
+                                     trend,
+                                     change_since_prev,
+                                     filtered_bds) {
+  data.frame(
+    "LA Number" = la_number,
+    "LA and Regions" = area_name,
+    "Trend" = trend,
+    "Change from previous year" = change_since_prev,
+    check.names = FALSE
+  ) |>
+    pretty_num_table(
+      dp = get_indicator_dps(filtered_bds),
+      exclude_columns = c("LA Number", "Trend")
+    )
+}
 
-  # Create all combinations of polarity and quartile band
-  polarity_colours <- expand.grid(
-    polarity = polarity_options,
-    quartile_band = quartile_band_options,
-    stringsAsFactors = FALSE
+
+#' Highlight a selected row in a reactable
+#'
+#' This function applies a specific style to a row if the value in the
+#' "LA and Regions" column matches the selected area.
+#'
+#' @param index The index of the row (automatically passed by `reactable`).
+#' @param data A data frame containing the table data.
+#' @param selected_area The specific area to highlight in the
+#' "LA and Regions" column.
+#'
+#' @return A list of CSS styles to apply to the row (if the condition matches),
+#' otherwise NULL.
+#'
+#' @examples
+#' \dontrun{
+#' # Use in a reactable table
+#' dfe_reactable(
+#'   region_la_table,
+#'   rowStyle = function(index) {
+#'     highlight_selected_row(index, region_la_table, selected_area)
+#'   }
+#' )
+#' }
+highlight_selected_row <- function(index, data, selected_area) {
+  if (data[index, "LA and Regions"] == selected_area) {
+    list(
+      color = "#6BACE6",
+      fontWeight = "bold"
+    )
+  }
+}
+
+
+#' Extract Unique Indicator Data Points
+#'
+#' This function retrieves unique data points for the specified indicator
+#' from the provided dataset. It specifically pulls the "dps" column,
+#' ensuring that the values are returned as numeric.
+#'
+#' The function utilises a helper function to extract unique values from
+#' the specified column in the dataset, converting them to numeric for
+#' further analysis.
+#'
+#' @param data_full A data frame or tibble containing the full dataset
+#'   from which the unique indicator data points are to be extracted.
+#'
+#' @return A numeric vector of unique data points from the "dps" column of
+#'   the dataset.
+#'
+#' @examples
+#' # Example usage:
+#' dps_values <- get_indicator_dps(data_full)
+#'
+get_indicator_dps <- function(data_full) {
+  data_full |>
+    pull_uniques("dps") |>
+    as.numeric()
+}
+
+
+#' Render Trend Icons Based on Value
+#'
+#' This function determines and renders a trend icon based on the given
+#' numeric value. It categorises the value into three trends: upward,
+#' downward, or stable, and returns the corresponding icon for use in
+#' Shiny applications.
+#'
+#' The function handles NA values appropriately, returning an NA for any
+#' missing data. Positive values are represented with an upward arrow,
+#' negative values with a downward arrow, and a value of zero with
+#' horizontal arrows indicating stability.
+#'
+#' @param value A numeric value that indicates the trend to be rendered.
+#'   This value can be positive, negative, zero, or NA.
+#'
+#' @return A Shiny icon object corresponding to the trend represented by
+#'   the input value, or NA if the value is missing.
+#'
+#' @examples
+#' # Example usage:
+#' icon <- trend_icon_renderer(5) # Returns an upward arrow icon
+#'
+trend_icon_renderer <- function(value) {
+  trend_icon <- dplyr::case_when(
+    is.na(value) ~ NA,
+    value > 0 ~ "arrow-up",
+    value < 0 ~ "arrow-down",
+    value == 0 ~ "arrows-left-right",
+    TRUE ~ NA
   )
 
-  # Initialize cell_colour column with "none"
-  polarity_colours$cell_colour <- "none"
+  # Render output
+  if (is.na(trend_icon)) {
+    NA
+  } else {
+    shiny::icon(trend_icon)
+  }
+}
 
-  # Apply the conditions to determine the cell colour
-  polarity_colours$cell_colour <- with(polarity_colours, ifelse(
-    (is.na(polarity) | polarity == "-") | (quartile_band == "B" | quartile_band == "C"),
-    "none", ifelse(
-      (quartile_band == "A" & polarity == "Low"),
-      "green", ifelse(
-        (quartile_band == "D" & polarity == "Low"),
-        "red", ifelse(
-          (quartile_band == "A" & polarity == "High"),
-          "red", ifelse(
-            (quartile_band == "D" & polarity == "High"),
-            "green",
-            "none"
-          )
-        )
-      )
+
+#' Define Quartile Banding Column with Background Color
+#'
+#' This function creates a column definition for a reactable table that
+#' applies background colors to cells based on their quartile banding.
+#' It utilises the `reactablefmtr` package to style cells according to the
+#' specified quartile band and polarity of the data.
+#'
+#' The function calls another helper function to determine the appropriate
+#' background color for each cell based on the values in the `Polarity`
+#' and `Quartile Banding` columns of the input data.
+#'
+#' @param data A data frame or tibble containing at least two columns:
+#'   `Polarity` and `Quartile Banding`, which are used to determine the
+#'   background color for each cell in the quartile banding column.
+#'
+#' @return A `colDef` object from the `reactablefmtr` package that defines
+#'   the styling for the quartile banding column, including the background
+#'   color settings.
+#'
+#' @examples
+#' # Example usage:
+#' col_def <- quartile_banding_col_def(data)
+#' reactable::reactable(data, defaultColDef = col_def)
+#'
+quartile_banding_col_def <- function(data) {
+  # Return the colDef object with the background color applied
+  reactablefmtr::cell_style(
+    data = data,
+    background_color = get_quartile_band_cell_colour(
+      data$Polarity,
+      data$`Quartile Banding`
     )
-  ))
-
-  polarity_colours
+  )
 }

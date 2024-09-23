@@ -122,7 +122,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         ) +
         format_axes(la_long()) +
         set_plot_colours(la_long()) +
-        set_plot_labs(filtered_bds(), app_inputs$indicator()) +
+        set_plot_labs(filtered_bds()) +
         custom_theme()
 
 
@@ -130,7 +130,8 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       vertical_hover <- lapply(
         get_years(la_long()),
         tooltip_vlines,
-        la_long()
+        la_long(),
+        get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph
@@ -141,7 +142,8 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
           )
-        )
+        ),
+        fonts = list(sans = "Arial")
       )
     })
 
@@ -205,7 +207,10 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             fill = `LA and Regions`,
             tooltip = glue::glue_data(
               la_long() |>
-                pretty_num_table(include_columns = "values_num", dp = 1),
+                pretty_num_table(
+                  include_columns = "values_num",
+                  dp = get_indicator_dps(filtered_bds())
+                ),
               "Year: {Years}\n{`LA and Regions`}: {values_num}"
             ),
             data_id = `LA and Regions`
@@ -217,14 +222,15 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         ) +
         format_axes(la_long()) +
         set_plot_colours(la_long(), "fill") +
-        set_plot_labs(filtered_bds(), app_inputs$indicator()) +
+        set_plot_labs(filtered_bds()) +
         custom_theme()
 
       # Plotting interactive graph
       ggiraph::girafe(
         ggobj = la_bar_chart,
         width_svg = 8,
-        options = generic_ggiraph_options()
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
       )
     })
 

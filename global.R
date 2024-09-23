@@ -149,8 +149,12 @@ stat_n_geog <- stat_n |>
 
 # Metrics
 # Remove whitesapce from key & filter out discontinued metrics
+# Set any NA decimal place column values to 1
 metrics_clean <- metrics_raw |>
-  dplyr::mutate(Measure_short = trimws(Measure_short)) |>
+  dplyr::mutate(
+    Measure_short = trimws(Measure_short),
+    dps = ifelse(is.na(dps), 1, dps)
+  ) |>
   dplyr::filter(!grepl("DISCONTINUE", Table_status))
 
 metrics_discontinued <- metrics_raw |>
@@ -166,7 +170,7 @@ metrics_discontinued <- metrics_raw |>
 bds_metrics <- metrics_clean |>
   dplyr::select(
     Topic, Measure_code, Measure, Measure_short,
-    Polarity, y_axis_name
+    Polarity, y_axis_name, Chart_title, dps
   ) |>
   dplyr::left_join(bds_clean,
     by = c("Measure_short" = "Short Desc"),
@@ -196,6 +200,15 @@ testthat::test_that(
       nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)
     )
   }
+)
+# Using waldo to do same as test
+waldo::compare(
+  x = bds_clean |>
+    dplyr::filter(`Short Desc` %notin% metrics_discontinued) |>
+    nrow() |>
+    as.numeric(),
+  y = (nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)) |>
+    as.numeric()
 )
 
 # PROOF 2: The unique values of Measure Short + Topic are the same
@@ -234,8 +247,9 @@ testthat::test_that("Number of topics per duplicate is 2", {
 
 # Join stat nieghbours LA names to SN dataframe
 stat_n_la <- stat_n_long |>
-  dplyr::right_join(
+  dplyr::left_join(
     stat_n_geog |>
+      dplyr::mutate(`LA num` = as.character(`LA num`)) |>
       dplyr::select(`LA num`,
         `LA Name_sn` = `LA Name`
       ),
@@ -283,23 +297,9 @@ testthat::test_that("Same LAs in both BDS and Stat Neighbours", {
 })
 
 
-# Englands
-national_names_bds <- bds_clean |>
-  dplyr::filter(grepl("England \\(", `LA and Regions`)) |>
-  pull_uniques("LA and Regions")
-
-# PROOF: 2 England names
-testthat::test_that("There are 2 England names", {
-  testthat::expect_length(
-    national_names_bds,
-    2
-  )
-})
-
-
 # LAs
 region_names_bds <- bds_clean |>
-  dplyr::filter(`LA and Regions` %notin% c(la_names_bds, national_names_bds)) |>
+  dplyr::filter(`LA and Regions` %notin% c(la_names_bds, "England")) |>
   pull_uniques("LA and Regions")
 
 # PROOF: 11 Regions and same Regions in BDS and Statistical Neighbours

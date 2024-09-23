@@ -1,7 +1,7 @@
 #' Shared Folder Path
 #'
 #' This variable holds the path to the 'LAIT - modernisation' teams channel folder.
-#' The folder is synchronized and located in the user's local system.
+#' The folder is synchronised and located in the user's local system.
 #'
 shared_folder <- paste0(
   r"(C:\Users\jtufts\Department for Education\LAIT modernisation - General)",

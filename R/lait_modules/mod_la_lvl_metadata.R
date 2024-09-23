@@ -33,7 +33,13 @@ MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
 
       if (grepl("link", metadata_type)) {
         label <- indicator_input()
-        metadata <- tags$a(href = metadata, class = "btn btn-default", label)
+        metadata <- dfeshiny::external_link(href = metadata, link_text = label)
+      }
+
+      # Handle metadata that is text by converting newlines to <br> tags
+      if (is.character(metadata)) {
+        metadata <- gsub("\r\n|\n", "<br>", metadata)
+        metadata <- HTML(metadata)
       }
 
       metadata

@@ -57,8 +57,8 @@ ui <- function(input, output, session) {
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
     # https://book.javascript-for-r.com/shiny-cookies.html
-    dfeshiny::dfe_cookie_script(),
-    dfeshiny::cookie_banner_ui(
+    dfeshiny::dfe_cookies_script(),
+    dfeshiny::cookies_banner_ui(
       "cookie-banner",
       "Local Authority Interactive Tool (LAIT)"
     ),
@@ -98,42 +98,90 @@ ui <- function(input, output, session) {
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
       bslib::nav_panel(
-        title = "Local Authority View",
+        title = "LA Level",
 
-        # Tab header ==============================================================
-        h1("Local Authority View"),
+        # Tab header ==========================================================
+        PageHeaderUI("la_header"),
 
-        # User Inputs =============================================================
+        # User Inputs =========================================================
         appInputsUI("la_level"),
 
-        # LA Tables ===============================================================
+        # LA Tables ===========================================================
         # Main table
         LA_LevelTableUI("la_table"),
 
         # Stats table
         LA_StatsTableUI("la_stats"),
 
-        # LA Charts ===============================================================
+        # LA Charts ===========================================================
         LA_ChartUI("la_chart"),
 
-        # LA Metadata =============================================================
+        # LA Metadata =========================================================
         LA_LevelMetaUI("la_meta")
       ),
-      user_guide_panel(),
-      a11y_panel(),
-      dfeshiny::support_panel(
-        team_email = "jake.tufts@education.gov.uk",
-        repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-        form_url = "https://forms.office.com"
+      bslib::nav_panel(
+        title = "Regional Level",
+
+        # Tab header ==========================================================
+        PageHeaderUI("region_header"),
+
+        # User Inputs =========================================================
+        appInputsUI("region_level"),
+
+        # Region tables =======================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::card(
+            bslib::card_header("Regional Authorities"),
+            bslib::card_body(
+              # Region LA Table -----------------------------------------------
+              RegionLA_TableUI("region_la_table"),
+              # Region Table --------------------------------------------------
+              Region_TableUI("region_table"),
+              # Region Stats Table --------------------------------------------
+              Region_StatsTableUI("stats_table")
+            )
+          )
+        ),
+
+        # Region charts =======================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::navset_card_underline(
+            id = "region_charts",
+            Region_FocusLine_chartUI("region_focus_line"),
+            Region_Multi_chartUI("region_multi_line")
+          )
+        ),
+
+        # Region Metadata =====================================================
+        LA_LevelMetaUI("region_meta")
       ),
-      # Cookies info
-      dfeshiny::cookies_panel_ui(
-        id = "cookie-panel",
-        google_analytics_key = google_analytics_key
+      # User guide ============================================================
+      user_guide_panel(),
+      # Accessibility =========================================================
+      a11y_panel(),
+      # Support and feedback ==================================================
+      bslib::nav_panel(
+        value = "support_panel",
+        title = "Support and feedback",
+        dfeshiny::support_panel(
+          team_email = "jake.tufts@education.gov.uk",
+          repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
+          form_url = "https://forms.office.com"
+        )
+      ),
+      # Cookies info ==========================================================
+      bslib::nav_panel(
+        value = "cookies_panel_ui",
+        title = "Cookies",
+        dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
       )
     ),
 
-    # Footer ------------------------------------------------------------------
+    # Footer ==================================================================
     shinyGovstyle::footer(full = TRUE)
   )
 }
