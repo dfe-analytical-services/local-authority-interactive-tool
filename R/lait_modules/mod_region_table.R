@@ -1,6 +1,23 @@
 # nolint start: object_name
 #
-# Get the LA region
+# General modules =============================================================
+# These are nested within other modules
+#
+#' LA Region Server Module
+#'
+#' A module that retrieves the region corresponding to the selected LA.
+#'
+#' @param id The namespace ID for the module.
+#' @param la_input A reactive expression returning the selected LA name.
+#' @param stat_n_geog A data frame containing LA names and corresponding
+#' regions.
+#'
+#' @return A reactive expression that outputs the region associated with the
+#' selected LA.
+#'
+#' @examples
+#' LA_RegionServer("region", input$la, stat_n_geog)
+#'
 LA_RegionServer <- function(id, la_input, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
     reactive({
@@ -13,7 +30,21 @@ LA_RegionServer <- function(id, la_input, stat_n_geog) {
 }
 
 
-# Get clean LA Region
+#' Clean LA Region Server Module
+#'
+#' A module that cleans and returns the region associated with the selected LA.
+#'
+#' @param id The namespace ID for the module.
+#' @param app_inputs A list of reactive inputs, including the selected LA.
+#' @param stat_n_geog A data frame containing LA names and corresponding regions.
+#' @param bds_metrics A data frame containing metric data for filtering.
+#'
+#' @return A reactive expression that returns a cleaned region for the selected
+#' LA, accounting for missing indicators at Inner/Outer London levels.
+#'
+#' @examples
+#' Clean_RegionServer("clean_region", app_inputs, stat_n_geog, bds_metrics)
+#'
 Clean_RegionServer <- function(id, app_inputs, stat_n_geog, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -31,7 +62,25 @@ Clean_RegionServer <- function(id, app_inputs, stat_n_geog, bds_metrics) {
 }
 
 
-# Long format Region LA data
+#' Region LA Long Data Server Module
+#'
+#' A module that filters and formats the dataset for the selected LA and
+#' region in long format.
+#'
+#' @param id The namespace ID for the module.
+#' @param stat_n_geog A data frame containing LA and regional data.
+#' @param region_la A reactive expression returning the selected LA's region.
+#' @param filtered_bds A reactive expression returning the filtered dataset.
+#'
+#' @return A reactive expression that returns the long-format dataset
+#' for the selected LA and regional LAs, including numeric year values.
+#'
+#' @examples
+#' RegionLA_LongDataServer(
+#'   "region_la_long_data", stat_n_geog, region_la,
+#'   filtered_bds
+#' )
+#'
 RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
   moduleServer(id, function(input, output, session) {
     reactive({
@@ -59,7 +108,21 @@ RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
   })
 }
 
-# Most recent year
+
+#' Current Year Server Module
+#'
+#' A module that retrieves the most recent year from the dataset based on
+#' the maximum numeric year.
+#'
+#' @param id The namespace ID for the module.
+#' @param region_la_long A reactive expression returning the long-format dataset.
+#'
+#' @return A reactive expression that returns the most recent year as a string
+#' from the dataset.
+#'
+#' @examples
+#' Current_YearServer("current_year", region_la_long)
+#'
 Current_YearServer <- function(id, region_la_long) {
   moduleServer(id, function(input, output, session) {
     reactive({
@@ -71,22 +134,24 @@ Current_YearServer <- function(id, region_la_long) {
   })
 }
 
-# Region LA table UI ==========================================================
-RegionLA_TableUI <- function(id) {
-  ns <- NS(id)
 
-  div(
-    style = "overflow-y: visible;",
-    bslib::card(
-      # bslib::card_header(""),
-      bslib::card_body(
-        reactable::reactableOutput(ns("region_la_table"))
-      )
-    )
-  )
-}
-
-# Region LA table data --------------------------------------------------------
+# Region LA Table =============================================================
+#' Region LA Data Server
+#'
+#' Server module to process and transform data for Region LA table. It filters,
+#' formats, and calculates differences in values across years for selected
+#' Local Authorities.
+#'
+#' @param id The namespace ID for the server module.
+#' @param app_inputs Reactive inputs for the app, including selected LA.
+#' @param bds_metrics Dataset of BDS metrics for filtering.
+#' @param stat_n_geog Dataset containing geographic information for LAs.
+#'
+#' @return A reactive object containing the formatted Region LA table data.
+#'
+#' @examples
+#' RegionLA_DataServer("region_la_data", app_inputs, bds_metrics, stat_n_geog)
+#'
 RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -96,7 +161,12 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     region_la <- LA_RegionServer("region_la", app_inputs$la, stat_n_geog)
 
     # Long format Region LA data
-    region_la_long <- RegionLA_LongDataServer("region_la_long", stat_n_geog, region_la, filtered_bds)
+    region_la_long <- RegionLA_LongDataServer(
+      "region_la_long",
+      stat_n_geog,
+      region_la,
+      filtered_bds
+    )
 
     # Current year
     current_year <- Current_YearServer("current_year", region_la_long)
@@ -121,7 +191,52 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   })
 }
 
-# Region LA table Server ------------------------------------------------------
+
+#' Region LA Table UI
+#'
+#' Creates a UI component for displaying a table of Local Authorities within
+#' a region using `reactable`.
+#'
+#' @param id The namespace ID for the UI module.
+#'
+#' @return A UI element containing a `reactable` output for displaying the
+#' Region LA table.
+#'
+#' @examples
+#' RegionLA_TableUI("region_la_table")
+#'
+RegionLA_TableUI <- function(id) {
+  ns <- NS(id)
+
+  div(
+    style = "overflow-y: visible;",
+    bslib::card(
+      # bslib::card_header(""),
+      bslib::card_body(
+        reactable::reactableOutput(ns("region_la_table"))
+      )
+    )
+  )
+}
+
+
+#' Region LA Table Server
+#'
+#' Server module for processing and rendering the Region LA table. It filters
+#' data for selected topics and indicators, calculates current year values,
+#' and formats the data for display in a reactable table.
+#'
+#' @param id The namespace ID for the server module.
+#' @param app_inputs Reactive inputs from the application, including the
+#' selected Local Authority.
+#' @param bds_metrics Dataset containing BDS metrics for filtering data.
+#' @param stat_n_geog Dataset with geographic information for Local Authorities.
+#'
+#' @return A reactive table output ready for rendering in the UI.
+#'
+#' @examples
+#' RegionLA_TableServer("region_la_table", app_inputs, bds_metrics, stat_n_geog)
+#'
 RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -131,10 +246,20 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     region_la <- LA_RegionServer("region_la", app_inputs$la, stat_n_geog)
 
     # Long format Region LA data
-    region_la_long <- RegionLA_LongDataServer("region_la_long", stat_n_geog, region_la, filtered_bds)
+    region_la_long <- RegionLA_LongDataServer(
+      "region_la_long",
+      stat_n_geog,
+      region_la,
+      filtered_bds
+    )
 
     # Get Region LA table
-    region_la_table_raw <- RegionLA_DataServer("region_la_table_raw", app_inputs, bds_metrics, stat_n_geog)
+    region_la_table_raw <- RegionLA_DataServer(
+      "region_la_table_raw",
+      app_inputs,
+      bds_metrics,
+      stat_n_geog
+    )
 
     # Current year
     current_year <- Current_YearServer("current_year", region_la_long)
@@ -166,8 +291,22 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 }
 
 
-
-# Get long data format for Regions
+# Region Table ================================================================
+#' Region Long Data Server
+#'
+#' Server module to process and format long data for regions and England.
+#' It filters the data based on selected regions and transforms it into
+#' a long format suitable for further analysis and visualization.
+#'
+#' @param id The namespace ID for the server module.
+#' @param filtered_bds A reactive expression providing filtered BDS data.
+#' @param region_names_bds A vector of region names for filtering.
+#'
+#' @return A reactive object containing the long-format data for the regions.
+#'
+#' @examples
+#' Region_LongDataServer("region_long_data", filtered_bds, region_names_bds)
+#'
 Region_LongDataServer <- function(id, filtered_bds, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     reactive({
@@ -191,30 +330,34 @@ Region_LongDataServer <- function(id, filtered_bds, region_names_bds) {
 }
 
 
-# Region table UI =============================================================
-Region_TableUI <- function(id) {
-  ns <- NS(id)
-
-  div(
-    # Add black border between the tables
-    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    bslib::card(
-      # bslib::card_header(""),
-      bslib::card_body(
-        reactable::reactableOutput(ns("region_table"))
-      )
-    )
-  )
-}
-
-# Region table data -----------------------------------------------------------
+#' Region Data Server
+#'
+#' Server module that processes data for regions, filtering by the
+#' selected topic and indicator. It generates a long format dataset
+#' for regions and calculates the difference between the last two years.
+#'
+#' @param id The namespace ID for the server module.
+#' @param app_inputs A reactive input list containing application inputs.
+#' @param bds_metrics A dataset containing metrics for filtering.
+#' @param region_names_bds A vector of region names for filtering.
+#'
+#' @return A reactive data frame containing the region table with values
+#' for the last two years, structured for further analysis and display.
+#'
+#' @examples
+#' Region_DataServer("region_data", app_inputs, bds_metrics, region_names_bds)
+#'
 Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format Region LA data
-    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
+    region_long <- Region_LongDataServer(
+      "region_long",
+      filtered_bds,
+      region_names_bds
+    )
 
     # Build Region table
     shiny::reactive({
@@ -236,14 +379,77 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
   })
 }
 
-# Region table Server ---------------------------------------------------------
-Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
+
+#' Region Table UI
+#'
+#' UI module to create a card that displays a table for region data.
+#' The card includes a styled border for visual separation and ensures
+#' that the table output is scrollable as needed.
+#'
+#' @param id The namespace ID for the UI module.
+#'
+#' @return A UI element containing the card with the region table output.
+#'
+#' @examples
+#' Region_TableUI("region_table_ui")
+#'
+Region_TableUI <- function(id) {
+  ns <- NS(id)
+
+  div(
+    # Add black border between the tables
+    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+    bslib::card(
+      # bslib::card_header(""),
+      bslib::card_body(
+        reactable::reactableOutput(ns("region_table"))
+      )
+    )
+  )
+}
+
+
+#' Region Table Server
+#'
+#' Server module that processes and renders the region table, filtering
+#' data based on selected topics and indicators. It prepares a long format
+#' dataset, calculates the current year, and arranges the table for display,
+#' ensuring the England row is placed at the bottom.
+#'
+#' @param id The namespace ID for the server module.
+#' @param app_inputs A reactive input list containing application inputs.
+#' @param bds_metrics A dataset containing metrics for filtering.
+#' @param stat_n_geog A dataset for geographic statistics.
+#' @param region_names_bds A vector of region names for filtering.
+#'
+#' @return A rendered reactable displaying the region data, formatted and
+#' ordered based on the current year.
+#'
+#' @examples
+#' Region_TableServer(
+#'   "region_table", app_inputs, bds_metrics,
+#'   stat_n_geog, region_names_bds
+#' )
+#'
+Region_TableServer <- function(id,
+                               app_inputs,
+                               bds_metrics,
+                               stat_n_geog,
+                               region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
-    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+    filtered_bds <- BDS_FilteredServer(
+      "filtered_bds",
+      app_inputs,
+      bds_metrics
+    )
 
     # Long format Region LA data
-    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
+    region_long <- Region_LongDataServer(
+      "region_long",
+      filtered_bds,
+      region_names_bds
+    )
 
     # Current year
     current_year <- Current_YearServer("current_year", region_long)
@@ -263,13 +469,20 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_
         ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
         # Places England row at the bottom of the table
-        dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
+        dplyr::mutate(is_england = ifelse(
+          grepl("^England", `LA and Regions`), 1, 0
+        )) |>
         dplyr::arrange(is_england, .by_group = FALSE) |>
         dplyr::select(-is_england)
     })
 
     # Get clean Regions
-    region_clean <- Clean_RegionServer("region_clean", app_inputs, stat_n_geog, bds_metrics)
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
 
     # Table output
     output$region_table <- reactable::renderReactable({
@@ -288,7 +501,20 @@ Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_
 }
 
 
-# Region Stats table UI =======================================================
+# Region Stats table ==========================================================
+#' Region Stats Table UI
+#'
+#' UI module that creates a card layout for displaying the region statistics
+#' table. It includes styling for overflow and a top border to separate the
+#' table visually.
+#'
+#' @param id The namespace ID for the UI module.
+#'
+#' @return A UI element containing a reactable output for the region stats table.
+#'
+#' @examples
+#' Region_StatsTableUI("region_stats_table")
+#'
 Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
@@ -304,15 +530,45 @@ Region_StatsTableUI <- function(id) {
   )
 }
 
-# Region Stats table Server ---------------------------------------------------
-Region_StatsTableServer <- function(
-    id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
+
+#' Region Stats Table Server
+#'
+#' Server module that processes and manages the data for the region stats
+#' table. It filters the data based on selected inputs and prepares the
+#' statistics for rendering.
+#'
+#' @param id The namespace ID for the server module.
+#' @param app_inputs Reactive inputs from the main app, including selected
+#'                  local authority (LA).
+#' @param bds_metrics Data metrics used for filtering and processing.
+#' @param stat_n_geog Data frame containing geographic information for
+#'                     regions.
+#' @param region_names_bds Names of regions for filtering the dataset.
+#'
+#' @return A reactive output for rendering the region stats table.
+#'
+#' @examples
+#' Region_StatsTableServer(
+#'   "region_stats_table", app_inputs, bds_metrics,
+#'   stat_n_geog, region_names_bds
+#' )
+#'
+Region_StatsTableServer <- function(id,
+                                    app_inputs,
+                                    bds_metrics,
+                                    stat_n_geog,
+                                    region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Get Region LA table
-    region_la_table_raw <- RegionLA_DataServer("region_la_raw", app_inputs, bds_metrics, stat_n_geog)
+    region_la_table_raw <- RegionLA_DataServer(
+      "region_la_raw",
+      app_inputs,
+      bds_metrics,
+      stat_n_geog
+    )
 
     # Region table
     region_table_raw <- Region_DataServer(
@@ -321,7 +577,12 @@ Region_StatsTableServer <- function(
     )
 
     # Get clean Regions
-    region_clean <- Clean_RegionServer("region_clean", app_inputs, stat_n_geog, bds_metrics)
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
 
     # Build stats table
     region_stats_table <- reactive({
@@ -358,17 +619,13 @@ Region_StatsTableServer <- function(
       region_trend <- as.numeric(region_stats_change)
 
       # Build stats table
-      data.frame(
-        "LA Number" = region_stats_la_num,
-        "LA and Regions" = region_stats_name,
-        "Trend" = region_trend,
-        "Change from previous year" = region_stats_change,
-        check.names = FALSE
-      ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = c("LA Number", "Trend")
-        )
+      build_region_stats_table(
+        region_stats_la_num,
+        region_stats_name,
+        region_trend,
+        region_stats_change,
+        filtered_bds()
+      )
     })
 
     # Table output
@@ -387,7 +644,10 @@ Region_StatsTableServer <- function(
               cell = trend_icon_renderer
             )
           )
-        )
+        ),
+        rowStyle = function(index) {
+          highlight_selected_row(index, region_stats_table(), app_inputs$la())
+        }
       )
     })
   })

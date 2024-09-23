@@ -295,7 +295,7 @@ server_dev <- function(input, output, session) {
     )
 
     # Build stats LA Level table
-    la_stats_table <- create_stats_table(
+    la_stats_table <- build_la_stats_table(
       la_diff(),
       input$la_input,
       la_trend,

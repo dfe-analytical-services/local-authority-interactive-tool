@@ -183,7 +183,7 @@ if (la_indicator_polarity %in% "Low") {
   la_quartile <- "Not applicable"
 }
 
-la_stats_table <- create_stats_table(
+la_stats_table <- build_la_stats_table(
   la_table,
   selected_la,
   la_trend,

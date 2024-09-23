@@ -109,6 +109,23 @@ create_focus_plot_colours <- function(data_long, focus_group) {
 }
 
 
+#' Create Plot Sizes for Focus Group
+#'
+#' This function generates a vector of line sizes for plotting, where the
+#' specified focus group is highlighted with a larger line size. All other
+#' groups are assigned a default smaller size.
+#'
+#' @param data_long A data frame in long format containing the plotting
+#'   groups. This should include a column for "LA and Regions".
+#' @param focus_group A character string indicating the focus group to be
+#'   highlighted in the plot.
+#'
+#' @return A numeric vector of line sizes, with the focus group having a
+#'   larger size (1) and all other groups having a default smaller size (0.5).
+#'
+#' @examples
+#' create_focus_plot_sizes(data_long, "Barking and Dagenham")
+#'
 create_focus_plot_sizes <- function(data_long, focus_group) {
   # Get plot groups
   plot_groups <- data_long |>
@@ -143,69 +160,34 @@ calculate_y_range <- function(data_long) {
 }
 
 
-#' @title Get Lower Limit of Y-Axis
-#' @description This function calculates the lower limit of the y-axis
-#' for the plot.
-#' @param data_long A dataframe containing the dataset.
-#' @return A numeric value representing the lower limit of the y-axis.
+#' Calculate Pretty Y-Gridlines
+#'
+#' This function computes the y-range for the provided data and generates
+#' 'pretty' gridline breaks. It ensures that gridlines extend above the
+#' maximum and below the minimum values of the dataset, enhancing plot
+#' readability.
+#'
+#' The function first retrieves the data range using `calculate_y_range`.
+#' If the maximum value is non-positive, it sets the upper limit to zero,
+#' and if the minimum value is non-negative, it sets the lower limit to zero
+#' as well. This adjustment guarantees that the y-axis includes zero when
+#' necessary.
+#'
+#' After calculating the range, it generates 'pretty' breaks and checks to
+#' ensure breaks extend beyond the maximum and minimum values. If needed, it
+#' adds increments to the breaks for clarity.
+#'
+#' @param data_long A data frame in long format, containing the data
+#'   for which the y-axis gridlines are calculated.
+#'
+#' @return A numeric vector of 'pretty' breaks for y-gridlines, ensuring
+#'   that gridlines extend beyond the minimum and maximum values for better
+#'   visualization.
+#'
 #' @examples
-#' \dontrun{
-#' get_ylim_low(data_long = my_data)
-#' }
-#' @export
-get_ylim_low <- function(data_long) {
-  y_range <- calculate_y_range(data_long)
-
-  if (y_range[1] >= 0) {
-    0
-  } else {
-    # Generate a sequence of pretty breaks based on the range
-    pretty_breaks <- pretty(y_range)
-    min_pretty_break <- min(pretty_breaks)
-
-    # Ensure there's a break below the min value
-    if (min_pretty_break >= y_range[1]) {
-      min_pretty_break <- min_pretty_break - diff(pretty_breaks[1:2])
-    }
-
-    # Return min break
-    min_pretty_break
-  }
-}
-
-
-#' @title Get Upper Limit of Y-Axis
-#' @description This function calculates the upper limit of the y-axis for
-#' the plot.
-#' @param data_long A dataframe containing the dataset.
-#' @return A numeric value representing the upper limit of the y-axis.
-#' @examples
-#' \dontrun{
-#' get_ylim_high(data_long = my_data)
-#' }
-#' @export
-# Calculate the pretty break just above the max data point
-get_ylim_high <- function(data_long) {
-  y_range <- calculate_y_range(data_long)
-
-  if (y_range[2] <= 0) {
-    0
-  } else {
-    # Generate a sequence of pretty breaks based on the range
-    pretty_breaks <- pretty(y_range)
-    max_pretty_break <- max(pretty_breaks)
-
-    # Ensure there's a break above the max value
-    if (max_pretty_break <= y_range[2]) {
-      max_pretty_break <- max_pretty_break + diff(pretty_breaks[1:2])
-    }
-
-    # Return max break
-    max_pretty_break
-  }
-}
-
-# Function to calculate y-range and ensure gridline above max and below min
+#' # Example usage:
+#' gridlines <- pretty_y_gridlines(data_long)
+#'
 pretty_y_gridlines <- function(data_long) {
   # Get the range of the data
   y_range <- calculate_y_range(data_long)
@@ -270,28 +252,31 @@ get_num_years <- function(data_long) {
 }
 
 
-#' Format Axes for a ggplot2 Plot
+#' Format Axes for Plotting
 #'
-#' This function formats the x and y axes for a ggplot2 plot.
-#' It uses the data in long format to determine the limits and
-#' breaks for the axes.
+#' This function formats the axes for a ggplot2 plot based on the provided
+#' data. It sets the y-axis limits, breaks, and labels, as well as the
+#' x-axis breaks, ensuring that the axes are appropriately scaled for
+#' the given dataset.
 #'
-#' @param data_long A data frame in long format.
-#' The data frame should have a numeric variable for the y-axis
-#' and a time variable for the x-axis.
+#' The function first calculates the number of years in the dataset using
+#' `get_num_years` and then determines the pretty y-gridline breaks using
+#' `pretty_y_gridlines`. It then creates a list containing the necessary
+#' scale functions for both the y-axis and x-axis.
 #'
-#' @return A list of ggplot2 scale functions for the x and y axes.
+#' @param data_long A data frame in long format, which contains the data
+#'   used for plotting. The structure should include relevant time and
+#'   numeric values.
+#'
+#' @return A list containing the ggplot2 scale functions for formatting
+#'   the y-axis and x-axis. This can be directly added to a ggplot object.
 #'
 #' @examples
-#' \dontrun{
-#' data_long <- data.frame(year = 2000:2020, value = rnorm(21))
-#' p <- ggplot(data_long, aes(x = year, y = value)) +
-#'   geom_line() +
-#'   format_axes(data_long)
-#' print(p)
-#' }
-#'
-#' @export
+#' # Example usage:
+#' axes <- format_axes(data_long)
+#' ggplot(data_long) +
+#'   axes +
+#'   geom_line()
 format_axes <- function(data_long) {
   num_years <- get_num_years(data_long)
   y_breaks <- pretty_y_gridlines(data_long)
@@ -310,27 +295,35 @@ format_axes <- function(data_long) {
 }
 
 
-#' Set Plot Colours
+#' Set Plot Colours for ggplot2
 #'
-#' This function applies a manual color or fill scale to a ggplot2 plot,
-#' based on the provided color parameters.
+#' This function applies custom colour scales to a ggplot2 plot based on the
+#' specified colour type. It allows for manual adjustments to colour and
+#' fill aesthetics, and supports highlighting a focus group if desired.
 #'
-#' @param colour_params A named vector of colors, typically generated by
-#' the `create_plot_colours` function.
-#' @param colour_type A character string specifying the type of
-#' color scale to apply.
-#' Options are `"colour"` (for line and point colors) and
-#' `"fill"` (for bar fill colors). Default is `"colour"`.
+#' The function accepts a `colour_type` parameter to determine whether to
+#' apply colour or fill scales, and can adjust the aesthetics for a specific
+#' focus group. It generates colour palettes using helper functions tailored
+#' to the data provided.
 #'
-#' @return A `ggplot2` scale function (`scale_colour_manual` or
-#' `scale_fill_manual`) that can be added to a ggplot2 plot.
+#' @param data_long A data frame in long format, which contains the data
+#'   for plotting. The structure should include relevant categorical values
+#'   for colours.
+#' @param colour_type A character string indicating the type of colour scale
+#'   to apply. Options include "colour", "fill", "focus", and "focus-fill".
+#' @param focus_group An optional character string specifying the focus group
+#'   for which to apply special colour and size adjustments.
 #'
-#' @details
-#' This function returns the appropriate ggplot2 scale function
-#' (`scale_colour_manual` or `scale_fill_manual`) based on the
-#' `colour_type` argument.
-#' The colors are applied according to the mapping in `colour_params`,
-#' ensuring that each group in the data is assigned its corresponding color.
+#' @return A ggplot2 scale function (or a list of scale functions)
+#'   for setting colour or fill aesthetics. This can be directly added to
+#'   a ggplot object.
+#'
+#' @examples
+#' # Example usage:
+#' colours <- set_plot_colours(data_long, "focus", "Barking and Dagenham")
+#' ggplot(data_long) +
+#'   colours +
+#'   geom_line()
 #'
 set_plot_colours <- function(data_long,
                              colour_type = "colour",
@@ -350,32 +343,31 @@ set_plot_colours <- function(data_long,
 }
 
 
-#' Set Plot Labels for a ggplot2 Plot
+#' Set Plot Labels for ggplot2
 #'
-#' This function sets the x, y, and title labels for a ggplot2 plot.
-#' It uses the filtered data and selected indicator to determine the labels.
+#' This function sets the labels for a ggplot2 plot, including the x-axis,
+#' y-axis, and the main title. It retrieves the y-axis title and plot title
+#' based on the provided filtered data.
 #'
-#' @param filtered_bds A filtered data frame.
-#' The data frame should have a numeric variable for the y-axis and a
-#' time variable for the x-axis.
-#' @param selected_indicator A character string representing the selected
-#' indicator for the plot.
+#' The function uses helper functions to determine appropriate titles for
+#' the axes and the plot, ensuring that the labels are relevant to the data
+#' being visualized.
 #'
-#' @return A ggplot2 labs function with the x, y, and title labels set.
+#' @param filtered_bds A data frame or object containing the filtered data
+#'   used for plotting. This should include information necessary to derive
+#'   the y-axis and plot titles.
+#'
+#' @return A `labs` object for ggplot2, containing the specified labels for
+#'   the x-axis, y-axis, and title. This can be directly added to a ggplot
+#'   object.
 #'
 #' @examples
-#' \dontrun{
-#' filtered_bds <- data.frame(
-#'   year = 2000:2020, value = rnorm(21),
-#'   indicator = "GDP"
-#' )
-#' p <- ggplot(filtered_bds, aes(x = year, y = value)) +
-#'   geom_line() +
-#'   set_plot_labs(filtered_bds, "GDP")
-#' print(p)
-#' }
+#' # Example usage:
+#' labs <- set_plot_labs(filtered_bds)
+#' ggplot(data) +
+#'   labs +
+#'   geom_line()
 #'
-#' @export
 set_plot_labs <- function(filtered_bds) {
   y_title <- get_yaxis_title(filtered_bds)
   plot_title <- get_plot_title(filtered_bds)
@@ -388,22 +380,24 @@ set_plot_labs <- function(filtered_bds) {
 }
 
 
-#' Custom ggplot2 Theme
+#' Create a Custom ggplot2 Theme
 #'
-#' This function returns a list of ggplot2 theme elements for
-#' customizing the appearance of plots.
+#' This function defines a custom theme for ggplot2 plots, enhancing the
+#' visual presentation of the charts. It builds upon the minimal theme and
+#' applies various aesthetic adjustments for titles, axes, and gridlines.
 #'
-#' @return A list of `ggplot2::theme` settings, including a minimal theme,
-#' centered plot titles, bottom legend placement,
-#' and removal of minor grid lines on the x-axis.
+#' The customisations include centered plot titles, specific angles and
+#' adjustments for the y-axis title, and the positioning of the legend. It
+#' also modifies the appearance of gridlines for a cleaner look.
 #'
-#' @details
-#' The custom theme is designed to provide a clean and modern look to the plots.
-#' It uses `ggplot2::theme_minimal` as the base theme,
-#' with additional customization for plot titles,
-#' legend positioning, and grid lines.
-#' This theme can be easily applied to any ggplot2 plot to
-#' ensure visual consistency.
+#' @return A list of theme elements to be used with ggplot2. This can be
+#'   added to a ggplot object to apply the custom styling.
+#'
+#' @examples
+#' # Example usage:
+#' ggplot(data) +
+#'   geom_line() +
+#'   custom_theme()
 #'
 custom_theme <- function() {
   list(
@@ -504,7 +498,7 @@ custom_ggiraph_tooltip <- function() {
 #' Generate Generic ggiraph Options
 #'
 #' This function generates a list of commonly used ggiraph options for
-#' customizing tooltips and toolbars in `ggiraph` visualizations.
+#' customising tooltips and toolbars in `ggiraph` visualizations.
 #' It is designed to provide a set of default settings that can be easily
 #' extended or overridden.
 #'
@@ -512,13 +506,13 @@ custom_ggiraph_tooltip <- function() {
 #' These options will be added to the default options provided by this function.
 #'
 #' @return A list of `ggiraph` options, including tooltip styling,
-#' toolbar position, and customization for PNG download functionality.
+#' toolbar position, and customisation for PNG download functionality.
 #'
 #' @details
 #' The default options generated by this function include:
-#' - Tooltip customization via `ggiraph::opts_tooltip()`,
+#' - Tooltip customisation via `ggiraph::opts_tooltip()`,
 #' with a custom CSS styling and full opacity.
-#' - Toolbar customization via `ggiraph::opts_toolbar()`,
+#' - Toolbar customisation via `ggiraph::opts_toolbar()`,
 #' positioning the toolbar in the top right corner,
 #' setting a custom filename for PNG downloads,
 #' and hiding unnecessary toolbar options like selection and zoom.

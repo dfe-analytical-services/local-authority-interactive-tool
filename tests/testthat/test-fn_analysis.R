@@ -81,55 +81,6 @@ test_that("6. calculate_change_from_prev_yr processes multiple LAs and Regions c
 })
 
 
-
-# calculate_trend() -----------------------------------------------------------
-# Test 1: Positive values
-test_that("1. calculate_trend returns 'Increase' for positive values", {
-  positive_change <- c(5)
-  expected_positive <- c("Increase")
-  expect_equal(calculate_trend(positive_change), expected_positive)
-})
-
-# Test 2: Negative values
-test_that("2. calculate_trend returns 'Decrease' for negative values", {
-  negative_change <- c(-2)
-  expected_negative <- c("Decrease")
-  expect_equal(calculate_trend(negative_change), expected_negative)
-})
-
-# Test 3: Zero values
-test_that("3. calculate_trend returns 'No change' for zero values", {
-  zero_change <- c(0)
-  expected_zero <- c("No change") # Adjusted to match the function output
-  expect_equal(calculate_trend(zero_change), expected_zero)
-})
-
-# Test 4: NA values
-test_that("4. calculate_trend returns NA_character_ for NA values", {
-  na_change <- c(NA)
-  expected_na <- NA_character_
-  expect_equal(calculate_trend(na_change), expected_na)
-})
-
-# Test 5: Empty vector
-test_that("5.calculate_trend returns an empty vector for an empty input and warns", {
-  empty_change <- numeric(0)
-  expected_empty <- character(0)
-  expected_warning <- "The change_since_prev value looks wrong:"
-  expect_warning(
-    expect_equal(calculate_trend(empty_change), expected_empty),
-    expected_warning
-  )
-})
-
-# Test 6: Multiple values
-test_that("6. calculate_trend returns a warning for multiple values and no trend", {
-  multiple_val <- c(-3, 5)
-  expected_warning <- "The change_since_prev value looks wrong:"
-  expect_warning(calculate_trend(multiple_val), expected_warning)
-})
-
-
 # calculate_quartile_band() ---------------------------------------------------
 # Define quartile bands for testing
 quartile_bands <- c(

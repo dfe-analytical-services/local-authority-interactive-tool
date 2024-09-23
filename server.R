@@ -101,7 +101,7 @@ server <- function(input, output, session) {
   la_app_inputs <- appInputsServer("la_level", shared_values)
 
   # Page header
-  pageHeaderServer("la_header", la_app_inputs, "Local Authority View")
+  PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
 
   # LA level tables ===========================================================
   # Main table
@@ -159,7 +159,7 @@ server <- function(input, output, session) {
   region_app_inputs <- appInputsServer("region_level", shared_values)
 
   # Header
-  pageHeaderServer("region_header", region_app_inputs, "Regional View")
+  PageHeaderServer("region_header", region_app_inputs, "Regional View")
 
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------

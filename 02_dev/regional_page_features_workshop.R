@@ -180,17 +180,13 @@ region_stats_change <- c(region_la_change_prev, region_change_prev)
 region_trend <- as.numeric(region_stats_change)
 
 # Build stats table
-region_stats_table <- data.frame(
-  "LA Number" = region_stats_la_num,
-  "LA and Regions" = region_stats_name,
-  "Trend" = region_trend,
-  "Change from previous year" = region_stats_change,
-  check.names = FALSE
-) |>
-  pretty_num_table(
-    dp = get_indicator_dps(filtered_bds),
-    exclude_columns = c("LA Number", "Trend")
-  )
+region_stats_table <- build_region_stats_table(
+  region_stats_la_num,
+  region_stats_name,
+  region_trend,
+  region_stats_change,
+  filtered_bds
+)
 
 # Format stats table
 # Use modifyList to merge the lists properly
@@ -209,7 +205,10 @@ dfe_reactable(
         cell = trend_icon_renderer
       )
     )
-  )
+  ),
+  rowStyle = function(index) {
+    highlight_selected_row(index, region_stats_table, selected_la)
+  }
 )
 
 

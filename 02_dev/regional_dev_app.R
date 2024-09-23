@@ -386,35 +386,35 @@ server_dev <- function(input, output, session) {
     region_trend <- as.numeric(region_stats_change)
 
     # Build stats table
-    region_stats_table <- data.frame(
-      "LA Number" = region_stats_la_num,
-      "LA and Regions" = region_stats_name,
-      "Trend" = region_trend,
-      "Change from previous year" = region_stats_change,
-      check.names = FALSE
-    ) |>
-      pretty_num_table(
-        dp = get_indicator_dps(filtered_bds$data),
-        exclude_columns = c("LA Number", "Trend")
-      )
+    build_region_stats_table(
+      region_stats_la_num,
+      region_stats_name,
+      region_trend,
+      region_stats_change,
+      filtered_bds$data
+    )
   })
 
   output$region_stats_table <- reactable::renderReactable({
     dfe_reactable(
       region_stats_table(),
       columns = modifyList(
+        # Create the reactable with specific column alignments
         align_reactable_cols(
-          region_stats_table,
+          region_stats_table(),
           num_exclude = "LA Number",
           categorical = c("Trend", "Quartile Banding")
         ),
-        # Trend icon arrows
+        # Define specific formatting for the Trend and Quartile Banding columns
         list(
           Trend = reactable::colDef(
             cell = trend_icon_renderer
           )
         )
-      )
+      ),
+      rowStyle = function(index) {
+        highlight_selected_row(index, region_stats_table(), input$la_input)
+      }
     )
   })
 

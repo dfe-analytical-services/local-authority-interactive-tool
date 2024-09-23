@@ -316,8 +316,8 @@ test_that("4. dfe_reactable with HTML content", {
 })
 
 
-# create_stats_table() --------------------------------------------------------
-test_that("1. create_stats_table works with standard inputs", {
+# build_la_stats_table() --------------------------------------------------------
+test_that("1. build_la_stats_table works with standard inputs", {
   main_table <- data.frame(
     "LA Number" = 123,
     "LA and Regions" = "LA1",
@@ -331,7 +331,7 @@ test_that("1. create_stats_table works with standard inputs", {
   quartile_bands <- c("25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
   indicator_polarity <- "High"
 
-  result <- create_stats_table(
+  result <- build_la_stats_table(
     main_table,
     selected_la,
     trend,
@@ -360,7 +360,7 @@ test_that("1. create_stats_table works with standard inputs", {
   expect_equal(result, expected)
 })
 
-test_that("2. create_stats_table handles empty inputs gracefully", {
+test_that("2. build_la_stats_table handles empty inputs gracefully", {
   main_table <- data.frame(
     "LA Number" = numeric(0),
     "LA and Regions" = character(0),
@@ -376,7 +376,7 @@ test_that("2. create_stats_table handles empty inputs gracefully", {
 
   expect_warning(
     expect_error(
-      create_stats_table(
+      build_la_stats_table(
         main_table,
         selected_la,
         trend,
@@ -392,7 +392,7 @@ test_that("2. create_stats_table handles empty inputs gracefully", {
   )
 })
 
-test_that("3. create_stats_table handles NAs gracefully", {
+test_that("3. build_la_stats_table handles NAs gracefully", {
   main_table <- data.frame(
     "LA Number" = NA,
     "LA and Regions" = "LA1",
@@ -423,7 +423,7 @@ test_that("3. create_stats_table handles NAs gracefully", {
 
   expect_warning(
     expect_equal(
-      create_stats_table(
+      build_la_stats_table(
         main_table,
         selected_la,
         trend,
@@ -439,7 +439,7 @@ test_that("3. create_stats_table handles NAs gracefully", {
   )
 })
 
-test_that("4. create_stats_table handles NA Quartile Banding gracefully", {
+test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
   main_table <- data.frame(
     "LA Number" = NA,
     "LA and Regions" = "LA1",
@@ -470,7 +470,7 @@ test_that("4. create_stats_table handles NA Quartile Banding gracefully", {
 
   expect_warning(
     expect_equal(
-      create_stats_table(
+      build_la_stats_table(
         main_table,
         selected_la,
         trend,

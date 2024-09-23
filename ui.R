@@ -101,7 +101,7 @@ ui <- function(input, output, session) {
         title = "LA Level",
 
         # Tab header ==========================================================
-        pageHeaderUI("la_header"),
+        PageHeaderUI("la_header"),
 
         # User Inputs =========================================================
         appInputsUI("la_level"),
@@ -123,7 +123,7 @@ ui <- function(input, output, session) {
         title = "Regional Level",
 
         # Tab header ==========================================================
-        pageHeaderUI("region_header"),
+        PageHeaderUI("region_header"),
 
         # User Inputs =========================================================
         appInputsUI("region_level"),

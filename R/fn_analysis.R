@@ -72,47 +72,44 @@ calculate_change_from_prev_yr <- function(data) {
 }
 
 
-#' Calculate Trend Based on Change Since Previous Value
+#' Calculate Quartile Bands for Indicator Values
 #'
-#' This function determines the trend (increase, decrease, or no trend)
-#' based on the change since the previous value.
+#' This function calculates the quartile band for a given set of indicator
+#' values based on specified quartile bands and the polarity of the indicator.
+#' The function supports both "Low" and "High" polarity, which affects how the
+#' bands are assigned.
 #'
-#' @param change_since_prev Numeric vector representing the change since
-#' the previous value.
+#' @param indicator_val A numeric vector of indicator values to be
+#' categorised into quartile bands.
+#' @param quartile_bands A named vector or list containing quartile bands with
+#' names "0%", "25%", "50%", "75%", and "100%".
+#' @param indicator_polarity A string indicating the polarity of the indicator.
+#' Should be either "Low" or "High".
 #'
-#' @return A character vector indicating the trend: "Increase", "Decrease",
-#' "No trend", or `NA` if the input is missing.
+#' @return A character vector with quartile bands assigned ("A", "B", "C", "D")
+#' based on the indicator values,
+#' or "Error" if the input is invalid or missing quartile bands.
+#' If the indicator value is NA, it returns NA_character_.
+#' If the indicator value is empty, it returns an empty character vector.
 #'
-calculate_trend <- function(change_since_prev) {
-  # Check if change_since_prev is empty or has a length greater than one
-  if (length(change_since_prev) == 0 || length(change_since_prev) > 1) {
-    warning(
-      "The change_since_prev value looks wrong: ",
-      "length is either 0 or greater than 1."
-    )
-  }
-
-  dplyr::case_when(
-    change_since_prev == 0 ~ "No change",
-    change_since_prev > 0 ~ "Increase",
-    change_since_prev < 0 ~ "Decrease",
-    TRUE ~ NA_character_
-  )
-}
-
-
-#' Calculate Quartile Band Based on Indicator Value
-#'
-#' This function assigns a quartile band (A, B, C, D) to an indicator value
-#' based on its position within specified quartile bands.
-#'
-#' @param indicator_val Numeric value representing the indicator to be
-#' classified.
-#' @param quartile_bands A named numeric vector specifying the
-#' quartile band thresholds.
-#'
-#' @return A character vector indicating the quartile band: "A", "B", "C", "D",
-#' or "Error" if the value does not fit within the provided ranges.
+#' @examples
+#' # Example usage
+#' calculate_quartile_band(
+#'   c(5, 10, 15),
+#'   c(
+#'     "0%" = 0, "25%" = 10, "50%" = 20,
+#'     "75%" = 30, "100%" = 40
+#'   ),
+#'   "Low"
+#' )
+#' calculate_quartile_band(
+#'   c(5, 10, 15),
+#'   c(
+#'     "0%" = 0, "25%" = 10, "50%" = 20,
+#'     "75%" = 30, "100%" = 40
+#'   ),
+#'   "High"
+#' )
 #'
 calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_polarity) {
   # Check if all required quartile bands are present

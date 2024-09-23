@@ -263,7 +263,7 @@
 #'         pull_uniques("Polarity")
 #'
 #'       # Build stats LA Level table
-#'       la_stats_table <- create_stats_table(
+#'       la_stats_table <- build_la_stats_table(
 #'         la_diff(),
 #'         app_inputs$la(),
 #'         la_trend,

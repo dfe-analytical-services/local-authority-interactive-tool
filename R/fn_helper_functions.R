@@ -96,7 +96,7 @@ suppressMessages(
 #' This function generates an HTML `head` tag that includes a
 #' link to a specified CSS stylesheet.
 #' It can be used to dynamically set or include a CSS file in a Shiny
-#' application or any other HTML-based interface that utilizes R.
+#' application or any other HTML-based interface that utilises R.
 #'
 #' @param css_filename A character string specifying the path or
 #' URL to the CSS file.
@@ -409,6 +409,10 @@ af_colours_focus <- function() {
 }
 
 
+# Temp function to replace the dfeR::pretty_num()
+# Extra functionality means that it can be specified the decimal places to
+# show, e.g., instead of 3.00 getting rounded to 3, if nsmall = 2 then
+# it wil appear as 3.00, useful for table formatting in Shiny
 pretty_num <- function(
     value,
     prefix = "",

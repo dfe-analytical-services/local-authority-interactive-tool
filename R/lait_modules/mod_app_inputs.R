@@ -38,10 +38,10 @@ appInputsUI <- function(id) {
 }
 
 
-#' Shiny Server Function for Handling the App Inputs with Synchronization
+#' Shiny Server Function for Handling the App Inputs with Synchronisation
 #'
 #' This function creates a Shiny server module for handling the app inputs
-#' and synchronizing them across multiple pages.
+#' and synchronising them across multiple pages.
 #' It observes the selected topic name and updates the choices for the
 #' indicator name based on the selected topic, and also updates the shared
 #' reactive values to keep the inputs in sync between pages.
@@ -54,7 +54,7 @@ appInputsUI <- function(id) {
 #'
 appInputsServer <- function(id, shared_values) {
   moduleServer(id, function(input, output, session) {
-    # Observe and synchronize LA input across pages
+    # Observe and synchronise LA input across pages
     observe({
       updateSelectInput(session, "la_name", selected = shared_values$la)
     })
@@ -86,12 +86,12 @@ appInputsServer <- function(id, shared_values) {
       shared_values$topic <- input$topic_name
     })
 
-    # Observe and synchronize LA input changes
+    # Observe and synchronise LA input changes
     observeEvent(input$la_name, {
       shared_values$la <- input$la_name
     })
 
-    # Observe and synchronize Indicator input changes
+    # Observe and synchronise Indicator input changes
     observeEvent(input$indicator_name, {
       shared_values$indicator <- input$indicator_name
     })

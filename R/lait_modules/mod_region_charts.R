@@ -1,6 +1,29 @@
 # nolint start: object_name
 #
-# Build data for plotting
+# General modules =============================================================
+# Building data for plotting
+#
+#' Long Plot Server Module for Regions
+#'
+#' This module handles the server-side logic for creating long format data
+#' for regional local authorities. It filters data based on selected topics
+#' and indicators, and removes London regions with all NA values, along with
+#' England from the final output.
+#'
+#' @param id A unique identifier for the module instance.
+#' @param app_inputs A list of input parameters from the application.
+#' @param bds_metrics A data frame containing metrics for filtering.
+#' @param region_names_bds A data frame of regional names for mapping.
+#'
+#' @return A reactive expression containing filtered long format data for
+#' regions, excluding specified regions and handling NA values.
+#'
+#' @examples
+#' Region_LongPlotServer(
+#'   "region_plot", app_inputs, metrics_data,
+#'   region_names
+#' )
+#'
 Region_LongPlotServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
@@ -23,7 +46,19 @@ Region_LongPlotServer <- function(id, app_inputs, bds_metrics, region_names_bds)
 }
 
 
-
+# Multi-choice chart input module =============================================
+#' Chart Input UI Module
+#'
+#' Creates a user interface component for selecting regions to compare in
+#' a chart. Users can select up to three regions from a provided list.
+#'
+#' @param id A unique identifier for the module instance.
+#'
+#' @return A `div` containing a selectize input for region selection.
+#'
+#' @examples
+#' Chart_InputUI("chart_input_module")
+#'
 Chart_InputUI <- function(id) {
   ns <- NS(id)
 
@@ -39,8 +74,29 @@ Chart_InputUI <- function(id) {
 }
 
 
-# Restrict the user input choices to only eligible Regions
-# Not England, Ldn () where missing, and default Region
+#' Chart Input Server Module
+#'
+#' Handles server-side logic for the Chart Input module. It filters the
+#' available regions based on user input and updates the selection
+#' dynamically when the default region changes. Ensures that the default
+#' region is not selectable.
+#'
+#' @param id A unique identifier for the module instance.
+#' @param app_inputs A list of input parameters from the application.
+#' @param region_long_plot A reactive expression providing long format
+#' region data.
+#' @param region_clean A reactive expression for the default region to
+#' exclude from selection.
+#'
+#' @return A reactive expression containing the valid selected regions
+#' for the chart, excluding the default region.
+#'
+#' @examples
+#' Chart_InputServer(
+#'   "chart_input_module", app_inputs, region_long_data,
+#'   region_default
+#' )
+#'
 Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
   moduleServer(id, function(input, output, session) {
     # Reactive expression to generate multi_chart_data
@@ -72,9 +128,20 @@ Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
 }
 
 
-
-# Region chart modules ========================================================
-# Region Focus line chart UI ==================================================
+# Region chart module =========================================================
+#' Region Focus Line Chart UI Module
+#'
+#' Creates a user interface component for displaying a focus line chart
+#' of regions. The chart is embedded in a navigational panel and styled
+#' as a card for better presentation.
+#'
+#' @param id A unique identifier for the module instance.
+#'
+#' @return A `nav_panel` containing a card with a line chart output.
+#'
+#' @examples
+#' Region_FocusLine_chartUI("focus_line_chart_module")
+#'
 Region_FocusLine_chartUI <- function(id) {
   ns <- NS(id)
 
@@ -89,7 +156,28 @@ Region_FocusLine_chartUI <- function(id) {
   )
 }
 
-# Region Focus line chart Server ----------------------------------------------
+
+#' Region Focus Line Chart Server Module
+#'
+#' Handles server-side logic for the Region Focus Line Chart module. It
+#' retrieves and processes data for the chart, including filtering and
+#' formatting. The chart is interactive and allows for a dynamic display
+#' of region data over time.
+#'
+#' @param id A unique identifier for the module instance.
+#' @param app_inputs A list of input parameters from the application.
+#' @param bds_metrics A dataset containing metrics for plotting.
+#' @param stat_n_geog A geographic identifier for statistics.
+#' @param region_names_bds A dataset containing names of regions.
+#'
+#' @return None. Outputs an interactive line chart for the selected regions.
+#'
+#' @examples
+#' Region_FocusLine_chartServer(
+#'   "focus_line_chart_module", app_inputs,
+#'   bds_metrics, stat_n_geog, region_names_bds
+#' )
+#'
 Region_FocusLine_chartServer <- function(id,
                                          app_inputs,
                                          bds_metrics,
@@ -195,8 +283,20 @@ Region_FocusLine_chartServer <- function(id,
 }
 
 
-
-# Region multi-choice line chart UI ===========================================
+# Region multi-choice line chart module =======================================
+#' Region Multi-Choice Line Chart UI Module
+#'
+#' Creates a user interface component for displaying a line chart based
+#' on user-selected regions. The UI includes a filter sidebar for selecting
+#' multiple regions to compare.
+#'
+#' @param id A unique identifier for the module instance.
+#'
+#' @return A `nav_panel` containing a card with a sidebar and line chart output.
+#'
+#' @examples
+#' Region_Multi_chartUI("multi_chart_module")
+#'
 Region_Multi_chartUI <- function(id) {
   ns <- NS(id)
 
@@ -219,8 +319,33 @@ Region_Multi_chartUI <- function(id) {
   )
 }
 
-# Region multi-choice line chart Server ---------------------------------------
-Region_Multi_chartServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
+
+#' Region Multi-Choice Line Chart Server Module
+#'
+#' Handles server-side logic for the Region Multi-Choice Line Chart module.
+#' It retrieves and processes data for the chart, filtering based on user
+#' selections and building an interactive line chart that displays selected
+#' regions over time.
+#'
+#' @param id A unique identifier for the module instance.
+#' @param app_inputs A list of input parameters from the application.
+#' @param bds_metrics A dataset containing metrics for plotting.
+#' @param stat_n_geog A geographic identifier for statistics.
+#' @param region_names_bds A dataset containing names of regions.
+#'
+#' @return None. Outputs an interactive multi-choice line chart for selected regions.
+#'
+#' @examples
+#' Region_Multi_chartServer(
+#'   "multi_chart_module", app_inputs,
+#'   bds_metrics, stat_n_geog, region_names_bds
+#' )
+#'
+Region_Multi_chartServer <- function(id,
+                                     app_inputs,
+                                     bds_metrics,
+                                     stat_n_geog,
+                                     region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(
