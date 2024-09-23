@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
+selected_topic <- "All Pupil Absence & Exclusions"
+selected_indicator <- "Percentage of LAC pupil with at least one fixed exclusion"
 selected_la <- "Bedford Borough"
 
 # Filter stat neighbour for selected LA

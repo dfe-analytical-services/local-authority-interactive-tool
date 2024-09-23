@@ -284,7 +284,8 @@ filter_and_pull <- function(data, filter_col, filter_var, pull_col) {
 #'
 get_metadata <- function(data, input_indicator, metadata) {
   metadata_output <- data |>
-    filter_and_pull("Measure", input_indicator, metadata)
+    filter_and_pull("Measure", input_indicator, metadata) |>
+    unique()
 
   if (length(metadata_output) < 1) {
     warning("No matching metadata for ", metadata)
