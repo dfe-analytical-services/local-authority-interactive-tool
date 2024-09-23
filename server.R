@@ -46,26 +46,26 @@ server <- function(input, output, session) {
     shiny::updateQueryString(url)
   })
 
-  # shiny::observe({
-  #   if (input$navlistPanel == "Example tab 1") {
-  #     shinytitle::change_window_title(
-  #       session,
-  #       paste0(
-  #         site_title, " - ",
-  #         input$selectPhase, ", ",
-  #         input$selectArea
-  #       )
-  #     )
-  #   } else {
-  #     shinytitle::change_window_title(
-  #       session,
-  #       paste0(
-  #         site_title, " - ",
-  #         input$navlistPanel
-  #       )
-  #     )
-  #   }
-  # })
+  shiny::observe({
+    if (input$navsetpillslist == "LA Level") {
+      shinytitle::change_window_title(
+        session,
+        paste0(
+          site_title, " - ",
+          la_app_inputs$indicator(), ", ",
+          la_app_inputs$la()
+        )
+      )
+    } else {
+      shinytitle::change_window_title(
+        session,
+        paste0(
+          site_title, " - ",
+          input$navsetpillslist
+        )
+      )
+    }
+  })
 
   # Cookies logic =============================================================
   output$cookie_status <- dfeshiny::cookies_banner_server(
@@ -99,6 +99,9 @@ server <- function(input, output, session) {
 
   # User Inputs ===============================================================
   la_app_inputs <- appInputsServer("la_level", shared_values)
+
+  # Page header
+  pageHeaderServer("la_header", la_app_inputs, "Local Authority View")
 
   # LA level tables ===========================================================
   # Main table
@@ -154,6 +157,9 @@ server <- function(input, output, session) {
   # ===========================================================================
   # User Inputs ===============================================================
   region_app_inputs <- appInputsServer("region_level", shared_values)
+
+  # Header
+  pageHeaderServer("region_header", region_app_inputs, "Regional View")
 
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------
