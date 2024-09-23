@@ -11,9 +11,9 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Contextual\\Other"
-selected_indicator <- "Number of pupil eligible for pupil premium"
-selected_la <- "Barnsley"
+selected_topic <- "Health and Wellbeing"
+selected_indicator <- "Infant Mortality"
+selected_la <- "Bedford Borough"
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -229,7 +229,7 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
 # Format stats table
 # Format stats table
 # Use modifyList to merge the lists properly
-reactable::reactable(
+dfe_reactable(
   la_stats_table |> dplyr::select(-Polarity),
   columns = modifyList(
     # Create the reactable with specific column alignments
@@ -242,13 +242,7 @@ reactable::reactable(
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
       `Quartile Banding` = reactable::colDef(
-        style = reactablefmtr::cell_style(
-          data = la_stats_table,
-          background_color = get_quartile_band_cell_colour(
-            la_stats_table$Polarity,
-            la_stats_table$`Quartile Banding`
-          )
-        )
+        style = quartile_banding_col_def(la_stats_table)
       ),
       Trend = reactable::colDef(
         cell = trend_icon_renderer

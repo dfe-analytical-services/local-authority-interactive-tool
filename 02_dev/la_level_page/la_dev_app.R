@@ -8,8 +8,6 @@ list.files("R/", full.names = TRUE) |>
   })() |>
   purrr::walk(source)
 
-gdtools::register_gfont("Open Sans")
-gdtools::addGFontHtmlDependency(family = "Open Sans")
 
 # UI
 ui_dev <- bslib::page_fillable(
@@ -268,7 +266,7 @@ server_dev <- function(input, output, session) {
       filter_la_regions(input$la_input, pull_col = "values_num")
 
     # Set the trend value
-    la_trend <- calculate_trend(la_change_prev)
+    la_trend <- as.numeric(la_change_prev)
 
     # Get polarity of indicator
     la_indicator_polarity <- filtered_bds$data |>
@@ -309,7 +307,7 @@ server_dev <- function(input, output, session) {
     ) |>
       pretty_num_table(
         dp = indicator_dps(),
-        exclude_columns = c("LA Number", "Latest National Rank")
+        exclude_columns = c("LA Number", "Trend", "Latest National Rank")
       )
 
     la_stats_table
@@ -330,13 +328,7 @@ server_dev <- function(input, output, session) {
         # Style Quartile Banding column with colour
         list(
           `Quartile Banding` = reactable::colDef(
-            style = reactablefmtr::cell_style(
-              data = la_stats_table(),
-              background_color = get_quartile_band_cell_colour(
-                la_stats_table()$Polarity,
-                la_stats_table()$`Quartile Banding`
-              )
-            )
+            style = quartile_banding_col_def(la_stats_table())
           ),
           Trend = reactable::colDef(
             cell = trend_icon_renderer

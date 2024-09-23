@@ -162,8 +162,13 @@ align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
     # Check if all values in the column are NA
     all_na <- all(is.na(data[[col]]))
 
+    # Check if columns include numeric col NA descriptors
+    str_na_num_col <- any(grepl("^-$", as.character(data[[col]])))
+
     # Exclude columns that are explicitly mentioned in the `num_exclude` argument
-    if (((contains_numeric || all_na) && !(col %in% num_exclude)) || (col %in% categorical)) {
+    if (((contains_numeric || all_na || str_na_num_col) &&
+      !(col %in% num_exclude)) ||
+      (col %in% categorical)) {
       # Right-align columns that contain numbers or are all NA
       reactable::colDef(
         align = "right",
@@ -324,12 +329,30 @@ get_indicator_dps <- function(data_full) {
 # Function to render trend icons based on the value
 trend_icon_renderer <- function(value) {
   trend_icon <- dplyr::case_when(
-    is.na(value) ~ NA_character_,
+    is.na(value) ~ NA,
     value > 0 ~ "arrow-up",
     value < 0 ~ "arrow-down",
-    TRUE ~ "minus"
+    value == 0 ~ "arrows-left-right",
+    TRUE ~ NA
   )
 
-  # Return Font Awesome icon for the Trend column
-  shiny::icon(trend_icon)
+  # Render output
+  if (is.na(trend_icon)) {
+    NA
+  } else {
+    shiny::icon(trend_icon)
+  }
+}
+
+
+# Function to define Quartile Banding column with background color
+quartile_banding_col_def <- function(data) {
+  # Return the colDef object with the background color applied
+  reactablefmtr::cell_style(
+    data = data,
+    background_color = get_quartile_band_cell_colour(
+      data$Polarity,
+      data$`Quartile Banding`
+    )
+  )
 }
