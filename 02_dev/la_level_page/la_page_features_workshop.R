@@ -124,7 +124,10 @@ la_indicator_polarity <- filtered_bds |>
   pull_uniques("Polarity")
 
 # Set the trend value
-la_trend <- as.numeric(la_change_prev)
+la_trend <- la_diff |>
+  filter_la_regions(selected_la,
+    pull_col = "values_num"
+  )
 
 # Get latest rank, ties are set to min & NA vals to NA rank
 la_rank <- filtered_bds |>
@@ -226,7 +229,6 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
 }
 
 
-# Format stats table
 # Format stats table
 # Use modifyList to merge the lists properly
 dfe_reactable(

@@ -116,12 +116,7 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
           id_cols = c("LA Number", "LA and Regions"),
           names_from = Years,
           values_from = values_num
-        ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        )
     })
   })
 }
@@ -129,8 +124,30 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 # Region LA table Server ------------------------------------------------------
 RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
   moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Get LA region
+    region_la <- LA_RegionServer("region_la", app_inputs$la, stat_n_geog)
+
+    # Long format Region LA data
+    region_la_long <- RegionLA_LongDataServer("region_la_long", stat_n_geog, region_la, filtered_bds)
+
     # Get Region LA table
-    region_la_table <- RegionLA_DataServer("region_la_table", app_inputs, bds_metrics, stat_n_geog)
+    region_la_table_raw <- RegionLA_DataServer("region_la_table_raw", app_inputs, bds_metrics, stat_n_geog)
+
+    # Current year
+    current_year <- Current_YearServer("current_year", region_la_long)
+
+    # Pretty and order table ready for rendering
+    region_la_table <- reactive({
+      region_la_table_raw() |>
+        pretty_num_table(
+          dp = get_indicator_dps(filtered_bds()),
+          exclude_columns = "LA Number"
+        ) |>
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+    })
 
     # Table output
     output$region_la_table <- reactable::renderReactable({
@@ -199,9 +216,6 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
     # Long format Region LA data
     region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
 
-    # Current year
-    current_year <- Current_YearServer("current_year", region_long)
-
     # Build Region table
     shiny::reactive({
       # Difference between last two years
@@ -215,16 +229,7 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
           id_cols = c("LA Number", "LA and Regions"),
           names_from = Years,
           values_from = values_num
-        ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
-        # Places England row at the bottom of the table
-        dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
-        dplyr::arrange(is_england, .by_group = FALSE) |>
-        dplyr::select(-is_england)
+        )
 
       region_table
     })
@@ -234,11 +239,34 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
 # Region table Server ---------------------------------------------------------
 Region_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog, region_names_bds) {
   moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Long format Region LA data
+    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
+
+    # Current year
+    current_year <- Current_YearServer("current_year", region_long)
+
     # Region table
-    region_table <- Region_DataServer(
-      "region_table",
+    region_table_raw <- Region_DataServer(
+      "region_table_raw",
       app_inputs, bds_metrics, region_names_bds
     )
+
+    # Pretty and order table ready for rendering
+    region_table <- reactive({
+      region_table_raw() |>
+        pretty_num_table(
+          dp = get_indicator_dps(filtered_bds()),
+          exclude_columns = "LA Number"
+        ) |>
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        # Places England row at the bottom of the table
+        dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
+        dplyr::arrange(is_england, .by_group = FALSE) |>
+        dplyr::select(-is_england)
+    })
 
     # Get clean Regions
     region_clean <- Clean_RegionServer("region_clean", app_inputs, stat_n_geog, bds_metrics)
@@ -284,11 +312,11 @@ Region_StatsTableServer <- function(
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Get Region LA table
-    region_la_table <- RegionLA_DataServer("region_la", app_inputs, bds_metrics, stat_n_geog)
+    region_la_table_raw <- RegionLA_DataServer("region_la_raw", app_inputs, bds_metrics, stat_n_geog)
 
-    # Get Region table
-    region_table <- Region_DataServer(
-      "region_table",
+    # Region table
+    region_table_raw <- Region_DataServer(
+      "region_table_raw",
       app_inputs, bds_metrics, region_names_bds
     )
 
@@ -299,23 +327,23 @@ Region_StatsTableServer <- function(
     region_stats_table <- reactive({
       # Get LA numbers
       # Selected LA
-      region_la_la_num <- region_la_table() |>
+      region_la_la_num <- region_la_table_raw() |>
         filter_la_regions(app_inputs$la(), pull_col = "LA Number")
 
       # Region and England
-      region_la_num <- region_table() |>
+      region_la_num <- region_table_raw() |>
         filter_la_regions(c(region_clean(), "England"), pull_col = "LA Number")
 
       # Get change in previous year
       # Selected LA
-      region_la_change_prev <- region_la_table() |>
+      region_la_change_prev <- region_la_table_raw() |>
         filter_la_regions(app_inputs$la(),
           latest = FALSE,
           pull_col = "Change from previous year"
         )
 
       # Region and England
-      region_change_prev <- region_table() |>
+      region_change_prev <- region_table_raw() |>
         filter_la_regions(c(region_clean(), "England"),
           latest = FALSE,
           pull_col = "Change from previous year"
@@ -327,12 +355,7 @@ Region_StatsTableServer <- function(
       region_stats_change <- c(region_la_change_prev, region_change_prev)
 
       # Creating the trend descriptions
-      region_trend <- dplyr::case_when(
-        is.na(region_stats_change) ~ NA_character_,
-        region_stats_change > 0 ~ "Increase",
-        region_stats_change < 0 ~ "Decrease",
-        TRUE ~ "No trend"
-      )
+      region_trend <- as.numeric(region_stats_change)
 
       # Build stats table
       data.frame(
@@ -341,17 +364,29 @@ Region_StatsTableServer <- function(
         "Trend" = region_trend,
         "Change from previous year" = region_stats_change,
         check.names = FALSE
-      )
+      ) |>
+        pretty_num_table(
+          dp = get_indicator_dps(filtered_bds()),
+          exclude_columns = c("LA Number", "Trend")
+        )
     })
 
     # Table output
     output$region_stats_table <- reactable::renderReactable({
       dfe_reactable(
         region_stats_table(),
-        columns = align_reactable_cols(
-          region_stats_table(),
-          num_exclude = "LA Number",
-          categorical = c("Trend")
+        columns = modifyList(
+          align_reactable_cols(
+            region_stats_table(),
+            num_exclude = "LA Number",
+            categorical = c("Trend", "Quartile Banding")
+          ),
+          # Trend icon arrows
+          list(
+            Trend = reactable::colDef(
+              cell = trend_icon_renderer
+            )
+          )
         )
       )
     })

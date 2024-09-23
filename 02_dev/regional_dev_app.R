@@ -359,18 +359,22 @@ server_dev <- function(input, output, session) {
       filter_la_regions(c(region_la_ldn_clean(), "England"), pull_col = "LA Number")
 
     # Get change in previous year
+    # Difference between last two years
+    region_diff <- region_long() |>
+      calculate_change_from_prev_yr()
+
     # Selected LA
-    region_la_change_prev <- region_la_table() |>
-      filter_la_regions(input$la_input,
-        latest = FALSE,
-        pull_col = "Change from previous year"
+    region_la_change_prev <- region_la_diff() |>
+      filter_la_regions(
+        input$la_input,
+        pull_col = "values_num"
       )
 
     # Region and England
-    region_change_prev <- region_table() |>
-      filter_la_regions(c(region_la_ldn_clean(), "England"),
-        latest = FALSE,
-        pull_col = "Change from previous year"
+    region_change_prev <- region_diff |>
+      filter_la_regions(
+        c(region_la_ldn_clean(), "England"),
+        pull_col = "values_num"
       )
 
     # Creating the stats table cols
@@ -379,12 +383,7 @@ server_dev <- function(input, output, session) {
     region_stats_change <- c(region_la_change_prev, region_change_prev)
 
     # Creating the trend descriptions
-    region_trend <- dplyr::case_when(
-      is.na(region_stats_change) ~ NA_character_,
-      region_stats_change > 0 ~ "Increase",
-      region_stats_change < 0 ~ "Decrease",
-      TRUE ~ "No trend"
-    )
+    region_trend <- as.numeric(region_stats_change)
 
     # Build stats table
     region_stats_table <- data.frame(
@@ -393,16 +392,28 @@ server_dev <- function(input, output, session) {
       "Trend" = region_trend,
       "Change from previous year" = region_stats_change,
       check.names = FALSE
-    )
+    ) |>
+      pretty_num_table(
+        dp = get_indicator_dps(filtered_bds$data),
+        exclude_columns = c("LA Number", "Trend")
+      )
   })
 
   output$region_stats_table <- reactable::renderReactable({
     dfe_reactable(
       region_stats_table(),
-      columns = align_reactable_cols(
-        region_stats_table(),
-        num_exclude = "LA Number",
-        categorical = c("Trend")
+      columns = modifyList(
+        align_reactable_cols(
+          region_stats_table,
+          num_exclude = "LA Number",
+          categorical = c("Trend", "Quartile Banding")
+        ),
+        # Trend icon arrows
+        list(
+          Trend = reactable::colDef(
+            cell = trend_icon_renderer
+          )
+        )
       )
     )
   })
@@ -484,7 +495,8 @@ server_dev <- function(input, output, session) {
         direction = "y",
         vjust = .5,
         hjust = 1,
-        show.legend = FALSE
+        show.legend = FALSE,
+        na.rm = TRUE
       ) +
       custom_theme() +
       coord_cartesian(clip = "off") +

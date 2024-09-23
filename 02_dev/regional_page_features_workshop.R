@@ -160,17 +160,15 @@ region_la_num <- region_table |>
 
 # Get change in previous year
 # Selected LA
-region_la_change_prev <- region_la_table |>
+region_la_change_prev <- region_la_diff |>
   filter_la_regions(selected_la,
-    latest = FALSE,
-    pull_col = "Change from previous year"
+    pull_col = "values_num"
   )
 
 # Region and England
-region_change_prev <- region_table |>
+region_change_prev <- region_diff |>
   filter_la_regions(c(region_la_ldn_clean, "England"),
-    latest = FALSE,
-    pull_col = "Change from previous year"
+    pull_col = "values_num"
   )
 
 # Creating the stats table cols
@@ -179,12 +177,7 @@ region_stats_name <- c(selected_la, region_la_ldn_clean, "England")
 region_stats_change <- c(region_la_change_prev, region_change_prev)
 
 # Creating the trend descriptions
-region_trend <- dplyr::case_when(
-  is.na(region_stats_change) ~ NA_character_,
-  region_stats_change > 0 ~ "Increase",
-  region_stats_change < 0 ~ "Decrease",
-  TRUE ~ "No trend"
-)
+region_trend <- as.numeric(region_stats_change)
 
 # Build stats table
 region_stats_table <- data.frame(
@@ -193,6 +186,30 @@ region_stats_table <- data.frame(
   "Trend" = region_trend,
   "Change from previous year" = region_stats_change,
   check.names = FALSE
+) |>
+  pretty_num_table(
+    dp = get_indicator_dps(filtered_bds),
+    exclude_columns = c("LA Number", "Trend")
+  )
+
+# Format stats table
+# Use modifyList to merge the lists properly
+dfe_reactable(
+  region_stats_table,
+  columns = modifyList(
+    # Create the reactable with specific column alignments
+    align_reactable_cols(
+      region_stats_table,
+      num_exclude = "LA Number",
+      categorical = c("Trend", "Quartile Banding")
+    ),
+    # Define specific formatting for the Trend and Quartile Banding columns
+    list(
+      Trend = reactable::colDef(
+        cell = trend_icon_renderer
+      )
+    )
+  )
 )
 
 
@@ -309,7 +326,8 @@ region_line_chart <- focus_line_data |>
     nudge_x = 2,
     direction = "y",
     hjust = 1,
-    show.legend = FALSE
+    show.legend = FALSE,
+    na.rm = TRUE
   ) +
   custom_theme() +
   coord_cartesian(clip = "off") +

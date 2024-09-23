@@ -158,7 +158,8 @@ Region_FocusLine_chartServer <- function(id,
           direction = "y",
           vjust = .5,
           hjust = 1,
-          show.legend = FALSE
+          show.legend = FALSE,
+          na.rm = TRUE
         ) +
         custom_theme() +
         coord_cartesian(clip = "off") +
