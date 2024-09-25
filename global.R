@@ -43,6 +43,8 @@ if (FALSE) {
   shhh(library(dfeR))
   shhh(library(dfeshiny))
   shhh(library(shinyGovstyle))
+  # Plotting
+  shhh(library(gfonts))
 }
 
 
