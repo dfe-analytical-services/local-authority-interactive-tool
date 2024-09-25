@@ -13,6 +13,12 @@ p {
   overflow-wrap: anywhere; /* email too big for smaller screens and needs to wrap */
 }
 
+/* make all text sans-serif (for ggiraph plots on shinyapps.io)
+text {
+  font-family: helvetica,arial,sans-serf;
+}
+*/
+
 /* heading text */
 .govuk-header__link--service-name {
   font-family: "Helvetica Neue", "Arial", sans-serif;
@@ -377,8 +383,4 @@ html {
 .card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
   width: 50vw !important;
   align-self: center;
-}
-
-text {
-  font-family: helvetica,arial,sans-serf;
 }
