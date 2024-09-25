@@ -18,9 +18,6 @@ shhh(library(shiny))
 shhh(library(ggplot2))
 shhh(library(ggiraph))
 
-# Register font (for shinyapps.io)
-gdtools::register_gfont("Arimo")
-
 # Dependencies needed for testing or CI but not for the app -------------------
 # Including them here keeps them in renv but avoids the app needlessly loading
 # them, saving on load time.
@@ -43,8 +40,6 @@ if (FALSE) {
   shhh(library(dfeR))
   shhh(library(dfeshiny))
   shhh(library(shinyGovstyle))
-  # Plotting
-  shhh(library(gfonts))
 }
 
 
