@@ -13,11 +13,10 @@ p {
   overflow-wrap: anywhere; /* email too big for smaller screens and needs to wrap */
 }
 
-/* make all text sans-serif (for ggiraph plots on shinyapps.io)
+/* make all text sans-serif (for ggiraph plots on shinyapps.io) */
 text {
   font-family: helvetica,arial,sans-serf;
 }
-*/
 
 /* heading text */
 .govuk-header__link--service-name {

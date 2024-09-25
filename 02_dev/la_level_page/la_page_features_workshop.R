@@ -19,6 +19,7 @@ selected_la <- "Bedford Borough"
 filtered_sn <- stat_n_la |>
   dplyr::filter(`LA Name` == selected_la)
 
+# Statistical Neighbours
 la_sns <- filtered_sn |>
   pull_uniques("LA Name_sn")
 

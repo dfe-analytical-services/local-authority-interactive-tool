@@ -53,7 +53,6 @@ ui <- function(input, output, session) {
     # Load javascript dependencies --------------------------------------------
     shinyWidgets::useShinydashboard(),
     shinyjs::useShinyjs(),
-    gdtools::addGFontHtmlDependency("Arimo"),
 
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:

@@ -27,3 +27,19 @@ filtered_bds <- bds_metrics |>
 # Decimal point setting
 indicator_dps <- filtered_bds |>
   get_indicator_dps()
+
+# Get statistical neighbours
+# Filter stat neighbour for selected LA
+filtered_sn <- stat_n_la |>
+  dplyr::filter(`LA Name` == selected_la)
+
+# Pull sn names
+stat_n_sns <- filtered_sn |>
+  pull_uniques("LA Name_sn")
+
+# Get selected LA region
+stat_n_region <- filtered_sn |>
+  pull_uniques("GOReg")
+
+# Determine London region to use
+stat_n_ldn_clean <- clean_ldn_region(stat_n_region, filtered_bds)
