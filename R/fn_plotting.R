@@ -401,7 +401,7 @@ set_plot_labs <- function(filtered_bds) {
 #'
 custom_theme <- function() {
   list(
-    ggplot2::theme_minimal(),
+    ggplot2::theme_minimal(base_family = "Arimo"),
     ggplot2::theme(
       # Keeps title within chart
       plot.title = ggtext::element_textbox(
