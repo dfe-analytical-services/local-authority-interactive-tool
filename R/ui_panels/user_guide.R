@@ -28,6 +28,10 @@ user_guide_panel <- function() {
               system for use elsewhere. (Download feature arriving soon...)"),
           p("We will add some relevant background information here. For example
               some useful LAIT resources."),
+          h2("Using the app"),
+          p("Here we will add detailed instructions of how to use the LAIT app.
+              This will include screenshots and guidance. For example, how to
+              investigate an indicator using the Regional Level page."),
           h2("Guidance sources"),
           p("For example, here we'll add some of the key resources we draw
                   on to guide styling and vizualisation...")

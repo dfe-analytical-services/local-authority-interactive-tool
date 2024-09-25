@@ -214,6 +214,14 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
+
+  # User guide
+  InternalLinkServer(
+    "la_level_link",
+    "la_level_panel",
+    session
+  )
+
   # Stop app ------------------------------------------------------------------
   session$onSessionEnded(function() {
     shiny::stopApp()

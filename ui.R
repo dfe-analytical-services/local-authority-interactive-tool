@@ -99,6 +99,7 @@ ui <- function(input, output, session) {
       # Content for these panels is defined in the R/ui_panels/ folder
       bslib::nav_panel(
         title = "LA Level",
+        value = "la_level_panel",
 
         # Tab header ==========================================================
         PageHeaderUI("la_header"),
