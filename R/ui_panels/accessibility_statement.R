@@ -5,9 +5,22 @@ a11y_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           width = 12,
-          h1("Accessibility statement for [service name]"), # TODO
+          shinyGovstyle::banner(
+            "beta banner",
+            "beta",
+            paste0(
+              "This page is in beta phase and we are still reviewing the
+               content. We will update the relevant missing information closer
+                to the end of development. (Where it says 'Not available' or
+               'To be done'.)"
+            )
+          ),
+          shiny::br(),
+          h1("Accessibility statement for LAIT"), # TODO
           p(
-            "This accessibility statement applies to the [raw service URL] website. This website is run by the", # TODO
+            "This accessibility statement applies to the
+            https://department-for-education.shinyapps.io/local-authority-interactive-tool/
+            website. This website is run by the", # TODO
             a(
               href = "https://www.gov.uk/government/organisations/department-for-education",
               "Department for Education (DfE)",
@@ -32,14 +45,14 @@ a11y_panel <- function() {
           h2("How accessible this website is"),
           p("We know some parts of this website are not fully accessible:"),
           tags$div(tags$ul(
-            tags$li("list them here") # TODO
+            tags$li("Not available yet") # TODO
           )),
           h2("Feedback and contact information"),
           p(
             "If you need information on this website in a different format please see the ",
             a(
-              href = "", # TODO
-              "[source publication] on Explore education statistics", # TODO
+              href = "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait", # TODO
+              "LAIT GOV.UK website", # TODO
               .noWS = "after"
             ),
             ". More details are available on that service for alternative formats of this data.",
@@ -83,7 +96,7 @@ a11y_panel <- function() {
           p("The content listed below is non-accessible for the following reasons.
              We will address these issues to ensure our content is accessible."),
           tags$div(tags$ul(
-            tags$li("list them here") # TODO
+            tags$li("Not available yet") # TODO
           )),
           h3("Disproportionate burden"),
           p("Not applicable."),
@@ -110,7 +123,7 @@ a11y_panel <- function() {
             tags$li("charts, maps, and tables")
           )),
           p(
-            "This specific website was was last tested on [date] against", # TODO
+            "This specific website was was last tested on [To be done] against", # TODO
             a(
               href = "https://www.w3.org/TR/WCAG22/",
               "Accessibility Guidelines WCAG2.2",
@@ -130,14 +143,14 @@ a11y_panel <- function() {
           p(
             "Our current list of issues to be resolved is available on our ",
             a(
-              href = "", # TODO
+              href = "https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues", # TODO
               "[GitHub issues page]", # TODO
               .noWS = "after"
             ),
             "."
           ),
           h2("Preparation of this accessibility statement"),
-          p("This statement was prepared on 1st July 2024. It was last reviewed on [date]."), # TODO
+          p("This statement was prepared on 1st July 2024. It was last reviewed on [To be done]."), # TODO
           p(
             "The template used for this website was last testing in March 2024 against the WCAG 2.2 AA standard.
           This test of a representative sample of pages was carried out by the",

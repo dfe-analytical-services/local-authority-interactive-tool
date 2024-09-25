@@ -5,6 +5,16 @@ user_guide_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           12,
+          shinyGovstyle::banner(
+            "beta banner",
+            "beta",
+            paste0(
+              "This page is in beta phase and we are still reviewing the content.
+               We will provide a much more detailed user guide when the tool is
+               published."
+            )
+          ),
+          shiny::br(),
           h1("Local Authority Interactive Tool"),
           h2("Introduction"),
           p("The Department has developed the Local Authority Interactive Tool

@@ -167,6 +167,21 @@ ui <- function(input, output, session) {
       # Support and feedback ==================================================
       bslib::nav_panel(
         value = "support_panel",
+        shinyGovstyle::banner(
+          "beta banner",
+          "beta",
+          paste0(
+            "This page is in beta phase and we are still reviewing the content.
+             We are aware the links in <b>Find more information on the data</b>
+             section are currently incorrect. Please see the ",
+            dfeshiny::external_link(
+              href = parent_publication,
+              link_text = "LAIT website"
+            ),
+            " for more information."
+          )
+        ),
+        shiny::br(),
         title = "Support and feedback",
         dfeshiny::support_panel(
           team_email = "jake.tufts@education.gov.uk",
