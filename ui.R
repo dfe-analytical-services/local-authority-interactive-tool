@@ -186,7 +186,7 @@ ui <- function(input, output, session) {
         dfeshiny::support_panel(
           team_email = "jake.tufts@education.gov.uk",
           repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-          form_url = "https://forms.office.com"
+          form_url = "https://forms.office.com/e/gTNw1EBgsn"
         )
       ),
       # Cookies info ==========================================================
