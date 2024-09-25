@@ -342,7 +342,8 @@ server_dev <- function(input, output, session) {
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, region_table(), region_la_ldn_clean())
-      }
+      },
+      pagination = FALSE
     )
   })
 

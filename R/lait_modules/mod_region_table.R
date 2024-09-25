@@ -494,7 +494,8 @@ Region_TableServer <- function(id,
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, region_table(), region_clean())
-        }
+        },
+        pagination = FALSE
       )
     })
   })
