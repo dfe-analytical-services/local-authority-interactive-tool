@@ -68,7 +68,10 @@ Chart_InputUI <- function(id) {
       label = "Select region to compare (max 3)",
       choices = region_names_bds,
       multiple = TRUE,
-      options = list(maxItems = 3)
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button")
+      )
     )
   )
 }
