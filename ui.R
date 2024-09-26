@@ -94,7 +94,7 @@ ui <- function(input, output, session) {
     bslib::navset_pill_list(
       "",
       id = "navsetpillslist",
-      widths = c(2, 8),
+      widths = c(2, 10),
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
       bslib::nav_panel(

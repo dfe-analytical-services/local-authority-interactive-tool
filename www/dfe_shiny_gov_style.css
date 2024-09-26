@@ -171,10 +171,20 @@ a:hover {
   margin-right: 0;
 }
 
+/* No longer in use as using col width 10 */
 /* sets the main area width. Originally set to 66.667% in the GDS
 template. 80% works well here to reduce white space on the right hand side.*/
+/*
 .col-sm-8 {
   width: 80%
+}
+*/
+
+/* Media query for screens smaller than 768px (e.g., tablets and mobile) */
+@media screen and (max-width: 768px) {
+  .col-sm-8 {
+    width: 100%; /* Full width on mobile devices */
+  }
 }
 
 /* GOV.UK footer ----------------------------------------------------------- */
@@ -423,4 +433,9 @@ html {
   .reactable {
     font-size: 0.7rem !important; /* Even smaller font size for mobile */
   }
+}
+
+/* Used instead of .col-sm-8 for main body of app */
+.col-sm-10 {
+  padding-right: 2rem;
 }
