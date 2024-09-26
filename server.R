@@ -46,14 +46,17 @@ server <- function(input, output, session) {
     shiny::updateQueryString(url)
   })
 
+  # Dynamically changes window title to be LAIT - page - LA - indicator
+  # (Selected by user)
   shiny::observe({
-    if (input$navsetpillslist == "LA Level") {
+    if (input$navsetpillslist %in% c("LA Level", "Regional Level")) {
       shinytitle::change_window_title(
         session,
         paste0(
           site_title, " - ",
-          la_app_inputs$indicator(), ", ",
-          la_app_inputs$la()
+          input$navsetpillslist, ": ",
+          la_app_inputs$la(), ", ",
+          la_app_inputs$indicator()
         )
       )
     } else {
@@ -218,7 +221,7 @@ server <- function(input, output, session) {
   # User guide
   InternalLinkServer(
     "la_level_link",
-    "la_level_panel",
+    "LA Level",
     session
   )
 
