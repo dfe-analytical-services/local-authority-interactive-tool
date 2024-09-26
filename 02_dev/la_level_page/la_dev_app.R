@@ -251,7 +251,12 @@ server_dev <- function(input, output, session) {
   output$la_table <- reactable::renderReactable({
     dfe_reactable(
       la_table(),
-      columns = align_reactable_cols(la_table(), num_exclude = "LA Number"),
+      columns = utils::modifyList(
+        align_reactable_cols(la_table(), num_exclude = "LA Number"),
+        list(
+          `LA and Regions` = set_min_col_width()
+        )
+      ),
       rowStyle = function(index) {
         highlight_selected_row(index, la_table(), input$la_input)
       }

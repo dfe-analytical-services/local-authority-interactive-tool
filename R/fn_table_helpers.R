@@ -150,15 +150,20 @@ dfe_reactable <- function(data, ...) {
     highlight = TRUE,
     borderless = TRUE,
     showSortIcon = FALSE,
-    style = list(fontSize = "16px"),
+    resizable = TRUE,
+    fullWidth = TRUE,
     defaultColDef = reactable::colDef(
       headerClass = "bar-sort-header",
       html = TRUE,
-      na = "NA"
+      na = "NA",
+      minWidth = 50,
+      align = "left"
     ),
     ...
   )
 }
+
+
 
 
 #' Check if a column contains numeric or NA values
@@ -206,7 +211,7 @@ is_numeric_or_na <- function(col_data) {
 #' align_reactable_cols(mtcars)
 #' align_reactable_cols(mtcars, num_exclude = c("mpg"), categorical = c("cyl"))
 align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
-  lapply(names(data), function(col) {
+  aligned_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
     if ((is_numeric_or_na(col_data) && !(col %in% num_exclude)) || (col %in% categorical)) {
       # Right-align columns that contain numbers or are all NA
@@ -227,6 +232,18 @@ align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
     }
   }) |>
     setNames(names(data))
+
+  # Merge in default min width for LA and Regions col
+  if ("LA and Regions" %in% names(data)) {
+    aligned_cols <- utils::modifyList(
+      aligned_cols,
+      list(
+        `LA and Regions` = set_min_col_width(100)
+      )
+    )
+  }
+
+  aligned_cols
 }
 
 
@@ -505,5 +522,13 @@ quartile_banding_col_def <- function(data) {
       data$Polarity,
       data$`Quartile Banding`
     )
+  )
+}
+
+
+
+set_min_col_width <- function(min_width = 60) {
+  reactable::colDef(
+    minWidth = min_width
   )
 }
