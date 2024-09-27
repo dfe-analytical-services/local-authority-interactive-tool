@@ -439,3 +439,18 @@ html {
 .col-sm-10 {
   padding-right: 2rem;
 }
+
+/* Making padding look nice on mobile (whitespace to right and left of main tab) */
+@media screen and (max-width: 575px) {
+  .col-sm-10 {
+  padding-right: 1.5rem;
+  padding-left: 2rem;
+  }
+}
+
+/* Divider between naigation and tab header for mobile */
+@media screen and (min-width: 576px) {
+  .mobile-only-hr {
+    display: none; /* Hide hr on larger screens */
+  }
+}

@@ -98,6 +98,7 @@ ui <- function(input, output, session) {
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
       bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
         title = "LA Level",
         value = "LA Level",
 
