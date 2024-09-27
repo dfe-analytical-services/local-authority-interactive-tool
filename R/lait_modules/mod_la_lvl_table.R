@@ -201,6 +201,11 @@ LA_StatsTableUI <- function(id) {
     class = "well",
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
+      width = NULL,
+      style = htmltools::css(
+        grid_template_columns = "3fr 2fr",
+        max_width = "100%"
+      ),
       bslib::card(
         bslib::card_body(
           reactable::reactableOutput(ns("la_stats"))

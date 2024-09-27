@@ -94,11 +94,13 @@ ui <- function(input, output, session) {
     bslib::navset_pill_list(
       "",
       id = "navsetpillslist",
-      widths = c(2, 8),
+      widths = c(2, 10),
       well = FALSE,
       # Content for these panels is defined in the R/ui_panels/ folder
       bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
         title = "LA Level",
+        value = "LA Level",
 
         # Tab header ==========================================================
         PageHeaderUI("la_header"),
@@ -121,6 +123,7 @@ ui <- function(input, output, session) {
       ),
       bslib::nav_panel(
         title = "Regional Level",
+        value = "Regional Level",
 
         # Tab header ==========================================================
         PageHeaderUI("region_header"),
@@ -166,11 +169,26 @@ ui <- function(input, output, session) {
       # Support and feedback ==================================================
       bslib::nav_panel(
         value = "support_panel",
-        title = "Support and feedback",
+        shinyGovstyle::banner(
+          "beta banner",
+          "beta",
+          paste0(
+            "This page is in beta phase and we are still reviewing the content.
+             We are aware the links in <b>Find more information on the data</b>
+             section are currently incorrect. Please see the ",
+            dfeshiny::external_link(
+              href = parent_publication,
+              link_text = "LAIT website"
+            ),
+            " for more information."
+          )
+        ),
+        shiny::br(),
+        title = "Support and feedback (Feedback form)",
         dfeshiny::support_panel(
           team_email = "jake.tufts@education.gov.uk",
           repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-          form_url = "https://forms.office.com"
+          form_url = "https://forms.office.com/e/gTNw1EBgsn"
         )
       ),
       # Cookies info ==========================================================

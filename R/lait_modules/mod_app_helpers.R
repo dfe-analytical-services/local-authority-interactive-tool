@@ -48,4 +48,51 @@ PageHeaderServer <- function(id, app_inputs, page_title) {
 }
 
 
+#' Internal Link UI Function
+#'
+#' Creates an internal action link within a Shiny module. This link is
+#' used to switch between tabs within a Shiny app.
+#'
+#' @param id Character string that serves as the namespace for the module.
+#'
+#' @return A UI element (action link) that can be clicked to switch tabs.
+#'
+InternalLinkUI <- function(id) {
+  ns <- shiny::NS(id) # Namespace the module
+  actionLink(ns("internal_link"), "LA Level page")
+}
+
+
+#' Internal Link Server Function
+#'
+#' Handles the server-side logic for switching tabs in a Shiny app using
+#' the action link defined in `InternalLinkUI()`. It listens for the link's
+#' click event and switches the tab accordingly.
+#'
+#' @param id Character string for namespacing the module.
+#' @param tab_value Character string representing the value of the tab to
+#' switch to.
+#' @param parent_session Shiny session object from the parent server.
+#' @param tabset_id Character string defining the ID of the tabset panel
+#' (defaults to "navsetpillslist").
+#'
+#' @return None. This function is called for its side effects, which include
+#' switching the active tab.
+#'
+InternalLinkServer <- function(id,
+                               tab_value,
+                               parent_session,
+                               tabset_id = "navsetpillslist") {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(input$internal_link, {
+      # Switch to the specified tab
+      bslib::nav_select(
+        id = tabset_id,
+        selected = tab_value,
+        session = parent_session
+      )
+    })
+  })
+}
+
 # nolint end
