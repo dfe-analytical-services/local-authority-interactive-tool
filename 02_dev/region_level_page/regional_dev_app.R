@@ -86,7 +86,10 @@ ui_dev <- bslib::page_fillable(
                   label = "Select region to compare (max 3)",
                   choices = region_names_bds,
                   multiple = TRUE,
-                  options = list(maxItems = 3)
+                  options = list(
+                    maxItems = 3,
+                    plugins = list("remove_button")
+                  )
                 )
               ),
               ggiraph::girafeOutput("region_multi_line_chart")
@@ -342,7 +345,8 @@ server_dev <- function(input, output, session) {
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, region_table(), region_la_ldn_clean())
-      }
+      },
+      pagination = FALSE
     )
   })
 

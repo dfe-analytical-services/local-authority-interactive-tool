@@ -220,36 +220,46 @@ pretty_y_gridlines <- function(data_long) {
 
 
 
-#' @title Get Unique Years from Dataset
-#' @description This function extracts the unique years from the
-#' 'Years_num' column in the provided dataset.
-#' @param data_long A dataframe containing the dataset.
-#' @return A numeric vector containing the unique years.
+#' Extract unique years from a dataset
+#'
+#' This function retrieves unique years from a long-form dataset, allowing
+#' you to specify whether to extract numeric years or character-based labels.
+#'
+#' @param data_long A data frame in long format that contains year information.
+#' @param type A string indicating the type of year to extract.
+#'        Use "numeric" for numeric years (default) or "character" for
+#'        character-based years.
+#'
+#' @return A vector of unique years, either numeric or character-based,
+#'         depending on the `type` argument.
+#'
+#' @details The function first arranges the dataset by numeric years
+#'          (`Years_num`). It then extracts unique years based on the
+#'          column chosen according to the `type` parameter:
+#'          either numeric (`Years_num`) or character (`Years`).
+#'
 #' @examples
-#' \dontrun{
-#' get_years(data_long = my_data)
-#' }
-#' @export
-get_years <- function(data_long) {
-  data_long |>
-    pull_uniques("Years_num")
+#' # Example usage with a long-form dataset:
+#' # get_years(data_long, type = "numeric")
+#' # get_years(data_long, type = "character")
+get_years <- function(data_long, type = "numeric") {
+  # Ensure type is valid
+  if (!type %in% c("numeric", "character")) {
+    stop("Invalid type. Please use 'numeric', 'character' or leave it empty.")
+  }
+
+  # Arrange the data by Years_num
+  data_ordered <- data_long |>
+    dplyr::arrange(Years_num)
+
+  # Choose Years column based on the type
+  year_column <- ifelse(type == "numeric", "Years_num", "Years")
+
+  # Return unique years
+  data_ordered |>
+    pull_uniques(year_column)
 }
 
-
-#' @title Get Number of Unique Years
-#' @description This function calculates the number of unique years
-#' in the provided dataset.
-#' @param data_long A dataframe containing the dataset.
-#' @return A numeric value representing the number of unique years.
-#' @examples
-#' \dontrun{
-#' get_num_years(data_long = my_data)
-#' }
-#' @export
-get_num_years <- function(data_long) {
-  get_years(data_long) |>
-    length()
-}
 
 
 #' Format Axes for Plotting
@@ -278,9 +288,16 @@ get_num_years <- function(data_long) {
 #'   axes +
 #'   geom_line()
 format_axes <- function(data_long) {
-  num_years <- get_num_years(data_long)
+  # Get pretty Y-axis breaks
   y_breaks <- pretty_y_gridlines(data_long)
 
+  # Number of breaks for X-axis
+  num_years <- get_years(data_long)
+
+  # Get X-axis year labels (these can be non-numeric such as 2019-20)
+  year_labels <- get_years(data_long, "character")
+
+  # Axes formatting
   list(
     ggplot2::scale_y_continuous(
       limits = range(y_breaks),
@@ -289,7 +306,8 @@ format_axes <- function(data_long) {
       labels = unlist(lapply(pretty(y_breaks), dfeR::pretty_num))
     ),
     ggplot2::scale_x_continuous(
-      breaks = scales::breaks_pretty(n = num_years)
+      breaks = num_years,
+      labels = year_labels
     )
   )
 }

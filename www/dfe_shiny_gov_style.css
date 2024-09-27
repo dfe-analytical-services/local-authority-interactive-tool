@@ -171,10 +171,20 @@ a:hover {
   margin-right: 0;
 }
 
+/* No longer in use as using col width 10 */
 /* sets the main area width. Originally set to 66.667% in the GDS
 template. 80% works well here to reduce white space on the right hand side.*/
+/*
 .col-sm-8 {
   width: 80%
+}
+*/
+
+/* Media query for screens smaller than 768px (e.g., tablets and mobile) */
+@media screen and (max-width: 768px) {
+  .col-sm-8 {
+    width: 100%; /* Full width on mobile devices */
+  }
 }
 
 /* GOV.UK footer ----------------------------------------------------------- */
@@ -382,4 +392,65 @@ html {
 .card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
   width: 50vw !important;
   align-self: center;
+}
+
+.reactable {
+  font-size: 1rem !important;
+  table-layout: fixed;
+  width: 100% !important;
+  word-break: keep-all; /* Prevents breaking words mid-word */
+  white-space: normal; /* Allows line breaks between words */
+}
+
+@media screen and (min-width: 1440px) {
+  .Reactable {
+    font-size: 1.188rem !important;  /* Slightly larger font size for large monitors */
+  }
+}
+
+@media screen and (min-width: 1240px) {
+  .Reactable {
+    font-size: 1.1rem !important;  /* Slightly larger font size for large laptops */
+  }
+}
+
+/* Media query for laptop screens (1024px or smaller) */
+@media screen and (max-width: 1024px) {
+  .reactable {
+    font-size: 0.9rem !important; /* Slightly smaller font size for laptops */
+  }
+}
+
+/* Media query for tablet-sized screens (768px or smaller) */
+@media screen and (max-width: 768px) {
+  .reactable {
+    font-size: 0.8rem !important; /* Smaller font size for tablets */
+  }
+}
+
+/* Media query for small screens (480px or smaller) */
+@media screen and (max-width: 480px) {
+  .reactable {
+    font-size: 0.7rem !important; /* Even smaller font size for mobile */
+  }
+}
+
+/* Used instead of .col-sm-8 for main body of app */
+.col-sm-10 {
+  padding-right: 2rem;
+}
+
+/* Making padding look nice on mobile (whitespace to right and left of main tab) */
+@media screen and (max-width: 575px) {
+  .col-sm-10 {
+  padding-right: 1.5rem;
+  padding-left: 2rem;
+  }
+}
+
+/* Divider between naigation and tab header for mobile */
+@media screen and (min-width: 576px) {
+  .mobile-only-hr {
+    display: none; /* Hide hr on larger screens */
+  }
 }

@@ -5,28 +5,43 @@ user_guide_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           12,
-          h1("Department for Education (DfE) Analytical Services R Shiny data dashboard template"),
-          h2("Introduction"),
-          p("This app demonstrates the DfE Analytical Services R Shiny data dashboard template."),
-          p(
-            "You might want to add some brief introductory text here alongside some links to
-          different tabs within your dashboard. Here's an example of a link working:",
-            actionLink("link_to_app_content_tab", "Example tab 1")
+          shinyGovstyle::banner(
+            "beta banner",
+            "beta",
+            paste0(
+              "This page is in beta phase and we are still reviewing the content.
+               We will provide a much more detailed user guide when the tool is
+               published."
+            )
           ),
-          p("You need to add an observeEvent() function to the server.R
-                    script for any link that navigates within your App."),
+          shiny::br(),
+          h1("Local Authority Interactive Tool"),
+          h2("Introduction"),
+          p("The Department has developed the Local Authority Interactive Tool
+              (LAIT) to provide easy access to a wide range of data related to
+              children and young people sourced from various departments across
+              government.
+
+              The app is designed and maintained by the DFE's Regions Group LA
+              Performance & Data (LAPD) Team."),
+          p(
+            "We might want to add some brief introductory text here alongside
+              some links to different tabs within your dashboard. Here's an
+              example of a link working:",
+            InternalLinkUI("la_level_link")
+          ),
           h2("Context and purpose"),
-          p("This app is the DfE Analytical Service's R-Shiny template
-                  demonstration app and is being developed to provide a coherent
-                  styling for DfE dashboards alongside some useful example
-                  componenets that teams can adapt for their own uses."),
-          p("DfE teams using this template should avoid changing the
-                  styling and layout, keeping the header, footer and side
-                  navigation list formats."),
-          p("You might want to add some relevant background information
-                  for your users here. For example some useful links to your
-                  Explore Education Statistics (EES)
-                  publication, data sources and other relevant resources."),
+          p("The Tool provides the functionality to ‘benchmark’ an authority
+              nationally and against either its Region or Statistical
+              Neighbours. The data items are presented largely in the form of
+              tables and charts, which can be varied and ‘downloaded’ from the
+              system for use elsewhere. (Download feature arriving soon...)"),
+          p("We will add some relevant background information here. For example
+              some useful LAIT resources."),
+          h2("Using the app"),
+          p("Here we will add detailed instructions of how to use the LAIT app.
+              This will include screenshots and guidance. For example, how to
+              investigate an indicator using the Regional Level page."),
           h2("Guidance sources"),
           p("For example, here we'll add some of the key resources we draw
                   on to guide styling and vizualisation...")
