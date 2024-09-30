@@ -454,3 +454,10 @@ html {
     display: none; /* Hide hr on larger screens */
   }
 }
+
+/* Prevents horizontal scroll from appearing unecessarily */
+@media screen and (min-width: 850px) {
+  .Reactable .rt-table {
+    overflow-x: hidden;
+  }
+}

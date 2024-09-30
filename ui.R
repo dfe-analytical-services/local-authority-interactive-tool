@@ -184,7 +184,7 @@ ui <- function(input, output, session) {
           )
         ),
         shiny::br(),
-        title = "Support and feedback (Feedback form)",
+        title = shiny::HTML("Support and feedback<br>(Feedback form)"),
         dfeshiny::support_panel(
           team_email = "jake.tufts@education.gov.uk",
           repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
