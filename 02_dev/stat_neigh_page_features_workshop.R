@@ -29,16 +29,14 @@ indicator_dps <- filtered_bds |>
   get_indicator_dps()
 
 # Get statistical neighbours
-# Filter stat neighbour for selected LA
-filtered_sn <- stat_n_la |>
-  dplyr::filter(`LA Name` == selected_la)
-
 # Pull sn names
-stat_n_sns <- filtered_sn |>
+stat_n_sns <- stat_n_la |>
+  dplyr::filter(`LA Name` == selected_la) |>
   pull_uniques("LA Name_sn")
 
 # Get selected (Ldn cleaned) LA region
-stat_n_region <- filtered_sn |>
+stat_n_region <- stat_n_la |>
+  dplyr::filter(`LA Name` == selected_la) |>
   pull_uniques("GOReg") |>
   clean_ldn_region(filtered_bds)
 
