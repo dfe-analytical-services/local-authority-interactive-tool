@@ -436,8 +436,10 @@ html {
 }
 
 /* Used instead of .col-sm-8 for main body of app */
+/* Adjusting padding for aesthetic & gov compliance (RHS whitespace) */
 .col-sm-10 {
   padding-right: 2rem;
+  padding-left: 0;
 }
 
 /* Making padding look nice on mobile (whitespace to right and left of main tab) */
@@ -452,5 +454,12 @@ html {
 @media screen and (min-width: 576px) {
   .mobile-only-hr {
     display: none; /* Hide hr on larger screens */
+  }
+}
+
+/* Prevents horizontal scroll from appearing unecessarily */
+@media screen and (min-width: 850px) {
+  .Reactable .rt-table {
+    overflow-x: hidden;
   }
 }

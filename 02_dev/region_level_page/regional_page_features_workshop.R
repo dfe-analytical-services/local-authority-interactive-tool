@@ -47,7 +47,7 @@ region_la_filtered_bds <- filtered_bds |>
 # Region LA levels long
 region_la_long <- region_la_filtered_bds |>
   # dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
   # dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
@@ -56,8 +56,7 @@ region_la_long <- region_la_filtered_bds |>
       #   selected_la, la_region,
       #   "Statistical Neighbours", "England"
       # )
-    ),
-    Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+    )
   )
 
 # Difference between last two years
@@ -103,7 +102,7 @@ region_filtered_bds <- filtered_bds |>
 # Region levels long
 region_long <- region_filtered_bds |>
   # dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
   # dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
@@ -112,8 +111,7 @@ region_long <- region_filtered_bds |>
       #   selected_la, la_region,
       #   "Statistical Neighbours", "England"
       # )
-    ),
-    Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+    )
   )
 
 # Difference between last two years

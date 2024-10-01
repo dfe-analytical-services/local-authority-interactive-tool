@@ -49,9 +49,7 @@ calculate_change_from_prev_yr <- function(data) {
     warning(
       paste0(
         "Missing year found in the change from previous year ",
-        "calculation, may cause incorrect value for indicator: ",
-        data |>
-          pull_uniques("Measure")
+        "calculation, may cause incorrect value for indicator: "
       )
     )
   }

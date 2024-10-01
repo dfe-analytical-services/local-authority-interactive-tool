@@ -464,17 +464,24 @@ tooltip_vlines <- function(x, data, indicator_dp = 1) {
   geom_vline_interactive(
     xintercept = x,
     data_id = x,
-    tooltip = glue::glue("Year: {x}", paste0(
-      "\n",
-      glue::glue_data(
-        data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-          dplyr::filter(Years_num == x) |>
-          dplyr::arrange(dplyr::desc(values_num)),
-        "{`LA and Regions`}: {values_num}"
-      ),
-      collapse = ""
-    )),
+    tooltip = glue::glue(
+      # Get Years (descriptive)
+      "Year: {data |>
+      dplyr::filter(Years_num == x) |>
+      get_years(type = 'character')}",
+      # Get Geog area: Value
+      paste0(
+        "\n",
+        glue::glue_data(
+          data |>
+            pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+            dplyr::filter(Years_num == x) |>
+            dplyr::arrange(dplyr::desc(values_num)),
+          "{`LA and Regions`}: {values_num}"
+        ),
+        collapse = ""
+      )
+    ),
     hover_nearest = TRUE,
     linetype = "dashed",
     size = 2.5,

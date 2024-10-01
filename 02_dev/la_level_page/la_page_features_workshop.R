@@ -53,10 +53,10 @@ sn_avg <- la_filtered_bds |>
   dplyr::filter(`LA and Regions` %in% la_sns) |>
   dplyr::summarise(
     values_num = mean(values_num, na.rm = TRUE),
-    .by = c("Years")
+    .by = c("Years", "Years_num")
   ) |>
   dplyr::mutate(
-    "LA Number" = NA,
+    "LA Number" = "-",
     "LA and Regions" = "Statistical Neighbours",
     .before = "Years"
   )
@@ -64,7 +64,7 @@ sn_avg <- la_filtered_bds |>
 # LA levels long
 la_long <- la_filtered_bds |>
   dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, values_num, Values) |>
+  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
   dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
@@ -73,8 +73,7 @@ la_long <- la_filtered_bds |>
         selected_la, la_region_ldn_clean,
         "Statistical Neighbours", "England"
       )
-    ),
-    Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+    )
   )
 
 # Difference between last two years

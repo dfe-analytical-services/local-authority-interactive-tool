@@ -97,10 +97,9 @@ RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
 
       # Select needed columns, factorise geogs and create numeric yr
       region_la_long <- region_la_filtered_bds |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
         dplyr::mutate(
-          `LA and Regions` = factor(`LA and Regions`),
-          Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+          `LA and Regions` = factor(`LA and Regions`)
         )
 
       region_la_long
@@ -318,10 +317,9 @@ Region_LongDataServer <- function(id, filtered_bds, region_names_bds) {
 
       # Region levels long
       region_long <- region_filtered_bds |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
         dplyr::mutate(
-          `LA and Regions` = factor(`LA and Regions`),
-          Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+          `LA and Regions` = factor(`LA and Regions`)
         )
 
       region_long

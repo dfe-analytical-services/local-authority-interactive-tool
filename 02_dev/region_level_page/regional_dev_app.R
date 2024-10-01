@@ -239,10 +239,9 @@ server_dev <- function(input, output, session) {
 
     # Region LA levels long
     region_la_long <- region_la_filtered_bds |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
       dplyr::mutate(
-        `LA and Regions` = factor(`LA and Regions`),
-        Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+        `LA and Regions` = factor(`LA and Regions`)
       )
   })
 
@@ -300,10 +299,9 @@ server_dev <- function(input, output, session) {
 
     # Region levels long
     region_long <- region_filtered_bds |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
       dplyr::mutate(
-        `LA and Regions` = factor(`LA and Regions`),
-        Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+        `LA and Regions` = factor(`LA and Regions`)
       )
 
     region_long
