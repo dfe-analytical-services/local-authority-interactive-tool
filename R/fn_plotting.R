@@ -465,7 +465,11 @@ tooltip_vlines <- function(x, data, indicator_dp = 1) {
     xintercept = x,
     data_id = x,
     tooltip = glue::glue(
-      "Year: {unique(data$Years[data$Years_num == x])}",
+      # Get Years (descriptive)
+      "Year: {data |>
+      dplyr::filter(Years_num == x) |>
+      get_years(type = 'character')}",
+      # Get Geog area: Value
       paste0(
         "\n",
         glue::glue_data(
