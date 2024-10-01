@@ -9,7 +9,7 @@ list.files("R/", full.names = TRUE) |>
   purrr::walk(source)
 
 
-# LAIT Regional Level LA table ------------------------------------------------
+# LAIT Statistical Neighbour Level page ---------------------------------------
 # - Regional Authorities
 # Set user inputs
 selected_topic <- "Foundation Stage"
@@ -95,7 +95,7 @@ stat_n_table <- stat_n_long |>
     exclude_columns = "LA Number"
   )
 
-# 1st Statistical Neighbours table
+# Statistical Neighbour Level SN table ----------------------------------------
 stat_n_sn_table <- stat_n_table |>
   dplyr::filter(`LA and Regions` %in% c(selected_la, stat_n_sns)) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`)
@@ -112,7 +112,7 @@ dfe_reactable(
 )
 
 
-# Join difference and pivot wider to recreate 2nd Statistical Neighbours table
+# Statistical Neighbour Level comparison table --------------------------------
 stat_n_comp_table <- stat_n_table |>
   dplyr::filter(`LA and Regions` %in% c(
     "Statistical Neighbours",
@@ -130,10 +130,10 @@ dfe_reactable(
 )
 
 
-# - Local Authority specific stats table --------------------------------------
+# Statistical Neighbour Level stats table -------------------------------------
 stat_n_stats_geog <- c(selected_la, stat_n_region, "England")
 
-# Extract change from prev year (from LA table)
+# Extract change from prev year
 stat_n_change_prev <- stat_n_diff |>
   filter_la_regions(stat_n_stats_geog,
     pull_col = "values_num"
@@ -176,7 +176,7 @@ stat_n_quartile <- calculate_quartile_band(
   stat_n_indicator_polarity
 )
 
-# Main stats table
+# SN stats table
 stat_n_stats_table <- data.frame(
   "LA Number" = stat_n_diff |>
     filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
@@ -197,3 +197,6 @@ stat_n_statsla_table <- data.frame(
   "Quartile Banding" = stat_n_quartile,
   check.names = FALSE
 )
+
+
+# Statistical Neighbour Level SN focus plot -----------------------------------
