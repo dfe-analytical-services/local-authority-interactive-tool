@@ -56,7 +56,7 @@ sn_avg <- la_filtered_bds |>
     .by = c("Years", "Years_num")
   ) |>
   dplyr::mutate(
-    "LA Number" = NA,
+    "LA Number" = "-",
     "LA and Regions" = "Statistical Neighbours",
     .before = "Years"
   )

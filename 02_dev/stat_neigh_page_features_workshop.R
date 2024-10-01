@@ -51,10 +51,10 @@ stat_n_sn_avg <- stat_n_filtered_bds |>
   dplyr::filter(`LA and Regions` %in% stat_n_sns) |>
   dplyr::summarise(
     values_num = mean(values_num, na.rm = TRUE),
-    .by = c("Years")
+    .by = c("Years", "Years_num")
   ) |>
   dplyr::mutate(
-    "LA Number" = NA,
+    "LA Number" = "-",
     "LA and Regions" = "Statistical Neighbours",
     .before = "Years"
   )

@@ -167,6 +167,7 @@ metrics_discontinued <- metrics_raw |>
 # BDS & metrics (left join as have cleaned metrics for discontinued)
 # Many-to-many join due to duplicates Measure_short from Data Dict
 # (as topics can share measures)
+# Some creation and cleaning of important cols
 bds_metrics <- metrics_clean |>
   dplyr::select(
     Topic, Measure_code, Measure, Measure_short,
@@ -177,7 +178,8 @@ bds_metrics <- metrics_clean |>
     relationship = "many-to-many"
   ) |>
   dplyr::mutate(
-    Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+    Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
+    `LA Number` = as.character(`LA Number`)
   )
 
 

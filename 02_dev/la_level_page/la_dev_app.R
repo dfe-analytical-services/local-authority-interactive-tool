@@ -197,7 +197,7 @@ server_dev <- function(input, output, session) {
         .by = c("Years", "Years_num")
       ) |>
       dplyr::mutate(
-        "LA Number" = NA,
+        "LA Number" = "-",
         "LA and Regions" = "Statistical Neighbours",
         .before = "Years"
       )

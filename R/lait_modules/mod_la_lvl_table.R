@@ -86,7 +86,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           .by = c("Years", "Years_num")
         ) |>
         dplyr::mutate(
-          "LA Number" = NA,
+          "LA Number" = "-",
           "LA and Regions" = "Statistical Neighbours",
           .before = "Years"
         )
