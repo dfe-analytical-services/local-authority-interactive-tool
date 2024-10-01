@@ -61,7 +61,7 @@ stat_n_sn_avg <- stat_n_filtered_bds |>
 
 # Statistical Neighbours long data
 stat_n_long <- stat_n_filtered_bds |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, values_num, Values) |>
+  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
   dplyr::bind_rows(stat_n_sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
@@ -70,8 +70,7 @@ stat_n_long <- stat_n_filtered_bds |>
         selected_la, stat_n_sns, "Statistical Neighbours",
         stat_n_region, "England"
       )
-    ),
-    Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+    )
   )
 
 # Most recent year
