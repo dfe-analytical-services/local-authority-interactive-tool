@@ -200,3 +200,136 @@ stat_n_statsla_table <- data.frame(
 
 
 # Statistical Neighbour Level SN focus plot -----------------------------------
+# Set selected LA to last level so appears at front of plot
+focus_line_data <- stat_n_long |>
+  dplyr::filter(`LA and Regions` %in% c(selected_la, stat_n_sns)) |>
+  reorder_la_regions(selected_la, after = Inf)
+
+region_line_chart <- focus_line_data |>
+  ggplot2::ggplot() +
+  ggiraph::geom_line_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      color = `LA and Regions`,
+      size = `LA and Regions`,
+      data_id = `LA and Regions`,
+    ),
+    na.rm = TRUE
+  ) +
+  format_axes(focus_line_data) +
+  set_plot_colours(focus_line_data, colour_type = "focus", focus_group = selected_la) +
+  set_plot_labs(filtered_bds) +
+  ggrepel::geom_label_repel(
+    data = subset(focus_line_data, Years == current_year),
+    aes(
+      x = Years_num,
+      y = values_num,
+      label = `LA and Regions`
+    ),
+    color = "black",
+    segment.colour = NA,
+    label.size = NA,
+    max.overlaps = Inf,
+    nudge_x = 2,
+    direction = "y",
+    hjust = 1,
+    show.legend = FALSE,
+    na.rm = TRUE
+  ) +
+  custom_theme() +
+  coord_cartesian(clip = "off") +
+  theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+  guides(color = "none", size = "none")
+
+
+# Creating vertical geoms to make vertical hover tooltip
+vertical_hover <- lapply(
+  get_years(focus_line_data),
+  tooltip_vlines,
+  focus_line_data,
+  indicator_dps
+)
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = (region_line_chart + vertical_hover),
+  width_svg = 12,
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  ),
+  fonts = list(sans = "Arial")
+)
+
+
+# Statistical Neighbour Level SN multi-choice line plot -----------------------
+# Randomly select up to 6 Geog areas for plotting
+set.seed(123) # Set seed for reproducibility (optional)
+stat_n_random_selection <- stat_n_long |>
+  pull_uniques("LA and Regions") |>
+  as.character() |>
+  sample(size = 3) # Select up to 6 randomly
+
+# Filter Statistical Neighbour data for these areas
+stat_n_line_chart_data <- stat_n_long |>
+  # Filter for random areas - simulate user choosing up to 6 areas
+  dplyr::filter(
+    (`LA and Regions` %in% stat_n_random_selection) |
+      (`LA and Regions` %in% selected_la)
+  ) |>
+  # Set area orders so selection order starts on top of plot
+  reorder_la_regions(rev(c(selected_la, stat_n_random_selection)), after = Inf)
+
+# Plot - selected areas
+region_line_chart <- stat_n_line_chart_data |>
+  ggplot2::ggplot() +
+  ggiraph::geom_point_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      color = `LA and Regions`,
+      data_id = `LA and Regions`
+    ),
+    na.rm = TRUE
+  ) +
+  ggiraph::geom_line_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      color = `LA and Regions`,
+      data_id = `LA and Regions`
+    ),
+    na.rm = TRUE
+  ) +
+  format_axes(stat_n_line_chart_data) +
+  manual_colour_mapping(
+    c(selected_la, stat_n_random_selection),
+    type = "line"
+  ) +
+  set_plot_labs(filtered_bds) +
+  custom_theme() +
+  # Revert order of the legend so goes from right to left
+  ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+
+
+# Creating vertical geoms to make vertical hover tooltip
+vertical_hover <- lapply(
+  get_years(stat_n_line_chart_data),
+  tooltip_vlines,
+  stat_n_line_chart_data,
+  indicator_dps
+)
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = (region_line_chart + vertical_hover),
+  width_svg = 8,
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  ),
+  fonts = list(sans = "Arial")
+)
