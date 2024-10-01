@@ -83,7 +83,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         dplyr::filter(`LA and Regions` %in% la_sns) |>
         dplyr::summarise(
           values_num = mean(values_num, na.rm = TRUE),
-          .by = c("Years")
+          .by = c("Years", "Years_num")
         ) |>
         dplyr::mutate(
           "LA Number" = NA,
@@ -94,7 +94,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       # LA levels long
       la_long <- la_filtered_bds |>
         dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, values_num) |>
+        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
         dplyr::bind_rows(sn_avg) |>
         dplyr::mutate(
           `LA and Regions` = factor(
@@ -103,8 +103,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
               app_inputs$la(), la_region_ldn_clean,
               "Statistical Neighbours", "England"
             )
-          ),
-          Years_num = as.numeric(substr(Years, start = 1, stop = 4))
+          )
         )
     })
 
