@@ -175,6 +175,9 @@ bds_metrics <- metrics_clean |>
   dplyr::left_join(bds_clean,
     by = c("Measure_short" = "Short Desc"),
     relationship = "many-to-many"
+  ) |>
+  dplyr::mutate(
+    Years_num = as.numeric(substr(Years, start = 1, stop = 4))
   )
 
 
