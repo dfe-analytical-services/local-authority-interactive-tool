@@ -491,6 +491,9 @@ server_dev <- function(input, output, session) {
 
   # Statistical Neighbour Level SN multi-choice line plot -----------------------
   output$stat_n_multi_line_chart <- ggiraph::renderGirafe({
+    # Stores all valid regions in data
+    valid_regions <- stat_n_long()$`LA and Regions`
+
     # Filter Statistical Neighbour data for these areas
     stat_n_line_chart_data <- stat_n_long() |>
       # Filter for random areas - simulate user choosing up to 6 areas
@@ -499,7 +502,10 @@ server_dev <- function(input, output, session) {
           (`LA and Regions` %in% input$la_input)
       ) |>
       # Set area orders so selection order starts on top of plot
-      reorder_la_regions(rev(c(input$la_input, input$chart_line_input)), after = Inf)
+      reorder_la_regions(
+        rev(intersect(c(input$la_input, input$chart_line_input), valid_regions)),
+        after = Inf
+      )
 
     # Plot - selected areas
     multi_line_chart <- stat_n_line_chart_data |>
