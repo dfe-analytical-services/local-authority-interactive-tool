@@ -178,11 +178,14 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
 #' @return A character vector representing the cell colour corresponding
 #' to the given polarity and quartile band.
 #'
-get_quartile_band_cell_colour <- function(polarity, quartile_band) {
+get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
   all_polarities <- c("High", "Low", "-", NA)
   valid_polarities <- c("High", "Low")
   all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
   valid_quartiles <- c("A", "B", "C", "D")
+
+  polarity <- data_polarity[1]
+  quartile_band <- data_quartile_band[1]
 
   # Check if polarity is not unexpected value
   if (!polarity %in% all_polarities) {

@@ -183,6 +183,8 @@ stat_n_stats_table <- data.frame(
   "LA and Regions" = stat_n_stats_geog,
   "Trend" = stat_n_trend,
   "Change from previous year" = stat_n_change_prev,
+  "National Rank" = c(stat_n_rank, NA, NA),
+  "Quartile Banding" = c(stat_n_quartile, NA, NA),
   "Polarity" = stat_n_indicator_polarity,
   check.names = FALSE
 ) |>
@@ -191,11 +193,32 @@ stat_n_stats_table <- data.frame(
     include_columns = c("Change from previous year")
   )
 
-# Rank and QB (get from LA in mods though)
-stat_n_statsla_table <- data.frame(
-  "Natioanl Rank" = stat_n_rank,
-  "Quartile Banding" = stat_n_quartile,
-  check.names = FALSE
+# Output stats table
+dfe_reactable(
+  stat_n_stats_table |>
+    dplyr::select(-Polarity),
+  columns = modifyList(
+    # Create the reactable with specific column alignments
+    align_reactable_cols(
+      stat_n_stats_table,
+      num_exclude = "LA Number",
+      categorical = c("Trend", "Quartile Banding")
+    ),
+    # Define specific formatting for the Trend and Quartile Banding columns
+    list(
+      Trend = reactable::colDef(
+        cell = trend_icon_renderer
+      ),
+      `National Rank` = reactable::colDef(na = ""),
+      `Quartile Banding` = reactable::colDef(
+        style = quartile_banding_col_def(stat_n_stats_table),
+        na = ""
+      )
+    )
+  ),
+  rowStyle = function(index) {
+    highlight_selected_row(index, stat_n_stats_table, selected_la)
+  }
 )
 
 
@@ -331,5 +354,83 @@ ggiraph::girafe(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
     )
   ),
+  fonts = list(sans = "Arial")
+)
+
+
+# Statistical Neighbour focus bar plot ----------------------------------------
+focus_bar_data <- focus_line_data |>
+  reorder_la_regions(selected_la)
+
+stat_n_focus_bar_chart <- focus_bar_data |>
+  ggplot2::ggplot() +
+  ggiraph::geom_col_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      fill = `LA and Regions`,
+      tooltip = glue::glue_data(
+        focus_bar_data |>
+          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
+        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      ),
+      data_id = `LA and Regions`
+    ),
+    position = "dodge",
+    width = 0.6,
+    na.rm = TRUE,
+    colour = "black"
+  ) +
+  format_axes(focus_bar_data) +
+  set_plot_colours(focus_bar_data, "focus-fill", selected_la) +
+  set_plot_labs(filtered_bds) +
+  custom_theme() +
+  guides(fill = "none")
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = stat_n_focus_bar_chart,
+  width_svg = 8,
+  options = generic_ggiraph_options(),
+  fonts = list(sans = "Arial")
+)
+
+
+# Statistical Neighbour multi-choice bar plot ---------------------------------
+stat_n_bar_multi_data <- stat_n_line_chart_data |>
+  reorder_la_regions(selected_la)
+
+stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
+  ggplot2::ggplot() +
+  ggiraph::geom_col_interactive(
+    ggplot2::aes(
+      x = Years_num,
+      y = values_num,
+      fill = `LA and Regions`,
+      tooltip = glue::glue_data(
+        stat_n_bar_multi_data |>
+          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
+        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      ),
+      data_id = `LA and Regions`
+    ),
+    position = "dodge",
+    width = 0.6,
+    na.rm = TRUE,
+    colour = "black"
+  ) +
+  format_axes(stat_n_bar_multi_data) +
+  manual_colour_mapping(
+    c(selected_la, stat_n_random_selection),
+    type = "bar"
+  ) +
+  set_plot_labs(filtered_bds) +
+  custom_theme()
+
+# Plotting interactive graph
+ggiraph::girafe(
+  ggobj = stat_n_multi_bar_chart,
+  width_svg = 8,
+  options = generic_ggiraph_options(),
   fonts = list(sans = "Arial")
 )
