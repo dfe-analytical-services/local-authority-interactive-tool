@@ -212,7 +212,7 @@ test_that("1. get_quartile_band_cell_colour returns correct colours for matching
 })
 
 # 2. Test with multiple polarity values in table_stats
-test_that("2. get_quartile_band_cell_colour throws error when multiple polarities", {
+test_that("2. get_quartile_band_cell_colour throws error when missing quartile bands", {
   table_stats_multiple_polarity <- data.frame(
     Polarity = c("Low", "High")
     # Missing `Quartile Banding` column
@@ -222,7 +222,7 @@ test_that("2. get_quartile_band_cell_colour throws error when multiple polaritie
       table_stats_multiple_polarity$Polarity,
       table_stats_multiple_polarity$`Quartile Banding`
     ),
-    "the condition has length > 1"
+    "argument is of length zero"
   )
 })
 
