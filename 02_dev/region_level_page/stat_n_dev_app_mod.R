@@ -31,11 +31,16 @@ ui_mod <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::card(
       bslib::card_header("Statistical Neighbours"),
-      bslib::card_body(
-        # Statistical Neighbour LA SNs Table ----------------------------------
-        StatN_LASNsTableUI("stat_n_sns_table")
-      )
+      # Statistical Neighbour LA SNs Table ----------------------------------
+      StatN_LASNsTableUI("stat_n_sns_table"),
+      # Statistical Neighbour LA Geog Compare Table -------------------------
+      StatN_GeogCompTableUI("stat_n_comp_table")
     )
+  ),
+  div(
+    class = "well",
+    # Statistical Neighbour Statistics Table ------------------------------
+    StatN_StatsTableUI("stat_n_stats_table")
   )
 )
 
@@ -60,6 +65,23 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la
+  )
+
+  # LA geographic comparison table --------------------------------------------
+  StatN_GeogCompTableServer(
+    "stat_n_comp_table",
+    app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
+
+  # Statistics Table ----------------------------------------------------------
+  StatN_StatsTableServer(
+    "stat_n_stats_table",
+    app_inputs,
+    bds_metrics,
+    stat_n_la,
+    la_names_bds
   )
 }
 
