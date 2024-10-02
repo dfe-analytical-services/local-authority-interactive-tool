@@ -372,7 +372,7 @@ Region_Multi_chartServer <- function(id,
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Pulling specific choices available for selected app & organisational level
+    # Pulling specific choices available for selected LA & indicator
     chart_input <- Chart_InputServer(
       "chart_input",
       app_inputs,
