@@ -64,6 +64,80 @@ ui_dev <- bslib::page_fillable(
         )
       )
     )
+  ),
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_underline(
+      id = "region_charts",
+      bslib::nav_panel(
+        title = "Focus line chart",
+        bslib::card(
+          bslib::card_body(
+            ggiraph::girafeOutput("stat_n_focus_line_chart")
+          ),
+          full_screen = TRUE
+        ),
+      ),
+      bslib::nav_panel(
+        title = "Line chart - user selection",
+        bslib::card(
+          id = "region_multi_line",
+          bslib::card_body(
+            bslib::layout_sidebar(
+              sidebar = bslib::sidebar(
+                title = "Filter options",
+                position = "left",
+                shiny::selectizeInput(
+                  inputId = "chart_line_input",
+                  label = "Select region to compare (max 3)",
+                  choices = region_names_bds,
+                  multiple = TRUE,
+                  options = list(
+                    maxItems = 3,
+                    plugins = list("remove_button")
+                  )
+                )
+              ),
+              ggiraph::girafeOutput("stat_n_multi_line_chart")
+            )
+          ),
+          full_screen = TRUE
+        )
+      ) # ,
+      # bslib::nav_panel(
+      #   title = "Focus bar chart",
+      #   bslib::card(
+      #     bslib::card_body(
+      #       ggiraph::girafeOutput("region_focus_bar_chart")
+      #     ),
+      #     full_screen = TRUE
+      #   ),
+      # ),
+      # bslib::nav_panel(
+      #   title = "Bar chart - user selection",
+      #   bslib::card(
+      #     id = "region_multi_bar",
+      #     bslib::card_body(
+      #       bslib::layout_sidebar(
+      #         sidebar = bslib::sidebar(
+      #           title = "Filter options",
+      #           position = "left",
+      #           shiny::selectizeInput(
+      #             inputId = "chart_bar_input",
+      #             label = "Select region to compare (max 3)",
+      #             choices = region_names_bds,
+      #             multiple = TRUE,
+      #             options = list(maxItems = 3)
+      #           )
+      #         ),
+      #         ggiraph::girafeOutput("region_multi_bar_chart")
+      #       )
+      #     ),
+      #     full_screen = TRUE
+      #   )
+      # )
+    )
   )
 )
 
@@ -318,6 +392,165 @@ server_dev <- function(input, output, session) {
       rowStyle = function(index) {
         highlight_selected_row(index, stat_n_stats_output, input$la_input)
       }
+    )
+  })
+
+
+  # Statistical Neighbour charts ----------------------------------------------
+
+  # Restrict the user input choices to only eligble Regions
+  # Not England, Ldn () where missing, and default Region
+  shiny::observeEvent(input$la_input, {
+    # Get indicator choices for selected topic
+    multi_chart_data <- stat_n_long() |>
+      dplyr::filter(
+        `LA and Regions` != input$la_input
+      ) |>
+      pull_uniques("LA and Regions")
+
+    updateSelectInput(
+      session = session,
+      inputId = "chart_line_input",
+      choices = multi_chart_data
+    )
+
+    # updateSelectInput(
+    #   session = session,
+    #   inputId = "chart_bar_input",
+    #   choices = multi_chart_data
+    # )
+  })
+
+
+  # Statistical Neighbour Level SN focus plot -----------------------------------
+  output$stat_n_focus_line_chart <- ggiraph::renderGirafe({
+    # Set selected LA to last level so appears at front of plot
+    focus_line_data <- stat_n_long() |>
+      dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
+      reorder_la_regions(input$la_input, after = Inf)
+
+    focus_line_chart <- focus_line_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_line_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          size = `LA and Regions`,
+          data_id = `LA and Regions`,
+        ),
+        na.rm = TRUE
+      ) +
+      format_axes(focus_line_data) +
+      set_plot_colours(focus_line_data, colour_type = "focus", focus_group = input$la_input) +
+      set_plot_labs(filtered_bds$data) +
+      ggrepel::geom_label_repel(
+        data = subset(focus_line_data, Years == current_year()),
+        aes(
+          x = Years_num,
+          y = values_num,
+          label = `LA and Regions`
+        ),
+        color = "black",
+        segment.colour = NA,
+        label.size = NA,
+        max.overlaps = Inf,
+        nudge_x = 2,
+        direction = "y",
+        hjust = 1,
+        show.legend = FALSE,
+        na.rm = TRUE
+      ) +
+      custom_theme() +
+      coord_cartesian(clip = "off") +
+      theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+      guides(color = "none", size = "none")
+
+
+    # Creating vertical geoms to make vertical hover tooltip
+    vertical_hover <- lapply(
+      get_years(focus_line_data),
+      tooltip_vlines,
+      focus_line_data,
+      indicator_dps()
+    )
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = (focus_line_chart + vertical_hover),
+      width_svg = 12,
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      ),
+      fonts = list(sans = "Arial")
+    )
+  })
+
+
+  # Statistical Neighbour Level SN multi-choice line plot -----------------------
+  output$stat_n_multi_line_chart <- ggiraph::renderGirafe({
+    # Filter Statistical Neighbour data for these areas
+    stat_n_line_chart_data <- stat_n_long() |>
+      # Filter for random areas - simulate user choosing up to 6 areas
+      dplyr::filter(
+        (`LA and Regions` %in% input$chart_line_input) |
+          (`LA and Regions` %in% input$la_input)
+      ) |>
+      # Set area orders so selection order starts on top of plot
+      reorder_la_regions(rev(c(input$la_input, input$chart_line_input)), after = Inf)
+
+    # Plot - selected areas
+    multi_line_chart <- stat_n_line_chart_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_point_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          data_id = `LA and Regions`
+        ),
+        na.rm = TRUE
+      ) +
+      ggiraph::geom_line_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          data_id = `LA and Regions`
+        ),
+        na.rm = TRUE
+      ) +
+      format_axes(stat_n_line_chart_data) +
+      manual_colour_mapping(
+        c(input$la_input, input$chart_line_input),
+        type = "line"
+      ) +
+      set_plot_labs(filtered_bds$data) +
+      custom_theme() +
+      # Revert order of the legend so goes from right to left
+      ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+
+
+    # Creating vertical geoms to make vertical hover tooltip
+    vertical_hover <- lapply(
+      get_years(stat_n_line_chart_data),
+      tooltip_vlines,
+      stat_n_line_chart_data,
+      indicator_dps()
+    )
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = (multi_line_chart + vertical_hover),
+      width_svg = 8,
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      ),
+      fonts = list(sans = "Arial")
     )
   })
 }
