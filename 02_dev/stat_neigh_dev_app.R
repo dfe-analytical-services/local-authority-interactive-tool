@@ -91,7 +91,7 @@ ui_dev <- bslib::page_fillable(
                 shiny::selectizeInput(
                   inputId = "chart_line_input",
                   label = "Select region to compare (max 3)",
-                  choices = region_names_bds,
+                  choices = NULL,
                   multiple = TRUE,
                   options = list(
                     maxItems = 3,
@@ -104,39 +104,39 @@ ui_dev <- bslib::page_fillable(
           ),
           full_screen = TRUE
         )
-      ) # ,
-      # bslib::nav_panel(
-      #   title = "Focus bar chart",
-      #   bslib::card(
-      #     bslib::card_body(
-      #       ggiraph::girafeOutput("region_focus_bar_chart")
-      #     ),
-      #     full_screen = TRUE
-      #   ),
-      # ),
-      # bslib::nav_panel(
-      #   title = "Bar chart - user selection",
-      #   bslib::card(
-      #     id = "region_multi_bar",
-      #     bslib::card_body(
-      #       bslib::layout_sidebar(
-      #         sidebar = bslib::sidebar(
-      #           title = "Filter options",
-      #           position = "left",
-      #           shiny::selectizeInput(
-      #             inputId = "chart_bar_input",
-      #             label = "Select region to compare (max 3)",
-      #             choices = region_names_bds,
-      #             multiple = TRUE,
-      #             options = list(maxItems = 3)
-      #           )
-      #         ),
-      #         ggiraph::girafeOutput("region_multi_bar_chart")
-      #       )
-      #     ),
-      #     full_screen = TRUE
-      #   )
-      # )
+      ),
+      bslib::nav_panel(
+        title = "Focus bar chart",
+        bslib::card(
+          bslib::card_body(
+            ggiraph::girafeOutput("stat_n_focus_bar_chart")
+          ),
+          full_screen = TRUE
+        ),
+      ),
+      bslib::nav_panel(
+        title = "Bar chart - user selection",
+        bslib::card(
+          id = "region_multi_bar",
+          bslib::card_body(
+            bslib::layout_sidebar(
+              sidebar = bslib::sidebar(
+                title = "Filter options",
+                position = "left",
+                shiny::selectizeInput(
+                  inputId = "chart_bar_input",
+                  label = "Select region to compare (max 3)",
+                  choices = NULL,
+                  multiple = TRUE,
+                  options = list(maxItems = 3)
+                )
+              ),
+              ggiraph::girafeOutput("stat_n_multi_bar_chart")
+            )
+          ),
+          full_screen = TRUE
+        )
+      )
     )
   )
 )
@@ -399,27 +399,67 @@ server_dev <- function(input, output, session) {
   # Statistical Neighbour charts ----------------------------------------------
 
   # Restrict the user input choices to only eligble Regions
-  # Not England, Ldn () where missing, and default Region
-  shiny::observeEvent(input$la_input, {
-    # Get indicator choices for selected topic
+  # Helper function to filter and retain valid selections
+  retain_valid_selections <- function(current_choices, previous_selections) {
+    # Keep only selections that are part of the new choices
+    intersect(previous_selections, current_choices)
+  }
+
+  # Update both chart inputs when la_input changes
+  observeEvent(input$la_input, {
+    # Get available regions excluding the selected LA
     multi_chart_data <- stat_n_long() |>
-      dplyr::filter(
-        `LA and Regions` != input$la_input
-      ) |>
+      dplyr::filter(`LA and Regions` != input$la_input) |>
       pull_uniques("LA and Regions")
 
+    # Store previous selections for chart_line_input and chart_bar_input
+    prev_line_selections <- input$chart_line_input
+    prev_bar_selections <- input$chart_bar_input
+
+    # Retain only valid selections from previous inputs
+    valid_line_selections <- retain_valid_selections(multi_chart_data, prev_line_selections)
+    valid_bar_selections <- retain_valid_selections(multi_chart_data, prev_bar_selections)
+
+    # Update chart_line_input while retaining valid previous selections
     updateSelectInput(
       session = session,
       inputId = "chart_line_input",
-      choices = multi_chart_data
+      choices = multi_chart_data,
+      selected = valid_line_selections # Restore previous valid selections
     )
 
-    # updateSelectInput(
-    #   session = session,
-    #   inputId = "chart_bar_input",
-    #   choices = multi_chart_data
-    # )
+    # Update chart_bar_input while retaining valid previous selections
+    updateSelectInput(
+      session = session,
+      inputId = "chart_bar_input",
+      choices = multi_chart_data,
+      selected = valid_bar_selections # Restore previous valid selections
+    )
   })
+
+  # Keep line and bar inputs synchronized without resetting selections
+  observeEvent(input$chart_line_input, {
+    if (!identical(input$chart_bar_input, input$chart_line_input)) {
+      updateSelectInput(
+        session = session,
+        inputId = "chart_bar_input",
+        selected = input$chart_line_input
+      )
+    }
+  })
+
+  observeEvent(input$chart_bar_input, {
+    if (!identical(input$chart_line_input, input$chart_bar_input)) {
+      updateSelectInput(
+        session = session,
+        inputId = "chart_line_input",
+        selected = input$chart_bar_input
+      )
+    }
+  })
+
+
+
 
 
   # Statistical Neighbour Level SN focus plot -----------------------------------
@@ -556,6 +596,100 @@ server_dev <- function(input, output, session) {
           css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
         )
       ),
+      fonts = list(sans = "Arial")
+    )
+  })
+
+
+  # Statistical Neighbour focus bar plot ----------------------------------------
+  output$stat_n_focus_bar_chart <- ggiraph::renderGirafe({
+    focus_bar_data <- stat_n_long() |>
+      dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
+      reorder_la_regions(input$la_input)
+
+    stat_n_focus_bar_chart <- focus_bar_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_col_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          fill = `LA and Regions`,
+          tooltip = glue::glue_data(
+            focus_bar_data |>
+              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
+            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+          ),
+          data_id = `LA and Regions`
+        ),
+        position = "dodge",
+        width = 0.6,
+        na.rm = TRUE,
+        colour = "black"
+      ) +
+      format_axes(focus_bar_data) +
+      set_plot_colours(focus_bar_data, "focus-fill", input$la_input) +
+      set_plot_labs(filtered_bds$data) +
+      custom_theme() +
+      guides(fill = "none")
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = stat_n_focus_bar_chart,
+      width_svg = 8,
+      options = generic_ggiraph_options(),
+      fonts = list(sans = "Arial")
+    )
+  })
+
+
+  # Statistical Neighbour multi-choice bar plot -------------------------------
+  output$stat_n_multi_bar_chart <- ggiraph::renderGirafe({
+    # Stores all valid regions in data
+    valid_regions <- stat_n_long()$`LA and Regions`
+
+    stat_n_bar_multi_data <- stat_n_long() |>
+      # Filter for random areas - simulate user choosing up to 6 areas
+      dplyr::filter(
+        (`LA and Regions` %in% input$chart_bar_input) |
+          (`LA and Regions` %in% input$la_input)
+      ) |>
+      # Set area orders so selection order starts on top of plot
+      reorder_la_regions(
+        intersect(c(input$la_input, input$chart_bar_input), valid_regions)
+      )
+
+    stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
+      ggplot2::ggplot() +
+      ggiraph::geom_col_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          fill = `LA and Regions`,
+          tooltip = glue::glue_data(
+            stat_n_bar_multi_data |>
+              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
+            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+          ),
+          data_id = `LA and Regions`
+        ),
+        position = "dodge",
+        width = 0.6,
+        na.rm = TRUE,
+        colour = "black"
+      ) +
+      format_axes(stat_n_bar_multi_data) +
+      manual_colour_mapping(
+        c(input$la_input, input$chart_bar_input),
+        type = "bar"
+      ) +
+      set_plot_labs(filtered_bds$data) +
+      custom_theme()
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = stat_n_multi_bar_chart,
+      width_svg = 8,
+      options = generic_ggiraph_options(),
       fonts = list(sans = "Arial")
     )
   })
