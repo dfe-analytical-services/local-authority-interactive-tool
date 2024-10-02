@@ -183,6 +183,8 @@ stat_n_stats_table <- data.frame(
   "LA and Regions" = stat_n_stats_geog,
   "Trend" = stat_n_trend,
   "Change from previous year" = stat_n_change_prev,
+  "National Rank" = c(stat_n_rank, NA, NA),
+  "Quartile Banding" = c(stat_n_quartile, NA, NA),
   "Polarity" = stat_n_indicator_polarity,
   check.names = FALSE
 ) |>
@@ -191,11 +193,32 @@ stat_n_stats_table <- data.frame(
     include_columns = c("Change from previous year")
   )
 
-# Rank and QB (get from LA in mods though)
-stat_n_statsla_table <- data.frame(
-  "Natioanl Rank" = stat_n_rank,
-  "Quartile Banding" = stat_n_quartile,
-  check.names = FALSE
+# Output stats table
+dfe_reactable(
+  stat_n_stats_table |>
+    dplyr::select(-Polarity),
+  columns = modifyList(
+    # Create the reactable with specific column alignments
+    align_reactable_cols(
+      stat_n_stats_table,
+      num_exclude = "LA Number",
+      categorical = c("Trend", "Quartile Banding")
+    ),
+    # Define specific formatting for the Trend and Quartile Banding columns
+    list(
+      Trend = reactable::colDef(
+        cell = trend_icon_renderer
+      ),
+      `National Rank` = reactable::colDef(na = ""),
+      `Quartile Banding` = reactable::colDef(
+        style = quartile_banding_col_def(stat_n_stats_table),
+        na = ""
+      )
+    )
+  ),
+  rowStyle = function(index) {
+    highlight_selected_row(index, stat_n_stats_table, selected_la)
+  }
 )
 
 

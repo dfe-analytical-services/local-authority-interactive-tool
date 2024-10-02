@@ -53,28 +53,18 @@ ui_dev <- bslib::page_fillable(
         )
       )
     )
-  ) # ,
-  # div(
-  #   class = "well",
-  #   bslib::layout_column_wrap(
-  #     bslib::card(
-  #       bslib::card_header(),
-  #       bslib::card_body(
-  #         div(
-  #           reactable::reactableOutput("stat_n_stats_table")
-  #         )
-  #       )
-  #     ),
-  #     bslib::card(
-  #       bslib::card_header(),
-  #       bslib::card_body(
-  #         div(
-  #           reactable::reactableOutput("stat_n_stats_la_table")
-  #         )
-  #       )
-  #     )
-  #   )
-  # )
+  ),
+  div(
+    class = "well",
+    bslib::card(
+      bslib::card_header(),
+      bslib::card_body(
+        div(
+          reactable::reactableOutput("stat_n_stats_table")
+        )
+      )
+    )
+  )
 )
 
 
@@ -229,6 +219,105 @@ server_dev <- function(input, output, session) {
       # Create the reactable with specific column alignments
       columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
       pagination = FALSE
+    )
+  })
+
+
+  # Statistical Neighbour Level stats table -------------------------------------
+  stat_n_stats_table <- reactive({
+    stat_n_stats_geog <- c(input$la_input, stat_n_region(), "England")
+
+    # Extract change from prev year
+    stat_n_change_prev <- stat_n_diff() |>
+      filter_la_regions(stat_n_stats_geog,
+        pull_col = "values_num"
+      )
+
+    # Get polarity of indicator
+    stat_n_indicator_polarity <- filtered_bds$data |>
+      pull_uniques("Polarity")
+
+    # Set the trend value
+    stat_n_trend <- as.numeric(stat_n_change_prev)
+
+    # Get latest rank, ties are set to min & NA vals to NA rank
+    stat_n_rank <- filtered_bds$data |>
+      filter_la_regions(la_names_bds, latest = TRUE) |>
+      dplyr::mutate(
+        rank = dplyr::case_when(
+          is.na(values_num) ~ NA,
+          # Rank in descending order
+          stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+          # Rank in ascending order
+          stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+        )
+      ) |>
+      filter_la_regions(input$la_input, pull_col = "rank")
+
+
+    # Calculate quartile bands for indicator
+    stat_n_quartile_bands <- filtered_bds$data |>
+      filter_la_regions(la_names_bds, latest = TRUE, pull_col = "values_num") |>
+      quantile(na.rm = TRUE)
+
+    # Extracting LA latest value
+    stat_n_indicator_val <- filtered_bds$data |>
+      filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
+
+    # Calculating which quartile this value sits in
+    stat_n_quartile <- calculate_quartile_band(
+      stat_n_indicator_val,
+      stat_n_quartile_bands,
+      stat_n_indicator_polarity
+    )
+
+    # SN stats table
+    data.frame(
+      "LA Number" = stat_n_diff() |>
+        filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
+      "LA and Regions" = stat_n_stats_geog,
+      "Trend" = stat_n_trend,
+      "Change from previous year" = stat_n_change_prev,
+      "National Rank" = c(stat_n_rank, NA, NA),
+      "Quartile Banding" = c(stat_n_quartile, NA, NA),
+      "Polarity" = stat_n_indicator_polarity,
+      check.names = FALSE
+    )
+  })
+
+  # Main stats table
+  output$stat_n_stats_table <- reactable::renderReactable({
+    stat_n_stats_output <- stat_n_stats_table() |>
+      pretty_num_table(
+        dp = get_indicator_dps(filtered_bds$data),
+        include_columns = c("Change from previous year")
+      )
+
+    dfe_reactable(
+      stat_n_stats_output |>
+        dplyr::select(-Polarity),
+      columns = modifyList(
+        # Create the reactable with specific column alignments
+        align_reactable_cols(
+          stat_n_stats_output,
+          num_exclude = "LA Number",
+          categorical = c("Trend", "Quartile Banding")
+        ),
+        # Define specific formatting for the Trend and Quartile Banding columns
+        list(
+          Trend = reactable::colDef(
+            cell = trend_icon_renderer
+          ),
+          `National Rank` = reactable::colDef(na = ""),
+          `Quartile Banding` = reactable::colDef(
+            style = quartile_banding_col_def(stat_n_stats_output),
+            na = ""
+          )
+        )
+      ),
+      rowStyle = function(index) {
+        highlight_selected_row(index, stat_n_stats_output, input$la_input)
+      }
     )
   })
 }
