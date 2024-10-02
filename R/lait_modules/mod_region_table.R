@@ -122,13 +122,18 @@ RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
 #' @examples
 #' Current_YearServer("current_year", region_la_long)
 #'
-Current_YearServer <- function(id, region_la_long) {
+Current_YearServer <- function(id, data, data_type = "long") {
   moduleServer(id, function(input, output, session) {
     reactive({
-      # Extract string year for max numeric year
-      region_la_long() |>
-        dplyr::filter(Years_num == max(Years_num)) |>
-        pull_uniques("Years")
+      if (data_type == "long") {
+        # Extract string year for max numeric year
+        data() |>
+          dplyr::filter(Years_num == max(Years_num)) |>
+          pull_uniques("Years")
+      } else if (data_type == "wide") {
+        # Get column name second from right
+        names(data())[ncol(data()) - 1]
+      }
     })
   })
 }
