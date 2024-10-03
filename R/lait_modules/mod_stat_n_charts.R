@@ -195,28 +195,29 @@ StatN_FocusBarChartServer <- function(id,
 }
 
 
-
-
-StatN_MultiLineChartUI <- function(id) {
+StatN_Chart_InputUI <- function(id) {
   ns <- NS(id)
 
-  bslib::nav_panel(
-    title = "Line chart - user selection",
-    bslib::card(
-      id = "stat_n_multi_line",
-      bslib::card_body(
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(
-            title = "Filter options",
-            position = "left",
-            StatN_Chart_InputUI(
-              ns("chart_line_input") # Line chart input only
-            )[[1]]
-          ),
-          ggiraph::girafeOutput(ns("output_chart"))
-        )
-      ),
-      full_screen = TRUE
+  tagList(
+    shiny::selectizeInput(
+      inputId = ns("chart_line_input"),
+      label = "Select region to compare (max 3)",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button")
+      )
+    ),
+    shiny::selectizeInput(
+      inputId = ns("chart_bar_input"),
+      label = "Select region to compare (max 3)",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button")
+      )
     )
   )
 }
@@ -346,6 +347,31 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
 }
 
 
+
+
+StatN_MultiLineChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Line chart - user selection",
+    bslib::card(
+      id = "stat_n_multi_line",
+      bslib::card_body(
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            title = "Filter options",
+            position = "left",
+            StatN_Chart_InputUI(
+              ns("chart_line_input") # Line chart input only
+            )[[1]]
+          ),
+          ggiraph::girafeOutput(ns("output_chart"))
+        )
+      ),
+      full_screen = TRUE
+    )
+  )
+}
 
 
 
