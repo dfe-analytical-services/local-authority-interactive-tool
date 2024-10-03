@@ -204,7 +204,7 @@ ui <- function(input, output, session) {
         ),
 
         # Statistical Neighbour Metadata ======================================
-        LA_LevelMetaUI("region_meta")
+        LA_LevelMetaUI("stat_n_meta")
       ),
       # User guide ============================================================
       user_guide_panel(),
