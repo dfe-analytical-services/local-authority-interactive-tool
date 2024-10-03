@@ -14,7 +14,7 @@ list.files("R/", full.names = TRUE) |>
 # Set user inputs
 selected_topic <- "Foundation Stage"
 selected_indicator <- "Foundation Stage - % achieving a good level of development"
-selected_la <- "Barking and Dagenham"
+selected_la <- "Cumberland"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>

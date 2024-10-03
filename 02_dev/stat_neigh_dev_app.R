@@ -97,8 +97,7 @@ ui_dev <- bslib::page_fillable(
                     maxItems = 3,
                     plugins = list("remove_button"),
                     dropdownParent = "body"
-                  ),
-                  class = "custom-dropdown"
+                  )
                 )
               ),
               ggiraph::girafeOutput("stat_n_multi_line_chart")
@@ -204,6 +203,7 @@ server_dev <- function(input, output, session) {
 
   # Long format Statistical Neighbour data
   stat_n_long <- reactive({
+    print(stat_n_sns())
     # Calculate SN average
     stat_n_sn_avg <- filtered_bds$data |>
       dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
@@ -219,6 +219,7 @@ server_dev <- function(input, output, session) {
 
     # Statistical Neighbours long data
     filtered_bds$data |>
+      dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns(), stat_n_region(), "England")) |>
       dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
       dplyr::bind_rows(stat_n_sn_avg) |>
       dplyr::mutate(
@@ -247,6 +248,8 @@ server_dev <- function(input, output, session) {
 
   # Build main Statistical Neighbour formatted table (used to create the others)
   stat_n_table <- shiny::reactive({
+    print(stat_n_long())
+
     # Join difference and pivot wider
     stat_n_long() |>
       dplyr::bind_rows(stat_n_diff()) |>
@@ -265,6 +268,8 @@ server_dev <- function(input, output, session) {
     stat_n_sns_table <- stat_n_table() |>
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+
+    print(stat_n_sns_table)
 
     dfe_reactable(
       stat_n_sns_table,

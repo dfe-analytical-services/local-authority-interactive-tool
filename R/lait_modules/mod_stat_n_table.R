@@ -117,6 +117,7 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
 
       # Statistical Neighbours long data
       filtered_bds() |>
+        dplyr::filter(`LA and Regions` %in% c(la_input(), stat_n_sns(), stat_n_region(), "England")) |>
         dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
         dplyr::bind_rows(stat_n_sn_avg) |>
         dplyr::mutate(
