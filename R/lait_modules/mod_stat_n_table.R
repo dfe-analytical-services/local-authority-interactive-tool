@@ -1,20 +1,23 @@
-# # shareable modules:
-# indicator_dps - done
+# nolint start: object_name
 #
-# stat_n_sns
+# General modules =============================================================
+# These are nested within other modules
 #
-# stat_n_region
-#
-# stat_n_long
-#
-# stat_n_diff
-#
-# current_year
-#
-# stat_n_table
-
-
-
+#' Get Local Authority Statistical Neighbours Server Module
+#'
+#' This module retrieves the statistical neighbours for a selected Local
+#' Authority (LA) based on the input from the user.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param la_input A reactive expression returning the selected Local Authority
+#' name, which is used to filter the statistical neighbours.
+#' @param stat_n_la A data frame containing statistical neighbours information
+#' for all Local Authorities. The data must include columns for "LA Name" and
+#' "LA Name_sn" (the statistical neighbours).
+#'
+#' @return A reactive expression that provides the list of statistical
+#' neighbours (as "LA Name_sn") for the selected Local Authority.
+#'
 Get_LAStatNsServer <- function(id, la_input, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     reactive({
@@ -27,6 +30,23 @@ Get_LAStatNsServer <- function(id, la_input, stat_n_la) {
 }
 
 
+#' Get Local Authority Cleaned Region Server Module
+#'
+#' This module retrieves the region for a selected Local Authority (LA) and
+#' applies cleaning to the region data (e.g., adjusting for London regions).
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param la_input A reactive expression returning the selected Local Authority
+#' name, used to filter the region data.
+#' @param filtered_bds A reactive expression returning additional boundary
+#' data needed for cleaning the region information.
+#' @param stat_n_la A data frame containing the region and statistical
+#' neighbours information for all Local Authorities, which includes "LA Name"
+#' and "GOReg" (Government Office Region).
+#'
+#' @return A reactive expression that provides the cleaned region for the
+#' selected Local Authority.
+#'
 Get_LACleanRegionServer <- function(id, la_input, filtered_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     reactive({
@@ -40,7 +60,30 @@ Get_LACleanRegionServer <- function(id, la_input, filtered_bds, stat_n_la) {
 }
 
 
-# Long format Statistical Neighbour data
+#' Long Format Statistical Neighbour Data Server Module
+#'
+#' This module generates long-format data for a selected Local Authority (LA),
+#' including the statistical neighbours and region information, and computes
+#' the statistical neighbour average.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param la_input A reactive expression returning the selected Local Authority
+#' name, used to filter the data.
+#' @param filtered_bds A reactive expression returning the boundary data,
+#' which includes values for different Local Authorities and their neighbours.
+#' @param stat_n_la A data frame containing statistical neighbours and region
+#' information for all Local Authorities.
+#'
+#' @return A reactive expression providing long-format data, which includes
+#' the selected LA, statistical neighbours, the average for statistical
+#' neighbours, and region information.
+#'
+#' @details The module makes use of two helper server modules:
+#' \code{\link{Get_LAStatNsServer}} to obtain the LA's statistical neighbours
+#' and \code{\link{Get_LACleanRegionServer}} to retrieve the LA's region with
+#' cleaning applied. The output is suitable for visualization in a time series
+#' format or for further analysis.
+#'
 StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Get LA statistical neighbours
@@ -90,6 +133,28 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
 }
 
 
+#' Statistical Neighbour Yearly Difference Server Module
+#'
+#' This module calculates the year-over-year difference in values for a selected
+#' Local Authority (LA) and its statistical neighbours.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param la_input A reactive expression returning the selected Local Authority
+#' name, used to filter the data.
+#' @param filtered_bds A reactive expression returning the boundary data,
+#' which includes values for different Local Authorities and their neighbours.
+#' @param stat_n_la A data frame containing statistical neighbours and region
+#' information for all Local Authorities.
+#'
+#' @return A reactive expression providing a data frame with the difference
+#' in values between the last two years for the selected LA, its statistical
+#' neighbours, and the region.
+#'
+#' @details This module relies on \code{\link{StatN_LongServer}} to obtain
+#' long-format data for the LA and its statistical neighbours. The module
+#' calculates the change in values between the last two years for analysis or
+#' display purposes.
+#'
 StatN_DiffServer <- function(id, la_input, filtered_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Get Statistical Neighbour long format
@@ -109,6 +174,29 @@ StatN_DiffServer <- function(id, la_input, filtered_bds, stat_n_la) {
 }
 
 
+#' Statistical Neighbour Data Table Server Module
+#'
+#' This module builds a formatted table for a selected Local Authority (LA)
+#' and its statistical neighbours, including yearly values and differences.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param la_input A reactive expression returning the selected Local Authority
+#' name, used to filter the data.
+#' @param filtered_bds A reactive expression returning the boundary data,
+#' which includes values for different Local Authorities and their neighbours.
+#' @param stat_n_la A data frame containing statistical neighbours and region
+#' information for all Local Authorities.
+#'
+#' @return A reactive expression providing a data frame formatted as a wide
+#' table, where rows represent Local Authorities and columns represent yearly
+#' values, including the difference between years.
+#'
+#' @details This module integrates data from two other server modules:
+#' \code{\link{StatN_LongServer}} for the long-format data of the LA and its
+#' statistical neighbours, and \code{\link{StatN_DiffServer}} to calculate the
+#' difference in values between years. The final output is a pretty-printed
+#' table suitable for presentation or further manipulation.
+#'
 StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Get Statistical Neighbour long format
@@ -145,8 +233,17 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
   })
 }
 
-
-
+# LA Statistical Neighbours table =============================================
+#' Statistical Neighbour Table UI Module
+#'
+#' This UI module generates a table to display the selected Local Authority (LA)
+#' and its statistical neighbours.
+#'
+#' @param id A character string representing the module's namespace ID.
+#'
+#' @return A UI component containing a reactable output for displaying the
+#' statistical neighbour table.
+#'
 StatN_LASNsTableUI <- function(id) {
   ns <- NS(id)
 
@@ -158,6 +255,29 @@ StatN_LASNsTableUI <- function(id) {
 }
 
 
+#' Statistical Neighbour Table Server Module
+#'
+#' This module generates a formatted reactable table that displays statistical
+#' data for the selected Local Authority (LA) and its statistical neighbours,
+#' along with the current year.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param app_inputs A list of reactive inputs, including the selected LA and
+#' other app-level filters.
+#' @param bds_metrics A reactive expression providing the metrics data
+#' (boundaries) for filtering and analysis.
+#' @param stat_n_la A data frame containing statistical neighbours and region
+#' information for all Local Authorities.
+#'
+#' @return This module does not return a value. It renders a reactable output
+#' displaying the LA and its statistical neighbours in a formatted table.
+#'
+#' @details The module integrates the output of \code{\link{StatN_DataServer}}
+#' for statistical neighbour data, \code{\link{Get_LAStatNsServer}} for LA
+#' neighbours, and \code{\link{Current_YearServer}} for retrieving the current
+#' year. The final reactable table is formatted using a custom dfe_reactable
+#' function, and rows are highlighted based on the selected LA.
+#'
 StatN_LASNsTableServer <- function(id,
                                    app_inputs,
                                    bds_metrics,
@@ -212,7 +332,18 @@ StatN_LASNsTableServer <- function(id,
 }
 
 
-
+# LA Statistical Neighbour Geographic comparison table ========================
+#' Statistical Neighbour Geographic Comparison Table UI Module
+#'
+#' This UI module generates a table for comparing the selected Local Authority
+#' (LA) with its statistical neighbours, region, and England.
+#'
+#' @param id A character string representing the module's namespace ID.
+#'
+#' @return A UI component containing a reactable output for displaying the
+#' geographic comparison table. The table includes a black border and spacing
+#' between sections for better visual distinction.
+#'
 StatN_GeogCompTableUI <- function(id) {
   ns <- NS(id)
 
@@ -226,6 +357,29 @@ StatN_GeogCompTableUI <- function(id) {
 }
 
 
+#' Statistical Neighbour Geographic Comparison Table Server Module
+#'
+#' This module generates a reactable table comparing the selected Local
+#' Authority (LA) with its statistical neighbours, region, and England.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param app_inputs A list of reactive inputs, including the selected LA and
+#' other app-level filters.
+#' @param bds_metrics A reactive expression providing the metrics data
+#' (boundaries) for filtering and analysis.
+#' @param stat_n_la A data frame containing statistical neighbours and region
+#' information for all Local Authorities.
+#'
+#' @return This module does not return a value. It renders a reactable output
+#' displaying the geographic comparison between the LA, its statistical
+#' neighbours, the region, and England.
+#'
+#' @details The module uses \code{\link{StatN_DataServer}} to fetch the formatted
+#' statistical data and \code{\link{Get_LACleanRegionServer}} to retrieve the
+#' LA's cleaned region. The table compares values across geographic areas,
+#' and column alignments are handled using a custom \code{align_reactable_cols}
+#' function.
+#'
 StatN_GeogCompTableServer <- function(id,
                                       app_inputs,
                                       bds_metrics,
@@ -277,6 +431,21 @@ StatN_GeogCompTableServer <- function(id,
 }
 
 
+# LA Statistical Neighbours Statistics table ==================================
+#' Statistical Neighbour Statistics Table UI Module
+#'
+#' This UI module generates a table to display statistical data for the
+#' selected Local Authority (LA) and its geographic comparison areas.
+#'
+#' @param id A character string representing the module's namespace ID.
+#'
+#' @return A UI component containing a reactable output for displaying the
+#' statistical data in a formatted table.
+#'
+#' @importFrom reactable reactableOutput
+#' @importFrom bslib card card_body
+#' @export
+
 StatN_StatsTableUI <- function(id) {
   ns <- NS(id)
 
@@ -291,6 +460,31 @@ StatN_StatsTableUI <- function(id) {
 }
 
 
+#' Statistical Neighbour Statistics Table Server Module
+#'
+#' This module generates a table with detailed statistical metrics for the
+#' selected Local Authority (LA), including trend, national rank, and quartile
+#' banding.
+#'
+#' @param id A character string representing the module's namespace ID.
+#' @param app_inputs A list of reactive inputs, including the selected LA and
+#' other app-level filters.
+#' @param bds_metrics A reactive expression providing the metrics data
+#' (boundaries) for filtering and analysis.
+#' @param stat_n_la A data frame containing statistical neighbours and region
+#' information for all Local Authorities.
+#' @param la_names_bds A character vector of LA names used for ranking and
+#' comparison in the data.
+#'
+#' @return This module does not return a value. It renders a reactable output
+#' displaying the statistical data table with columns for trend, change from
+#' previous year, national rank, and quartile banding.
+#'
+#' @details This module uses \code{\link{StatN_DiffServer}} to calculate
+#' the yearly change, and ranks the selected LA against other regions.
+#' It also calculates quartile banding based on the latest values for
+#' the selected indicator.
+#'
 StatN_StatsTableServer <- function(id,
                                    app_inputs,
                                    bds_metrics,
@@ -420,3 +614,5 @@ StatN_StatsTableServer <- function(id,
     })
   })
 }
+
+# nolint end
