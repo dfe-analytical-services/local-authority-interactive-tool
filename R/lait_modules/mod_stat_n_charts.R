@@ -390,48 +390,55 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     })
 
     # Observe if bar input becomes empty and clear both shared inputs if it does
-    observe({
-      if (is.null(input$chart_bar_input) || length(input$chart_bar_input) == 0) {
-        shared_values$chart_bar_input <- NULL
-        shared_values$chart_line_input <- NULL
-      }
-    })
-
-    # Observe if line input becomes empty and clear both shared inputs if it does
-    observe({
-      if (is.null(input$chart_line_input) || length(input$chart_line_input) == 0) {
-        shared_values$chart_bar_input <- NULL
-        shared_values$chart_line_input <- NULL
-      }
-    })
+    observeEvent(c(input$chart_bar_input, input$chart_line_input),
+      {
+        if (is.null(input$chart_bar_input) || is.null(input$chart_line_input)) {
+          shared_values$chart_bar_input <- NULL
+          shared_values$chart_line_input <- NULL
+        }
+      },
+      ignoreNULL = FALSE
+    )
 
     # Keep the line input synchronized with shared values
-    observe({
-      updateSelectizeInput(
-        session = session,
-        inputId = "chart_line_input",
-        selected = if (is.null(shared_values$chart_line_input)) character(0) else shared_values$chart_line_input
-      )
-    })
+    observeEvent(shared_values$chart_line_input,
+      {
+        updateSelectizeInput(
+          session = session,
+          inputId = "chart_line_input",
+          selected = if (is.null(shared_values$chart_line_input)) character(0) else shared_values$chart_line_input
+        )
+      },
+      ignoreNULL = FALSE
+    )
 
     # Keep the bar input synchronized with shared values
-    observe({
-      updateSelectizeInput(
-        session = session,
-        inputId = "chart_bar_input",
-        selected = if (is.null(shared_values$chart_bar_input)) character(0) else shared_values$chart_bar_input
-      )
-    })
+    observeEvent(shared_values$chart_bar_input,
+      {
+        updateSelectizeInput(
+          session = session,
+          inputId = "chart_bar_input",
+          selected = if (is.null(shared_values$chart_bar_input)) character(0) else shared_values$chart_bar_input
+        )
+      },
+      ignoreNULL = FALSE
+    )
 
     # Update shared values when the bar chart input changes
-    observeEvent(input$chart_bar_input, {
-      shared_values$chart_bar_input <- if (length(input$chart_bar_input) == 0) NULL else input$chart_bar_input
-    })
+    observeEvent(input$chart_bar_input,
+      {
+        shared_values$chart_bar_input <- if (is.null(input$chart_bar_input)) NULL else input$chart_bar_input
+      },
+      ignoreNULL = FALSE
+    )
 
     # Update shared values when the line chart input changes
-    observeEvent(input$chart_line_input, {
-      shared_values$chart_line_input <- if (length(input$chart_line_input) == 0) NULL else input$chart_line_input
-    })
+    observeEvent(input$chart_line_input,
+      {
+        shared_values$chart_line_input <- if (is.null(input$chart_line_input)) NULL else input$chart_line_input
+      },
+      ignoreNULL = FALSE
+    )
 
     # Synchronize the bar input with the line input whenever the bar input changes
     observeEvent(shared_values$chart_bar_input, {
