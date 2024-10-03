@@ -49,6 +49,7 @@ ui_mod <- bslib::page_fillable(
       id = "region_charts",
       StatN_FocusLineChartUI("stat_n_focus_line"),
       StatN_MultiLineChartUI("stat_n_multi_line"),
+      StatN_FocusBarChartUI("stat_n_focus_bar"),
       StatN_MultiBarChartUI("stat_n_multi_bar")
     )
   )
@@ -112,6 +113,14 @@ server_mod <- function(input, output, session) {
     bds_metrics,
     stat_n_la,
     shared_values
+  )
+
+  # Focus bar chart -----------------------------------------------------------
+  StatN_FocusBarChartServer(
+    "stat_n_focus_bar",
+    app_inputs,
+    bds_metrics,
+    stat_n_la
   )
 
   # Multi-choice bar chart ----------------------------------------------------

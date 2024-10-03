@@ -111,6 +111,117 @@ StatN_FocusLineChartServer <- function(id,
 
 
 
+StatN_FocusBarChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Bar chart - Focus",
+    bslib::card(
+      bslib::card_body(
+        ggiraph::girafeOutput(ns("output_chart"))
+      ),
+      full_screen = TRUE
+    )
+  )
+}
+
+
+StatN_FocusBarChartServer <- function(id,
+                                      app_inputs,
+                                      bds_metrics,
+                                      stat_n_la) {
+  moduleServer(id, function(input, output, session) {
+    # Filter for selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Get Statistical Neighbour long format
+    stat_n_long <- StatN_LongServer(
+      "stat_n_long",
+      app_inputs$la,
+      filtered_bds,
+      stat_n_la
+    )
+
+    # Get LA statistical neighbours
+    stat_n_sns <- Get_LAStatNsServer(
+      "stat_n_sns",
+      app_inputs$la,
+      stat_n_la
+    )
+
+    # Statistical Neighbour focus bar plot ------------------------------------
+    output$output_chart <- ggiraph::renderGirafe({
+      focus_bar_data <- stat_n_long() |>
+        dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
+        reorder_la_regions(app_inputs$la())
+
+      stat_n_focus_bar_chart <- focus_bar_data |>
+        ggplot2::ggplot() +
+        ggiraph::geom_col_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            fill = `LA and Regions`,
+            tooltip = glue::glue_data(
+              focus_bar_data |>
+                pretty_num_table(
+                  include_columns = "values_num",
+                  dp = get_indicator_dps(filtered_bds())
+                ),
+              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            ),
+            data_id = `LA and Regions`
+          ),
+          position = "dodge",
+          width = 0.6,
+          na.rm = TRUE,
+          colour = "black"
+        ) +
+        format_axes(focus_bar_data) +
+        set_plot_colours(focus_bar_data, "focus-fill", app_inputs$la()) +
+        set_plot_labs(filtered_bds()) +
+        custom_theme() +
+        guides(fill = "none")
+
+      # Plotting interactive graph
+      ggiraph::girafe(
+        ggobj = stat_n_focus_bar_chart,
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    })
+  })
+}
+
+
+
+
+StatN_MultiLineChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Line chart - user selection",
+    bslib::card(
+      id = "stat_n_multi_line",
+      bslib::card_body(
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            title = "Filter options",
+            position = "left",
+            StatN_Chart_InputUI(
+              ns("chart_line_input") # Line chart input only
+            )[[1]]
+          ),
+          ggiraph::girafeOutput(ns("output_chart"))
+        )
+      ),
+      full_screen = TRUE
+    )
+  )
+}
+
+
 StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
   moduleServer(id, function(input, output, session) {
     # Helper function to retain only the valid selections that are in the available choices
@@ -234,40 +345,6 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
   })
 }
 
-
-
-
-
-
-
-
-
-
-
-
-StatN_MultiLineChartUI <- function(id) {
-  ns <- NS(id)
-
-  bslib::nav_panel(
-    title = "Line chart - user selection",
-    bslib::card(
-      id = "stat_n_multi_line",
-      bslib::card_body(
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(
-            title = "Filter options",
-            position = "left",
-            StatN_Chart_InputUI(
-              ns("chart_line_input") # Line chart input only
-            )[[1]]
-          ),
-          ggiraph::girafeOutput(ns("output_chart"))
-        )
-      ),
-      full_screen = TRUE
-    )
-  )
-}
 
 
 
