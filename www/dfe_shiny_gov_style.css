@@ -443,10 +443,10 @@ html {
 }
 
 /* Making padding look nice on mobile (whitespace to right and left of main tab) */
-@media screen and (max-width: 575px) {
+@media screen and (max-width: 576px) {
   .col-sm-10 {
-  padding-right: 1.5rem;
-  padding-left: 2rem;
+    padding-right: 1.5rem;
+    padding-left: 2rem;
   }
 }
 

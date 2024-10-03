@@ -301,7 +301,8 @@ StatN_Chart_InputUI <- function(id) {
       multiple = TRUE,
       options = list(
         maxItems = 3,
-        plugins = list("remove_button")
+        plugins = list("remove_button"),
+        dropdownParent = "body"
       )
     ),
     shiny::selectizeInput(
@@ -311,7 +312,8 @@ StatN_Chart_InputUI <- function(id) {
       multiple = TRUE,
       options = list(
         maxItems = 3,
-        plugins = list("remove_button")
+        plugins = list("remove_button"),
+        dropdownParent = "body"
       )
     )
   )

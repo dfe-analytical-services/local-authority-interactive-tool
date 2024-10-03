@@ -88,7 +88,8 @@ ui_dev <- bslib::page_fillable(
                   multiple = TRUE,
                   options = list(
                     maxItems = 3,
-                    plugins = list("remove_button")
+                    plugins = list("remove_button"),
+                    dropdownParent = "body"
                   )
                 )
               ),
