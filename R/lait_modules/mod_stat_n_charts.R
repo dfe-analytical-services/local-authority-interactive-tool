@@ -1,3 +1,18 @@
+# nolint start: object_name
+#
+# Statistical Neighbour focus plots ===========================================
+#' UI for the Focus Line Chart of Statistical Neighbours
+#'
+#' This function creates the UI for the Focus Line Chart, which displays
+#' an interactive line chart comparing the selected Local Authority (LA)
+#' with its statistical neighbours over time.
+#'
+#' @param id A string representing the namespace for the module, used
+#'   to create a unique identifier for UI elements.
+#'
+#' @return A UI element consisting of a `bslib::nav_panel()` containing
+#'   a full-screen card with an interactive line chart output.
+#'
 StatN_FocusLineChartUI <- function(id) {
   ns <- NS(id)
 
@@ -13,7 +28,26 @@ StatN_FocusLineChartUI <- function(id) {
 }
 
 
-
+#' Server logic for the Focus Line Chart of Statistical Neighbours
+#'
+#' This function contains the server logic for generating and rendering
+#' the Focus Line Chart. It filters data based on user inputs,
+#' prepares the data for plotting, and renders an interactive line chart
+#' using `ggiraph`.
+#'
+#' @param id A string representing the namespace for the module, used
+#'   to create a unique identifier for server logic.
+#' @param app_inputs A reactive list of application inputs needed to
+#'   filter data for the line chart.
+#' @param bds_metrics A reactive data frame containing metrics for the
+#'   analysis.
+#' @param stat_n_la A reactive data frame containing Local Authority
+#'   statistical neighbours data.
+#'
+#' @return A `ggiraph::renderGirafe()` object that renders an
+#'   interactive line chart of the selected LA and its statistical
+#'   neighbours.
+#'
 StatN_FocusLineChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
@@ -110,7 +144,22 @@ StatN_FocusLineChartServer <- function(id,
 }
 
 
-
+#' UI for the Focus Bar Chart of Statistical Neighbours
+#'
+#' This function creates the user interface (UI) for the Focus Bar Chart,
+#' which displays an interactive bar chart comparing the selected Local
+#' Authority (LA) with its statistical neighbours across different years.
+#'
+#' The chart is displayed in a `bslib::nav_panel()` with a card layout,
+#' allowing for a full-screen view of the interactive chart output.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique UI elements that do not conflict
+#'   with other modules in the Shiny application.
+#'
+#' @return A UI element consisting of a `bslib::nav_panel()` containing
+#'   a full-screen card with an output for the interactive bar chart.
+#'
 StatN_FocusBarChartUI <- function(id) {
   ns <- NS(id)
 
@@ -126,6 +175,32 @@ StatN_FocusBarChartUI <- function(id) {
 }
 
 
+#' Server logic for the Focus Bar Chart of Statistical Neighbours
+#'
+#' This function contains the server logic for generating and rendering
+#' the Focus Bar Chart. It processes data based on user inputs, prepares
+#' the data for plotting, and renders an interactive bar chart using
+#' `ggiraph`.
+#'
+#' The bar chart compares the selected Local Authority with its statistical
+#' neighbours, displaying the values for each year in a clear and
+#' interactive format.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique server logic that does not conflict
+#'   with other modules in the Shiny application.
+#' @param app_inputs A reactive list of application inputs used to filter
+#'   data for the bar chart, including the selected Local Authority.
+#' @param bds_metrics A reactive data frame containing metrics needed for
+#'   analysis and visualization in the chart.
+#' @param stat_n_la A reactive data frame containing Local Authority
+#'   statistical neighbours data used for filtering and comparison.
+#'
+#' @return A `ggiraph::renderGirafe()` object that renders an
+#'   interactive bar chart of the selected Local Authority and its
+#'   statistical neighbours, allowing users to hover over bars for
+#'   additional information.
+#'
 StatN_FocusBarChartServer <- function(id,
                                       app_inputs,
                                       bds_metrics,
@@ -195,6 +270,26 @@ StatN_FocusBarChartServer <- function(id,
 }
 
 
+# Statistical Neighbour multi-choice plots ====================================
+#' UI for Chart Input Selection
+#'
+#' This function creates the user interface (UI) for selecting regions
+#' to compare in the line and bar charts. It provides two
+#' `selectizeInput` elements, each allowing the user to select up to
+#' three regions for comparison.
+#'
+#' The selected regions will be used to filter the data displayed in
+#' the respective charts, enabling users to focus on specific areas
+#' of interest.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique UI elements that do not conflict
+#'   with other modules in the Shiny application.
+#'
+#' @return A UI element containing a `tagList` of two `selectizeInput`
+#'   elements for chart input selection, one for the line chart and one
+#'   for the bar chart.
+#'
 StatN_Chart_InputUI <- function(id) {
   ns <- NS(id)
 
@@ -223,6 +318,34 @@ StatN_Chart_InputUI <- function(id) {
 }
 
 
+#' Server logic for Chart Input Selection
+#'
+#' This function contains the server logic for managing the selection
+#' of regions to compare in both the line and bar charts. It synchronizes
+#' the selected inputs and ensures that they remain valid and consistent
+#' across both inputs.
+#'
+#' The function allows for dynamic updates of the input choices based on
+#' the selected Local Authority (LA) and maintains shared values
+#' across different chart inputs, ensuring the user experience is smooth
+#' and intuitive.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique server logic that does not conflict
+#'   with other modules in the Shiny application.
+#' @param la_input A reactive expression containing the selected
+#'   Local Authority input. This input is used to filter available
+#'   choices for the charts.
+#' @param stat_n_long A reactive data frame containing statistical
+#'   neighbour data in long format, used for filtering choices.
+#' @param shared_values A reactive list for storing shared input values
+#'   between the line and bar chart selections, allowing for easy
+#'   synchronization of selections.
+#'
+#' @return A list containing reactive expressions for the selected line
+#'   and bar chart inputs. This allows other parts of the application to
+#'   access the current selections made by the user.
+#'
 StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
   moduleServer(id, function(input, output, session) {
     # Helper function to retain only the valid selections that are in the available choices
@@ -337,18 +460,33 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     })
 
     # Return the selected inputs as reactive values for use elsewhere in the app
-    return(
-      list(
-        line_input = reactive(shared_values$chart_line_input),
-        bar_input = reactive(shared_values$chart_bar_input)
-      )
+    list(
+      line_input = reactive(shared_values$chart_line_input),
+      bar_input = reactive(shared_values$chart_bar_input)
     )
   })
 }
 
 
-
-
+#' UI for Multi-Line Chart
+#'
+#' This function creates the user interface (UI) for displaying a
+#' multi-line chart based on user selections. It includes a sidebar
+#' for filtering options, allowing users to select regions for
+#' comparison in the line chart.
+#'
+#' The UI consists of a navigation panel containing a card with
+#' layout elements for filtering options and the chart output area.
+#' This module integrates the chart input UI and the interactive
+#' output for the multi-line chart.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique UI elements that do not
+#'   conflict with other modules in the Shiny application.
+#'
+#' @return A UI element representing the multi-line chart with
+#'   filtering options for user selection.
+#'
 StatN_MultiLineChartUI <- function(id) {
   ns <- NS(id)
 
@@ -374,7 +512,33 @@ StatN_MultiLineChartUI <- function(id) {
 }
 
 
-
+#' Server logic for Multi-Line Chart
+#'
+#' This function contains the server logic for generating a multi-line
+#' chart based on user-selected regions. It filters the data according
+#' to the selections made in the UI and renders the interactive line
+#' chart using `ggiraph`.
+#'
+#' The function integrates filtering based on the selected local
+#' authority (LA) and updates the chart output dynamically as the
+#' user makes selections. It ensures that the chart reflects the
+#' most current data based on the user's inputs.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique server logic that does not
+#'   conflict with other modules in the Shiny application.
+#' @param app_inputs A reactive list of application inputs, including
+#'   the selected LA, used for filtering the chart data.
+#' @param bds_metrics A reactive list of BDS metrics for filtering
+#'   purposes in the data.
+#' @param stat_n_la A reactive data frame containing statistical
+#'   neighbour data for the selected LA.
+#' @param shared_values A reactive list for storing shared input values
+#'   between different chart selections, facilitating synchronization.
+#'
+#' @return NULL This function does not return any values; it generates
+#'   the multi-line chart and updates the UI based on user selections.
+#'
 StatN_MultiLineChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
@@ -474,8 +638,25 @@ StatN_MultiLineChartServer <- function(id,
 }
 
 
-
-
+#' UI for Multi-Bar Chart
+#'
+#' This function creates the user interface (UI) for displaying a
+#' multi-bar chart based on user selections. It includes a sidebar
+#' for filtering options, allowing users to select regions for
+#' comparison in the bar chart.
+#'
+#' The UI consists of a navigation panel containing a card with
+#' layout elements for filtering options and the chart output area.
+#' This module integrates the chart input UI and the interactive
+#' output for the multi-bar chart.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique UI elements that do not
+#'   conflict with other modules in the Shiny application.
+#'
+#' @return A UI element representing the multi-bar chart with
+#'   filtering options for user selection.
+#'
 StatN_MultiBarChartUI <- function(id) {
   ns <- NS(id)
 
@@ -501,8 +682,33 @@ StatN_MultiBarChartUI <- function(id) {
 }
 
 
-
-
+#' Server logic for Multi-Bar Chart
+#'
+#' This function contains the server logic for generating a multi-bar
+#' chart based on user-selected regions. It filters the data according
+#' to the selections made in the UI and renders the interactive bar
+#' chart using `ggiraph`.
+#'
+#' The function integrates filtering based on the selected local
+#' authority (LA) and updates the chart output dynamically as the
+#' user makes selections. It ensures that the chart reflects the
+#' most current data based on the user's inputs.
+#'
+#' @param id A string representing the namespace for the module. This
+#'   identifier is used to create unique server logic that does not
+#'   conflict with other modules in the Shiny application.
+#' @param app_inputs A reactive list of application inputs, including
+#'   the selected LA, used for filtering the chart data.
+#' @param bds_metrics A reactive list of BDS metrics for filtering
+#'   purposes in the data.
+#' @param stat_n_la A reactive data frame containing statistical
+#'   neighbour data for the selected LA.
+#' @param shared_values A reactive list for storing shared input values
+#'   between different chart selections, facilitating synchronization.
+#'
+#' @return NULL This function does not return any values; it generates
+#'   the multi-bar chart and updates the UI based on user selections.
+#'
 StatN_MultiBarChartServer <- function(id,
                                       app_inputs,
                                       bds_metrics,
@@ -581,3 +787,5 @@ StatN_MultiBarChartServer <- function(id,
     })
   })
 }
+
+# nolint end
