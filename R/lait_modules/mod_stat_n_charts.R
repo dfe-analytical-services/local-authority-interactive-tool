@@ -396,6 +396,8 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
           shared_values$chart_bar_input <- NULL
           shared_values$chart_line_input <- NULL
         }
+
+        print("A - Bar & Line")
       },
       ignoreNULL = FALSE
     )
@@ -408,6 +410,7 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
           inputId = "chart_line_input",
           selected = if (is.null(shared_values$chart_line_input)) character(0) else shared_values$chart_line_input
         )
+        print("B - Line")
       },
       ignoreNULL = FALSE
     )
@@ -420,6 +423,7 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
           inputId = "chart_bar_input",
           selected = if (is.null(shared_values$chart_bar_input)) character(0) else shared_values$chart_bar_input
         )
+        print("B - Bar")
       },
       ignoreNULL = FALSE
     )
@@ -427,7 +431,8 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     # Update shared values when the bar chart input changes
     observeEvent(input$chart_bar_input,
       {
-        shared_values$chart_bar_input <- if (is.null(input$chart_bar_input)) NULL else input$chart_bar_input
+        shared_values$chart_bar_input <- input$chart_bar_input
+        print("C - Bar")
       },
       ignoreNULL = FALSE
     )
@@ -435,7 +440,8 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     # Update shared values when the line chart input changes
     observeEvent(input$chart_line_input,
       {
-        shared_values$chart_line_input <- if (is.null(input$chart_line_input)) NULL else input$chart_line_input
+        shared_values$chart_line_input <- input$chart_line_input
+        print("C - Line")
       },
       ignoreNULL = FALSE
     )
@@ -443,29 +449,30 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     # Synchronize the bar input with the line input whenever the bar input changes
     observeEvent(shared_values$chart_bar_input, {
       isolate({
-        shared_values$chart_line_input <- shared_values$chart_bar_input
-
         # Update the line input to reflect the changes in the bar input
         updateSelectizeInput(
           session = session,
           inputId = "chart_line_input",
           selected = if (is.null(shared_values$chart_bar_input)) character(0) else shared_values$chart_bar_input
         )
+        shared_values$chart_line_input <- shared_values$chart_bar_input
       })
+      print("E - Line")
     })
 
     # Synchronize the line input with the bar input whenever the line input changes
     observeEvent(shared_values$chart_line_input, {
       isolate({
-        shared_values$chart_bar_input <- shared_values$chart_line_input
-
         # Update the bar input to reflect the changes in the line input
         updateSelectizeInput(
           session = session,
           inputId = "chart_bar_input",
           selected = if (is.null(shared_values$chart_line_input)) character(0) else shared_values$chart_line_input
         )
+
+        shared_values$chart_bar_input <- shared_values$chart_line_input
       })
+      print("E - Bar")
     })
 
     # Return the selected inputs as reactive values for use elsewhere in the app
