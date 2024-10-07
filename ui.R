@@ -195,7 +195,7 @@ ui <- function(input, output, session) {
           class = "well",
           style = "overflow-y: visible;",
           bslib::navset_card_underline(
-            id = "region_charts",
+            id = "stat_n_charts",
             StatN_FocusLineChartUI("stat_n_focus_line"),
             StatN_MultiLineChartUI("stat_n_multi_line"),
             StatN_FocusBarChartUI("stat_n_focus_bar"),
