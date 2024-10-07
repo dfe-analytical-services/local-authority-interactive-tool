@@ -248,10 +248,8 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 StatN_LASNsTableUI <- function(id) {
   ns <- NS(id)
 
-  bslib::card_body(
-    div(
-      reactable::reactableOutput(ns("output_table"))
-    )
+  div(
+    reactable::reactableOutput(ns("output_table"))
   )
 }
 
@@ -348,12 +346,10 @@ StatN_LASNsTableServer <- function(id,
 StatN_GeogCompTableUI <- function(id) {
   ns <- NS(id)
 
-  bslib::card_body(
-    div(
-      # Add black border between the tables
-      style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-      reactable::reactableOutput(ns("output_table"))
-    )
+  div(
+    # Add black border between the tables
+    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+    reactable::reactableOutput(ns("output_table"))
   )
 }
 
@@ -451,6 +447,8 @@ StatN_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
+    class = "well",
+    style = "overflow-y: visible;",
     bslib::card(
       # bslib::card_header(""),
       bslib::card_body(
