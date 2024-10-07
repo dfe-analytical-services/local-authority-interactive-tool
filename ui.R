@@ -122,6 +122,7 @@ ui <- function(input, output, session) {
         LA_LevelMetaUI("la_meta")
       ),
       bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
         title = "Regional Level",
         value = "Regional Level",
 
@@ -141,12 +142,12 @@ ui <- function(input, output, session) {
               # Region LA Table -----------------------------------------------
               RegionLA_TableUI("region_la_table"),
               # Region Table --------------------------------------------------
-              Region_TableUI("region_table"),
-              # Region Stats Table --------------------------------------------
-              Region_StatsTableUI("stats_table")
+              Region_TableUI("region_table")
             )
           )
         ),
+        # Region Stats Table --------------------------------------------
+        Region_StatsTableUI("stats_table"),
 
         # Region charts =======================================================
         div(
@@ -163,6 +164,7 @@ ui <- function(input, output, session) {
         LA_LevelMetaUI("region_meta")
       ),
       bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
         title = "Statsitical Neighbour Level",
         value = "Statsitical Neighbour Level",
 
@@ -178,17 +180,16 @@ ui <- function(input, output, session) {
           style = "overflow-y: visible;",
           bslib::card(
             bslib::card_header("Statistical Neighbours"),
-            # Statistical Neighbour LA SNs Table ------------------------------
-            StatN_LASNsTableUI("stat_n_sns_table"),
-            # Statistical Neighbour LA Geog Compare Table ---------------------
-            StatN_GeogCompTableUI("stat_n_comp_table")
+            bslib::card_body(
+              # Statistical Neighbour LA SNs Table ------------------------------
+              StatN_LASNsTableUI("stat_n_sns_table"),
+              # Statistical Neighbour LA Geog Compare Table ---------------------
+              StatN_GeogCompTableUI("stat_n_comp_table")
+            )
           )
         ),
-        div(
-          class = "well",
-          # Statistical Neighbour Statistics Table ----------------------------
-          StatN_StatsTableUI("stat_n_stats_table")
-        ),
+        # Statistical Neighbour Statistics Table ----------------------------
+        StatN_StatsTableUI("stat_n_stats_table"),
 
         # Statistical Neighbour charts ========================================
         div(

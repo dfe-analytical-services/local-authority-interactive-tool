@@ -212,15 +212,7 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 RegionLA_TableUI <- function(id) {
   ns <- NS(id)
 
-  div(
-    style = "overflow-y: visible;",
-    bslib::card(
-      # bslib::card_header(""),
-      bslib::card_body(
-        reactable::reactableOutput(ns("region_la_table"))
-      )
-    )
-  )
+  reactable::reactableOutput(ns("region_la_table"))
 }
 
 
@@ -402,12 +394,7 @@ Region_TableUI <- function(id) {
   div(
     # Add black border between the tables
     style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    bslib::card(
-      # bslib::card_header(""),
-      bslib::card_body(
-        reactable::reactableOutput(ns("region_table"))
-      )
-    )
+    reactable::reactableOutput(ns("region_table"))
   )
 }
 
@@ -523,10 +510,9 @@ Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    # Add black border between the tables
-    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+    class = "well",
+    style = "overflow-y: visible;",
     bslib::card(
-      # bslib::card_header(""),
       bslib::card_body(
         reactable::reactableOutput(ns("region_stats_table"))
       )
