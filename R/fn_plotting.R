@@ -307,7 +307,8 @@ format_axes <- function(data_long) {
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
-      labels = year_labels
+      labels = year_labels,
+      guide = guide_axis(check.overlap = TRUE)
     )
   )
 }

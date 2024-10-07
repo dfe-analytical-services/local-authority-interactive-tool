@@ -586,7 +586,7 @@ server_dev <- function(input, output, session) {
     # Plotting interactive graph
     ggiraph::girafe(
       ggobj = (region_multi_line_chart + vertical_hover),
-      width_svg = 8,
+      width_svg = 8.5,
       options = generic_ggiraph_options(
         opts_hover(
           css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -634,7 +634,7 @@ server_dev <- function(input, output, session) {
     # Plotting interactive graph
     ggiraph::girafe(
       ggobj = focus_bar_chart,
-      width_svg = 8,
+      width_svg = 8.5,
       options = generic_ggiraph_options(),
       fonts = list(sans = "Arial")
     )
@@ -685,7 +685,7 @@ server_dev <- function(input, output, session) {
     # Plotting interactive graph
     ggiraph::girafe(
       ggobj = multi_bar_chart,
-      width_svg = 8,
+      width_svg = 8.5,
       options = generic_ggiraph_options(),
       fonts = list(sans = "Arial")
     )

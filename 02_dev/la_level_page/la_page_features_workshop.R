@@ -12,7 +12,7 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
+selected_indicator <- "Under 18 Hospital Admissions (Alcohol related)"
 selected_la <- "Bedford Borough"
 
 # Filter stat neighbour for selected LA
@@ -299,7 +299,7 @@ vertical_hover <- lapply(
 # Plotting interactive graph
 ggiraph::girafe(
   ggobj = (la_line_chart + vertical_hover),
-  width_svg = 8,
+  width_svg = 8.5,
   options = generic_ggiraph_options(
     opts_hover(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -338,7 +338,7 @@ la_bar_chart <- la_long |>
 # Plotting interactive graph
 ggiraph::girafe(
   ggobj = la_bar_chart,
-  width_svg = 8,
+  width_svg = 8.5,
   options = generic_ggiraph_options(),
   fonts = list(sans = "Arial")
 )

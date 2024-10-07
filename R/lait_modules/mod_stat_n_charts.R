@@ -85,7 +85,7 @@ StatN_FocusLineChartServer <- function(id,
       if (all(is.na(focus_line_data$values_num))) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(),
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(),
           fonts = list(sans = "Arial")
         )
@@ -244,7 +244,7 @@ StatN_FocusBarChartServer <- function(id,
       if (all(is.na(focus_bar_data$values_num))) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(),
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(),
           fonts = list(sans = "Arial")
         )
@@ -280,7 +280,7 @@ StatN_FocusBarChartServer <- function(id,
         # Plotting interactive graph
         ggiraph::girafe(
           ggobj = stat_n_focus_bar_chart,
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(),
           fonts = list(sans = "Arial")
         )
@@ -607,7 +607,7 @@ StatN_MultiLineChartServer <- function(id,
       if (all(is.na(stat_n_line_chart_data$values_num))) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(),
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(),
           fonts = list(sans = "Arial")
         )
@@ -655,7 +655,7 @@ StatN_MultiLineChartServer <- function(id,
         # Plotting interactive graph
         ggiraph::girafe(
           ggobj = (multi_line_chart + vertical_hover),
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(
             opts_hover(
               css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -785,7 +785,7 @@ StatN_MultiBarChartServer <- function(id,
       if (all(is.na(stat_n_bar_multi_data$values_num))) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(),
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(),
           fonts = list(sans = "Arial")
         )
@@ -820,7 +820,7 @@ StatN_MultiBarChartServer <- function(id,
         # Plotting interactive graph
         ggiraph::girafe(
           ggobj = stat_n_multi_bar_chart,
-          width_svg = 8,
+          width_svg = 8.5,
           options = generic_ggiraph_options(),
           fonts = list(sans = "Arial")
         )
