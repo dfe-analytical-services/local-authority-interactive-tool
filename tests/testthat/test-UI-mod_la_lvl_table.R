@@ -167,7 +167,7 @@ test_that("Check LA charts behave as expected", {
 
   # Change to different topic
   app$set_inputs(
-    `la_level-topic_name` = "Key Stage 1",
+    `la_inputs-topic_name` = "Key Stage 1",
     la_charts = "Bar chart"
   )
 
@@ -177,11 +177,11 @@ test_that("Check LA charts behave as expected", {
   la_barchart_str <- la_barchart_list$x$html
 
   # Extract all text content from <text> tags
-  cleaned_plot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", la_barchart_str)
+  cleaned_barplot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", la_barchart_str)
 
   # Remove any extra whitespace
-  cleaned_plot_str <- gsub("\n", " ", cleaned_plot_str)
-  cleaned_plot_str <- gsub("\\s+", " ", cleaned_plot_str)
+  cleaned_barplot_str <- gsub("\n", " ", cleaned_barplot_str)
+  cleaned_barplot_str <- gsub("\\s+", " ", cleaned_barplot_str)
 
   # Check is a bar chart
   testthat::expect_true(
@@ -203,7 +203,7 @@ test_that("Check LA charts behave as expected", {
   testthat::expect_true(
     grepl(
       "Pupils achieving Key Stage 1 Reading Expected Standard (%)",
-      cleaned_plot_str,
+      cleaned_barplot_str,
       fixed = TRUE
     )
   )
