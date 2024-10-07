@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Statistical Neighbour Level page ---------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Foundation Stage"
-selected_indicator <- "Foundation Stage - % achieving a good level of development"
+selected_topic <- "Health and Wellbeing"
+selected_indicator <- "Infant Mortality"
 selected_la <- "Cumberland"
 
 # Filter BDS for topic and indicator

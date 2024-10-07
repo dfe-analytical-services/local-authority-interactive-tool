@@ -484,63 +484,72 @@ server_dev <- function(input, output, session) {
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
       reorder_la_regions(input$la_input, after = Inf)
 
-    focus_line_chart <- focus_line_data |>
-      ggplot2::ggplot() +
-      ggiraph::geom_line_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          size = `LA and Regions`,
-          data_id = `LA and Regions`,
+    if (all(is.na(focus_line_data$values_num))) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(),
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    } else {
+      focus_line_chart <- focus_line_data |>
+        ggplot2::ggplot() +
+        ggiraph::geom_line_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            color = `LA and Regions`,
+            size = `LA and Regions`,
+            data_id = `LA and Regions`,
+          ),
+          na.rm = TRUE
+        ) +
+        format_axes(focus_line_data) +
+        set_plot_colours(focus_line_data, colour_type = "focus", focus_group = input$la_input) +
+        set_plot_labs(filtered_bds$data) +
+        ggrepel::geom_label_repel(
+          data = subset(focus_line_data, Years == current_year()),
+          aes(
+            x = Years_num,
+            y = values_num,
+            label = `LA and Regions`
+          ),
+          color = "black",
+          segment.colour = NA,
+          label.size = NA,
+          max.overlaps = Inf,
+          nudge_x = 2,
+          direction = "y",
+          hjust = 1,
+          show.legend = FALSE,
+          na.rm = TRUE
+        ) +
+        custom_theme() +
+        coord_cartesian(clip = "off") +
+        theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+        guides(color = "none", size = "none")
+
+
+      # Creating vertical geoms to make vertical hover tooltip
+      vertical_hover <- lapply(
+        get_years(focus_line_data),
+        tooltip_vlines,
+        focus_line_data,
+        indicator_dps()
+      )
+
+      # Plotting interactive graph
+      ggiraph::girafe(
+        ggobj = (focus_line_chart + vertical_hover),
+        width_svg = 12,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
         ),
-        na.rm = TRUE
-      ) +
-      format_axes(focus_line_data) +
-      set_plot_colours(focus_line_data, colour_type = "focus", focus_group = input$la_input) +
-      set_plot_labs(filtered_bds$data) +
-      ggrepel::geom_label_repel(
-        data = subset(focus_line_data, Years == current_year()),
-        aes(
-          x = Years_num,
-          y = values_num,
-          label = `LA and Regions`
-        ),
-        color = "black",
-        segment.colour = NA,
-        label.size = NA,
-        max.overlaps = Inf,
-        nudge_x = 2,
-        direction = "y",
-        hjust = 1,
-        show.legend = FALSE,
-        na.rm = TRUE
-      ) +
-      custom_theme() +
-      coord_cartesian(clip = "off") +
-      theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
-      guides(color = "none", size = "none")
-
-
-    # Creating vertical geoms to make vertical hover tooltip
-    vertical_hover <- lapply(
-      get_years(focus_line_data),
-      tooltip_vlines,
-      focus_line_data,
-      indicator_dps()
-    )
-
-    # Plotting interactive graph
-    ggiraph::girafe(
-      ggobj = (focus_line_chart + vertical_hover),
-      width_svg = 12,
-      options = generic_ggiraph_options(
-        opts_hover(
-          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
-        )
-      ),
-      fonts = list(sans = "Arial")
-    )
+        fonts = list(sans = "Arial")
+      )
+    }
   })
 
 
@@ -562,57 +571,66 @@ server_dev <- function(input, output, session) {
         after = Inf
       )
 
-    # Plot - selected areas
-    multi_line_chart <- stat_n_line_chart_data |>
-      ggplot2::ggplot() +
-      ggiraph::geom_point_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          data_id = `LA and Regions`
+    if (all(is.na(stat_n_line_chart_data$values_num))) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(),
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    } else {
+      # Plot - selected areas
+      multi_line_chart <- stat_n_line_chart_data |>
+        ggplot2::ggplot() +
+        ggiraph::geom_point_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            color = `LA and Regions`,
+            data_id = `LA and Regions`
+          ),
+          na.rm = TRUE
+        ) +
+        ggiraph::geom_line_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            color = `LA and Regions`,
+            data_id = `LA and Regions`
+          ),
+          na.rm = TRUE
+        ) +
+        format_axes(stat_n_line_chart_data) +
+        manual_colour_mapping(
+          c(input$la_input, input$chart_line_input),
+          type = "line"
+        ) +
+        set_plot_labs(filtered_bds$data) +
+        custom_theme() +
+        # Revert order of the legend so goes from right to left
+        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+
+
+      # Creating vertical geoms to make vertical hover tooltip
+      vertical_hover <- lapply(
+        get_years(stat_n_line_chart_data),
+        tooltip_vlines,
+        stat_n_line_chart_data,
+        indicator_dps()
+      )
+
+      # Plotting interactive graph
+      ggiraph::girafe(
+        ggobj = (multi_line_chart + vertical_hover),
+        width_svg = 8,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
         ),
-        na.rm = TRUE
-      ) +
-      ggiraph::geom_line_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          data_id = `LA and Regions`
-        ),
-        na.rm = TRUE
-      ) +
-      format_axes(stat_n_line_chart_data) +
-      manual_colour_mapping(
-        c(input$la_input, input$chart_line_input),
-        type = "line"
-      ) +
-      set_plot_labs(filtered_bds$data) +
-      custom_theme() +
-      # Revert order of the legend so goes from right to left
-      ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
-
-
-    # Creating vertical geoms to make vertical hover tooltip
-    vertical_hover <- lapply(
-      get_years(stat_n_line_chart_data),
-      tooltip_vlines,
-      stat_n_line_chart_data,
-      indicator_dps()
-    )
-
-    # Plotting interactive graph
-    ggiraph::girafe(
-      ggobj = (multi_line_chart + vertical_hover),
-      width_svg = 8,
-      options = generic_ggiraph_options(
-        opts_hover(
-          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
-        )
-      ),
-      fonts = list(sans = "Arial")
-    )
+        fonts = list(sans = "Arial")
+      )
+    }
   })
 
 
@@ -622,38 +640,47 @@ server_dev <- function(input, output, session) {
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
       reorder_la_regions(input$la_input)
 
-    stat_n_focus_bar_chart <- focus_bar_data |>
-      ggplot2::ggplot() +
-      ggiraph::geom_col_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            focus_bar_data |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+    if (all(is.na(focus_bar_data$values_num))) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(),
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    } else {
+      stat_n_focus_bar_chart <- focus_bar_data |>
+        ggplot2::ggplot() +
+        ggiraph::geom_col_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            fill = `LA and Regions`,
+            tooltip = glue::glue_data(
+              focus_bar_data |>
+                pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
+              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            ),
+            data_id = `LA and Regions`
           ),
-          data_id = `LA and Regions`
-        ),
-        position = "dodge",
-        width = 0.6,
-        na.rm = TRUE,
-        colour = "black"
-      ) +
-      format_axes(focus_bar_data) +
-      set_plot_colours(focus_bar_data, "focus-fill", input$la_input) +
-      set_plot_labs(filtered_bds$data) +
-      custom_theme() +
-      guides(fill = "none")
+          position = "dodge",
+          width = 0.6,
+          na.rm = TRUE,
+          colour = "black"
+        ) +
+        format_axes(focus_bar_data) +
+        set_plot_colours(focus_bar_data, "focus-fill", input$la_input) +
+        set_plot_labs(filtered_bds$data) +
+        custom_theme() +
+        guides(fill = "none")
 
-    # Plotting interactive graph
-    ggiraph::girafe(
-      ggobj = stat_n_focus_bar_chart,
-      width_svg = 8,
-      options = generic_ggiraph_options(),
-      fonts = list(sans = "Arial")
-    )
+      # Plotting interactive graph
+      ggiraph::girafe(
+        ggobj = stat_n_focus_bar_chart,
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    }
   })
 
 
@@ -673,40 +700,49 @@ server_dev <- function(input, output, session) {
         intersect(c(input$la_input, input$chart_bar_input), valid_regions)
       )
 
-    stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
-      ggplot2::ggplot() +
-      ggiraph::geom_col_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            stat_n_bar_multi_data |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+    if (all(is.na(stat_n_bar_multi_data$values_num))) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(),
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    } else {
+      stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
+        ggplot2::ggplot() +
+        ggiraph::geom_col_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            fill = `LA and Regions`,
+            tooltip = glue::glue_data(
+              stat_n_bar_multi_data |>
+                pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
+              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            ),
+            data_id = `LA and Regions`
           ),
-          data_id = `LA and Regions`
-        ),
-        position = "dodge",
-        width = 0.6,
-        na.rm = TRUE,
-        colour = "black"
-      ) +
-      format_axes(stat_n_bar_multi_data) +
-      manual_colour_mapping(
-        c(input$la_input, input$chart_bar_input),
-        type = "bar"
-      ) +
-      set_plot_labs(filtered_bds$data) +
-      custom_theme()
+          position = "dodge",
+          width = 0.6,
+          na.rm = TRUE,
+          colour = "black"
+        ) +
+        format_axes(stat_n_bar_multi_data) +
+        manual_colour_mapping(
+          c(input$la_input, input$chart_bar_input),
+          type = "bar"
+        ) +
+        set_plot_labs(filtered_bds$data) +
+        custom_theme()
 
-    # Plotting interactive graph
-    ggiraph::girafe(
-      ggobj = stat_n_multi_bar_chart,
-      width_svg = 8,
-      options = generic_ggiraph_options(),
-      fonts = list(sans = "Arial")
-    )
+      # Plotting interactive graph
+      ggiraph::girafe(
+        ggobj = stat_n_multi_bar_chart,
+        width_svg = 8,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    }
   })
 }
 
