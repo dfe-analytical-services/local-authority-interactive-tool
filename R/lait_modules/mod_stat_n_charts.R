@@ -359,7 +359,8 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     valid_selections <- reactive({
       stat_n_long() |>
         dplyr::filter(`LA and Regions` != la_input()) |> # Exclude the selected LA from choices
-        pull_uniques("LA and Regions") # Get the unique values of LA and Regions
+        pull_uniques("LA and Regions") |> # Get the unique values of LA and Regions
+        as.character()
     })
 
     # Observe when the main LA input changes to update both chart inputs (line and bar)
@@ -395,11 +396,6 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
         if (!setequal(input$chart_line_input, shared_values$chart_line_input)) {
           # Update line chart shared val with user input
           shared_values$chart_line_input <- input$chart_line_input
-
-          # Also update bar chart with line chart input (sync)
-          shared_values$chart_bar_input <- input$chart_line_input
-
-          # print(paste0("Line update: ", input$chart_line_input))
         }
       },
       ignoreNULL = FALSE,
@@ -407,22 +403,23 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     )
 
     # Keep the bar selected synchronized with shared values
-    observeEvent(shared_values$chart_bar_input,
+    observeEvent(shared_values$chart_line_input,
       {
-        isolate({
-          if (!setequal(input$chart_bar_input, shared_values$chart_bar_input)) {
-            updateSelectizeInput(
-              session = session,
-              inputId = "chart_bar_input",
-              selected = if (is.null(shared_values$chart_bar_input)) {
-                character(0)
-              } else {
-                shared_values$chart_bar_input
-              }
-            )
-            # print(paste0("Bar change: ", shared_values$chart_bar_input))
-          }
-        })
+        later::later(function() {
+          isolate({
+            if (!setequal(input$chart_bar_input, shared_values$chart_line_input)) {
+              updateSelectizeInput(
+                session = session,
+                inputId = "chart_bar_input",
+                selected = if (is.null(shared_values$chart_line_input)) {
+                  character(0)
+                } else {
+                  shared_values$chart_line_input
+                }
+              )
+            }
+          })
+        }, delay = 0.5)
       },
       ignoreNULL = FALSE,
       ignoreInit = TRUE
@@ -434,11 +431,6 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
         if (!setequal(input$chart_bar_input, shared_values$chart_bar_input)) {
           # Update bar chart shared val with user input
           shared_values$chart_bar_input <- input$chart_bar_input
-
-          # Also update line chart with bar chart input (sync)
-          shared_values$chart_line_input <- input$chart_bar_input
-
-          # print(paste0("Bar update: ", input$chart_bar_input))
         }
       },
       ignoreNULL = FALSE,
@@ -446,22 +438,23 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     )
 
     # Keep the line selected synchronized with shared values
-    observeEvent(shared_values$chart_line_input,
+    observeEvent(shared_values$chart_bar_input,
       {
-        isolate({
-          if (!setequal(input$chart_line_input, shared_values$chart_line_input)) {
-            updateSelectizeInput(
-              session = session,
-              inputId = "chart_line_input",
-              selected = if (is.null(shared_values$chart_line_input)) {
-                character(0)
-              } else {
-                shared_values$chart_line_input
-              }
-            )
-            # print(paste0("Line change: ", shared_values$chart_line_input))
-          }
-        })
+        later::later(function() {
+          isolate({
+            if (!setequal(input$chart_line_input, shared_values$chart_bar_input)) {
+              updateSelectizeInput(
+                session = session,
+                inputId = "chart_line_input",
+                selected = if (is.null(shared_values$chart_bar_input)) {
+                  character(0)
+                } else {
+                  shared_values$chart_bar_input
+                }
+              )
+            }
+          })
+        }, delay = 0.5)
       },
       ignoreNULL = FALSE,
       ignoreInit = TRUE

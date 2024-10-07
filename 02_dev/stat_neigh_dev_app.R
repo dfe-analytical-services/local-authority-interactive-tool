@@ -13,6 +13,7 @@ ui_dev <- bslib::page_fillable(
 
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+  shinyjs::useShinyjs(),
 
   # Tab header ==============================================================
   h1("Regional Level"),
@@ -203,7 +204,6 @@ server_dev <- function(input, output, session) {
 
   # Long format Statistical Neighbour data
   stat_n_long <- reactive({
-    print(stat_n_sns())
     # Calculate SN average
     stat_n_sn_avg <- filtered_bds$data |>
       dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
@@ -248,8 +248,6 @@ server_dev <- function(input, output, session) {
 
   # Build main Statistical Neighbour formatted table (used to create the others)
   stat_n_table <- shiny::reactive({
-    print(stat_n_long())
-
     # Join difference and pivot wider
     stat_n_long() |>
       dplyr::bind_rows(stat_n_diff()) |>
@@ -268,8 +266,6 @@ server_dev <- function(input, output, session) {
     stat_n_sns_table <- stat_n_table() |>
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`)
-
-    print(stat_n_sns_table)
 
     dfe_reactable(
       stat_n_sns_table,
@@ -446,23 +442,35 @@ server_dev <- function(input, output, session) {
 
   # Keep line and bar inputs synchronized without resetting selections
   observeEvent(input$chart_line_input, {
-    if (!identical(input$chart_bar_input, input$chart_line_input)) {
-      updateSelectInput(
-        session = session,
-        inputId = "chart_bar_input",
-        selected = input$chart_line_input
-      )
-    }
+    # Capture the current reactive values
+    chart_line_input_val <- input$chart_line_input
+    chart_bar_input_val <- input$chart_bar_input
+
+    later::later(function() {
+      if (!setequal(chart_bar_input_val, chart_line_input_val)) {
+        updateSelectInput(
+          session = session,
+          inputId = "chart_bar_input",
+          selected = chart_line_input_val
+        )
+      }
+    }, delay = 1)
   })
 
   observeEvent(input$chart_bar_input, {
-    if (!identical(input$chart_line_input, input$chart_bar_input)) {
-      updateSelectInput(
-        session = session,
-        inputId = "chart_line_input",
-        selected = input$chart_bar_input
-      )
-    }
+    # Capture the current reactive values
+    chart_line_input_val <- input$chart_line_input
+    chart_bar_input_val <- input$chart_bar_input
+
+    later::later(function() {
+      if (!setequal(chart_line_input_val, chart_bar_input_val)) {
+        updateSelectInput(
+          session = session,
+          inputId = "chart_line_input",
+          selected = chart_bar_input_val
+        )
+      }
+    }, delay = 1)
   })
 
 
