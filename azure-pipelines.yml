@@ -1,0 +1,29 @@
+name: lait
+
+pool:
+  name: RSConnect
+
+trigger:
+  branches:
+    include:
+    - main
+    - azure-deploy
+  paths:
+    exclude:
+    - azure-pipelines.yml
+
+resources:
+  repositories:
+    - repository: posit-deploy
+      type: git
+      name: ESFA-Data-Science/posit-deploy
+
+extends:
+  template: deploy.yml@posit-deploy
+  parameters:
+    appName: lait
+    environments:
+    - name: Pre-Production
+      appId: 953
+    approvers: |
+      jake.tufts@education.gov.uk
