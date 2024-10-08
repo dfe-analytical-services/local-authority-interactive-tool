@@ -401,6 +401,7 @@ server_dev <- function(input, output, session) {
 
   # Statistical Neighbour charts ----------------------------------------------
 
+  # Shared inputs -------------------------------------------------------------
   # Restrict the user input choices to only eligble Regions
   # Helper function to filter and retain valid selections
   retain_valid_selections <- function(current_choices, previous_selections) {
@@ -440,41 +441,77 @@ server_dev <- function(input, output, session) {
     )
   })
 
+  # Stores the shared inputs between line and bar charts
+  shared_chart_inputs <- shiny::reactiveValues(
+    line_chart = NULL,
+    bar_chart = NULL
+  )
+
   # Keep line and bar inputs synchronized without resetting selections
-  observeEvent(input$chart_line_input, {
-    # Capture the current reactive values
-    chart_line_input_val <- input$chart_line_input
-    chart_bar_input_val <- input$chart_bar_input
+  observeEvent(input$chart_line_input,
+    {
+      # Capture the current reactive values
+      shared_chart_inputs$line_chart <- input$chart_line_input
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
+  )
 
-    later::later(function() {
-      if (!setequal(chart_bar_input_val, chart_line_input_val)) {
-        updateSelectInput(
-          session = session,
-          inputId = "chart_bar_input",
-          selected = chart_line_input_val
-        )
-      }
-    }, delay = 1)
-  })
+  # Update the bar chart with new line chart value
+  observeEvent(shared_chart_inputs$line_chart,
+    {
+      later::later(function() {
+        isolate({
+          if (!setequal(shared_chart_inputs$line_chart, input$chart_bar_input)) {
+            updateSelectInput(
+              session = session,
+              inputId = "chart_bar_input",
+              selected = if (is.null(shared_chart_inputs$line_chart)) {
+                character(0)
+              } else {
+                shared_chart_inputs$line_chart
+              }
+            )
+          }
+        })
+      }, delay = 0.1)
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
+  )
 
-  observeEvent(input$chart_bar_input, {
-    # Capture the current reactive values
-    chart_line_input_val <- input$chart_line_input
-    chart_bar_input_val <- input$chart_bar_input
+  # Update shared bar input
+  observeEvent(input$chart_bar_input,
+    {
+      # Capture the current reactive values
+      shared_chart_inputs$chart_bar_input <- input$chart_bar_input
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
+  )
 
-    later::later(function() {
-      if (!setequal(chart_line_input_val, chart_bar_input_val)) {
-        updateSelectInput(
-          session = session,
-          inputId = "chart_line_input",
-          selected = chart_bar_input_val
-        )
-      }
-    }, delay = 1)
-  })
-
-
-
+  # Update line chart with bar chart input
+  observeEvent(shared_chart_inputs$bar_chart,
+    {
+      later::later(function() {
+        isolate({
+          if (!setequal(shared_chart_inputs$chart_bar_input, input$chart_line_input)) {
+            updateSelectInput(
+              session = session,
+              inputId = "chart_line_input",
+              selected = if (is.null(shared_chart_inputs$chart_bar_input)) {
+                character(0)
+              } else {
+                shared_chart_inputs$chart_bar_input
+              }
+            )
+          }
+        })
+      }, delay = 0.1)
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
+  )
 
 
   # Statistical Neighbour Level SN focus plot -----------------------------------

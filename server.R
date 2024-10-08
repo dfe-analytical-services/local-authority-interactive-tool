@@ -93,7 +93,9 @@ server <- function(input, output, session) {
   shared_values <- reactiveValues(
     la = NULL,
     topic = NULL,
-    indicator = NULL
+    indicator = NULL,
+    chart_line_input = NULL,
+    chart_bar_input = NULL
   )
 
   # ===========================================================================
