@@ -81,6 +81,8 @@ ui_dev <- bslib::page_fillable(
               sidebar = bslib::sidebar(
                 title = "Filter options",
                 position = "left",
+                width = "30%",
+                open = list(desktop = "open", mobile = "always-above"),
                 shiny::selectizeInput(
                   inputId = "chart_line_input",
                   label = "Select region to compare (max 3)",
@@ -117,6 +119,8 @@ ui_dev <- bslib::page_fillable(
               sidebar = bslib::sidebar(
                 title = "Filter options",
                 position = "left",
+                width = "30%",
+                open = list(desktop = "open", mobile = "always-above"),
                 shiny::selectizeInput(
                   inputId = "chart_bar_input",
                   label = "Select region to compare (max 3)",
