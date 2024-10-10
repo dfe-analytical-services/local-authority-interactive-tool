@@ -539,3 +539,15 @@ html {
 .card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="true"] .bslib-sidebar-layout>.main {
   flex: 1 1 100%; /* Allow the main content to take up 100% of the width */
 }
+
+/* Visually hide column headers, but keep them accessible to screen reader users. */
+.hidden-column-headers .rt-thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

@@ -64,11 +64,6 @@ all_la_long <- filtered_bds |>
 all_la_diff <- all_la_long |>
   calculate_change_from_prev_yr()
 
-# Most recent year
-current_year <- all_la_long |>
-  dplyr::filter(Years_num == max(Years_num)) |>
-  pull_uniques("Years")
-
 # Convert to wide format and join rank column
 all_la_table <- all_la_long |>
   rbind(all_la_diff) |>
@@ -112,14 +107,17 @@ all_la_region_table <- all_la_table |>
   ) |>
   # Replace Rank with a blank col
   dplyr::mutate(Rank = "") |>
-  dplyr::rename(` ` = "Rank") |>
   dplyr::arrange(`LA Number`)
 
 # Output table
 dfe_reactable(
   all_la_region_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+  columns = modifyList(
+    align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+    # Remove all column header names
+    setNames(lapply(names(all_la_region_table), function(name) reactable::colDef(name = "")), names(all_la_region_table))
+  ),
   rowStyle = function(index) {
     highlight_selected_row(index, all_la_region_table, all_la_region)
   },

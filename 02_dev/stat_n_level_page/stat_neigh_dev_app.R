@@ -13,7 +13,6 @@ ui_dev <- bslib::page_fillable(
 
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
-  shinyjs::useShinyjs(),
 
   # Tab header ==============================================================
   h1("Regional Level"),
