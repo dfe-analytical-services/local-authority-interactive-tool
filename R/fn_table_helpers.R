@@ -238,7 +238,9 @@ align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
     aligned_cols <- utils::modifyList(
       aligned_cols,
       list(
-        `LA and Regions` = set_min_col_width(100)
+        `LA Number` = set_min_col_width(75),
+        `LA and Regions` = set_min_col_width(100),
+        `Change from previous year` = set_min_col_width(80)
       )
     )
   }
@@ -527,8 +529,12 @@ quartile_banding_col_def <- function(data) {
 
 
 
+# Function to set minimum column width and prevent wrapping onto more than 2 lines
 set_min_col_width <- function(min_width = 60) {
   reactable::colDef(
-    minWidth = min_width
+    minWidth = min_width,
+    # style = list(
+    #   display = "inline-table"
+    # )
   )
 }

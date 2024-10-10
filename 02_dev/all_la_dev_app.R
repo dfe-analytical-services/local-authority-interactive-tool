@@ -184,7 +184,7 @@ server_dev <- function(input, output, session) {
       # Create the reactable with specific column alignments
       columns = align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
       rowStyle = function(index) {
-        highlight_selected_row(index, all_la_region_table, all_la_region())
+        highlight_selected_row(index, all_la_region_table, all_la_region)
       },
       pagination = FALSE,
       class = "hidden-column-headers"

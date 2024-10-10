@@ -26,34 +26,32 @@ ui_mod <- bslib::page_fillable(
   appInputsUI("all_la_inputs"),
 
   # LA Level Table ------------------------------------------------------------
-  AllLA_LATableUI("la_table"),
-
-  # LA Stats Table ------------------------------------------------------------
-  AllLA_RegionTableUI("la_stats"),
+  AllLA_TableUI("all_la_table")
 )
 
 
 # Server
 server_mod <- function(input, output, session) {
-  # Getting inputs ------------------------------------------------------------
-  # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("all_la_inputs")
-
-
-  # LA table ------------------------------------------------------------------
-  AllLA_LATableServer(
-    "la_table",
-    app_inputs,
-    bds_metrics,
-    stat_n_la
+  # Getting inputs  ===========================================================
+  # reactiveValues object to store shared input values across pages
+  shared_values <- reactiveValues(
+    la = NULL,
+    topic = NULL,
+    indicator = NULL,
+    chart_line_input = NULL,
+    chart_bar_input = NULL
   )
 
-  # Region table  -------------------------------------------------------------
-  AllLA_RegionTableServer(
-    "la_stats",
+  # Extract selected LA, Topic and Indicator
+  app_inputs <- appInputsServer("all_la_inputs", shared_values)
+
+
+  # LA and Region table -------------------------------------------------------
+  AllLA_TableServer(
+    "all_la_table",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    la_names_bds
   )
 }
 
