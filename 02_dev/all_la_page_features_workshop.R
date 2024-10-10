@@ -13,7 +13,7 @@ list.files("R/", full.names = TRUE) |>
 # - Regional Authorities
 # Set user inputs
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
+selected_indicator <- "Low birth weight"
 selected_la <- "Barking and Dagenham"
 
 
@@ -60,13 +60,18 @@ all_la_ranked <- filtered_bds |>
 all_la_long <- filtered_bds |>
   dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values)
 
+# Difference between last two years
+all_la_diff <- all_la_long |>
+  calculate_change_from_prev_yr()
+
 # Most recent year
 current_year <- all_la_long |>
   dplyr::filter(Years_num == max(Years_num)) |>
   pull_uniques("Years")
 
-# Convert to wide format
+# Convert to wide format and join rank column
 all_la_table <- all_la_long |>
+  rbind(all_la_diff) |>
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions"),
     names_from = Years,
@@ -77,3 +82,46 @@ all_la_table <- all_la_long |>
     dp = indicator_dps,
     exclude_columns = c("LA Number", "Rank")
   )
+
+
+# All LA Level LA table -------------------------------------------------------
+all_la_la_table <- all_la_table |>
+  dplyr::filter(`LA and Regions` %in% la_names_bds) |>
+  dplyr::arrange(`LA and Regions`)
+
+# Output table
+dfe_reactable(
+  all_la_la_table,
+  # Create the reactable with specific column alignments
+  columns = align_reactable_cols(all_la_la_table, num_exclude = "LA Number"),
+  rowStyle = function(index) {
+    highlight_selected_row(index, all_la_la_table, selected_la)
+  },
+  pagination = FALSE
+)
+
+
+# All LA Level Region table ---------------------------------------------------
+all_la_region_table <- all_la_table |>
+  # Keep only Regions and England (remove London Inner/Outer with all NAs)
+  dplyr::filter(
+    `LA and Regions` %notin% la_names_bds,
+    !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
+      # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
+      rowSums(!is.na(dplyr::select(all_la_table, -c(`LA Number`, `LA and Regions`)))) == 0)
+  ) |>
+  # Replace Rank with a blank col
+  dplyr::mutate(Rank = "") |>
+  dplyr::rename(` ` = "Rank") |>
+  dplyr::arrange(`LA Number`)
+
+# Output table
+dfe_reactable(
+  all_la_region_table,
+  # Create the reactable with specific column alignments
+  columns = align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+  rowStyle = function(index) {
+    highlight_selected_row(index, all_la_region_table, all_la_region)
+  },
+  pagination = FALSE
+)
