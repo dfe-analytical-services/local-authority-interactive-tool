@@ -42,7 +42,7 @@ ui_dev <- bslib::page_fillable(
     class = "well",
     style = "overflow-y: visible;",
     bslib::card(
-      bslib::card_header("Chart name"),
+      bslib::card_header(shiny::uiOutput("all_la_table_name")),
       bslib::card_body(
         div(
           reactable::reactableOutput("all_la_la_table")
@@ -199,6 +199,11 @@ server_dev <- function(input, output, session) {
       pagination = FALSE,
       class = "hidden-column-headers"
     )
+  })
+
+  output$all_la_table_name <- shiny::renderUI({
+    filtered_bds$data |>
+      pull_uniques("Chart_title")
   })
 }
 
