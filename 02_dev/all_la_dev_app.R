@@ -95,26 +95,6 @@ server_dev <- function(input, output, session) {
       )
   })
 
-  # Get decimal places for indicator selected
-  indicator_dps <- reactive({
-    filtered_bds$data |>
-      get_indicator_dps()
-  })
-
-  # Get polarity of indicator
-  indicator_polarity <- reactive({
-    filtered_bds$data |>
-      pull_uniques("Polarity")
-  })
-
-  # Get region
-  all_la_region <- reactive({
-    stat_n_la |>
-      dplyr::filter(`LA Name` == input$la_input) |>
-      pull_uniques("GOReg") |>
-      clean_ldn_region(filtered_bds$data)
-  })
-
   # All LA formatted table
   all_la_table <- reactive({
     # All LAs long data
@@ -125,6 +105,10 @@ server_dev <- function(input, output, session) {
     all_la_diff <- all_la_long |>
       calculate_change_from_prev_yr()
 
+    # Get polarity of indicator
+    indicator_polarity <- filtered_bds$data |>
+      pull_uniques("Polarity")
+
     # Get latest rank, ties are set to min & NA vals to NA rank
     all_la_ranked <- filtered_bds$data |>
       filter_la_regions(la_names_bds, latest = TRUE) |>
@@ -132,9 +116,9 @@ server_dev <- function(input, output, session) {
         Rank = dplyr::case_when(
           is.na(values_num) ~ NA,
           # Rank in descending order
-          indicator_polarity() == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+          indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
           # Rank in ascending order
-          indicator_polarity() == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+          indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
         )
       ) |>
       dplyr::select(`LA and Regions`, Rank)
@@ -149,7 +133,7 @@ server_dev <- function(input, output, session) {
       ) |>
       dplyr::left_join(all_la_ranked, by = "LA and Regions") |>
       pretty_num_table(
-        dp = indicator_dps(),
+        dp = get_indicator_dps(filtered_bds$data),
         exclude_columns = c("LA Number", "Rank")
       )
   })
@@ -187,6 +171,12 @@ server_dev <- function(input, output, session) {
       # Replace Rank with a blank col
       dplyr::mutate(Rank = "") |>
       dplyr::arrange(`LA Number`)
+
+    # Get region of LA
+    all_la_region <- stat_n_la |>
+      dplyr::filter(`LA Name` == input$la_input) |>
+      pull_uniques("GOReg") |>
+      clean_ldn_region(filtered_bds$data)
 
     # Output table
     dfe_reactable(
