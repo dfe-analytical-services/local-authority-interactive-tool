@@ -95,4 +95,76 @@ InternalLinkServer <- function(id,
   })
 }
 
+
+#' UI function for creating a download button in a Shiny module.
+#'
+#' @param id A unique identifier for the module. This is used to namespace
+#'   inputs and outputs in the UI.
+#' @param download_label A label to customize the download button text.
+#'   It will be prefixed with "Download ".
+#'
+#' @return A download button UI element that allows users to download data
+#'   in a specified format.
+#'
+#' @examples
+#' # Example usage in UI
+#' Download_DataUI("download_data", "LA table")
+#'
+Download_DataUI <- function(id, download_label) {
+  ns <- NS(id)
+
+  shiny::downloadButton(
+    ns("download"),
+    label = paste0("Download ", download_label),
+    class = "gov-uk-button",
+    icon = NULL
+  )
+}
+
+
+#' Server function for handling data downloads in a Shiny module.
+#'
+#' @param id A unique identifier for the module, matching the UI id.
+#' @param file_type_input A reactive expression representing the selected
+#'   file type for download (e.g., CSV or XLSX).
+#' @param data_for_download A reactive expression that returns the data
+#'   to be downloaded based on user inputs or selections.
+#' @param download_name A string specifying the name of the download file
+#'   (excluding the extension).
+#'
+#' @return A Shiny module server function that sets up the download
+#'   functionality for the specified data and file type. The output
+#'   includes a download handler that triggers when the user clicks the
+#'   download button created in the UI function.
+#'
+#' @examples
+#' # Example usage in server
+#' Download_DataServer(
+#'   "download_data", input$file_type,
+#'   filtered_data(), "LA_data"
+#' )
+#'
+Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
+  moduleServer(id, function(input, output, session) {
+    # Download tables
+    # Store the table and export file in reactive values
+    local <- reactiveValues(data = NULL, export_file = NULL)
+
+    # Observe when input$file_type or all_la_table is updated and create relevant file
+    observeEvent(c(file_type_input(), data_for_download()), {
+      # LA table
+      local$data <- data_for_download()
+
+      generate_csv(local, file_type_input())
+    })
+
+    # Download handlers
+    output$download <- create_download_handler(
+      local,
+      file_type_input,
+      download_name
+    )
+  })
+}
+
 # nolint end
