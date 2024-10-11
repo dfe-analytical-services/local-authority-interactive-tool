@@ -69,6 +69,42 @@ Get_AllLATableNameServer <- function(id, filtered_bds) {
 }
 
 
+# Download data
+Download_DataUI <- function(id, download_label) {
+  ns <- NS(id)
+
+  shiny::downloadButton(
+    ns("download"),
+    label = paste0("Download ", download_label),
+    class = "gov-uk-button",
+    icon = NULL
+  )
+}
+
+Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
+  moduleServer(id, function(input, output, session) {
+    # Download tables
+    # Store the table and export file in reactive values
+    local <- reactiveValues(data = NULL, export_file = NULL)
+
+    # Observe when input$file_type or all_la_table is updated and create relevant file
+    observeEvent(c(file_type_input(), data_for_download()), {
+      # LA table
+      local$data <- data_for_download()
+
+      generate_csv(local, file_type_input())
+    })
+
+    # Download handlers
+    output$download <- create_download_handler(
+      local,
+      file_type_input,
+      download_name
+    )
+  })
+}
+
+
 
 AllLA_TableUI <- function(id) {
   ns <- NS(id)
@@ -76,19 +112,36 @@ AllLA_TableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header(
-        Get_AllLATableNameUI(ns("table_name")),
-        style = "text-align: center;"
-      ),
-      bslib::card_body(
-        div(
-          reactable::reactableOutput(ns("la_table"))
+    bslib::navset_card_tab(
+      id = "all_la_table_tabs",
+      bslib::nav_panel(
+        "Tables",
+        bslib::card_header(
+          Get_AllLATableNameUI(ns("table_name")),
+          style = "text-align: center;"
         ),
+        bslib::card_header("Local Authorities"),
+        reactable::reactableOutput(ns("la_table")),
         div(
           style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+          bslib::card_header("Regions"),
           reactable::reactableOutput(ns("region_table"))
         )
+      ),
+      bslib::nav_panel(
+        "Download data",
+        shinyGovstyle::radio_button_Input(
+          inputId = ns("file_type"),
+          label = h2("Choose download file format"),
+          hint_label = paste0(
+            "This will download all data related to the providers and options selected.",
+            " The XLSX format is designed for use in Microsoft Excel."
+          ),
+          choices = c("CSV (Up to 5.47 MB)", "XLSX (Up to 1.75 MB)"),
+          selected = "CSV (Up to 5.47 MB)"
+        ),
+        Download_DataUI(ns("la_download"), "LA Table"),
+        Download_DataUI(ns("region_download"), "Region Table")
       )
     )
   )
@@ -122,8 +175,7 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
     output$la_table <- reactable::renderReactable({
       # Filter for LAs and arrange by alphabetical order
       all_la_la_table <- all_la_table() |>
-        dplyr::filter(`LA and Regions` %in% la_names_bds) |>
-        dplyr::arrange(`LA and Regions`)
+        filter_la_data_all_la(la_names_bds)
 
       # Output table
       dfe_reactable(
@@ -137,6 +189,17 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       )
     })
 
+    # LA table download -------------------------------------------------------
+    Download_DataServer(
+      "la_download",
+      reactive({
+        input$file_type
+      }),
+      reactive({
+        filter_la_data_all_la(all_la_table(), la_names_bds)
+      }),
+      paste0(app_inputs$indicator(), "-All-LAs-Local-Authorities")
+    )
 
     # All LA Level Region table -----------------------------------------------
     output$region_table <- reactable::renderReactable({
@@ -172,5 +235,17 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
         # class = "hidden-column-headers"
       )
     })
+
+    # Region table download ---------------------------------------------------
+    Download_DataServer(
+      "region_download",
+      reactive({
+        input$file_type
+      }),
+      reactive({
+        filter_region_data_all_la(all_la_table(), la_names_bds)
+      }),
+      paste0(app_inputs$indicator(), "-All-LAs-Regions")
+    )
   })
 }

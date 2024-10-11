@@ -45,7 +45,10 @@ ui_dev <- bslib::page_fillable(
       id = "all_la_table_tabs",
       bslib::nav_panel(
         "Tables",
-        bslib::card_header(shiny::uiOutput("all_la_table_name")),
+        bslib::card_header(
+          shiny::uiOutput("all_la_table_name"),
+          style = "text-align: center;"
+        ),
         reactable::reactableOutput("all_la_la_table"),
         div(
           style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
@@ -68,15 +71,13 @@ ui_dev <- bslib::page_fillable(
           "la_download",
           label = "Download LA table",
           class = "gov-uk-button",
-          icon = NULL,
-          style = "margin: 0;"
+          icon = NULL
         ),
         shiny::downloadButton(
           "region_download",
           label = "Download Region table",
           class = "gov-uk-button",
-          icon = NULL,
-          style = "margin: 0;"
+          icon = NULL
         )
       )
     )

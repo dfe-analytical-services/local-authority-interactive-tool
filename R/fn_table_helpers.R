@@ -156,7 +156,7 @@ dfe_reactable <- function(data, ...) {
       headerClass = "bar-sort-header",
       html = TRUE,
       na = "NA",
-      minWidth = 60,
+      minWidth = 65,
       align = "left"
     ),
     ...
@@ -238,9 +238,9 @@ align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
     aligned_cols <- utils::modifyList(
       aligned_cols,
       list(
-        `LA Number` = set_min_col_width(75),
+        `LA Number` = set_min_col_width(80),
         `LA and Regions` = set_min_col_width(100),
-        `Change from previous year` = set_min_col_width(80)
+        `Change from previous year` = set_min_col_width(90)
       )
     )
   }
