@@ -116,15 +116,22 @@ create_measure_key <- function(data) {
 #'
 generate_csv <- function(local, ext_input) {
   # Set extension from user input
-  if (ext_input == "CSV (Up to 5.47 MB)") {
+  if (grepl("csv", ext_input, ignore.case = TRUE)) {
     # Create a temporary file path for the CSV export
     out <- tempfile(fileext = ".csv")
-
     # Write the CSV file to the temporary path
     write.csv(local$data, file = out, row.names = FALSE)
-  } else {
+  } else if (grepl("xlsx", ext_input, ignore.case = TRUE)) {
     out <- tempfile(fileext = ".xlsx")
     openxlsx::write.xlsx(local$data, file = out, colWidths = "Auto")
+  } else if (grepl("png", ext_input, ignore.case = TRUE)) {
+    out <- tempfile(fileext = ".png")
+    ggplot2::ggsave(
+      filename = out,
+      plot = local$data,
+      width = 8.5,
+      height = 6
+    )
   }
 
   # Store the file path in the reactive values object
@@ -161,21 +168,24 @@ generate_csv <- function(local, ext_input) {
 create_download_handler <- function(local, ext_input, table_name_prefix) {
   downloadHandler(
     filename = function() {
-      if (ext_input() == "CSV (Up to 5.47 MB)") {
-        paste0(table_name_prefix, "-", Sys.Date(), ".csv")
-      } else {
+      ext <- ext_input() # Add parentheses to evaluate the reactive expression
+      if (grepl("xlsx", ext, ignore.case = TRUE)) {
         paste0(table_name_prefix, "-", Sys.Date(), ".xlsx")
+      } else if (grepl("csv", ext, ignore.case = TRUE)) {
+        paste0(table_name_prefix, "-", Sys.Date(), ".csv")
+      } else if (grepl("png", ext, ignore.case = TRUE)) {
+        paste0(table_name_prefix, "-", Sys.Date(), ".png")
       }
     },
     content = function(file) {
-      # Added a basic pop up notification as the Excel file can take time to generate
       pop_up <- shiny::showNotification("Generating download file", duration = NULL)
-      # Copy the CSV from local$export_file to the file being downloaded
       file.copy(local$export_file, file)
       on.exit(shiny::removeNotification(pop_up), add = TRUE)
     }
   )
 }
+
+
 
 
 #' Create a File Type Selection Input with a Custom Input ID
@@ -192,15 +202,26 @@ create_download_handler <- function(local, ext_input, table_name_prefix) {
 #' @examples
 #' # Using the function to create a file type input with a custom ID
 #' file_type_input("custom_file_type_id")
-file_type_input_btn <- function(input_id) {
+file_type_input_btn <- function(input_id, file_type = "table") {
   shinyGovstyle::radio_button_Input(
     inputId = input_id,
     label = h2("Choose download file format"),
-    hint_label = paste0(
-      "This will download all data related to the providers and options selected.",
-      " The XLSX format is designed for use in Microsoft Excel."
-    ),
-    choices = c("CSV (Up to 5.47 MB)", "XLSX (Up to 1.75 MB)"),
-    selected = "CSV (Up to 5.47 MB)"
+    hint_label = if (file_type == "table") {
+      paste0(
+        "This will download all data related to the providers and options selected.",
+        " The XLSX format is designed for use in Microsoft Excel."
+      )
+    } else {
+      paste0(
+        "This will download the plots related to the options selected.",
+        " The HTML format contains the interactive element."
+      )
+    },
+    choices = if (file_type == "table") {
+      c("CSV", "XLSX")
+    } else {
+      c("PNG", "HTML")
+    },
+    selected = if (file_type == "table") "CSV" else "PNG"
   )
 }

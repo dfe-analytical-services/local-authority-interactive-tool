@@ -49,6 +49,11 @@ LA_ChartUI <- function(id) {
           ),
           full_screen = TRUE
         )
+      ),
+      bslib::nav_panel(
+        "Download",
+        file_type_input_btn(ns("file_type"), file_type = "chart"),
+        Download_DataUI(ns("line_download"), "Line chart")
       )
     )
   )
@@ -96,10 +101,9 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics, stat_n_la
     )
 
-    # LA Level line chart plot ----------------------------------
+    # Build main plot
     la_line_chart <- reactive({
-      # Plot
-      la_line_chart <- la_long() |>
+      la_long() |>
         ggplot2::ggplot() +
         ggiraph::geom_point_interactive(
           ggplot2::aes(
@@ -124,8 +128,10 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         set_plot_colours(la_long()) +
         set_plot_labs(filtered_bds()) +
         custom_theme()
+    })
 
-
+    # LA Level line chart plot ----------------------------------
+    output$line_chart <- ggiraph::renderGirafe({
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(la_long()),
@@ -136,7 +142,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = (la_line_chart + vertical_hover),
+        ggobj = (la_line_chart() + vertical_hover),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -147,9 +153,19 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
-    output$line_chart <- ggiraph::renderGirafe({
-      la_line_chart()
-    })
+    # Download handler for the line chart
+    Download_DataServer(
+      "line_download",
+      reactive(app_inputs),
+      reactive(input$file_type),
+      reactive(la_line_chart()),
+      paste0(
+        app_inputs$la(),
+        "-",
+        app_inputs$indicator(),
+        "-LA-Level-Line-Chart"
+      )
+    )
   })
 }
 

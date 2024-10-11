@@ -308,6 +308,12 @@ ggiraph::girafe(
   fonts = list(sans = "Arial")
 )
 
+ggsave(
+  "test.png",
+  plot = la_line_chart, # Use the ggplot object inside the girafe output
+  width = 8.5,
+  height = 6
+)
 
 # LA bar plot -----------------------------------------------------------------
 # Plot

@@ -169,16 +169,7 @@ AllLA_TableUI <- function(id) {
       ),
       bslib::nav_panel(
         "Download data",
-        shinyGovstyle::radio_button_Input(
-          inputId = ns("file_type"),
-          label = h2("Choose download file format"),
-          hint_label = paste0(
-            "This will download all data related to the providers and options selected.",
-            " The XLSX format is designed for use in Microsoft Excel."
-          ),
-          choices = c("CSV (Up to 5.47 MB)", "XLSX (Up to 1.75 MB)"),
-          selected = "CSV (Up to 5.47 MB)"
-        ),
+        file_type_input_btn(ns("file_type")),
         Download_DataUI(ns("la_download"), "LA Table"),
         Download_DataUI(ns("region_download"), "Region Table")
       )

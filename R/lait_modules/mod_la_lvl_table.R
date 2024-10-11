@@ -133,7 +133,7 @@ LA_LevelTableUI <- function(id) {
       bslib::nav_panel(
         "Download data",
         file_type_input_btn(ns("file_type")),
-        Download_DataUI(ns("la_table"), "LA Table"),
+        Download_DataUI(ns("la_download"), "LA Table"),
       )
     )
   )
@@ -194,13 +194,10 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # LA table download -------------------------------------------------------
     Download_DataServer(
-      "la_table",
-      reactive({
-        input$file_type
-      }),
-      reactive({
-        la_table()
-      }),
+      "la_download",
+      reactive(app_inputs),
+      reactive(input$file_type),
+      reactive(la_table()),
       paste0(app_inputs$la(), "-", app_inputs$indicator(), "-Local-Authority-View")
     )
   })
