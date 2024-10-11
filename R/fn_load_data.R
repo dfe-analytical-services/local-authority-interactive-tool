@@ -94,26 +94,39 @@ create_measure_key <- function(data) {
 
 
 # Function to create CSV and store the export file path
-generate_csv <- function(local) {
-  # Create a temporary file path for the CSV export
-  out <- tempfile(fileext = ".csv")
+generate_csv <- function(local, ext_input) {
+  # Set extension from user input
+  if (ext_input == "CSV (Up to 5.47 MB)") {
+    # Create a temporary file path for the CSV export
+    out <- tempfile(fileext = ".csv")
 
-  # Write the CSV file to the temporary path
-  write.csv(local$data, file = out, row.names = FALSE)
+    # Write the CSV file to the temporary path
+    write.csv(local$data, file = out, row.names = FALSE)
+  } else {
+    out <- tempfile(fileext = ".xlsx")
+    openxlsx::write.xlsx(local$data, file = out, colWidths = "Auto")
+  }
 
   # Store the file path in the reactive values object
   local$export_file <- out
 }
 
 # Create a general download handler function
-create_download_handler <- function(local, table_name_prefix) {
+create_download_handler <- function(local, ext_input, table_name_prefix) {
   downloadHandler(
     filename = function() {
-      paste0(table_name_prefix, "-", Sys.Date(), ".csv")
+      if (ext_input() == "CSV (Up to 5.47 MB)") {
+        paste0(table_name_prefix, "-", Sys.Date(), ".csv")
+      } else {
+        paste0(table_name_prefix, "-", Sys.Date(), ".xlsx")
+      }
     },
     content = function(file) {
+      # Added a basic pop up notification as the Excel file can take time to generate
+      pop_up <- shiny::showNotification("Generating download file", duration = NULL)
       # Copy the CSV from local$export_file to the file being downloaded
       file.copy(local$export_file, file)
+      on.exit(shiny::removeNotification(pop_up), add = TRUE)
     }
   )
 }

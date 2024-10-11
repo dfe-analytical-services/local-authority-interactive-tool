@@ -41,27 +41,42 @@ ui_dev <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header(shiny::uiOutput("all_la_table_name")),
-      bslib::card_body(
-        div(
-          style = "text-align: right;", # Aligns the button to the right
-          downloadButton(
-            outputId = "la_download",
-            label = "Download LA table",
-            class = "gov-uk-button",
-            style = "margin: 0;"
-          )
-        ),
+    bslib::navset_card_tab(
+      id = "all_la_table_tabs",
+      bslib::nav_panel(
+        "Tables",
+        bslib::card_header(shiny::uiOutput("all_la_table_name")),
         reactable::reactableOutput("all_la_la_table"),
         div(
           style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
-          downloadButton(
-            outputId = "region_download",
-            label = "Download Region table",
-            class = "gov-uk-button"
-          ),
           reactable::reactableOutput("all_la_region_table")
+        )
+      ),
+      bslib::nav_panel(
+        "Download data",
+        shinyGovstyle::radio_button_Input(
+          inputId = "file_type",
+          label = h2("Choose download file format"),
+          hint_label = paste0(
+            "This will download all data related to the providers and options selected.",
+            " The XLSX format is designed for use in Microsoft Excel."
+          ),
+          choices = c("CSV (Up to 5.47 MB)", "XLSX (Up to 1.75 MB)"),
+          selected = "CSV (Up to 5.47 MB)"
+        ),
+        shiny::downloadButton(
+          "la_download",
+          label = "Download LA table",
+          class = "gov-uk-button",
+          icon = NULL,
+          style = "margin: 0;"
+        ),
+        shiny::downloadButton(
+          "region_download",
+          label = "Download Region table",
+          class = "gov-uk-button",
+          icon = NULL,
+          style = "margin: 0;"
         )
       )
     )
@@ -168,22 +183,6 @@ server_dev <- function(input, output, session) {
     )
   })
 
-  # Download LA table
-  # Store the table and export file in reactive values
-  la_local <- reactiveValues(data = NULL, export_file = NULL)
-
-  # Observe when all_la_table is updated and create a CSV file
-  observeEvent(all_la_table(), {
-    la_local$data <- all_la_table() |>
-      filter_la_data_all_la(la_names_bds)
-
-    generate_csv(la_local)
-  })
-
-  # Download handler for the CSV
-  output$la_download <- create_download_handler(la_local, "AllLA_LA_table")
-
-
   # All LA Level Region table -------------------------------------------------
   output$all_la_region_table <- reactable::renderReactable({
     # Filter and prepare Region table
@@ -209,20 +208,29 @@ server_dev <- function(input, output, session) {
     )
   })
 
-  # Download Region table
+  # Download tables
   # Store the table and export file in reactive values
+  la_local <- reactiveValues(data = NULL, export_file = NULL)
   region_local <- reactiveValues(data = NULL, export_file = NULL)
 
-  # Observe when all_la_table is updated and create a CSV file
-  observeEvent(all_la_table(), {
+  # Observe when input$file_type or all_la_table is updated and create relevant file
+  observeEvent(c(input$file_type, all_la_table()), {
+    # LA table
+    la_local$data <- all_la_table() |>
+      filter_la_data_all_la(la_names_bds)
+
+    generate_csv(la_local, input$file_type)
+
+    # Region table
     region_local$data <- all_la_table() |>
       filter_region_data_all_la(la_names_bds)
 
-    generate_csv(region_local)
+    generate_csv(region_local, input$file_type)
   })
 
-  # Download handler for the CSV
-  output$region_download <- create_download_handler(region_local, "AllLA_Region_table")
+  # Download handlers
+  output$la_download <- create_download_handler(la_local, reactive(input$file_type), "AllLA_LA_table")
+  output$region_download <- create_download_handler(region_local, reactive(input$file_type), "AllLA_Region_table")
 
   # Get chart title for All LA table name
   output$all_la_table_name <- shiny::renderUI({
