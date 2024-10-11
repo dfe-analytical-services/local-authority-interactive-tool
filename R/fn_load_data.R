@@ -176,3 +176,31 @@ create_download_handler <- function(local, ext_input, table_name_prefix) {
     }
   )
 }
+
+
+#' Create a File Type Selection Input with a Custom Input ID
+#'
+#' This function generates a radio button input for selecting file formats
+#' (CSV or XLSX) with a fixed label, hint, choices, and default selection.
+#'
+#' @param input_id The unique input ID for the radio button input.
+#'
+#' @return A `radio_button_Input` object for use in a Shiny UI.
+#'
+#' @importFrom shinyGovstyle radio_button_Input
+#'
+#' @examples
+#' # Using the function to create a file type input with a custom ID
+#' file_type_input("custom_file_type_id")
+file_type_input_btn <- function(input_id) {
+  shinyGovstyle::radio_button_Input(
+    inputId = input_id,
+    label = h2("Choose download file format"),
+    hint_label = paste0(
+      "This will download all data related to the providers and options selected.",
+      " The XLSX format is designed for use in Microsoft Excel."
+    ),
+    choices = c("CSV (Up to 5.47 MB)", "XLSX (Up to 1.75 MB)"),
+    selected = "CSV (Up to 5.47 MB)"
+  )
+}

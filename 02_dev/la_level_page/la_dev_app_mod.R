@@ -41,9 +41,18 @@ ui_mod <- bslib::page_fillable(
 
 # Server
 server_mod <- function(input, output, session) {
-  # Getting inputs ----------------------------------
+  # Getting inputs  ===========================================================
+  # reactiveValues object to store shared input values across pages
+  shared_values <- reactiveValues(
+    la = NULL,
+    topic = NULL,
+    indicator = NULL,
+    chart_line_input = NULL,
+    chart_bar_input = NULL
+  )
+
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("la_inputs")
+  app_inputs <- appInputsServer("la_inputs", shared_values)
 
 
   # LA level table ----------------------------------
