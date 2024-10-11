@@ -144,14 +144,14 @@ Download_DataUI <- function(id, download_label) {
 #'   filtered_data(), "LA_data"
 #' )
 #'
-Download_DataServer <- function(id, app_inputs, file_type_input, data_for_download, download_name) {
+Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
   moduleServer(id, function(input, output, session) {
     # Download tables
     # Store the table and export file in reactive values
     local <- reactiveValues(data = NULL, export_file = NULL)
 
     # Observe when input$file_type or all_la_table is updated and create relevant file
-    observeEvent(c(file_type_input(), app_inputs()), {
+    observeEvent(list(file_type_input(), download_name()), {
       # LA table
       local$data <- data_for_download()
 
@@ -162,7 +162,7 @@ Download_DataServer <- function(id, app_inputs, file_type_input, data_for_downlo
     output$download <- create_download_handler(
       local,
       file_type_input,
-      download_name
+      reactive(download_name())
     )
   })
 }

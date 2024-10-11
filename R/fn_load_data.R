@@ -169,12 +169,13 @@ create_download_handler <- function(local, ext_input, table_name_prefix) {
   downloadHandler(
     filename = function() {
       ext <- ext_input() # Add parentheses to evaluate the reactive expression
+      print(paste("Download name:", table_name_prefix()))
       if (grepl("xlsx", ext, ignore.case = TRUE)) {
-        paste0(table_name_prefix, "-", Sys.Date(), ".xlsx")
+        paste0(table_name_prefix(), "-", Sys.Date(), ".xlsx")
       } else if (grepl("csv", ext, ignore.case = TRUE)) {
-        paste0(table_name_prefix, "-", Sys.Date(), ".csv")
+        paste0(table_name_prefix(), "-", Sys.Date(), ".csv")
       } else if (grepl("png", ext, ignore.case = TRUE)) {
-        paste0(table_name_prefix, "-", Sys.Date(), ".png")
+        paste0(table_name_prefix(), "-", Sys.Date(), ".png")
       }
     },
     content = function(file) {
