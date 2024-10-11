@@ -90,3 +90,30 @@ create_measure_key <- function(data) {
       .after = Measure_short
     )
 }
+
+
+
+# Function to create CSV and store the export file path
+generate_csv <- function(local) {
+  # Create a temporary file path for the CSV export
+  out <- tempfile(fileext = ".csv")
+
+  # Write the CSV file to the temporary path
+  write.csv(local$data, file = out, row.names = FALSE)
+
+  # Store the file path in the reactive values object
+  local$export_file <- out
+}
+
+# Create a general download handler function
+create_download_handler <- function(local, table_name_prefix) {
+  downloadHandler(
+    filename = function() {
+      paste0(table_name_prefix, "-", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      # Copy the CSV from local$export_file to the file being downloaded
+      file.copy(local$export_file, file)
+    }
+  )
+}

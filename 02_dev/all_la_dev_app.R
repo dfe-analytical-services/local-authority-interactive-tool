@@ -45,10 +45,22 @@ ui_dev <- bslib::page_fillable(
       bslib::card_header(shiny::uiOutput("all_la_table_name")),
       bslib::card_body(
         div(
-          reactable::reactableOutput("all_la_la_table")
+          style = "text-align: right;", # Aligns the button to the right
+          downloadButton(
+            outputId = "la_download",
+            label = "Download LA table",
+            class = "gov-uk-button",
+            style = "margin: 0;"
+          )
         ),
+        reactable::reactableOutput("all_la_la_table"),
         div(
           style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+          downloadButton(
+            outputId = "region_download",
+            label = "Download Region table",
+            class = "gov-uk-button"
+          ),
           reactable::reactableOutput("all_la_region_table")
         )
       )
@@ -142,8 +154,7 @@ server_dev <- function(input, output, session) {
   output$all_la_la_table <- reactable::renderReactable({
     # Filter for LAs and arrange by alphabetical order
     all_la_la_table <- all_la_table() |>
-      dplyr::filter(`LA and Regions` %in% la_names_bds) |>
-      dplyr::arrange(`LA and Regions`)
+      filter_la_data_all_la(la_names_bds)
 
     # Output table
     dfe_reactable(
@@ -157,20 +168,27 @@ server_dev <- function(input, output, session) {
     )
   })
 
+  # Download LA table
+  # Store the table and export file in reactive values
+  la_local <- reactiveValues(data = NULL, export_file = NULL)
+
+  # Observe when all_la_table is updated and create a CSV file
+  observeEvent(all_la_table(), {
+    la_local$data <- all_la_table() |>
+      filter_la_data_all_la(la_names_bds)
+
+    generate_csv(la_local)
+  })
+
+  # Download handler for the CSV
+  output$la_download <- create_download_handler(la_local, "AllLA_LA_table")
+
+
   # All LA Level Region table -------------------------------------------------
   output$all_la_region_table <- reactable::renderReactable({
     # Filter and prepare Region table
     all_la_region_table <- all_la_table() |>
-      # Keep only Regions and England (remove London Inner/Outer with all NAs)
-      dplyr::filter(
-        `LA and Regions` %notin% la_names_bds,
-        !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
-          # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
-          rowSums(!is.na(dplyr::select(all_la_table(), -c(`LA Number`, `LA and Regions`)))) == 0)
-      ) |>
-      # Replace Rank with a blank col
-      dplyr::mutate(Rank = "") |>
-      dplyr::arrange(`LA Number`)
+      filter_region_data_all_la(la_names_bds)
 
     # Get region of LA
     all_la_region <- stat_n_la |>
@@ -191,6 +209,22 @@ server_dev <- function(input, output, session) {
     )
   })
 
+  # Download Region table
+  # Store the table and export file in reactive values
+  region_local <- reactiveValues(data = NULL, export_file = NULL)
+
+  # Observe when all_la_table is updated and create a CSV file
+  observeEvent(all_la_table(), {
+    region_local$data <- all_la_table() |>
+      filter_region_data_all_la(la_names_bds)
+
+    generate_csv(region_local)
+  })
+
+  # Download handler for the CSV
+  output$region_download <- create_download_handler(region_local, "AllLA_Region_table")
+
+  # Get chart title for All LA table name
   output$all_la_table_name <- shiny::renderUI({
     filtered_bds$data |>
       pull_uniques("Chart_title")

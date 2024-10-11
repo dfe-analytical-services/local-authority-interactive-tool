@@ -233,3 +233,23 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
       )
     )
 }
+
+
+
+# Create a reusable function to filter data based on LA/Region
+filter_la_data_all_la <- function(data, la_names) {
+  data |>
+    dplyr::filter(`LA and Regions` %in% la_names) |>
+    dplyr::arrange(`LA and Regions`)
+}
+
+filter_region_data_all_la <- function(data, la_names) {
+  data |>
+    dplyr::filter(
+      `LA and Regions` %notin% la_names,
+      !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
+        rowSums(!is.na(dplyr::select(data, -c(`LA Number`, `LA and Regions`)))) == 0)
+    ) |>
+    dplyr::mutate(Rank = "") |>
+    dplyr::arrange(`LA Number`)
+}
