@@ -248,7 +248,9 @@ filter_region_data_all_la <- function(data, la_names) {
     dplyr::filter(
       `LA and Regions` %notin% la_names,
       !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
-        rowSums(!is.na(dplyr::select(data, -c(`LA Number`, `LA and Regions`)))) == 0)
+        rowSums(!is.na(dplyr::select(
+          data, -c(`LA Number`, `LA and Regions`)
+        ))) == 0)
     ) |>
     dplyr::mutate(Rank = "") |>
     dplyr::arrange(`LA Number`)

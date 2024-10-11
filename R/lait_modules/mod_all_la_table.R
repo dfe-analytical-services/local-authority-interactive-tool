@@ -311,3 +311,5 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
     )
   })
 }
+
+# nolint end

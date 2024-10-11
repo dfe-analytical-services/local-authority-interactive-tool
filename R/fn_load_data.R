@@ -92,8 +92,28 @@ create_measure_key <- function(data) {
 }
 
 
-
-# Function to create CSV and store the export file path
+#' Generates a CSV or Excel file from the provided data and stores the
+#' export file path in a reactive values object.
+#'
+#' @param local A reactive values object containing a `data` attribute, which
+#'   holds the data to be exported, and an `export_file` attribute to store
+#'   the file path of the generated export.
+#' @param ext_input A character string indicating the desired file format.
+#'   It should be either "CSV (Up to 5.47 MB)" for CSV format or any other
+#'   string for Excel format (XLSX).
+#'
+#' @return NULL. This function modifies the `local` reactive values object to
+#'   store the path of the generated export file.
+#'
+#' @details The function creates a temporary file in the system's
+#'   temporary directory. If the user selects CSV format, it writes the
+#'   data to a CSV file. If the user selects Excel format, it writes
+#'   the data to an Excel file with automatic column widths.
+#'
+#' @examples
+#' # Example of using generate_csv in a download handler
+#' generate_csv(local_values, input$file_type)
+#'
 generate_csv <- function(local, ext_input) {
   # Set extension from user input
   if (ext_input == "CSV (Up to 5.47 MB)") {
@@ -111,7 +131,33 @@ generate_csv <- function(local, ext_input) {
   local$export_file <- out
 }
 
-# Create a general download handler function
+
+#' Creates a download handler for exporting data in either CSV or Excel
+#' format from a Shiny application.
+#'
+#' @param local A reactive values object containing the path to the
+#'   export file in `local$export_file`.
+#' @param ext_input A reactive expression that returns the file format
+#'   selected by the user (either "CSV (Up to 5.47 MB)" or another value
+#'   for Excel format).
+#' @param table_name_prefix A character string used as a prefix for the
+#'   download filename, typically indicating the content of the data.
+#'
+#' @return A Shiny `downloadHandler` that provides the necessary
+#'   functionality for file downloading.
+#'
+#' @details The filename for the downloaded file is generated based on
+#'   the user's selected format and includes the current date. A notification
+#'   is displayed to the user while the file is being generated, particularly
+#'   for Excel files that may take longer to create. The contents of the
+#'   file are copied from the temporary export file stored in `local`.
+#'
+#' @examples
+#' # Example of creating a download handler for a CSV or Excel export
+#' output$download <- create_download_handler(local_values, reactive({
+#'   input$file_type
+#' }), "Data")
+#'
 create_download_handler <- function(local, ext_input, table_name_prefix) {
   downloadHandler(
     filename = function() {

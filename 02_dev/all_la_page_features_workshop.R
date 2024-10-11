@@ -101,9 +101,15 @@ all_la_region_table <- all_la_table |>
   # Keep only Regions and England (remove London Inner/Outer with all NAs)
   dplyr::filter(
     `LA and Regions` %notin% la_names_bds,
-    !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
-      # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
-      rowSums(!is.na(dplyr::select(all_la_table, -c(`LA Number`, `LA and Regions`)))) == 0)
+    # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
+    !(
+      `LA and Regions` %in% c("London (Inner)", "London (Outer)") &
+        rowSums(
+          !is.na(
+            dplyr::select(data, -c(`LA Number`, `LA and Regions`))
+          )
+        ) == 0
+    )
   ) |>
   # Replace Rank with a blank col
   dplyr::mutate(Rank = "") |>
@@ -116,7 +122,13 @@ dfe_reactable(
   columns = modifyList(
     align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
     # Remove all column header names
-    setNames(lapply(names(all_la_region_table), function(name) reactable::colDef(name = "")), names(all_la_region_table))
+    setNames(
+      lapply(
+        names(all_la_region_table),
+        function(name) reactable::colDef(name = "")
+      ),
+      names(all_la_region_table)
+    )
   ),
   rowStyle = function(index) {
     highlight_selected_row(index, all_la_region_table, all_la_region)

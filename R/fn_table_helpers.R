@@ -528,13 +528,28 @@ quartile_banding_col_def <- function(data) {
 }
 
 
-
-# Function to set minimum column width and prevent wrapping onto more than 2 lines
+#' Sets a minimum column width for Reactable tables to prevent text wrapping.
+#'
+#' @param min_width A numeric value specifying the minimum width of the column
+#'   in pixels. Default is set to 60 pixels.
+#'
+#' @return A `colDef` object from the `reactable` package that applies the
+#'   specified minimum width to a column. This helps maintain a consistent
+#'   appearance in tables and prevents cell content from wrapping onto
+#'   additional lines.
+#'
+#' @examples
+#' # Example usage in a Reactable table definition
+#' reactable::reactable(
+#'   data = my_data,
+#'   columns = list(
+#'     column1 = set_min_col_width(80),
+#'     column2 = set_min_col_width(100)
+#'   )
+#' )
+#'
 set_min_col_width <- function(min_width = 60) {
   reactable::colDef(
     minWidth = min_width,
-    # style = list(
-    #   display = "inline-table"
-    # )
   )
 }
