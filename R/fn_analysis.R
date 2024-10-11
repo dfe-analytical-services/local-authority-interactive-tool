@@ -211,7 +211,6 @@ get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
 }
 
 
-
 #' Calculate Rank Based on Numeric Values
 #'
 #' This function calculates the rank of numeric values within a data frame,
@@ -235,14 +234,58 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
 }
 
 
-
-# Create a reusable function to filter data based on LA/Region
+#' Filter All LA Data Based on Local Authorities
+#'
+#' This function filters the All LA data to retain only the rows where the
+#' `LA and Regions` column matches any of the provided `la_names`. The
+#' resulting data is then arranged in alphabetical order based on
+#' `LA and Regions`.
+#'
+#' @param data A data frame containing a column named `LA and Regions` to filter.
+#' @param la_names A character vector of local authority or region names to
+#'   filter the data by.
+#'
+#' @return A data frame filtered to include only rows where the
+#'   `LA and Regions` column matches the names in `la_names`. The output
+#'   is arranged alphabetically by `LA and Regions`.
+#'
+#' @importFrom dplyr filter arrange
+#'
+#' @examples
+#' # Assuming `df` is your data frame and `la_names_vec` is a vector of LA names
+#' filtered_data <- filter_la_data_all_la(df, la_names_vec)
+#'
 filter_la_data_all_la <- function(data, la_names) {
   data |>
     dplyr::filter(`LA and Regions` %in% la_names) |>
     dplyr::arrange(`LA and Regions`)
 }
 
+
+#' Filter All LA Data Based on Regions
+#'
+#' This function filters the All LA data to exclude rows where the
+#' `LA and Regions` column matches any of the provided `la_names`. It also
+#' removes rows where the `LA and Regions` value is either "London (Inner)" or
+#' "London (Outer)" and all remaining columns (except `LA Number` and
+#' `LA and Regions`) contain only `NA` values. After filtering, the function
+#' adds a blank `Rank` column and arranges the data by `LA Number`.
+#'
+#' @param data A data frame containing columns `LA Number` and `LA and Regions`.
+#' @param la_names A character vector of local authority names to exclude from
+#'   the data.
+#'
+#' @return A data frame filtered to exclude rows matching the specified
+#'   local authority names and rows with "London (Inner)" or "London (Outer)"
+#'   where the remaining columns contain only `NA` values. The output includes
+#'   a blank `Rank` column and is arranged by `LA Number`.
+#'
+#' @importFrom dplyr filter mutate arrange select
+#'
+#' @examples
+#' # Assuming `df` is your data frame and `la_names_vec` is a vector of LA names
+#' filtered_region_data <- filter_region_data_all_la(df, la_names_vec)
+#'
 filter_region_data_all_la <- function(data, la_names) {
   data |>
     dplyr::filter(
