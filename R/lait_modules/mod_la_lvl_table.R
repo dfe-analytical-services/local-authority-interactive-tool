@@ -218,30 +218,21 @@ LA_StatsTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_card_tab(
-      id = "all_la_table_tabs",
-      bslib::nav_panel(
-        "Table",
-        bslib::layout_column_wrap(
-          width = NULL,
-          style = htmltools::css(
-            grid_template_columns = "3fr 2fr",
-            max_width = "100%"
-          ),
-          div(
-            bslib::card_header("General Statistics", style = "color: #0000;"),
-            reactable::reactableOutput(ns("la_stats"))
-          ),
-          div(
-            bslib::card_header("Quartile bands"),
-            reactable::reactableOutput(ns("la_quartiles"))
-          )
+    bslib::card(
+      bslib::layout_column_wrap(
+        width = NULL,
+        style = htmltools::css(
+          grid_template_columns = "3fr 2fr",
+          max_width = "100%"
+        ),
+        div(
+          bslib::card_header("General Statistics", style = "color: #0000;"),
+          reactable::reactableOutput(ns("la_stats"))
+        ),
+        div(
+          bslib::card_header("Quartile bands"),
+          reactable::reactableOutput(ns("la_quartiles"))
         )
-      ),
-      bslib::nav_panel(
-        "Download data",
-        file_type_input_btn(ns("file_type")),
-        Download_DataUI(ns("stats_download"), "Stats Table"),
       )
     )
   )
@@ -369,18 +360,6 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         )
       )
     })
-
-    # Stats table download ----------------------------------------------------
-    Download_DataServer(
-      "stats_download",
-      reactive({
-        input$file_type
-      }),
-      reactive({
-        la_stats_table()
-      }),
-      paste0(app_inputs$la(), "-", app_inputs$indicator(), "-Local-Authority-View-stats")
-    )
   })
 }
 
