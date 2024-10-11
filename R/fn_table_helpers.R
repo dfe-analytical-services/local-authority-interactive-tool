@@ -156,7 +156,7 @@ dfe_reactable <- function(data, ...) {
       headerClass = "bar-sort-header",
       html = TRUE,
       na = "NA",
-      minWidth = 50,
+      minWidth = 60,
       align = "left"
     ),
     ...
