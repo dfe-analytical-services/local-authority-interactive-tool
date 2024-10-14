@@ -156,7 +156,7 @@ dfe_reactable <- function(data, ...) {
       headerClass = "bar-sort-header",
       html = TRUE,
       na = "NA",
-      minWidth = 50,
+      minWidth = 65,
       align = "left"
     ),
     ...
@@ -238,7 +238,9 @@ align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
     aligned_cols <- utils::modifyList(
       aligned_cols,
       list(
-        `LA and Regions` = set_min_col_width(100)
+        `LA Number` = set_min_col_width(80),
+        `LA and Regions` = set_min_col_width(100),
+        `Change from previous year` = set_min_col_width(90)
       )
     )
   }
@@ -526,9 +528,28 @@ quartile_banding_col_def <- function(data) {
 }
 
 
-
+#' Sets a minimum column width for Reactable tables to prevent text wrapping.
+#'
+#' @param min_width A numeric value specifying the minimum width of the column
+#'   in pixels. Default is set to 60 pixels.
+#'
+#' @return A `colDef` object from the `reactable` package that applies the
+#'   specified minimum width to a column. This helps maintain a consistent
+#'   appearance in tables and prevents cell content from wrapping onto
+#'   additional lines.
+#'
+#' @examples
+#' # Example usage in a Reactable table definition
+#' reactable::reactable(
+#'   data = my_data,
+#'   columns = list(
+#'     column1 = set_min_col_width(80),
+#'     column2 = set_min_col_width(100)
+#'   )
+#' )
+#'
 set_min_col_width <- function(min_width = 60) {
   reactable::colDef(
-    minWidth = min_width
+    minWidth = min_width,
   )
 }

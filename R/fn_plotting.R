@@ -434,7 +434,10 @@ custom_theme <- function() {
       legend.title = element_blank(),
       panel.grid = element_line(colour = "#D9D9D9"),
       panel.grid.minor = element_blank(),
-      panel.grid.major.x = element_blank()
+      panel.grid.major.x = element_blank(),
+      plot.background = ggplot2::element_rect(fill = "white", color = NA),
+      panel.background = ggplot2::element_rect(fill = "white", color = NA),
+      legend.background = ggplot2::element_rect(fill = "white", color = NA)
     )
   )
 }

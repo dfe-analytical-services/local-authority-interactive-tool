@@ -19,23 +19,14 @@ ui_mod <- bslib::page_fillable(
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
   # Tab header ================================================================
-  h1("Local Authority View"),
+  h1("All Local Authorities"),
 
 
   # Start of app  =============================================================
-  appInputsUI("la_inputs"),
+  appInputsUI("all_la_inputs"),
 
-  # LA Level Table ----------------------------------
-  LA_LevelTableUI("la_table"),
-
-  # LA Stats Table ----------------------------------
-  LA_StatsTableUI("la_stats"),
-
-  # LA Charts ----------------------------------
-  LA_ChartUI("la_chart"),
-
-  # LA Metadata ----------------------------------
-  LA_LevelMetaUI("la_meta")
+  # LA Level Table ------------------------------------------------------------
+  AllLA_TableUI("all_la_table")
 )
 
 
@@ -52,46 +43,15 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("la_inputs", shared_values)
+  app_inputs <- appInputsServer("all_la_inputs", shared_values)
 
 
-  # LA level table ----------------------------------
-  LA_LevelTableServer(
-    "la_table",
+  # LA and Region table -------------------------------------------------------
+  AllLA_TableServer(
+    "all_la_table",
     app_inputs,
     bds_metrics,
-    stat_n_la
-  )
-
-  # LA stats table  ----------------------------------
-  LA_StatsTableServer(
-    "la_stats",
-    app_inputs,
-    bds_metrics,
-    stat_n_la
-  )
-
-  # LA line chart  ----------------------------------
-  LA_LineChartServer(
-    "la_chart",
-    app_inputs,
-    bds_metrics,
-    stat_n_la
-  )
-
-  # LA bar chart  ----------------------------------
-  LA_BarChartServer(
-    "la_chart",
-    app_inputs,
-    bds_metrics,
-    stat_n_la
-  )
-
-  # LA Meta
-  LA_LevelMetaServer(
-    "la_meta",
-    app_inputs$indicator,
-    metrics_clean
+    la_names_bds
   )
 }
 

@@ -123,10 +123,17 @@ LA_LevelTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header("Local Authority, Region and England"),
-      bslib::card_body(
+    bslib::navset_card_tab(
+      id = "all_la_table_tabs",
+      bslib::nav_panel(
+        "Table",
+        bslib::card_header("Local Authority, Region and England"),
         reactable::reactableOutput(ns("la_table"))
+      ),
+      bslib::nav_panel(
+        "Download data",
+        file_type_input_btn(ns("file_type")),
+        Download_DataUI(ns("la_download"), "LA Table"),
       )
     )
   )
@@ -184,6 +191,14 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         }
       )
     })
+
+    # LA table download -------------------------------------------------------
+    Download_DataServer(
+      "la_download",
+      reactive(input$file_type),
+      reactive(la_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Local-Authority-View"))
+    )
   })
 }
 
@@ -199,20 +214,19 @@ LA_StatsTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::layout_column_wrap(
-      width = NULL,
-      style = htmltools::css(
-        grid_template_columns = "3fr 2fr",
-        max_width = "100%"
-      ),
-      bslib::card(
-        bslib::card_body(
+    bslib::card(
+      bslib::layout_column_wrap(
+        width = NULL,
+        style = htmltools::css(
+          grid_template_columns = "3fr 2fr",
+          max_width = "100%"
+        ),
+        div(
+          bslib::card_header("General Statistics", style = "color: #0000;"),
           reactable::reactableOutput(ns("la_stats"))
-        )
-      ),
-      bslib::card(
-        bslib::card_header("Quartile bands"),
-        bslib::card_body(
+        ),
+        div(
+          bslib::card_header("Quartile bands"),
           reactable::reactableOutput(ns("la_quartiles"))
         )
       )

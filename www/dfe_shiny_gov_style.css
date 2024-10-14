@@ -385,7 +385,7 @@ html {
 /* Make full-screen bslib cards aesthetic */
 /* Set the SVG to fill the available space within the card */
 .ggiraph-svg {
-    max-height: 80vh !important;
+  max-height: 80vh !important;
 }
 
 /* Target the specific card using classes */
@@ -394,6 +394,7 @@ html {
   align-self: center;
 }
 
+/* Set default reactable styles */
 .reactable {
   font-size: 1rem !important;
   table-layout: fixed;
@@ -403,34 +404,40 @@ html {
 }
 
 @media screen and (min-width: 1440px) {
-  .Reactable {
+  .bslib-sidebar-layout .sidebar-title {
     font-size: 1.188rem !important;  /* Slightly larger font size for large monitors */
   }
 }
 
 @media screen and (min-width: 1240px) {
-  .Reactable {
+  .bslib-sidebar-layout .sidebar-title {
     font-size: 1.1rem !important;  /* Slightly larger font size for large laptops */
   }
 }
 
 /* Media query for laptop screens (1024px or smaller) */
 @media screen and (max-width: 1024px) {
-  .reactable {
+  .reactable,
+  .bslib-sidebar-layout > .sidebar > .sidebar-content label,
+  .selectize-control.multi .selectize-input.has-items {
     font-size: 0.9rem !important; /* Slightly smaller font size for laptops */
   }
 }
 
 /* Media query for tablet-sized screens (768px or smaller) */
 @media screen and (max-width: 768px) {
-  .reactable {
+  .reactable,
+  .bslib-sidebar-layout > .sidebar > .sidebar-content label,
+  .selectize-control.multi .selectize-input.has-items {
     font-size: 0.8rem !important; /* Smaller font size for tablets */
   }
 }
 
 /* Media query for small screens (480px or smaller) */
 @media screen and (max-width: 480px) {
-  .reactable {
+  .reactable,
+  .bslib-sidebar-layout > .sidebar > .sidebar-content label,
+  .selectize-control.multi .selectize-input.has-items {
     font-size: 0.7rem !important; /* Even smaller font size for mobile */
   }
 }
@@ -462,4 +469,85 @@ html {
   .Reactable .rt-table {
     overflow-x: hidden;
   }
+}
+
+
+/* Setting sidebar title in bslib sidebar cards */
+@media screen and (min-width: 1440px) {
+  .bslib-sidebar-layout .sidebar-title {
+    font-size: 1.35rem !important;
+  }
+}
+
+@media screen and (min-width: 1240px) {
+  .bslib-sidebar-layout .sidebar-title {
+    font-size: 1.25rem !important;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .bslib-sidebar-layout .sidebar-title {
+    font-size: 1.1rem !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .bslib-sidebar-layout .sidebar-title {
+    font-size: 1rem !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .bslib-sidebar-layout .sidebar-title {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Force sidebar to enter mobile mode (always on top of plot) on wider screen */
+@media (max-width: 900px) {
+  .bslib-sidebar-layout[data-collapsible-mobile="false"] {
+      display: block !important;
+      --_padding-icon: var(--_padding);
+      --_vert-border: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .bslib-sidebar-layout {
+      --bslib-sidebar-js-window-size: mobile;
+  }
+}
+
+@media (max-width: 900px) {
+  .bslib-sidebar-layout[data-collapsible-mobile="false"]>.collapse-toggle {
+      display: none;
+  }
+}
+
+
+/* When the card is in full-screen mode, hide the sidebar */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="true"] .bslib-sidebar-layout {
+  --_sidebar-width: 0% !important;
+}
+
+/* When the card is in full-screen mode, remove sidebar styles */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="true"] .bslib-sidebar-layout>.sidebar {
+  display: none;
+}
+
+/* When in full-screen mode, the main content should take up the full width */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="true"] .bslib-sidebar-layout>.main {
+  flex: 1 1 100%; /* Allow the main content to take up 100% of the width */
+}
+
+/* Visually hide column headers, but keep them accessible to screen reader users. */
+.hidden-column-headers .rt-thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }

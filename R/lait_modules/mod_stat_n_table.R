@@ -440,7 +440,7 @@ StatN_GeogCompTableServer <- function(id,
 #' @importFrom reactable reactableOutput
 #' @importFrom bslib card card_body
 #' @export
-
+#'
 StatN_StatsTableUI <- function(id) {
   ns <- NS(id)
 

@@ -313,6 +313,8 @@ Region_Multi_chartUI <- function(id) {
           sidebar = bslib::sidebar(
             title = "Filter options",
             position = "left",
+            width = "30%",
+            open = list(desktop = "open", mobile = "always-above"),
             Chart_InputUI(ns("chart_input"))
           ),
           ggiraph::girafeOutput(ns("region_multi_line_chart"))

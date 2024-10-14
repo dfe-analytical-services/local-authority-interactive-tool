@@ -520,6 +520,8 @@ StatN_MultiLineChartUI <- function(id) {
           sidebar = bslib::sidebar(
             title = "Filter options",
             position = "left",
+            width = "30%",
+            open = list(desktop = "open", mobile = "always-above"),
             StatN_Chart_InputUI(
               ns("chart_line_input") # Line chart input only
             )[[1]]
@@ -700,6 +702,8 @@ StatN_MultiBarChartUI <- function(id) {
           sidebar = bslib::sidebar(
             title = "Filter options",
             position = "left",
+            width = "30%",
+            open = list(desktop = "open", mobile = "always-above"),
             StatN_Chart_InputUI(
               ns("chart_bar_input") # Line chart input only
             )[[2]]

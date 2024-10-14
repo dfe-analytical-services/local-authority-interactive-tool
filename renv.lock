@@ -305,7 +305,7 @@
     },
     "bslib": {
       "Package": "bslib",
-      "Version": "0.7.0",
+      "Version": "0.8.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -323,7 +323,7 @@
         "rlang",
         "sass"
       ],
-      "Hash": "8644cc53f43828f19133548195d7e59e"
+      "Hash": "b299c6741ca9746fb227debcb0f9fb6c"
     },
     "cachem": {
       "Package": "cachem",
@@ -602,13 +602,13 @@
     },
     "dfeshiny": {
       "Package": "dfeshiny",
-      "Version": "0.4.1.9000",
+      "Version": "0.4.2",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteUsername": "dfe-analytical-services",
       "RemoteRepo": "dfeshiny",
       "RemoteRef": "main",
-      "RemoteSha": "0de4922658c293ea31048a2e63a49c6111162c16",
+      "RemoteSha": "a97980297b9d45afd5100c424a39c0e180e63524",
       "RemoteHost": "api.github.com",
       "Requirements": [
         "R",
@@ -623,7 +623,7 @@
         "stringr",
         "styler"
       ],
-      "Hash": "f6a1fd4632a0a75d84b24a77cc098602"
+      "Hash": "26a470de138bb9d64abb9f93b6c4b0ec"
     },
     "diffobj": {
       "Package": "diffobj",
@@ -1351,6 +1351,23 @@
         "askpass"
       ],
       "Hash": "2bcca3848e4734eb3b16103bc9aa4b8e"
+    },
+    "openxlsx": {
+      "Package": "openxlsx",
+      "Version": "4.2.7.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "grDevices",
+        "methods",
+        "stats",
+        "stringi",
+        "utils",
+        "zip"
+      ],
+      "Hash": "14304e44a0f90fa2d0f905472333c561"
     },
     "pillar": {
       "Package": "pillar",

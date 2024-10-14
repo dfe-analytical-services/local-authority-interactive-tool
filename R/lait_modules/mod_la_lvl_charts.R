@@ -49,6 +49,12 @@ LA_ChartUI <- function(id) {
           ),
           full_screen = TRUE
         )
+      ),
+      bslib::nav_panel(
+        "Download",
+        file_type_input_btn(ns("file_type"), file_type = "chart"),
+        Download_DataUI(ns("line_download"), "Line chart"),
+        Download_DataUI(ns("bar_download"), "Bar chart")
       )
     )
   )
@@ -96,10 +102,9 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics, stat_n_la
     )
 
-    # LA Level line chart plot ----------------------------------
+    # Build main static plot
     la_line_chart <- reactive({
-      # Plot
-      la_line_chart <- la_long() |>
+      la_long() |>
         ggplot2::ggplot() +
         ggiraph::geom_point_interactive(
           ggplot2::aes(
@@ -124,8 +129,10 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         set_plot_colours(la_long()) +
         set_plot_labs(filtered_bds()) +
         custom_theme()
+    })
 
-
+    # Build interactive line chart
+    interactive_line_chart <- reactive({
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(la_long()),
@@ -136,7 +143,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = (la_line_chart + vertical_hover),
+        ggobj = (la_line_chart() + vertical_hover),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -147,9 +154,18 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
+    # LA Level line chart plot ------------------------------------------------
     output$line_chart <- ggiraph::renderGirafe({
-      la_line_chart()
+      interactive_line_chart()
     })
+
+    # Download handler for the line chart
+    Download_DataServer(
+      "line_download",
+      reactive(input$file_type),
+      reactive(list("png" = la_line_chart(), "html" = interactive_line_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
+    )
   })
 }
 
@@ -195,8 +211,8 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics, stat_n_la
     )
 
-    # LA Level bar plot ----------------------------------
-    la_bar_chart <- reactive({
+    # Build main static plot
+    bar_chart <- reactive({
       # Build plot
       la_bar_chart <- la_long() |>
         ggplot2::ggplot() +
@@ -224,20 +240,30 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         set_plot_colours(la_long(), "fill") +
         set_plot_labs(filtered_bds()) +
         custom_theme()
+    })
 
-      # Plotting interactive graph
+    # Plotting interactive graph
+    interactive_bar_chart <- reactive({
       ggiraph::girafe(
-        ggobj = la_bar_chart,
+        ggobj = bar_chart(),
         width_svg = 8.5,
         options = generic_ggiraph_options(),
         fonts = list(sans = "Arial")
       )
     })
 
-
+    # LA Level bar chart plot -------------------------------------------------
     output$bar_chart <- ggiraph::renderGirafe({
-      la_bar_chart()
+      interactive_bar_chart()
     })
+
+    # Download handler for the bar chart
+    Download_DataServer(
+      "bar_download",
+      reactive(input$file_type),
+      reactive(list("png" = bar_chart(), "html" = interactive_bar_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
+    )
   })
 }
 

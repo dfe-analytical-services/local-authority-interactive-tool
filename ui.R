@@ -207,6 +207,23 @@ ui <- function(input, output, session) {
         # Statistical Neighbour Metadata ======================================
         LA_LevelMetaUI("stat_n_meta")
       ),
+      bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
+        title = "All LA Level",
+        value = "All LA Level",
+
+        # Tab header ==========================================================
+        PageHeaderUI("all_la_header"),
+
+        # User Inputs =========================================================
+        appInputsUI("all_la_inputs"),
+
+        # All LA Tables =======================================================
+        AllLA_TableUI("all_la_table"),
+
+        # LA Metadata =========================================================
+        LA_LevelMetaUI("all_la_meta")
+      ),
       # User guide ============================================================
       user_guide_panel(),
       # Accessibility =========================================================

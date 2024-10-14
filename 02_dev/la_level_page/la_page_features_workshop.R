@@ -297,7 +297,7 @@ vertical_hover <- lapply(
 )
 
 # Plotting interactive graph
-ggiraph::girafe(
+ggiraph_test_save <- ggiraph::girafe(
   ggobj = (la_line_chart + vertical_hover),
   width_svg = 8.5,
   options = generic_ggiraph_options(
@@ -308,6 +308,16 @@ ggiraph::girafe(
   fonts = list(sans = "Arial")
 )
 
+# Saving plot as a png
+# ggsave(
+#   "test.png",
+#   plot = la_line_chart, # Use the ggplot object inside the girafe output
+#   width = 8.5,
+#   height = 6
+# )
+
+# Save ggiraph plot as standalone html
+# htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
 # Plot
