@@ -171,6 +171,9 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
 
     # Observe changes in file type or data and generate export file
     observeEvent(list(file_type_input(), data_for_download(), download_name()), {
+      # Ensure inputs are not NULL
+      req(file_type_input(), data_for_download(), download_name())
+
       # Setting parameters
       local$file_type <- file_type_input()
       local$file_name <- download_name()

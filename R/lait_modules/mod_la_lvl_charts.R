@@ -154,11 +154,6 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
-    # LA Level line chart plot ------------------------------------------------
-    output$line_chart <- ggiraph::renderGirafe({
-      interactive_line_chart()
-    })
-
     # Download handler for the line chart
     Download_DataServer(
       "line_download",
@@ -166,6 +161,11 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       reactive(list("png" = la_line_chart(), "html" = interactive_line_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
     )
+
+    # LA Level line chart plot ------------------------------------------------
+    output$line_chart <- ggiraph::renderGirafe({
+      interactive_line_chart()
+    })
   })
 }
 
@@ -252,11 +252,6 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
-    # LA Level bar chart plot -------------------------------------------------
-    output$bar_chart <- ggiraph::renderGirafe({
-      interactive_bar_chart()
-    })
-
     # Download handler for the bar chart
     Download_DataServer(
       "bar_download",
@@ -264,6 +259,11 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       reactive(list("png" = bar_chart(), "html" = interactive_bar_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
     )
+
+    # LA Level bar chart plot -------------------------------------------------
+    output$bar_chart <- ggiraph::renderGirafe({
+      interactive_bar_chart()
+    })
   })
 }
 

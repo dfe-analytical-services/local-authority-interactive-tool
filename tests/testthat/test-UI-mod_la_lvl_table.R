@@ -140,7 +140,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check is a line chart
   testthat::expect_true(
-    grepl("stroke='none'", la_linechart_str)
+    grepl("<line id=", la_linechart_str)
   )
   testthat::expect_false(
     grepl("linejoin='miter'", la_linechart_str)
@@ -188,7 +188,7 @@ test_that("Check LA charts behave as expected", {
     grepl("linejoin='miter'", la_barchart_str)
   )
   testthat::expect_false(
-    grepl("stroke='none'", la_barchart_str)
+    grepl("<line id=", la_barchart_str)
   )
 
   # Check hover css

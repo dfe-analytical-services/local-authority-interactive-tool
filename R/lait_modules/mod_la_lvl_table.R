@@ -124,7 +124,7 @@ LA_LevelTableUI <- function(id) {
     class = "well",
     style = "overflow-y: visible;",
     bslib::navset_card_tab(
-      id = "all_la_table_tabs",
+      id = "la_lvl_table_tabs",
       bslib::nav_panel(
         "Table",
         bslib::card_header("Local Authority, Region and England"),
@@ -182,6 +182,16 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         dplyr::arrange(`LA and Regions`)
     })
 
+
+    # LA table download -------------------------------------------------------
+    Download_DataServer(
+      "la_download",
+      reactive(input$file_type),
+      reactive(la_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Local-Authority-View"))
+    )
+
+    # Reactable table output
     output$la_table <- reactable::renderReactable({
       dfe_reactable(
         la_table(),
@@ -191,14 +201,6 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         }
       )
     })
-
-    # LA table download -------------------------------------------------------
-    Download_DataServer(
-      "la_download",
-      reactive(input$file_type),
-      reactive(la_table()),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Local-Authority-View"))
-    )
   })
 }
 
