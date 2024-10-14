@@ -197,7 +197,7 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       "la_download",
       reactive(input$file_type),
       reactive(la_table()),
-      reactive(paste0(app_inputs$la(), "-", app_inputs$indicator(), "-Local-Authority-View"))
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Local-Authority-View"))
     )
   })
 }

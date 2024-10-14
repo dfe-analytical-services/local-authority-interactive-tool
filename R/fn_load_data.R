@@ -169,7 +169,7 @@ create_download_handler <- function(export_file, ext_input, table_name_prefix) {
         grepl("png", ext_input(), ignore.case = TRUE) ~ ".png",
         TRUE ~ "Error"
       )
-      paste0(table_name_prefix(), "-", Sys.Date(), file_ext)
+      paste0(paste(table_name_prefix(), collapse = "-"), "-", Sys.Date(), file_ext)
     },
     content = function(file) {
       pop_up <- shiny::showNotification("Generating download file", duration = NULL)

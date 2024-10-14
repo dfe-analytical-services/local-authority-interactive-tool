@@ -147,7 +147,7 @@ Download_DataUI <- function(id, download_label) {
 Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
   moduleServer(id, function(input, output, session) {
     # Reactive values for storing file path
-    local <- reactiveValues(export_file = NULL)
+    local <- reactiveValues(export_file = NULL, file_name = NULL)
 
     # Observe changes in file type or data and generate export file
     observeEvent(list(file_type_input(), data_for_download()), {
