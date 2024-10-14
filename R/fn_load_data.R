@@ -114,28 +114,23 @@ create_measure_key <- function(data) {
 #' # Example of using generate_csv in a download handler
 #' generate_csv(local_values, input$file_type)
 #'
-generate_csv <- function(local, ext_input) {
-  # Set extension from user input
-  if (grepl("csv", ext_input, ignore.case = TRUE)) {
-    # Create a temporary file path for the CSV export
-    out <- tempfile(fileext = ".csv")
-    # Write the CSV file to the temporary path
-    write.csv(local$data, file = out, row.names = FALSE)
-  } else if (grepl("xlsx", ext_input, ignore.case = TRUE)) {
-    out <- tempfile(fileext = ".xlsx")
-    openxlsx::write.xlsx(local$data, file = out, colWidths = "Auto")
-  } else if (grepl("png", ext_input, ignore.case = TRUE)) {
-    out <- tempfile(fileext = ".png")
-    ggplot2::ggsave(
-      filename = out,
-      plot = local$data,
-      width = 8.5,
-      height = 6
-    )
+generate_download_file <- function(data, file_type) {
+  out <- tempfile(fileext = dplyr::case_when(
+    grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
+    grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
+    grepl("png", file_type, ignore.case = TRUE) ~ ".png",
+    TRUE ~ "Error"
+  ))
+
+  if (grepl("csv", file_type, ignore.case = TRUE)) {
+    write.csv(data, file = out, row.names = FALSE)
+  } else if (grepl("xlsx", file_type, ignore.case = TRUE)) {
+    openxlsx::write.xlsx(data, file = out, colWidths = "Auto")
+  } else if (grepl("png", file_type, ignore.case = TRUE)) {
+    ggplot2::ggsave(filename = out, plot = data, width = 8.5, height = 6)
   }
 
-  # Store the file path in the reactive values object
-  local$export_file <- out
+  out
 }
 
 
@@ -165,28 +160,24 @@ generate_csv <- function(local, ext_input) {
 #'   input$file_type
 #' }), "Data")
 #'
-create_download_handler <- function(local, ext_input, table_name_prefix) {
+create_download_handler <- function(export_file, ext_input, table_name_prefix) {
   downloadHandler(
     filename = function() {
-      ext <- ext_input() # Add parentheses to evaluate the reactive expression
-      print(paste("Download name:", table_name_prefix()))
-      if (grepl("xlsx", ext, ignore.case = TRUE)) {
-        paste0(table_name_prefix(), "-", Sys.Date(), ".xlsx")
-      } else if (grepl("csv", ext, ignore.case = TRUE)) {
-        paste0(table_name_prefix(), "-", Sys.Date(), ".csv")
-      } else if (grepl("png", ext, ignore.case = TRUE)) {
-        paste0(table_name_prefix(), "-", Sys.Date(), ".png")
-      }
+      file_ext <- dplyr::case_when(
+        grepl("xlsx", ext_input(), ignore.case = TRUE) ~ ".xlsx",
+        grepl("csv", ext_input(), ignore.case = TRUE) ~ ".csv",
+        grepl("png", ext_input(), ignore.case = TRUE) ~ ".png",
+        TRUE ~ "Error"
+      )
+      paste0(table_name_prefix(), "-", Sys.Date(), file_ext)
     },
     content = function(file) {
       pop_up <- shiny::showNotification("Generating download file", duration = NULL)
-      file.copy(local$export_file, file)
+      file.copy(export_file, file)
       on.exit(shiny::removeNotification(pop_up), add = TRUE)
     }
   )
 }
-
-
 
 
 #' Create a File Type Selection Input with a Custom Input ID

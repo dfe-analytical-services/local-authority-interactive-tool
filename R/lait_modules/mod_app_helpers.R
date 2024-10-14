@@ -146,23 +146,23 @@ Download_DataUI <- function(id, download_label) {
 #'
 Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
   moduleServer(id, function(input, output, session) {
-    # Download tables
-    # Store the table and export file in reactive values
-    local <- reactiveValues(data = NULL, export_file = NULL)
+    # Reactive values for storing file path
+    local <- reactiveValues(export_file = NULL)
 
-    # Observe when input$file_type or all_la_table is updated and create relevant file
-    observeEvent(list(file_type_input(), download_name()), {
-      # LA table
+    # Observe changes in file type or data and generate export file
+    observeEvent(list(file_type_input(), data_for_download()), {
+      file_type <- file_type_input()
       local$data <- data_for_download()
 
-      generate_csv(local, file_type_input())
+      # Generate the file based on the selected file type
+      local$export_file <- generate_download_file(local$data, file_type)
     })
 
-    # Download handlers
+    # Download handler
     output$download <- create_download_handler(
-      local,
+      local$export_file,
       file_type_input,
-      reactive(download_name())
+      download_name
     )
   })
 }
