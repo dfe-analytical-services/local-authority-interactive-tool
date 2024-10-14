@@ -53,7 +53,8 @@ LA_ChartUI <- function(id) {
       bslib::nav_panel(
         "Download",
         file_type_input_btn(ns("file_type"), file_type = "chart"),
-        Download_DataUI(ns("line_download"), "Line chart")
+        Download_DataUI(ns("line_download"), "Line chart"),
+        Download_DataUI(ns("bar_download"), "Bar chart")
       )
     )
   )
@@ -210,8 +211,8 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics, stat_n_la
     )
 
-    # LA Level bar plot ----------------------------------
-    la_bar_chart <- reactive({
+    # Build main static plot
+    bar_chart <- reactive({
       # Build plot
       la_bar_chart <- la_long() |>
         ggplot2::ggplot() +
@@ -239,20 +240,30 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         set_plot_colours(la_long(), "fill") +
         set_plot_labs(filtered_bds()) +
         custom_theme()
+    })
 
-      # Plotting interactive graph
+    # Plotting interactive graph
+    interactive_bar_chart <- reactive({
       ggiraph::girafe(
-        ggobj = la_bar_chart,
+        ggobj = bar_chart(),
         width_svg = 8.5,
         options = generic_ggiraph_options(),
         fonts = list(sans = "Arial")
       )
     })
 
-
+    # LA Level bar chart plot -------------------------------------------------
     output$bar_chart <- ggiraph::renderGirafe({
-      la_bar_chart()
+      interactive_bar_chart()
     })
+
+    # Download handler for the bar chart
+    Download_DataServer(
+      "bar_download",
+      reactive(input$file_type),
+      reactive(list("png" = bar_chart(), "html" = interactive_bar_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
+    )
   })
 }
 

@@ -141,12 +141,10 @@ generate_download_file <- function(data, file_type) {
     write.csv(data, file = out, row.names = FALSE)
   } else if (grepl("xlsx", file_type, ignore.case = TRUE)) {
     openxlsx::write.xlsx(data, file = out, colWidths = "Auto")
-
-    # For charts we pull the relevant object from the reactive list to be saved
   } else if (grepl("png", file_type, ignore.case = TRUE)) {
-    ggplot2::ggsave(filename = out, plot = data$png, width = 8.5, height = 6)
+    ggplot2::ggsave(filename = out, plot = data, width = 8.5, height = 6)
   } else if (grepl("html", file_type, ignore.case = TRUE)) {
-    htmlwidgets::saveWidget(widget = data$html, file = out)
+    htmlwidgets::saveWidget(widget = data, file = out)
   }
 
   out
@@ -185,21 +183,21 @@ generate_download_file <- function(data, file_type) {
 #' create_download_handler("path/to/file.csv", reactive("csv"), reactive("data-table"))
 #' }
 #'
-create_download_handler <- function(export_file, ext_input, table_name_prefix) {
+create_download_handler <- function(local) {
   downloadHandler(
     filename = function() {
       file_ext <- dplyr::case_when(
-        grepl("xlsx", ext_input(), ignore.case = TRUE) ~ ".xlsx",
-        grepl("csv", ext_input(), ignore.case = TRUE) ~ ".csv",
-        grepl("png", ext_input(), ignore.case = TRUE) ~ ".png",
-        grepl("html", ext_input(), ignore.case = TRUE) ~ ".html",
+        grepl("xlsx", local$file_type, ignore.case = TRUE) ~ ".xlsx",
+        grepl("csv", local$file_type, ignore.case = TRUE) ~ ".csv",
+        grepl("png", local$file_type, ignore.case = TRUE) ~ ".png",
+        grepl("html", local$file_type, ignore.case = TRUE) ~ ".html",
         TRUE ~ "Error"
       )
-      paste0(paste(table_name_prefix(), collapse = "-"), "-", Sys.Date(), file_ext)
+      paste0(paste(local$file_name, collapse = "-"), "-", Sys.Date(), file_ext)
     },
     content = function(file) {
       pop_up <- shiny::showNotification("Generating download file", duration = NULL)
-      file.copy(export_file, file)
+      file.copy(local$export_file, file)
       on.exit(shiny::removeNotification(pop_up), add = TRUE)
     }
   )
