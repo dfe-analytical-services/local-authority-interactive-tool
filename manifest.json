@@ -822,7 +822,7 @@
       "description": {
         "Package": "bslib",
         "Title": "Custom 'Bootstrap' 'Sass' Themes for 'shiny' and 'rmarkdown'",
-        "Version": "0.7.0",
+        "Version": "0.8.0",
         "Authors@R": "c(\n    person(\"Carson\", \"Sievert\", , \"carson@posit.co\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-4958-2844\")),\n    person(\"Joe\", \"Cheng\", , \"joe@posit.co\", role = \"aut\"),\n    person(\"Garrick\", \"Aden-Buie\", , \"garrick@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0002-7111-0077\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\")),\n    person(, \"Bootstrap contributors\", role = \"ctb\",\n           comment = \"Bootstrap library\"),\n    person(, \"Twitter, Inc\", role = \"cph\",\n           comment = \"Bootstrap library\"),\n    person(\"Javi\", \"Aguilar\", role = c(\"ctb\", \"cph\"),\n           comment = \"Bootstrap colorpicker library\"),\n    person(\"Thomas\", \"Park\", role = c(\"ctb\", \"cph\"),\n           comment = \"Bootswatch library\"),\n    person(, \"PayPal\", role = c(\"ctb\", \"cph\"),\n           comment = \"Bootstrap accessibility plugin\")\n  )",
         "Description": "Simplifies custom 'CSS' styling of both 'shiny' and\n    'rmarkdown' via 'Bootstrap' 'Sass'. Supports 'Bootstrap' 3, 4 and 5 as\n    well as their various 'Bootswatch' themes. An interactive widget is\n    also provided for previewing themes in real time.",
         "License": "MIT + file LICENSE",
@@ -830,7 +830,7 @@
         "BugReports": "https://github.com/rstudio/bslib/issues",
         "Depends": "R (>= 2.10)",
         "Imports": "base64enc, cachem, fastmap (>= 1.1.1), grDevices, htmltools\n(>= 0.5.8), jquerylib (>= 0.1.3), jsonlite, lifecycle, memoise\n(>= 2.0.1), mime, rlang, sass (>= 0.4.9)",
-        "Suggests": "bsicons, curl, fontawesome, future, ggplot2, knitr, magrittr,\nrappdirs, rmarkdown (>= 2.7), shiny (>= 1.8.1), testthat,\nthematic, withr",
+        "Suggests": "bsicons, curl, fontawesome, future, ggplot2, knitr, magrittr,\nrappdirs, rmarkdown (>= 2.7), shiny (> 1.8.1), testthat,\nthematic, withr",
         "Config/Needs/deploy": "BH, chiflights22, colourpicker, commonmark, cpp11,\ncpsievert/chiflights22, cpsievert/histoslider, dplyr, DT,\nggplot2, ggridges, gt, hexbin, histoslider, htmlwidgets,\nlattice, leaflet, lubridate, modelr, plotly, reactable,\nreshape2, rprojroot, rsconnect, rstudio/shiny, scales, styler,\ntibble",
         "Config/Needs/routine": "chromote, desc, renv",
         "Config/Needs/website": "brio, crosstalk, dplyr, DT, ggplot2, glue,\nhtmlwidgets, leaflet, lorem, palmerpenguins, plotly, purrr,\nrprojroot, rstudio/htmltools, scales, stringr, tidyr, webshot2",
@@ -838,22 +838,22 @@
         "Config/testthat/parallel": "true",
         "Config/testthat/start-first": "zzzz-bs-sass, fonts, zzz-precompile,\ntheme-*, rmd-*",
         "Encoding": "UTF-8",
-        "RoxygenNote": "7.3.1",
+        "RoxygenNote": "7.3.2",
         "Collate": "'accordion.R' 'breakpoints.R' 'bs-current-theme.R'\n'bs-dependencies.R' 'bs-global.R' 'bs-remove.R'\n'bs-theme-layers.R' 'bs-theme-preset-bootswatch.R'\n'bs-theme-preset-builtin.R' 'bs-theme-preset.R' 'utils.R'\n'bs-theme-preview.R' 'bs-theme-update.R' 'bs-theme.R'\n'bslib-package.R' 'buttons.R' 'card.R' 'deprecated.R' 'files.R'\n'fill.R' 'imports.R' 'input-dark-mode.R' 'input-switch.R'\n'layout.R' 'nav-items.R' 'nav-update.R' 'navs-legacy.R'\n'navs.R' 'onLoad.R' 'page.R' 'popover.R' 'precompiled.R'\n'print.R' 'shiny-devmode.R' 'sidebar.R' 'staticimports.R'\n'tooltip.R' 'utils-deps.R' 'utils-shiny.R' 'utils-tags.R'\n'value-box.R' 'version-default.R' 'versions.R'",
         "NeedsCompilation": "no",
-        "Packaged": "2024-03-28 21:43:16 UTC; cpsievert",
+        "Packaged": "2024-07-29 18:49:12 UTC; cpsievert",
         "Author": "Carson Sievert [aut, cre] (<https://orcid.org/0000-0002-4958-2844>),\n  Joe Cheng [aut],\n  Garrick Aden-Buie [aut] (<https://orcid.org/0000-0002-7111-0077>),\n  Posit Software, PBC [cph, fnd],\n  Bootstrap contributors [ctb] (Bootstrap library),\n  Twitter, Inc [cph] (Bootstrap library),\n  Javi Aguilar [ctb, cph] (Bootstrap colorpicker library),\n  Thomas Park [ctb, cph] (Bootswatch library),\n  PayPal [ctb, cph] (Bootstrap accessibility plugin)",
         "Maintainer": "Carson Sievert <carson@posit.co>",
         "Repository": "RSPM",
-        "Date/Publication": "2024-03-29 01:00:03 UTC",
-        "Built": "R 4.4.0; ; 2024-04-25 22:58:12 UTC; windows",
+        "Date/Publication": "2024-07-29 19:20:02 UTC",
+        "Built": "R 4.4.0; ; 2024-07-30 04:32:16 UTC; windows",
         "RemoteType": "standard",
         "RemotePkgRef": "bslib",
         "RemoteRef": "bslib",
         "RemoteRepos": "https://packagemanager.posit.co/cran/latest",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "0.7.0"
+        "RemoteSha": "0.8.0"
       }
     },
     "cachem": {
@@ -1539,7 +1539,7 @@
       "description": {
         "Package": "dfeshiny",
         "Title": "DfE R Shiny Standards",
-        "Version": "0.4.1.9000",
+        "Version": "0.4.2",
         "Authors@R": "c(\n    person(\"Rich\", \"Bielby\", , \"richard.bielby@education.gov.uk\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0001-9070-9969\")),\n    person(\"Charlotte\", \"Foster\", , \"charlotte.foster@education.gov.uk\", role = \"aut\"),\n    person(\"Cam\", \"Race\", , \"cameron.race@education.gov.uk\", role = \"aut\")\n  )",
         "Description": "R package containing preferred methods for creating official\n    DfE R-Shiny dashboards.",
         "License": "GPL (>= 3)",
@@ -1556,18 +1556,18 @@
         "Language": "en-US",
         "Author": "Rich Bielby [aut, cre] (<https://orcid.org/0000-0001-9070-9969>),\n  Charlotte Foster [aut],\n  Cam Race [aut]",
         "Maintainer": "Rich Bielby <richard.bielby@education.gov.uk>",
-        "Built": "R 4.4.1; ; 2024-09-17 12:53:56 UTC; windows",
+        "Built": "R 4.4.1; ; 2024-10-10 10:49:08 UTC; windows",
         "RemoteType": "github",
         "RemoteUsername": "dfe-analytical-services",
         "RemoteRepo": "dfeshiny",
         "RemoteRef": "main",
-        "RemoteSha": "0de4922658c293ea31048a2e63a49c6111162c16",
+        "RemoteSha": "a97980297b9d45afd5100c424a39c0e180e63524",
         "RemoteHost": "api.github.com",
         "GithubHost": "api.github.com",
         "GithubRepo": "dfeshiny",
         "GithubUsername": "dfe-analytical-services",
         "GithubRef": "main",
-        "GithubSHA1": "0de4922658c293ea31048a2e63a49c6111162c16"
+        "GithubSHA1": "a97980297b9d45afd5100c424a39c0e180e63524"
       }
     },
     "diffobj": {
@@ -3453,6 +3453,47 @@
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
         "RemoteSha": "2.2.0"
+      }
+    },
+    "openxlsx": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Type": "Package",
+        "Package": "openxlsx",
+        "Title": "Read, Write and Edit xlsx Files",
+        "Version": "4.2.7.1",
+        "Date": "2024-09-19",
+        "Authors@R": "\n    c(person(given = \"Philipp\",\n             family = \"Schauberger\",\n             role = \"aut\",\n             email = \"philipp@schauberger.co.at\"),\n      person(given = \"Alexander\",\n             family = \"Walker\",\n             role = \"aut\",\n             email = \"Alexander.Walker1989@gmail.com\"),\n      person(given = \"Luca\",\n             family = \"Braglia\",\n             role = \"ctb\"),\n      person(given = \"Joshua\",\n             family = \"Sturm\",\n             role = \"ctb\"),\n      person(given = \"Jan Marvin\",\n             family = \"Garbuszus\",\n             role = c(\"ctb\", \"cre\"),\n             email = \"jan.garbuszus@ruhr-uni-bochum.de\"),\n      person(given = \"Jordan Mark\",\n             family = \"Barbone\",\n             role = \"ctb\",\n             email = \"jmbarbone@gmail.com\",\n             comment = c(ORCID = \"0000-0001-9788-3628\")),\n      person(given = \"David\",\n             family = \"Zimmermann\",\n             role = \"ctb\",\n             email = \"david_j_zimmermann@hotmail.com\"),\n      person(given = \"Reinhold\",\n             family = \"Kainhofer\",\n             role = \"ctb\",\n             email = \"reinhold@kainhofer.com\"))",
+        "Description": "Simplifies the creation of Excel .xlsx files by providing a\n    high level interface to writing, styling and editing worksheets.\n    Through the use of 'Rcpp', read/write times are comparable to the\n    'xlsx' and 'XLConnect' packages with the added benefit of removing the\n    dependency on Java.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://ycphs.github.io/openxlsx/index.html,\nhttps://github.com/ycphs/openxlsx",
+        "BugReports": "https://github.com/ycphs/openxlsx/issues",
+        "Depends": "R (>= 3.3.0)",
+        "Imports": "grDevices, methods, Rcpp, stats, stringi, utils, zip",
+        "Suggests": "curl, formula.tools, knitr, rmarkdown, testthat",
+        "LinkingTo": "Rcpp",
+        "VignetteBuilder": "knitr",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "RoxygenNote": "7.3.2",
+        "Collate": "'CommentClass.R' 'HyperlinkClass.R' 'RcppExports.R'\n'class_definitions.R' 'StyleClass.R' 'WorkbookClass.R'\n'asserts.R' 'baseXML.R' 'borderFunctions.R' 'build_workbook.R'\n'chartsheet_class.R' 'conditional_formatting.R'\n'data-fontSizeLookupTables.R' 'helperFunctions.R'\n'loadWorkbook.R' 'onUnload.R' 'openXL.R' 'openxlsx-package.R'\n'openxlsx.R' 'openxlsxCoerce.R' 'readWorkbook.R'\n'setWindowSize.R' 'sheet_data_class.R' 'utils.R'\n'workbook_column_widths.R' 'workbook_read_workbook.R'\n'workbook_write_data.R' 'worksheet_class.R' 'wrappers.R'\n'writeData.R' 'writeDataTable.R' 'writexlsx.R' 'zzz.R'",
+        "LazyData": "true",
+        "NeedsCompilation": "yes",
+        "Packaged": "2024-09-18 22:29:51 UTC; janmarvingarbuszus",
+        "Author": "Philipp Schauberger [aut],\n  Alexander Walker [aut],\n  Luca Braglia [ctb],\n  Joshua Sturm [ctb],\n  Jan Marvin Garbuszus [ctb, cre],\n  Jordan Mark Barbone [ctb] (<https://orcid.org/0000-0001-9788-3628>),\n  David Zimmermann [ctb],\n  Reinhold Kainhofer [ctb]",
+        "Maintainer": "Jan Marvin Garbuszus <jan.garbuszus@ruhr-uni-bochum.de>",
+        "Repository": "RSPM",
+        "Date/Publication": "2024-09-20 12:50:02 UTC",
+        "Built": "R 4.4.0; x86_64-w64-mingw32; 2024-09-21 04:35:46 UTC; windows",
+        "Archs": "x64",
+        "RemoteType": "standard",
+        "RemotePkgRef": "openxlsx",
+        "RemoteRef": "openxlsx",
+        "RemoteRepos": "https://packagemanager.posit.co/cran/latest",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "4.2.7.1"
       }
     },
     "pillar": {
@@ -6149,7 +6190,7 @@
       "checksum": "f8cce4a8acfff22f216ce5e59480bcb1"
     },
     ".Rprofile": {
-      "checksum": "24ca86674bf930c004ee83d3d3e61da9"
+      "checksum": "53ae3691380b1f7fc1b2bb65f9726e1d"
     },
     "01_data/02_prod/bds_long_0.parquet": {
       "checksum": "0aaba23d8884b79830e242070208f9ee"
@@ -6166,6 +6207,15 @@
     "01_data/02_prod/SN_April 2021.xlsx": {
       "checksum": "167a26582237c07b2ba6380a3d0deca2"
     },
+    "02_dev/all_la_dev_app.R": {
+      "checksum": "9c0094c6c397f908d36a4e202d40924c"
+    },
+    "02_dev/all_la_dev_app_mod.R": {
+      "checksum": "4f4b66dab180023e42c50c6a3ff95a86"
+    },
+    "02_dev/all_la_page_features_workshop.R": {
+      "checksum": "104eeeaa23f551c0f8dab4e8d230daf5"
+    },
     "02_dev/bds_wide_to_long.qmd": {
       "checksum": "4e0faae87d83cb597b9a31db2ec541d3"
     },
@@ -6173,10 +6223,10 @@
       "checksum": "25fcb7498114855309e710b7ad46acb4"
     },
     "02_dev/la_level_page/la_dev_app_mod.R": {
-      "checksum": "2fd3854de479c885c695ad6676c16b4e"
+      "checksum": "4b8745c9d4fa5b8f21c02adfaceb81b1"
     },
     "02_dev/la_level_page/la_page_features_workshop.R": {
-      "checksum": "3273c2ec2894f272fdaaa86fdd6c589d"
+      "checksum": "1a1549029b3631559c2541d18bf7b94f"
     },
     "02_dev/la_level_page/test-mod_la_lvl_table.R": {
       "checksum": "c17ae021c8d891a0b5f405c27c1dc125"
@@ -6188,18 +6238,18 @@
       "checksum": "c65ad4ca61afe1bc7ea341b0cd6b190d"
     },
     "02_dev/region_level_page/regional_dev_app.R": {
-      "checksum": "eecca7f5eea931466f3fd336b66c411f"
+      "checksum": "62ecba672e8147c906c6db69a323ff27"
     },
     "02_dev/region_level_page/regional_page_features_workshop.R": {
       "checksum": "5f71261c76b0bd6aafcb5800c98ddc2c"
     },
-    "02_dev/stat_n_dev_app_mod.R": {
+    "02_dev/stat_n_level_page/stat_n_dev_app_mod.R": {
       "checksum": "17da1dd7efa7754e2523848132609772"
     },
-    "02_dev/stat_neigh_dev_app.R": {
-      "checksum": "95a887c07b9b541d4ee31a96dc0fcb93"
+    "02_dev/stat_n_level_page/stat_neigh_dev_app.R": {
+      "checksum": "1847794f693737b1d13db37ea50507eb"
     },
-    "02_dev/stat_neigh_page_features_workshop.R": {
+    "02_dev/stat_n_level_page/stat_neigh_page_features_workshop.R": {
       "checksum": "627fded8b03b2d7b202da76e055380bb"
     },
     "02_dev/test_app.R": {
@@ -6224,46 +6274,49 @@
       "checksum": "45019769758bd08050ca9b18502b16e0"
     },
     "R/fn_analysis.R": {
-      "checksum": "fd174d7992a6138b3be15f180269cff5"
+      "checksum": "e9a83eb6318e173c688171c749263b54"
     },
     "R/fn_helper_functions.R": {
       "checksum": "31efee2020464953023dc5f57e0f94aa"
     },
     "R/fn_load_data.R": {
-      "checksum": "9ef607afacb8ed3046f3418e63b898d6"
+      "checksum": "48462719a1977bedd7d27417dbe22632"
     },
     "R/fn_plotting.R": {
-      "checksum": "f647aa3818a09c35cf00eff84f76ecf4"
+      "checksum": "c4c2d363d7ea5853b11e172c7931a5f2"
     },
     "R/fn_table_helpers.R": {
-      "checksum": "cc23fc3c9af29b94304d3ae20d298e8d"
+      "checksum": "9e700ddd2b9f7ce18885799a87e3c33c"
+    },
+    "R/lait_modules/mod_all_la_table.R": {
+      "checksum": "48cea525cbd0629a5863fe5d8a5a5f6a"
     },
     "R/lait_modules/mod_app_helpers.R": {
-      "checksum": "c8179c91f27ba17abc1b7f2cc0e4e99c"
+      "checksum": "457af745d961a392dc1adf08f79c7296"
     },
     "R/lait_modules/mod_app_inputs.R": {
       "checksum": "9d5c9de47941df21d1e53daa420a4934"
     },
     "R/lait_modules/mod_la_lvl_charts.R": {
-      "checksum": "c3be71ae60fa0b3cd5d399859e2ffdbc"
+      "checksum": "34b7d0ac9f6769e3148001f75d8e9e73"
     },
     "R/lait_modules/mod_la_lvl_metadata.R": {
       "checksum": "3a74f88a60605fba555caed1829b20e0"
     },
     "R/lait_modules/mod_la_lvl_table.R": {
-      "checksum": "2b5c8174c3c0561ea7db74f70c330fe7"
+      "checksum": "04ba26cc24a77c2f49e92d2f3c9b70d5"
     },
     "R/lait_modules/mod_region_charts.R": {
-      "checksum": "b28c06ed9c769d659addb5a424a8492b"
+      "checksum": "a4e23d42384bbb417cfeddf5f14075aa"
     },
     "R/lait_modules/mod_region_table.R": {
       "checksum": "d7c3df0a7c2e231b24fe13b45f412c1a"
     },
     "R/lait_modules/mod_stat_n_charts.R": {
-      "checksum": "c410dfbb7fa53a7d05435333399b29fe"
+      "checksum": "914c83557b4f5e3cf8bdd6d3d74c591f"
     },
     "R/lait_modules/mod_stat_n_table.R": {
-      "checksum": "311b090a7ea3897f1f5a5e997a1fc7aa"
+      "checksum": "370e86fd56e2048dee0e684cace01413"
     },
     "R/ui_panels/accessibility_statement.R": {
       "checksum": "4a367dc3a110cf76b091c13b6924d690"
@@ -6278,19 +6331,19 @@
       "checksum": "8de17a5f34c22284813fd01b8c2050bb"
     },
     "renv.lock": {
-      "checksum": "9b89468519d8d49fa27d0e584c15931f"
+      "checksum": "f9dc7d53be3bbfe45ec2ace986e20d98"
     },
     "server.R": {
-      "checksum": "399abc52e0450164bac964147a33e97e"
+      "checksum": "f43fc67327b6db1cd3959de0b6c7fc5e"
     },
     "tests/testthat.R": {
       "checksum": "935f216b013d0914cf23ab906e88f3a8"
     },
     "tests/testthat/_snaps/windows-4.4/UI-mod_la_lvl_table/la-charts-la_bar_chart.png": {
-      "checksum": "aeaf6473d395fbd2923bbe34b5404b0b"
+      "checksum": "a9a27208c7a0b62d14992a584e306e6e"
     },
     "tests/testthat/_snaps/windows-4.4/UI-mod_la_lvl_table/la-charts-la_line_chart.png": {
-      "checksum": "afb230ffe9f87754fb24ed003dc221c9"
+      "checksum": "50c079339758266e4cb8e8b807f6dee1"
     },
     "tests/testthat/fn_helper_functions_tests.R": {
       "checksum": "2cb95c06d8d860641f469afe4946e82c"
@@ -6335,7 +6388,7 @@
       "checksum": "75de91500b530ac36463dbbbc3da7779"
     },
     "ui.R": {
-      "checksum": "658527265f92d59f8e769eefe0e6cf76"
+      "checksum": "202323681a4f70160c1801e84febdb01"
     },
     "www/cookie-consent.js": {
       "checksum": "69c388f33fc14dcdbe937bcea66c379f"
@@ -6344,7 +6397,7 @@
       "checksum": "c23764dae2d73a45a55815d0327be6cb"
     },
     "www/dfe_shiny_gov_style.css": {
-      "checksum": "a35a784aa1984b31644ea34e8c2c5557"
+      "checksum": "2f9170b4c2fa20ab4c634bdf27abe428"
     },
     "www/dfefavicon.png": {
       "checksum": "179db108199253ed0617024df291473b"
