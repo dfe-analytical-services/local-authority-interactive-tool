@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Statistical Neighbour Level page ---------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Low birth weight"
+selected_topic <- "Children's Service Finance"
+selected_indicator <- "Total Services for Young People  (finance) - Gross"
 selected_la <- "Barking and Dagenham"
 
 
@@ -72,11 +72,7 @@ all_la_table <- all_la_long |>
     names_from = Years,
     values_from = values_num,
   ) |>
-  dplyr::left_join(all_la_ranked, by = "LA and Regions") |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = c("LA Number", "Rank")
-  )
+  dplyr::left_join(all_la_ranked, by = "LA and Regions")
 
 
 # All LA Level LA table -------------------------------------------------------
@@ -88,7 +84,11 @@ all_la_la_table <- all_la_table |>
 dfe_reactable(
   all_la_la_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(all_la_la_table, num_exclude = "LA Number"),
+  columns = align_reactable_cols(all_la_la_table,
+    num_exclude = "LA Number",
+    categorical = "Rank",
+    indicator_dps = indicator_dps
+  ),
   rowStyle = function(index) {
     highlight_selected_row(index, all_la_la_table, selected_la)
   },
@@ -106,7 +106,7 @@ all_la_region_table <- all_la_table |>
       `LA and Regions` %in% c("London (Inner)", "London (Outer)") &
         rowSums(
           !is.na(
-            dplyr::select(data, -c(`LA Number`, `LA and Regions`))
+            dplyr::select(all_la_table, -c(`LA Number`, `LA and Regions`))
           )
         ) == 0
     )
@@ -120,7 +120,11 @@ dfe_reactable(
   all_la_region_table,
   # Create the reactable with specific column alignments
   columns = modifyList(
-    align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+    align_reactable_cols(all_la_region_table,
+      num_exclude = "LA Number",
+      categorical = "Rank",
+      indicator_dps = indicator_dps
+    ),
     # Remove all column header names
     setNames(
       lapply(

@@ -25,6 +25,7 @@ ui <- function(input, output, session) {
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
+    tags$head(htmltools::includeScript("www/custom_js.js")),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines

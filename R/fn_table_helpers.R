@@ -210,24 +210,30 @@ is_numeric_or_na <- function(col_data) {
 #' @examples
 #' align_reactable_cols(mtcars)
 #' align_reactable_cols(mtcars, num_exclude = c("mpg"), categorical = c("cyl"))
-align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
+align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL, indicator_dps) {
   aligned_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
-    if ((is_numeric_or_na(col_data) && !(col %in% num_exclude)) || (col %in% categorical)) {
+    if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
       # Right-align columns that contain numbers or are all NA
       reactable::colDef(
         align = "right",
         headerClass = "bar-sort-header",
         html = TRUE,
-        na = "NA"
+        na = "NA",
+        sortable = TRUE,
+        sortNALast = TRUE,
+        cell = function(value) {
+          pretty_num(value, dp = indicator_dps)
+        }
       )
-    } else {
-      # Default left-alignment for other columns
+    } else if (col %in% categorical) {
       reactable::colDef(
-        align = "left",
+        align = "right",
         headerClass = "bar-sort-header",
         html = TRUE,
-        na = "NA"
+        na = "NA",
+        sortable = TRUE,
+        sortNALast = TRUE
       )
     }
   }) |>
@@ -552,4 +558,53 @@ set_min_col_width <- function(min_width = 60) {
   reactable::colDef(
     minWidth = min_width,
   )
+}
+
+
+
+# Updated function to handle an entire column for sorting
+sort_by_numeric_value <- function(df, column_name) {
+  # Helper function to convert string to numeric
+  convert_to_numeric <- function(x) {
+    x <- str_replace_all(x, ",", "") # Remove commas
+    if (str_detect(x, "billion")) {
+      as.numeric(str_replace(x, " billion", "")) * 1e9
+    } else if (str_detect(x, "million")) {
+      as.numeric(str_replace(x, " million", "")) * 1e6
+    } else {
+      as.numeric(x)
+    }
+  }
+
+  # Apply the conversion function using sapply and sort the data frame
+  df %>%
+    mutate(numeric_value = sapply(.data[[column_name]], convert_to_numeric)) %>% # Apply to the specified column
+    arrange(numeric_value) %>% # Sort by the numeric column
+    select(-numeric_value) # Optionally remove the numeric column
+}
+
+
+# Helper function to convert strings with numbers and units (e.g., million, billion) to numeric
+convert_to_numeric <- function(x) {
+  x <- stringr::str_replace_all(x, ",", "") # Remove commas
+
+  if (stringr::str_detect(x, "billion")) {
+    as.numeric(stringr::str_replace(x, " billion", "")) * 1e9 # Convert billion
+  } else if (stringr::str_detect(x, "million")) {
+    as.numeric(stringr::str_replace(x, " million", "")) * 1e6 # Convert million
+  } else {
+    as.numeric(x) # Convert plain numbers
+  }
+}
+
+# Function to sort a vector of mixed numeric and labeled values
+sort_numeric_vector <- function(vec) {
+  # Convert the vector to numeric values using sapply
+  numeric_vec <- sapply(vec, convert_to_numeric)
+
+  # Sort the original vector based on the numeric values
+  sorted_indices <- order(numeric_vec, na.last = TRUE) # Get indices for sorting
+  sorted_vec <- vec[sorted_indices] # Sort original vector based on indices
+
+  sorted_vec # Return the sorted vector
 }
