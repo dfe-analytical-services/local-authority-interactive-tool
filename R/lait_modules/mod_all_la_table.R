@@ -245,13 +245,9 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
     # LA table download -------------------------------------------------------
     Download_DataServer(
       "la_download",
-      reactive({
-        input$file_type
-      }),
-      reactive({
-        filter_la_data_all_la(all_la_table(), la_names_bds)
-      }),
-      paste0(app_inputs$indicator(), "-All-LAs-Local-Authorities")
+      reactive(input$file_type),
+      reactive(filter_la_data_all_la(all_la_table(), la_names_bds)),
+      reactive(c(app_inputs$indicator(), "All-LAs-Local-Authorities"))
     )
 
     # All LA Level Region table -----------------------------------------------
@@ -292,13 +288,9 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
     # Region table download ---------------------------------------------------
     Download_DataServer(
       "region_download",
-      reactive({
-        input$file_type
-      }),
-      reactive({
-        filter_region_data_all_la(all_la_table(), la_names_bds)
-      }),
-      paste0(app_inputs$indicator(), "-All-LAs-Regions")
+      reactive(input$file_type),
+      reactive(filter_region_data_all_la(all_la_table(), la_names_bds)),
+      reactive(c(app_inputs$indicator(), "All-LAs-Regions"))
     )
   })
 }

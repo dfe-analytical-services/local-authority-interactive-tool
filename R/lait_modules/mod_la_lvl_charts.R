@@ -158,12 +158,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       "line_download",
       reactive(input$file_type),
       reactive(la_line_chart()),
-      reactive(paste0(
-        app_inputs$la(),
-        "-",
-        app_inputs$indicator(),
-        "-LA-Level-Line-Chart"
-      ))
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
     )
   })
 }
