@@ -317,7 +317,7 @@ ggiraph_test_save <- ggiraph::girafe(
 # )
 
 # Save ggiraph plot as standalone html
-# htmlwidgets::saveWidget(ggiraph_test_save, "test.html")
+# htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
 # Plot

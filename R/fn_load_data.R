@@ -92,33 +92,48 @@ create_measure_key <- function(data) {
 }
 
 
-#' Generates a CSV or Excel file from the provided data and stores the
-#' export file path in a reactive values object.
+#' Generate Downloadable File Based on Data and File Type
 #'
-#' @param local A reactive values object containing a `data` attribute, which
-#'   holds the data to be exported, and an `export_file` attribute to store
-#'   the file path of the generated export.
-#' @param ext_input A character string indicating the desired file format.
-#'   It should be either "CSV (Up to 5.47 MB)" for CSV format or any other
-#'   string for Excel format (XLSX).
+#' This function generates a temporary file for download based on the provided
+#' data and file type. Supported file types include CSV, XLSX, PNG, and HTML.
+#' The function writes the data to the corresponding file format, and returns
+#' the file path for download.
 #'
-#' @return NULL. This function modifies the `local` reactive values object to
-#'   store the path of the generated export file.
+#' @param data A dataset or object to be saved, which can be a data frame or
+#'        a reactive list containing specific data for charts or widgets.
+#' @param file_type A string specifying the desired file type for download.
+#'        Supported types are: "csv", "xlsx", "png", and "html". This string
+#'        is matched case-insensitively.
 #'
-#' @details The function creates a temporary file in the system's
-#'   temporary directory. If the user selects CSV format, it writes the
-#'   data to a CSV file. If the user selects Excel format, it writes
-#'   the data to an Excel file with automatic column widths.
+#' @return A character string representing the path to the generated file.
+#'         The file will be saved temporarily with the appropriate extension
+#'         based on the provided `file_type`.
+#'
+#' @details
+#' The function handles multiple file types as follows:
+#' - For `"csv"`, it writes the data to a CSV file without row names.
+#' - For `"xlsx"`, it saves the data as an Excel file with auto column widths.
+#' - For `"png"`, it saves a ggplot object to a PNG file with specified size.
+#' - For `"html"`, it saves an HTML widget to an HTML file.
+#' If an unsupported file type is provided, the function returns an error.
 #'
 #' @examples
-#' # Example of using generate_csv in a download handler
-#' generate_csv(local_values, input$file_type)
+#' \dontrun{
+#' # Save a data frame as a CSV file
+#' generate_download_file(mtcars, "csv")
+#'
+#' # Save a ggplot chart as PNG
+#' plot_data <- list(png = ggplot(mtcars, aes(mpg, wt)) +
+#'   geom_point())
+#' generate_download_file(plot_data, "png")
+#' }
 #'
 generate_download_file <- function(data, file_type) {
   out <- tempfile(fileext = dplyr::case_when(
     grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
     grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
     grepl("png", file_type, ignore.case = TRUE) ~ ".png",
+    grepl("html", file_type, ignore.case = TRUE) ~ ".html",
     TRUE ~ "Error"
   ))
 
@@ -126,39 +141,49 @@ generate_download_file <- function(data, file_type) {
     write.csv(data, file = out, row.names = FALSE)
   } else if (grepl("xlsx", file_type, ignore.case = TRUE)) {
     openxlsx::write.xlsx(data, file = out, colWidths = "Auto")
+
+    # For charts we pull the relevant object from the reactive list to be saved
   } else if (grepl("png", file_type, ignore.case = TRUE)) {
-    ggplot2::ggsave(filename = out, plot = data, width = 8.5, height = 6)
+    ggplot2::ggsave(filename = out, plot = data$png, width = 8.5, height = 6)
+  } else if (grepl("html", file_type, ignore.case = TRUE)) {
+    htmlwidgets::saveWidget(widget = data$html, file = out)
   }
 
   out
 }
 
 
-#' Creates a download handler for exporting data in either CSV or Excel
-#' format from a Shiny application.
+#' Create Download Handler for Shiny Application
 #'
-#' @param local A reactive values object containing the path to the
-#'   export file in `local$export_file`.
-#' @param ext_input A reactive expression that returns the file format
-#'   selected by the user (either "CSV (Up to 5.47 MB)" or another value
-#'   for Excel format).
-#' @param table_name_prefix A character string used as a prefix for the
-#'   download filename, typically indicating the content of the data.
+#' This function creates a `downloadHandler` for use in a Shiny app, allowing
+#' users to download a file in the specified format. The file name is generated
+#' dynamically based on the provided extension input and table name prefix.
 #'
-#' @return A Shiny `downloadHandler` that provides the necessary
-#'   functionality for file downloading.
+#' @param export_file A string representing the file path of the file to be
+#'        downloaded. This should be a pre-generated file ready for download.
+#' @param ext_input A reactive expression that returns the file type selected
+#'        by the user. Supported types are: "xlsx", "csv", "png", and "html".
+#'        The file extension is matched case-insensitively.
+#' @param table_name_prefix A reactive expression returning a vector of strings
+#'        that represent parts of the file name. These are concatenated with
+#'        hyphens (`-`) to form the base of the download file name.
 #'
-#' @details The filename for the downloaded file is generated based on
-#'   the user's selected format and includes the current date. A notification
-#'   is displayed to the user while the file is being generated, particularly
-#'   for Excel files that may take longer to create. The contents of the
-#'   file are copied from the temporary export file stored in `local`.
+#' @return A `downloadHandler` object for use in the server function of a
+#'         Shiny app. This handler will allow the user to download a file
+#'         with the desired format and name.
+#'
+#' @details
+#' The filename is generated based on the table name prefix and current date,
+#' with the appropriate file extension determined by the user's selection.
+#' Supported extensions are: `.xlsx`, `.csv`, `.png`, and `.html`. The content
+#' of the file is copied from `export_file`, and a notification is shown to
+#' indicate that the file is being generated.
 #'
 #' @examples
-#' # Example of creating a download handler for a CSV or Excel export
-#' output$download <- create_download_handler(local_values, reactive({
-#'   input$file_type
-#' }), "Data")
+#' \dontrun{
+#' # Create a download handler for a CSV file
+#' create_download_handler("path/to/file.csv", reactive("csv"), reactive("data-table"))
+#' }
 #'
 create_download_handler <- function(export_file, ext_input, table_name_prefix) {
   downloadHandler(
@@ -167,6 +192,7 @@ create_download_handler <- function(export_file, ext_input, table_name_prefix) {
         grepl("xlsx", ext_input(), ignore.case = TRUE) ~ ".xlsx",
         grepl("csv", ext_input(), ignore.case = TRUE) ~ ".csv",
         grepl("png", ext_input(), ignore.case = TRUE) ~ ".png",
+        grepl("html", ext_input(), ignore.case = TRUE) ~ ".html",
         TRUE ~ "Error"
       )
       paste0(paste(table_name_prefix(), collapse = "-"), "-", Sys.Date(), file_ext)
@@ -180,20 +206,40 @@ create_download_handler <- function(export_file, ext_input, table_name_prefix) {
 }
 
 
-#' Create a File Type Selection Input with a Custom Input ID
+#' Generate a Radio Button Input for File Type Selection
 #'
-#' This function generates a radio button input for selecting file formats
-#' (CSV or XLSX) with a fixed label, hint, choices, and default selection.
+#' This function creates a radio button input for selecting the download file
+#' format in a Shiny application. The label, hint, and choices for the radio
+#' button are dynamically generated based on the type of file being downloaded
+#' (either a data table or plot).
 #'
-#' @param input_id The unique input ID for the radio button input.
+#' @param input_id A string representing the input ID for the radio button,
+#'        which will be used to access the selected file type in the Shiny
+#'        server logic.
+#' @param file_type A string that specifies the type of file being downloaded.
+#'        It can either be "table" (for downloading data tables) or any other
+#'        string (for downloading plots). Defaults to "table".
 #'
-#' @return A `radio_button_Input` object for use in a Shiny UI.
+#' @return A `shinyGovstyle::radio_button_Input` object to be included in the
+#'         Shiny UI, allowing the user to choose between available file formats
+#'         for the download.
 #'
-#' @importFrom shinyGovstyle radio_button_Input
+#' @details
+#' When the `file_type` is "table", the user will have the option to select
+#' between "CSV" and "XLSX" file formats. For other file types, the user can
+#' select between "PNG" and "HTML". The default selected option is "CSV" for
+#' tables and "PNG" for plots. The hint label displayed below the input will
+#' provide guidance based on the type of download.
 #'
 #' @examples
-#' # Using the function to create a file type input with a custom ID
-#' file_type_input("custom_file_type_id")
+#' \dontrun{
+#' # Generate file type selection for a table
+#' file_type_input_btn("file_type", file_type = "table")
+#'
+#' # Generate file type selection for a plot
+#' file_type_input_btn("file_type", file_type = "plot")
+#' }
+#'
 file_type_input_btn <- function(input_id, file_type = "table") {
   shinyGovstyle::radio_button_Input(
     inputId = input_id,

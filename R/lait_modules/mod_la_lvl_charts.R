@@ -101,7 +101,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       bds_metrics, stat_n_la
     )
 
-    # Build main plot
+    # Build main static plot
     la_line_chart <- reactive({
       la_long() |>
         ggplot2::ggplot() +
@@ -130,8 +130,8 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         custom_theme()
     })
 
-    # LA Level line chart plot ----------------------------------
-    output$line_chart <- ggiraph::renderGirafe({
+    # Build interactive line chart
+    interactive_line_chart <- reactive({
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(la_long()),
@@ -153,11 +153,16 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
+    # LA Level line chart plot ------------------------------------------------
+    output$line_chart <- ggiraph::renderGirafe({
+      interactive_line_chart()
+    })
+
     # Download handler for the line chart
     Download_DataServer(
       "line_download",
       reactive(input$file_type),
-      reactive(la_line_chart()),
+      reactive(list("png" = la_line_chart(), "html" = interactive_line_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
     )
   })
