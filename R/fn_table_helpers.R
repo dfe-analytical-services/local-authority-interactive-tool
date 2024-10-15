@@ -116,7 +116,7 @@ pretty_num_table <- function(data,
   data |>
     dplyr::mutate(dplyr::across(
       .cols = dplyr::all_of(cols_to_include),
-      ~ sapply(., pretty_num, ...)
+      ~ sapply(., dfeR::pretty_num, ...)
     ))
 }
 
@@ -156,7 +156,7 @@ dfe_reactable <- function(data, ...) {
       headerClass = "bar-sort-header",
       html = TRUE,
       na = "NA",
-      minWidth = 50,
+      minWidth = 65,
       align = "left"
     ),
     ...
@@ -191,60 +191,61 @@ is_numeric_or_na <- function(col_data) {
 }
 
 
-#' Align columns in a reactable based on data type
-#'
-#' This function generates alignment settings for each column in a reactable
-#' table. Columns containing numeric values or `NA` values will be right-aligned
-#' unless excluded. Categorical columns are also aligned according to the
-#' provided argument.
-#'
-#' @param data A data frame containing the table data.
-#' @param num_exclude A vector of column names to exclude from right alignment
-#' for numeric values or `NA` values. Default is `NULL`.
-#' @param categorical A vector of column names to be treated as categorical for
-#' alignment. Default is `NULL`.
-#'
-#' @return A named list of `colDef` objects defining alignment for each column
-#' in the reactable.
-#'
-#' @examples
-#' align_reactable_cols(mtcars)
-#' align_reactable_cols(mtcars, num_exclude = c("mpg"), categorical = c("cyl"))
-align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL) {
-  aligned_cols <- lapply(names(data), function(col) {
+# Helper function to format numeric columns
+format_reactable_num_col <- function(col, indicator_dps) {
+  reactable::colDef(
+    align = "right",
+    headerClass = "bar-sort-header",
+    html = TRUE,
+    na = "NA",
+    sortable = TRUE,
+    sortNALast = TRUE,
+    cell = function(value) {
+      dfeR::pretty_num(value, dp = indicator_dps)
+    }
+  )
+}
+
+# Helper function to format categorical columns
+format_reactable_cat_col <- function() {
+  reactable::colDef(
+    align = "right",
+    headerClass = "bar-sort-header",
+    html = TRUE,
+    na = "NA",
+    sortable = TRUE,
+    sortNALast = TRUE
+  )
+}
+
+# Helper function to set minimum column widths
+set_custom_default_col_widths <- function(...) {
+  list(
+    `LA Number` = set_min_col_width(80),
+    `LA and Regions` = set_min_col_width(100),
+    `Change from previous year` = set_min_col_width(90),
+    ...
+  )
+}
+
+
+# Main function to format numeric and categorical columns
+format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, categorical = NULL) {
+  formatted_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
-    if ((is_numeric_or_na(col_data) && !(col %in% num_exclude)) || (col %in% categorical)) {
-      # Right-align columns that contain numbers or are all NA
-      reactable::colDef(
-        align = "right",
-        headerClass = "bar-sort-header",
-        html = TRUE,
-        na = "NA"
-      )
-    } else {
-      # Default left-alignment for other columns
-      reactable::colDef(
-        align = "left",
-        headerClass = "bar-sort-header",
-        html = TRUE,
-        na = "NA"
-      )
+    if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
+      # Format numeric columns
+      format_reactable_num_col(col, indicator_dps)
+    } else if (col %in% categorical) {
+      # Format categorical columns
+      format_reactable_cat_col()
     }
   }) |>
     setNames(names(data))
 
-  # Merge in default min width for LA and Regions col
-  if ("LA and Regions" %in% names(data)) {
-    aligned_cols <- utils::modifyList(
-      aligned_cols,
-      list(
-        `LA and Regions` = set_min_col_width(100)
-      )
-    )
-  }
-
-  aligned_cols
+  formatted_cols
 }
+
 
 
 #' Create a Statistics Table
@@ -526,9 +527,77 @@ quartile_banding_col_def <- function(data) {
 }
 
 
-
+#' Sets a minimum column width for Reactable tables to prevent text wrapping.
+#'
+#' @param min_width A numeric value specifying the minimum width of the column
+#'   in pixels. Default is set to 60 pixels.
+#'
+#' @return A `colDef` object from the `reactable` package that applies the
+#'   specified minimum width to a column. This helps maintain a consistent
+#'   appearance in tables and prevents cell content from wrapping onto
+#'   additional lines.
+#'
+#' @examples
+#' # Example usage in a Reactable table definition
+#' reactable::reactable(
+#'   data = my_data,
+#'   columns = list(
+#'     column1 = set_min_col_width(80),
+#'     column2 = set_min_col_width(100)
+#'   )
+#' )
+#'
 set_min_col_width <- function(min_width = 60) {
   reactable::colDef(
-    minWidth = min_width
+    minWidth = min_width,
   )
+}
+
+
+
+# Updated function to handle an entire column for sorting
+sort_by_numeric_value <- function(df, column_name) {
+  # Helper function to convert string to numeric
+  convert_to_numeric <- function(x) {
+    x <- str_replace_all(x, ",", "") # Remove commas
+    if (str_detect(x, "billion")) {
+      as.numeric(str_replace(x, " billion", "")) * 1e9
+    } else if (str_detect(x, "million")) {
+      as.numeric(str_replace(x, " million", "")) * 1e6
+    } else {
+      as.numeric(x)
+    }
+  }
+
+  # Apply the conversion function using sapply and sort the data frame
+  df %>%
+    mutate(numeric_value = sapply(.data[[column_name]], convert_to_numeric)) %>% # Apply to the specified column
+    arrange(numeric_value) %>% # Sort by the numeric column
+    select(-numeric_value) # Optionally remove the numeric column
+}
+
+
+# Helper function to convert strings with numbers and units (e.g., million, billion) to numeric
+convert_to_numeric <- function(x) {
+  x <- stringr::str_replace_all(x, ",", "") # Remove commas
+
+  if (stringr::str_detect(x, "billion")) {
+    as.numeric(stringr::str_replace(x, " billion", "")) * 1e9 # Convert billion
+  } else if (stringr::str_detect(x, "million")) {
+    as.numeric(stringr::str_replace(x, " million", "")) * 1e6 # Convert million
+  } else {
+    as.numeric(x) # Convert plain numbers
+  }
+}
+
+# Function to sort a vector of mixed numeric and labeled values
+sort_numeric_vector <- function(vec) {
+  # Convert the vector to numeric values using sapply
+  numeric_vec <- sapply(vec, convert_to_numeric)
+
+  # Sort the original vector based on the numeric values
+  sorted_indices <- order(numeric_vec, na.last = TRUE) # Get indices for sorting
+  sorted_vec <- vec[sorted_indices] # Sort original vector based on indices
+
+  sorted_vec # Return the sorted vector
 }

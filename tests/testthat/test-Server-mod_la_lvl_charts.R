@@ -21,7 +21,7 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
     session$flushReact()
 
     # Retrieve the output plot
-    output_plot <- la_line_chart()
+    output_plot <- interactive_line_chart()
 
     # Check that the output is a ggiraph object
     testthat::expect_true(inherits(output_plot, "girafe"))
@@ -69,7 +69,7 @@ testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct 
     session$flushReact()
 
     # Retrieve the output plot
-    output_plot <- la_bar_chart()
+    output_plot <- interactive_bar_chart()
 
     # Check that the output is a ggiraph object
     testthat::expect_true(inherits(output_plot, "girafe"))

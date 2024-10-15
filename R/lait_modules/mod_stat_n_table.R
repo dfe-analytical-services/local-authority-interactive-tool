@@ -224,11 +224,7 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
         tidyr::pivot_wider(
           id_cols = c("LA Number", "LA and Regions"),
           names_from = Years,
-          values_from = values_num,
-        ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
+          values_from = values_num
         )
     })
   })
@@ -315,9 +311,13 @@ StatN_LASNsTableServer <- function(id,
       # Create table with correct formatting
       dfe_reactable(
         stat_n_sns_table,
-        columns = align_reactable_cols(
-          stat_n_sns_table,
-          num_exclude = "LA Number"
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            stat_n_sns_table,
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, stat_n_sns_table, app_inputs$la())
@@ -372,7 +372,7 @@ StatN_GeogCompTableUI <- function(id) {
 #' @details The module uses \code{\link{StatN_DataServer}} to fetch the formatted
 #' statistical data and \code{\link{Get_LACleanRegionServer}} to retrieve the
 #' LA's cleaned region. The table compares values across geographic areas,
-#' and column alignments are handled using a custom \code{align_reactable_cols}
+#' and column alignments are handled using a custom \code{format_num_reactable_cols}
 #' function.
 #'
 StatN_GeogCompTableServer <- function(id,
@@ -418,7 +418,14 @@ StatN_GeogCompTableServer <- function(id,
       dfe_reactable(
         stat_n_comp_table,
         # Create the reactable with specific column alignments
-        columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            stat_n_comp_table,
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
+        ),
         pagination = FALSE
       )
     })
@@ -440,12 +447,11 @@ StatN_GeogCompTableServer <- function(id,
 #' @importFrom reactable reactableOutput
 #' @importFrom bslib card card_body
 #' @export
-
+#'
 StatN_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    class = "well",
     style = "overflow-y: visible;",
     bslib::card(
       # bslib::card_header(""),
@@ -576,24 +582,23 @@ StatN_StatsTableServer <- function(id,
 
     # Main stats table
     output$output_table <- reactable::renderReactable({
-      stat_n_stats_output <- stat_n_stats_table() |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          include_columns = c("Change from previous year")
-        )
+      stat_n_stats_output <- stat_n_stats_table()
 
       dfe_reactable(
         stat_n_stats_output |>
           dplyr::select(-Polarity),
         columns = modifyList(
           # Create the reactable with specific column alignments
-          align_reactable_cols(
-            stat_n_stats_output,
+          format_num_reactable_cols(
+            stat_n_stats_output |>
+              dplyr::select(-Polarity),
+            get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding")
+            categorical = c("Trend", "Quartile Banding", "National Rank")
           ),
           # Define specific formatting for the Trend and Quartile Banding columns
           list(
+            set_custom_default_col_widths(),
             Trend = reactable::colDef(
               cell = trend_icon_renderer
             ),

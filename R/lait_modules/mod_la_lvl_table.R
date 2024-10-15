@@ -123,10 +123,17 @@ LA_LevelTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header("Local Authority, Region and England"),
-      bslib::card_body(
+    bslib::navset_card_tab(
+      id = "la_lvl_table_tabs",
+      bslib::nav_panel(
+        "Table",
+        bslib::card_header("Local Authority, Region and England"),
         reactable::reactableOutput(ns("la_table"))
+      ),
+      bslib::nav_panel(
+        "Download data",
+        file_type_input_btn(ns("file_type")),
+        Download_DataUI(ns("la_download"), "LA Table"),
       )
     )
   )
@@ -168,17 +175,30 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           names_from = Years,
           values_from = values_num
         ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
         dplyr::arrange(`LA and Regions`)
     })
 
+
+    # LA table download -------------------------------------------------------
+    Download_DataServer(
+      "la_download",
+      reactive(input$file_type),
+      reactive(la_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Local-Authority-View"))
+    )
+
+    # Reactable table output
     output$la_table <- reactable::renderReactable({
       dfe_reactable(
         la_table(),
-        columns = align_reactable_cols(la_table(), num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            la_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
+        ),
         rowStyle = function(index) {
           highlight_selected_row(index, la_table(), app_inputs$la())
         }
@@ -199,20 +219,19 @@ LA_StatsTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::layout_column_wrap(
-      width = NULL,
-      style = htmltools::css(
-        grid_template_columns = "3fr 2fr",
-        max_width = "100%"
-      ),
-      bslib::card(
-        bslib::card_body(
+    bslib::card(
+      bslib::layout_column_wrap(
+        width = NULL,
+        style = htmltools::css(
+          grid_template_columns = "3fr 2fr",
+          max_width = "100%"
+        ),
+        div(
+          bslib::card_header("General Statistics", style = "color: #0000;"),
           reactable::reactableOutput(ns("la_stats"))
-        )
-      ),
-      bslib::card(
-        bslib::card_header("Quartile bands"),
-        bslib::card_body(
+        ),
+        div(
+          bslib::card_header("Quartile bands"),
           reactable::reactableOutput(ns("la_quartiles"))
         )
       )
@@ -312,14 +331,16 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           dplyr::select(!dplyr::ends_with("including"), -Polarity),
         columns = modifyList(
           # Create the reactable with specific column alignments
-          align_reactable_cols(
+          format_num_reactable_cols(
             la_stats_table() |>
-              dplyr::select(-Polarity),
+              dplyr::select(!dplyr::ends_with("including"), -Polarity),
+            get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding")
+            categorical = c("Trend", "Quartile Banding", "Latest National Rank")
           ),
           # Style Quartile Banding column with colour
           list(
+            set_custom_default_col_widths(),
             `Quartile Banding` = reactable::colDef(
               style = quartile_banding_col_def(la_stats_table())
             ),
@@ -336,9 +357,10 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       dfe_reactable(
         la_stats_table() |>
           dplyr::select(dplyr::ends_with("including"), -Polarity),
-        columns = align_reactable_cols(
+        columns = format_num_reactable_cols(
           la_stats_table() |>
-            dplyr::select(dplyr::ends_with("including"), -Polarity)
+            dplyr::select(dplyr::ends_with("including"), -Polarity),
+          get_indicator_dps(filtered_bds())
         )
       )
     })

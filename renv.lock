@@ -587,28 +587,40 @@
     },
     "dfeR": {
       "Package": "dfeR",
-      "Version": "0.3.1",
+      "Version": "0.5.1",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
       "RemoteUsername": "dfe-analytical-services",
       "RemoteRepo": "dfeR",
       "RemoteRef": "main",
-      "RemoteSha": "f0823781f2fa9db697ae2861a8fa8dc2a29fefcc",
+      "RemoteSha": "bb09eda8f55258e34f25d94f401faa139ec781d6",
+      "RemoteHost": "api.github.com",
       "Requirements": [
-        "lifecycle"
+        "R",
+        "dplyr",
+        "emoji",
+        "httr",
+        "jsonlite",
+        "lifecycle",
+        "magrittr",
+        "renv",
+        "rlang",
+        "tidyselect",
+        "usethis",
+        "utils",
+        "withr"
       ],
-      "Hash": "642015c8e376326573dd33c9f7d3fa79"
+      "Hash": "93f6c19a253e2c836614972f5966c631"
     },
     "dfeshiny": {
       "Package": "dfeshiny",
-      "Version": "0.4.1.9000",
+      "Version": "0.4.2",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteUsername": "dfe-analytical-services",
       "RemoteRepo": "dfeshiny",
       "RemoteRef": "main",
-      "RemoteSha": "0de4922658c293ea31048a2e63a49c6111162c16",
+      "RemoteSha": "a97980297b9d45afd5100c424a39c0e180e63524",
       "RemoteHost": "api.github.com",
       "Requirements": [
         "R",
@@ -623,7 +635,7 @@
         "stringr",
         "styler"
       ],
-      "Hash": "f6a1fd4632a0a75d84b24a77cc098602"
+      "Hash": "26a470de138bb9d64abb9f93b6c4b0ec"
     },
     "diffobj": {
       "Package": "diffobj",
@@ -704,6 +716,19 @@
         "rlang"
       ],
       "Hash": "bb0eec2fe32e88d9e2836c2f73ea2077"
+    },
+    "emoji": {
+      "Package": "emoji",
+      "Version": "15.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "glue",
+        "stringr",
+        "tibble"
+      ],
+      "Hash": "961ccf8e88d1a8add09f9c811f4d7e29"
     },
     "evaluate": {
       "Package": "evaluate",
@@ -1351,6 +1376,23 @@
         "askpass"
       ],
       "Hash": "2bcca3848e4734eb3b16103bc9aa4b8e"
+    },
+    "openxlsx": {
+      "Package": "openxlsx",
+      "Version": "4.2.7.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "grDevices",
+        "methods",
+        "stats",
+        "stringi",
+        "utils",
+        "zip"
+      ],
+      "Hash": "14304e44a0f90fa2d0f905472333c561"
     },
     "pillar": {
       "Package": "pillar",

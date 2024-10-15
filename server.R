@@ -296,6 +296,30 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
+  # ===========================================================================
+  # All LA Level Page
+  # ===========================================================================
+  # User Inputs ===============================================================
+  all_la_app_inputs <- appInputsServer("all_la_inputs", shared_values)
+
+  # Header
+  PageHeaderServer("all_la_header", all_la_app_inputs, "All LA View")
+
+  # All LA tables =============================================================
+  # LA and Region table -------------------------------------------------------
+  AllLA_TableServer(
+    "all_la_table",
+    all_la_app_inputs,
+    bds_metrics,
+    la_names_bds
+  )
+
+  # All LA Metadata ===========================================================
+  LA_LevelMetaServer(
+    "all_la_meta",
+    all_la_app_inputs$indicator,
+    metrics_clean
+  )
 
   # User guide ================================================================
   InternalLinkServer(

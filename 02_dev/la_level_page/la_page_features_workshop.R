@@ -83,10 +83,6 @@ la_diff <- la_long |>
 # Join difference and pivot wider to recreate LAIT table
 la_table <- la_long |>
   dplyr::bind_rows(la_diff) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = "LA Number"
-  ) |>
   dplyr::mutate(Values = dplyr::case_when(
     is.na(values_num) ~ Values,
     `Years` == "Change from previous year" ~ as.character(values_num),
@@ -103,7 +99,14 @@ la_table <- la_long |>
 dfe_reactable(
   la_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(la_table, num_exclude = "LA Number"),
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      la_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number"
+    ),
+    set_custom_default_col_widths(),
+  ),
   rowStyle = function(index) {
     highlight_selected_row(index, la_table, selected_la)
   }
@@ -210,11 +213,7 @@ la_stats_table <- data.frame(
   "(D) Up to and including" = la_quartile_bands[["100%"]],
   "Polarity" = la_indicator_polarity,
   check.names = FALSE
-) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = c("LA Number", "Trend", "Latest National Rank")
-  )
+)
 
 if (la_indicator_polarity %notin% c("High", "Low")) {
   la_stats_table <- la_stats_table |>
@@ -235,14 +234,16 @@ dfe_reactable(
   la_stats_table |> dplyr::select(-Polarity),
   columns = modifyList(
     # Create the reactable with specific column alignments
-    align_reactable_cols(
+    format_num_reactable_cols(
       la_stats_table |>
         dplyr::select(-Polarity),
+      get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding")
+      categorical = c("Trend", "Quartile Banding", "Latest National Rank")
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
+      set_custom_default_col_widths(),
       `Quartile Banding` = reactable::colDef(
         style = quartile_banding_col_def(la_stats_table)
       ),
@@ -297,7 +298,7 @@ vertical_hover <- lapply(
 )
 
 # Plotting interactive graph
-ggiraph::girafe(
+ggiraph_test_save <- ggiraph::girafe(
   ggobj = (la_line_chart + vertical_hover),
   width_svg = 8.5,
   options = generic_ggiraph_options(
@@ -308,6 +309,16 @@ ggiraph::girafe(
   fonts = list(sans = "Arial")
 )
 
+# Saving plot as a png
+ggsave(
+  "test.png",
+  plot = la_line_chart, # Use the ggplot object inside the girafe output
+  width = 8.5,
+  height = 6
+)
+
+# Save ggiraph plot as standalone html
+htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
 # Plot

@@ -89,10 +89,6 @@ stat_n_table <- stat_n_long |>
     id_cols = c("LA Number", "LA and Regions"),
     names_from = Years,
     values_from = values_num,
-  ) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = "LA Number"
   )
 
 # Statistical Neighbour Level SN table ----------------------------------------
@@ -104,7 +100,14 @@ stat_n_sn_table <- stat_n_table |>
 dfe_reactable(
   stat_n_sn_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(stat_n_sn_table, num_exclude = "LA Number"),
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      stat_n_sn_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number"
+    ),
+    set_custom_default_col_widths()
+  ),
   rowStyle = function(index) {
     highlight_selected_row(index, stat_n_sn_table, selected_la)
   },
@@ -125,7 +128,14 @@ stat_n_comp_table <- stat_n_table |>
 dfe_reactable(
   stat_n_comp_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      stat_n_comp_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number"
+    ),
+    set_custom_default_col_widths()
+  ),
   pagination = FALSE
 )
 
@@ -187,25 +197,23 @@ stat_n_stats_table <- data.frame(
   "Quartile Banding" = c(stat_n_quartile, NA, NA),
   "Polarity" = stat_n_indicator_polarity,
   check.names = FALSE
-) |>
-  pretty_num_table(
-    dp = get_indicator_dps(filtered_bds),
-    include_columns = c("Change from previous year")
-  )
+)
 
 # Output stats table
 dfe_reactable(
   stat_n_stats_table |>
     dplyr::select(-Polarity),
   columns = modifyList(
-    # Create the reactable with specific column alignments
-    align_reactable_cols(
-      stat_n_stats_table,
+    format_num_reactable_cols(
+      stat_n_stats_table |>
+        dplyr::select(-Polarity),
+      get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding")
+      categorical = c("Trend", "Quartile Banding", "National Rank")
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
+      set_custom_default_col_widths(),
       Trend = reactable::colDef(
         cell = trend_icon_renderer
       ),

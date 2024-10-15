@@ -2,6 +2,8 @@
 shinytest2::load_app_env(app_dir = here::here())
 source(here::here("global.R"))
 
+options(shiny.testmode = TRUE)
+
 # Create minimal app
 minimal_ui <- shiny::fluidRow(
   title = "Minimal app",

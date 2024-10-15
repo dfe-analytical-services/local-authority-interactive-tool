@@ -16,6 +16,7 @@ test_that("1. calculate_change_from_prev_yr computes changes correctly", {
     Years = c("Change from previous year", "Change from previous year"),
     Years_num = c(2022, 2022),
     values_num = c(10, -5), # 2022-2021 change: Region1 = 90-80, Region2 = 195-190
+    Values = c(NA, NA),
     check.names = FALSE
   )
   result <- calculate_change_from_prev_yr(data_change)
@@ -32,6 +33,7 @@ test_that("2. calculate_change_from_prev_yr handles NA values in values_num", {
     Years = c("Change from previous year", "Change from previous year"),
     Years_num = c(2022, 2022),
     values_num = c(NA, -5), # NA handling should propagate to the calculation
+    Values = c(NA, NA),
     check.names = FALSE
   )
   result_na <- calculate_change_from_prev_yr(data_with_na)
@@ -48,6 +50,7 @@ test_that("3. calculate_change_from_prev_yr handles NA values in Years_num", {
     Years = c("Change from previous year"),
     Years_num = c(2021, 2022),
     values_num = c(20, -5),
+    Values = c(NA, NA),
     check.names = FALSE
   )
 
