@@ -258,10 +258,6 @@ server_dev <- function(input, output, session) {
         id_cols = c("LA Number", "LA and Regions"),
         names_from = Years,
         values_from = values_num,
-      ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = "LA Number"
       )
   })
 
@@ -272,9 +268,13 @@ server_dev <- function(input, output, session) {
 
     dfe_reactable(
       stat_n_sns_table,
-      columns = align_reactable_cols(
-        stat_n_sns_table,
-        num_exclude = "LA Number"
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          stat_n_sns_table,
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, stat_n_sns_table, input$la_input)
@@ -297,7 +297,14 @@ server_dev <- function(input, output, session) {
     dfe_reactable(
       stat_n_comp_table,
       # Create the reactable with specific column alignments
-      columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          stat_n_comp_table,
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
+      ),
       pagination = FALSE
     )
   })
@@ -367,24 +374,23 @@ server_dev <- function(input, output, session) {
 
   # Main stats table
   output$stat_n_stats_table <- reactable::renderReactable({
-    stat_n_stats_output <- stat_n_stats_table() |>
-      pretty_num_table(
-        dp = get_indicator_dps(filtered_bds$data),
-        include_columns = c("Change from previous year")
-      )
+    stat_n_stats_output <- stat_n_stats_table()
 
     dfe_reactable(
       stat_n_stats_output |>
         dplyr::select(-Polarity),
       columns = modifyList(
         # Create the reactable with specific column alignments
-        align_reactable_cols(
-          stat_n_stats_output,
+        format_num_reactable_cols(
+          stat_n_stats_output |>
+            dplyr::select(-Polarity),
+          get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding")
+          categorical = c("Trend", "Quartile Banding", "National Rank")
         ),
         # Define specific formatting for the Trend and Quartile Banding columns
         list(
+          set_custom_default_col_widths(),
           Trend = reactable::colDef(
             cell = trend_icon_renderer
           ),
