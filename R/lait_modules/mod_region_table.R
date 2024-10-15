@@ -510,6 +510,8 @@ Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
+    class = "well",
+    style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
         reactable::reactableOutput(ns("region_stats_table"))
