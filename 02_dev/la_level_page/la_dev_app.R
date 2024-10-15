@@ -240,10 +240,6 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = "LA Number"
-      ) |>
       dplyr::arrange(`LA and Regions`)
   })
 
@@ -251,10 +247,12 @@ server_dev <- function(input, output, session) {
     dfe_reactable(
       la_table(),
       columns = utils::modifyList(
-        align_reactable_cols(la_table(), num_exclude = "LA Number"),
-        list(
-          `LA and Regions` = set_min_col_width()
-        )
+        format_num_reactable_cols(
+          la_table(),
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, la_table(), input$la_input)
@@ -308,11 +306,7 @@ server_dev <- function(input, output, session) {
       la_quartile,
       la_quartile_bands,
       la_indicator_polarity
-    ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = c("LA Number", "Trend", "Latest National Rank")
-      )
+    )
 
     la_stats_table
   })
@@ -323,14 +317,16 @@ server_dev <- function(input, output, session) {
         dplyr::select(-Polarity),
       columns = modifyList(
         # Create the reactable with specific column alignments
-        align_reactable_cols(
+        format_num_reactable_cols(
           la_stats_table() |>
             dplyr::select(-Polarity),
+          get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding")
+          categorical = c("Trend", "Quartile Banding", "Latest National Rank")
         ),
         # Style Quartile Banding column with colour
         list(
+          set_custom_default_col_widths(),
           `Quartile Banding` = reactable::colDef(
             style = quartile_banding_col_def(la_stats_table())
           ),
