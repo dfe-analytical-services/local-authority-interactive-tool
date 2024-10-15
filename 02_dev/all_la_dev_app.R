@@ -221,27 +221,31 @@ server_dev <- function(input, output, session) {
 
   # Download tables
   # Store the table and export file in reactive values
-  la_local <- reactiveValues(data = NULL, export_file = NULL)
-  region_local <- reactiveValues(data = NULL, export_file = NULL)
+  la_local <- reactiveValues(export_file = NULL, data = NULL, file_type = NULL, file_name = NULL)
+  region_local <- reactiveValues(export_file = NULL, data = NULL, file_type = NULL, file_name = NULL)
 
-  # # Observe when input$file_type or all_la_table is updated and create relevant file
-  # observeEvent(c(input$file_type, all_la_table()), {
-  #   # LA table
-  #   la_local$data <- all_la_table() |>
-  #     filter_la_data_all_la(la_names_bds)
-  #
-  #   generate_file(la_local, input$file_type)
-  #
-  #   # Region table
-  #   region_local$data <- all_la_table() |>
-  #     filter_region_data_all_la(la_names_bds)
-  #
-  #   generate_file(region_local, input$file_type)
-  # })
-  #
-  # # Download handlers
-  # output$la_download <- create_download_handler(la_local, reactive(input$file_type), "AllLA_LA_table")
-  # output$region_download <- create_download_handler(region_local, reactive(input$file_type), "AllLA_Region_table")
+  # Observe when input$file_type or all_la_table is updated and create relevant file
+  observeEvent(c(input$file_type, all_la_table()), {
+    # Setting parameters
+    la_local$file_type <- input$file_type
+    la_local$file_name <- "AllLA_LA_table"
+
+    # LA table
+    la_local$data <- all_la_table() |>
+      filter_la_data_all_la(la_names_bds)
+
+    generate_download_file(la_local$data, input$file_type)
+
+    # Region table
+    region_local$data <- all_la_table() |>
+      filter_region_data_all_la(la_names_bds)
+
+    generate_download_file(region_local$data, input$file_type)
+  })
+
+  # Download handlers
+  output$la_download <- create_download_handler(la_local)
+  output$region_download <- create_download_handler(region_local)
 
   # Get chart title for All LA table name
   output$all_la_table_name <- shiny::renderUI({

@@ -192,7 +192,7 @@ is_numeric_or_na <- function(col_data) {
 
 
 # Helper function to format numeric columns
-format_reactable_numeric_col <- function(col, indicator_dps) {
+format_reactable_num_col <- function(col, indicator_dps) {
   reactable::colDef(
     align = "right",
     headerClass = "bar-sort-header",
@@ -207,7 +207,7 @@ format_reactable_numeric_col <- function(col, indicator_dps) {
 }
 
 # Helper function to format categorical columns
-format_reactable_categorical_col <- function() {
+format_reactable_cat_col <- function() {
   reactable::colDef(
     align = "right",
     headerClass = "bar-sort-header",
@@ -235,10 +235,10 @@ format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, c
     col_data <- data[[col]]
     if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
       # Format numeric columns
-      format_reactable_numeric_col(col, indicator_dps)
+      format_reactable_num_col(col, indicator_dps)
     } else if (col %in% categorical) {
       # Format categorical columns
-      format_reactable_categorical_col()
+      format_reactable_cat_col()
     }
   }) |>
     setNames(names(data))
