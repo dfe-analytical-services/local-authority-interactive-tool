@@ -69,11 +69,7 @@ Build_AllLATableServer <- function(id, filtered_bds, la_names_bds) {
           names_from = Years,
           values_from = values_num,
         ) |>
-        dplyr::left_join(all_la_ranked, by = "LA and Regions") |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = c("LA Number", "Rank")
-        )
+        dplyr::left_join(all_la_ranked, by = "LA and Regions")
     })
   })
 }
@@ -234,7 +230,15 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       dfe_reactable(
         all_la_la_table,
         # Create the reactable with specific column alignments
-        columns = align_reactable_cols(all_la_la_table, num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            all_la_la_table,
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number",
+            categorical = "Rank"
+          ),
+          set_custom_default_col_widths()
+        ),
         rowStyle = function(index) {
           highlight_selected_row(index, all_la_la_table, app_inputs$la())
         },
@@ -276,7 +280,15 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       dfe_reactable(
         all_la_region_table,
         # Create the reactable with specific column alignments
-        columns = align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            all_la_region_table,
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number",
+            categorical = "Rank"
+          ),
+          set_custom_default_col_widths()
+        ),
         rowStyle = function(index) {
           highlight_selected_row(index, all_la_region_table, all_la_region)
         },

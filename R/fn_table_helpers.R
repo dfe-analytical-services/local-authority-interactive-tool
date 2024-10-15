@@ -191,68 +191,61 @@ is_numeric_or_na <- function(col_data) {
 }
 
 
-#' Align columns in a reactable based on data type
-#'
-#' This function generates alignment settings for each column in a reactable
-#' table. Columns containing numeric values or `NA` values will be right-aligned
-#' unless excluded. Categorical columns are also aligned according to the
-#' provided argument.
-#'
-#' @param data A data frame containing the table data.
-#' @param num_exclude A vector of column names to exclude from right alignment
-#' for numeric values or `NA` values. Default is `NULL`.
-#' @param categorical A vector of column names to be treated as categorical for
-#' alignment. Default is `NULL`.
-#'
-#' @return A named list of `colDef` objects defining alignment for each column
-#' in the reactable.
-#'
-#' @examples
-#' align_reactable_cols(mtcars)
-#' align_reactable_cols(mtcars, num_exclude = c("mpg"), categorical = c("cyl"))
-align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL, indicator_dps) {
-  aligned_cols <- lapply(names(data), function(col) {
+# Helper function to format numeric columns
+format_reactable_numeric_col <- function(col, indicator_dps) {
+  reactable::colDef(
+    align = "right",
+    headerClass = "bar-sort-header",
+    html = TRUE,
+    na = "NA",
+    sortable = TRUE,
+    sortNALast = TRUE,
+    cell = function(value) {
+      dfeR::pretty_num(value, dp = indicator_dps)
+    }
+  )
+}
+
+# Helper function to format categorical columns
+format_reactable_categorical_col <- function() {
+  reactable::colDef(
+    align = "right",
+    headerClass = "bar-sort-header",
+    html = TRUE,
+    na = "NA",
+    sortable = TRUE,
+    sortNALast = TRUE
+  )
+}
+
+# Helper function to set minimum column widths
+set_custom_default_col_widths <- function(...) {
+  list(
+    `LA Number` = set_min_col_width(80),
+    `LA and Regions` = set_min_col_width(100),
+    `Change from previous year` = set_min_col_width(90),
+    ...
+  )
+}
+
+
+# Main function to format numeric and categorical columns
+format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, categorical = NULL) {
+  formatted_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
     if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
-      # Right-align columns that contain numbers or are all NA
-      reactable::colDef(
-        align = "right",
-        headerClass = "bar-sort-header",
-        html = TRUE,
-        na = "NA",
-        sortable = TRUE,
-        sortNALast = TRUE,
-        cell = function(value) {
-          dfeR::pretty_num(value, dp = indicator_dps)
-        }
-      )
+      # Format numeric columns
+      format_reactable_numeric_col(col, indicator_dps)
     } else if (col %in% categorical) {
-      reactable::colDef(
-        align = "right",
-        headerClass = "bar-sort-header",
-        html = TRUE,
-        na = "NA",
-        sortable = TRUE,
-        sortNALast = TRUE
-      )
+      # Format categorical columns
+      format_reactable_categorical_col()
     }
   }) |>
     setNames(names(data))
 
-  # Merge in default min width for LA and Regions col
-  if ("LA and Regions" %in% names(data)) {
-    aligned_cols <- utils::modifyList(
-      aligned_cols,
-      list(
-        `LA Number` = set_min_col_width(80),
-        `LA and Regions` = set_min_col_width(100),
-        `Change from previous year` = set_min_col_width(90)
-      )
-    )
-  }
-
-  aligned_cols
+  formatted_cols
 }
+
 
 
 #' Create a Statistics Table

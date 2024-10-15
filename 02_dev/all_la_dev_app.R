@@ -158,11 +158,6 @@ server_dev <- function(input, output, session) {
         id_cols = c("LA Number", "LA and Regions"),
         names_from = Years,
         values_from = values_num,
-      ) |>
-      dplyr::left_join(all_la_ranked, by = "LA and Regions") |>
-      pretty_num_table(
-        dp = get_indicator_dps(filtered_bds$data),
-        exclude_columns = c("LA Number", "Rank")
       )
   })
 
@@ -176,7 +171,15 @@ server_dev <- function(input, output, session) {
     dfe_reactable(
       all_la_la_table,
       # Create the reactable with specific column alignments
-      columns = align_reactable_cols(all_la_la_table, num_exclude = "LA Number"),
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          all_la_la_table,
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number",
+          categorical = "Rank"
+        ),
+        set_custom_default_col_widths()
+      ),
       rowStyle = function(index) {
         highlight_selected_row(index, all_la_la_table, input$la_input)
       },
@@ -200,7 +203,14 @@ server_dev <- function(input, output, session) {
     dfe_reactable(
       all_la_region_table,
       # Create the reactable with specific column alignments
-      columns = align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          all_la_region_table,
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
+      ),
       rowStyle = function(index) {
         highlight_selected_row(index, all_la_region_table, all_la_region)
       },
@@ -214,24 +224,24 @@ server_dev <- function(input, output, session) {
   la_local <- reactiveValues(data = NULL, export_file = NULL)
   region_local <- reactiveValues(data = NULL, export_file = NULL)
 
-  # Observe when input$file_type or all_la_table is updated and create relevant file
-  observeEvent(c(input$file_type, all_la_table()), {
-    # LA table
-    la_local$data <- all_la_table() |>
-      filter_la_data_all_la(la_names_bds)
-
-    generate_csv(la_local, input$file_type)
-
-    # Region table
-    region_local$data <- all_la_table() |>
-      filter_region_data_all_la(la_names_bds)
-
-    generate_csv(region_local, input$file_type)
-  })
-
-  # Download handlers
-  output$la_download <- create_download_handler(la_local, reactive(input$file_type), "AllLA_LA_table")
-  output$region_download <- create_download_handler(region_local, reactive(input$file_type), "AllLA_Region_table")
+  # # Observe when input$file_type or all_la_table is updated and create relevant file
+  # observeEvent(c(input$file_type, all_la_table()), {
+  #   # LA table
+  #   la_local$data <- all_la_table() |>
+  #     filter_la_data_all_la(la_names_bds)
+  #
+  #   generate_file(la_local, input$file_type)
+  #
+  #   # Region table
+  #   region_local$data <- all_la_table() |>
+  #     filter_region_data_all_la(la_names_bds)
+  #
+  #   generate_file(region_local, input$file_type)
+  # })
+  #
+  # # Download handlers
+  # output$la_download <- create_download_handler(la_local, reactive(input$file_type), "AllLA_LA_table")
+  # output$region_download <- create_download_handler(region_local, reactive(input$file_type), "AllLA_Region_table")
 
   # Get chart title for All LA table name
   output$all_la_table_name <- shiny::renderUI({

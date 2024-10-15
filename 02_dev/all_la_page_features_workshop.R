@@ -84,7 +84,7 @@ all_la_la_table <- all_la_table |>
 dfe_reactable(
   all_la_la_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(all_la_la_table,
+  columns = format_num_reactable_cols(all_la_la_table,
     num_exclude = "LA Number",
     categorical = "Rank",
     indicator_dps = indicator_dps
@@ -120,11 +120,13 @@ dfe_reactable(
   all_la_region_table,
   # Create the reactable with specific column alignments
   columns = modifyList(
-    align_reactable_cols(all_la_region_table,
+    format_num_reactable_cols(
+      all_la_region_table,
+      get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = "Rank",
-      indicator_dps = indicator_dps
+      categorical = "Rank"
     ),
+    set_custom_default_col_widths(),
     # Remove all column header names
     setNames(
       lapply(
