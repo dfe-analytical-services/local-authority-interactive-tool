@@ -224,7 +224,7 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
         tidyr::pivot_wider(
           id_cols = c("LA Number", "LA and Regions"),
           names_from = Years,
-          values_from = values_num,
+          values_from = values_num
         )
     })
   })

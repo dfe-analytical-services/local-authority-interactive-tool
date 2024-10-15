@@ -321,7 +321,6 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
-
   # User guide ================================================================
   InternalLinkServer(
     "la_level_link",
