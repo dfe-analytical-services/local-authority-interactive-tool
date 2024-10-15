@@ -223,7 +223,7 @@ align_reactable_cols <- function(data, num_exclude = NULL, categorical = NULL, i
         sortable = TRUE,
         sortNALast = TRUE,
         cell = function(value) {
-          pretty_num(value, dp = indicator_dps)
+          dfeR::pretty_num(value, dp = indicator_dps)
         }
       )
     } else if (col %in% categorical) {
