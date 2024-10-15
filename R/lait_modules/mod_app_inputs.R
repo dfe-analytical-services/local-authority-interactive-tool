@@ -54,25 +54,36 @@ appInputsUI <- function(id) {
 #'
 appInputsServer <- function(id, shared_values) {
   moduleServer(id, function(input, output, session) {
+    # Debounce input values to prevent looping when inputs change quickly
+    debounced_la_name <- shiny::debounce(reactive(input$la_name), 150)
+    debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 150)
+    debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
+
     # Observe and synchronise LA input across pages
     observe({
+      req(shared_values$la)
       updateSelectInput(session, "la_name", selected = shared_values$la)
     })
 
     observe({
+      req(shared_values$topic)
       updateSelectInput(session, "topic_name", selected = shared_values$topic)
     })
 
     observe({
+      req(shared_values$indicator)
       updateSelectInput(session, "indicator_name", selected = shared_values$indicator)
     })
 
     # Update Indicator dropdown for selected Topic
-    shiny::observeEvent(input$topic_name, {
+    shiny::observeEvent(debounced_topic_name(), {
+      req(debounced_topic_name())
       # Get indicator choices for selected topic
       filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(.data$Topic == input$topic_name) |>
+        dplyr::filter(.data$Topic == debounced_topic_name()) |>
         pull_uniques("Measure")
+
+      req(filtered_topic_bds)
 
       # Update the Indicator dropdown based on selected Topic
       updateSelectInput(
@@ -83,29 +94,31 @@ appInputsServer <- function(id, shared_values) {
       )
 
       # Update the shared reactive value for the topic
-      shared_values$topic <- input$topic_name
+      shared_values$topic <- debounced_topic_name()
     })
 
     # Observe and synchronise LA input changes
-    observeEvent(input$la_name, {
-      shared_values$la <- input$la_name
+    observeEvent(debounced_la_name(), {
+      req(debounced_la_name())
+      shared_values$la <- debounced_la_name()
     })
 
     # Observe and synchronise Indicator input changes
-    observeEvent(input$indicator_name, {
-      shared_values$indicator <- input$indicator_name
+    observeEvent(debounced_indicator_name(), {
+      req(debounced_indicator_name())
+      shared_values$indicator <- debounced_indicator_name()
     })
 
     # Return reactive settings
     app_settings <- list(
       la = reactive({
-        input$la_name
+        debounced_la_name()
       }),
       topic = reactive({
-        input$topic_name
+        debounced_topic_name()
       }),
       indicator = reactive({
-        input$indicator_name
+        debounced_indicator_name()
       })
     )
 
