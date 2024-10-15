@@ -12,9 +12,9 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Statistical Neighbour Level page ---------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Foundation Stage"
-selected_indicator <- "Foundation Stage - % achieving a good level of development"
-selected_la <- "Barking and Dagenham"
+selected_topic <- "Health and Wellbeing"
+selected_indicator <- "Infant Mortality"
+selected_la <- "Cumberland"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
@@ -348,7 +348,7 @@ vertical_hover <- lapply(
 # Plotting interactive graph
 ggiraph::girafe(
   ggobj = (region_line_chart + vertical_hover),
-  width_svg = 8,
+  width_svg = 8.5,
   options = generic_ggiraph_options(
     opts_hover(
       css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -390,7 +390,7 @@ stat_n_focus_bar_chart <- focus_bar_data |>
 # Plotting interactive graph
 ggiraph::girafe(
   ggobj = stat_n_focus_bar_chart,
-  width_svg = 8,
+  width_svg = 8.5,
   options = generic_ggiraph_options(),
   fonts = list(sans = "Arial")
 )
@@ -430,7 +430,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
 # Plotting interactive graph
 ggiraph::girafe(
   ggobj = stat_n_multi_bar_chart,
-  width_svg = 8,
+  width_svg = 8.5,
   options = generic_ggiraph_options(),
   fonts = list(sans = "Arial")
 )

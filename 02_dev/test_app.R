@@ -22,9 +22,6 @@ ui_test <- bslib::page_fillable(
   h1("Regional Level"),
   appInputsUI("la_level"),
 
-  # Start of app  =============================================================
-  appInputsUI("region_level"),
-
 
   # Region multi chart
   div(
@@ -32,7 +29,8 @@ ui_test <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::navset_card_underline(
       id = "la_charts",
-      Region_Multi_chartUI("region_multi_line")
+      StatN_MultiLineChartUI("multi_line"),
+      StatN_MultiBarChartUI("multi_bar")
     )
   )
 )
@@ -44,23 +42,29 @@ server_test <- function(input, output, session) {
   shared_values <- reactiveValues(
     la = NULL,
     topic = NULL,
-    indicator = NULL
+    indicator = NULL,
+    chart_line_input = NULL,
+    chart_bar_input = NULL
   )
 
   # LA
-  la_app_inputs <- appInputsServer("la_level", shared_values)
-
-  # Extract selected LA, Topic and Indicator
-  region_app_inputs <- appInputsServer("region_level", shared_values)
-
+  app_inputs <- appInputsServer("la_level", shared_values)
 
   # Region multi chart
-  Region_Multi_chartServer(
-    "region_multi_line",
-    region_app_inputs,
+  StatN_MultiLineChartServer(
+    "multi_line",
+    app_inputs,
     bds_metrics,
-    stat_n_geog,
-    region_names_bds
+    stat_n_la,
+    shared_values
+  )
+
+  StatN_MultiBarChartServer(
+    "multi_bar",
+    app_inputs,
+    bds_metrics,
+    stat_n_la,
+    shared_values
   )
 }
 

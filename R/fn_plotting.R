@@ -307,7 +307,8 @@ format_axes <- function(data_long) {
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
-      labels = year_labels
+      labels = year_labels,
+      guide = guide_axis(check.overlap = TRUE)
     )
   )
 }
@@ -641,4 +642,27 @@ manual_colour_mapping <- function(chart_groups, type) {
   } else if (type == "bar") {
     ggplot2::scale_fill_manual(values = colour_mapping)
   }
+}
+
+display_no_data_plot <- function() {
+  error_plot <- ggplot() +
+    annotate(
+      "text",
+      x = 0.5,
+      y = 0.5, # Position at the center of the plot
+      label = paste0(
+        "No plot due to no available data.\n",
+        "If you think this is incorrect, ",
+        "please report so in the feedback form."
+      ),
+      size = 6,
+      color = "red",
+      hjust = 0.5,
+      vjust = 0.5
+    ) +
+    theme_void() + # Remove axis, gridlines, etc.
+    theme(plot.margin = margin(50, 50, 50, 50)) + # Add some padding to the text
+    coord_cartesian(clip = "off")
+
+  error_plot
 }

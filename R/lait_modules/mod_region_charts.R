@@ -70,7 +70,8 @@ Chart_InputUI <- function(id) {
       multiple = TRUE,
       options = list(
         maxItems = 3,
-        plugins = list("remove_button")
+        plugins = list("remove_button"),
+        dropdownParent = "body"
       )
     )
   )
@@ -312,6 +313,8 @@ Region_Multi_chartUI <- function(id) {
           sidebar = bslib::sidebar(
             title = "Filter options",
             position = "left",
+            width = "30%",
+            open = list(desktop = "open", mobile = "always-above"),
             Chart_InputUI(ns("chart_input"))
           ),
           ggiraph::girafeOutput(ns("region_multi_line_chart"))
@@ -372,7 +375,7 @@ Region_Multi_chartServer <- function(id,
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Pulling specific choices available for selected app & organisational level
+    # Pulling specific choices available for selected LA & indicator
     chart_input <- Chart_InputServer(
       "chart_input",
       app_inputs,
@@ -435,7 +438,7 @@ Region_Multi_chartServer <- function(id,
       # Plotting interactive graph
       ggiraph::girafe(
         ggobj = region_multi_line + vertical_hover,
-        width_svg = 8,
+        width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"

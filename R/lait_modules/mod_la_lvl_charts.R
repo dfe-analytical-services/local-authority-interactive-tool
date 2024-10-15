@@ -137,7 +137,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       # Plotting interactive graph
       ggiraph::girafe(
         ggobj = (la_line_chart + vertical_hover),
-        width_svg = 8,
+        width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -228,7 +228,7 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       # Plotting interactive graph
       ggiraph::girafe(
         ggobj = la_bar_chart,
-        width_svg = 8,
+        width_svg = 8.5,
         options = generic_ggiraph_options(),
         fonts = list(sans = "Arial")
       )

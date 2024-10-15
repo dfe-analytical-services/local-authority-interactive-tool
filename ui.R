@@ -106,7 +106,7 @@ ui <- function(input, output, session) {
         PageHeaderUI("la_header"),
 
         # User Inputs =========================================================
-        appInputsUI("la_level"),
+        appInputsUI("la_inputs"),
 
         # LA Tables ===========================================================
         # Main table
@@ -122,6 +122,7 @@ ui <- function(input, output, session) {
         LA_LevelMetaUI("la_meta")
       ),
       bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
         title = "Regional Level",
         value = "Regional Level",
 
@@ -129,7 +130,7 @@ ui <- function(input, output, session) {
         PageHeaderUI("region_header"),
 
         # User Inputs =========================================================
-        appInputsUI("region_level"),
+        appInputsUI("region_inputs"),
 
         # Region tables =======================================================
         div(
@@ -141,12 +142,12 @@ ui <- function(input, output, session) {
               # Region LA Table -----------------------------------------------
               RegionLA_TableUI("region_la_table"),
               # Region Table --------------------------------------------------
-              Region_TableUI("region_table"),
-              # Region Stats Table --------------------------------------------
-              Region_StatsTableUI("stats_table")
+              Region_TableUI("region_table")
             )
           )
         ),
+        # Region Stats Table --------------------------------------------
+        Region_StatsTableUI("stats_table"),
 
         # Region charts =======================================================
         div(
@@ -161,6 +162,50 @@ ui <- function(input, output, session) {
 
         # Region Metadata =====================================================
         LA_LevelMetaUI("region_meta")
+      ),
+      bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
+        title = "Statsitical Neighbour Level",
+        value = "Statsitical Neighbour Level",
+
+        # Tab header ==========================================================
+        PageHeaderUI("stat_n_header"),
+
+        # User Inputs =========================================================
+        appInputsUI("stat_n_inputs"),
+
+        # Statistical Neighbour tables ========================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::card(
+            bslib::card_header("Statistical Neighbours"),
+            bslib::card_body(
+              # Statistical Neighbour LA SNs Table ------------------------------
+              StatN_LASNsTableUI("stat_n_sns_table"),
+              # Statistical Neighbour LA Geog Compare Table ---------------------
+              StatN_GeogCompTableUI("stat_n_comp_table")
+            )
+          )
+        ),
+        # Statistical Neighbour Statistics Table ----------------------------
+        StatN_StatsTableUI("stat_n_stats_table"),
+
+        # Statistical Neighbour charts ========================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::navset_card_underline(
+            id = "stat_n_charts",
+            StatN_FocusLineChartUI("stat_n_focus_line"),
+            StatN_MultiLineChartUI("stat_n_multi_line"),
+            StatN_FocusBarChartUI("stat_n_focus_bar"),
+            StatN_MultiBarChartUI("stat_n_multi_bar")
+          )
+        ),
+
+        # Statistical Neighbour Metadata ======================================
+        LA_LevelMetaUI("stat_n_meta")
       ),
       # User guide ============================================================
       user_guide_panel(),

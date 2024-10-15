@@ -93,7 +93,9 @@ server <- function(input, output, session) {
   shared_values <- reactiveValues(
     la = NULL,
     topic = NULL,
-    indicator = NULL
+    indicator = NULL,
+    chart_line_input = NULL,
+    chart_bar_input = NULL
   )
 
   # ===========================================================================
@@ -101,7 +103,7 @@ server <- function(input, output, session) {
   # ===========================================================================
 
   # User Inputs ===============================================================
-  la_app_inputs <- appInputsServer("la_level", shared_values)
+  la_app_inputs <- appInputsServer("la_inputs", shared_values)
 
   # Page header
   PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
@@ -159,7 +161,7 @@ server <- function(input, output, session) {
   # Regional Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  region_app_inputs <- appInputsServer("region_level", shared_values)
+  region_app_inputs <- appInputsServer("region_inputs", shared_values)
 
   # Header
   PageHeaderServer("region_header", region_app_inputs, "Regional View")
@@ -217,8 +219,85 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
+  # ===========================================================================
+  # Statistical Neighbour Level Page
+  # ===========================================================================
+  # User Inputs ===============================================================
+  stat_n_app_inputs <- appInputsServer("stat_n_inputs", shared_values)
 
-  # User guide
+  # Header
+  PageHeaderServer("stat_n_header", stat_n_app_inputs, "Statistical Neighbour View")
+
+  # Statistical Neighbour tables ==============================================
+  # LA statistical neighbours table -------------------------------------------
+  StatN_LASNsTableServer(
+    "stat_n_sns_table",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
+
+  # LA geographic comparison table --------------------------------------------
+  StatN_GeogCompTableServer(
+    "stat_n_comp_table",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
+
+  # Statistics Table ----------------------------------------------------------
+  StatN_StatsTableServer(
+    "stat_n_stats_table",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la,
+    la_names_bds
+  )
+
+  # Statistical Neighbour charts ==============================================
+  # Focus line chart ----------------------------------------------------------
+  StatN_FocusLineChartServer(
+    "stat_n_focus_line",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
+
+  # Multi-choice line chart ---------------------------------------------------
+  StatN_MultiLineChartServer(
+    "stat_n_multi_line",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la,
+    shared_values
+  )
+
+  # Focus bar chart -----------------------------------------------------------
+  StatN_FocusBarChartServer(
+    "stat_n_focus_bar",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la
+  )
+
+  # Multi-choice bar chart ----------------------------------------------------
+  StatN_MultiBarChartServer(
+    "stat_n_multi_bar",
+    stat_n_app_inputs,
+    bds_metrics,
+    stat_n_la,
+    shared_values
+  )
+
+  # Statistical Neighbour Metadata ============================================
+  LA_LevelMetaServer(
+    "stat_n_meta",
+    stat_n_app_inputs$indicator,
+    metrics_clean
+  )
+
+
+  # User guide ================================================================
   InternalLinkServer(
     "la_level_link",
     "LA Level",
