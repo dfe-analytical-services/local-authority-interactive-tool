@@ -263,10 +263,6 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Pretty and order table ready for rendering
     region_la_table <- reactive({
       region_la_table_raw() |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`)
     })
 
@@ -274,9 +270,13 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     output$region_la_table <- reactable::renderReactable({
       dfe_reactable(
         region_la_table(),
-        columns = align_reactable_cols(
-          region_la_table(),
-          num_exclude = "LA Number"
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            region_la_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, region_la_table(), app_inputs$la())
@@ -453,10 +453,6 @@ Region_TableServer <- function(id,
     # Pretty and order table ready for rendering
     region_table <- reactive({
       region_table_raw() |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
         # Places England row at the bottom of the table
         dplyr::mutate(is_england = ifelse(
@@ -478,9 +474,13 @@ Region_TableServer <- function(id,
     output$region_table <- reactable::renderReactable({
       dfe_reactable(
         region_table(),
-        columns = align_reactable_cols(
-          region_table(),
-          num_exclude = "LA Number"
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            region_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, region_table(), region_clean())
@@ -510,8 +510,6 @@ Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    class = "well",
-    style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
         reactable::reactableOutput(ns("region_stats_table"))
@@ -623,13 +621,14 @@ Region_StatsTableServer <- function(id,
       dfe_reactable(
         region_stats_table(),
         columns = modifyList(
-          align_reactable_cols(
+          format_num_reactable_cols(
             region_stats_table(),
-            num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding")
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
           ),
           # Trend icon arrows
           list(
+            set_custom_default_col_widths(),
             Trend = reactable::colDef(
               cell = trend_icon_renderer
             )

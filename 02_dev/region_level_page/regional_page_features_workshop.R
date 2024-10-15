@@ -100,9 +100,14 @@ region_la_table <- region_la_long |>
 # Render reactable table
 dfe_reactable(
   region_la_table,
-  columns = align_reactable_cols(region_la_table,
-    num_exclude = "LA Number",
-    indicator_dps = indicator_dps
+  columns = modifyList(
+    # Create the reactable with specific column alignments
+    format_num_reactable_cols(
+      region_la_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number",
+    ),
+    set_custom_default_col_widths()
   ),
   rowStyle = function(index) {
     highlight_selected_row(index, region_la_table, selected_la)
@@ -149,10 +154,6 @@ region_table <- region_long |>
     names_from = Years,
     values_from = values_num
   ) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = "LA Number"
-  ) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`) |>
   # Places England row at the bottom of the table
   dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
@@ -162,9 +163,13 @@ region_table <- region_long |>
 
 dfe_reactable(
   region_table,
-  columns = align_reactable_cols(
-    region_table,
-    num_exclude = "LA Number"
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      region_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number",
+    ),
+    set_custom_default_col_widths()
   ),
   rowStyle = function(index) {
     highlight_selected_row(index, region_table, region_clean)
@@ -219,13 +224,14 @@ dfe_reactable(
   region_stats_table,
   columns = modifyList(
     # Create the reactable with specific column alignments
-    align_reactable_cols(
+    format_num_reactable_cols(
       region_stats_table,
-      num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding")
+      get_indicator_dps(filtered_bds$data),
+      num_exclude = "LA Number"
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
+      set_custom_default_col_widths(),
       Trend = reactable::colDef(
         cell = trend_icon_renderer
       )

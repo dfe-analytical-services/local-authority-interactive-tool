@@ -273,19 +273,19 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = "LA Number"
-      ) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`)
   })
 
   output$region_la_table <- reactable::renderReactable({
     dfe_reactable(
       region_la_table(),
-      columns = align_reactable_cols(
-        region_la_table(),
-        num_exclude = "LA Number"
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          region_la_table(),
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, region_la_table(), input$la_input)
@@ -326,10 +326,6 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = "LA Number"
-      ) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
       # Places England row at the bottom of the table
       dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
@@ -342,9 +338,13 @@ server_dev <- function(input, output, session) {
   output$region_table <- reactable::renderReactable({
     dfe_reactable(
       region_table(),
-      columns = align_reactable_cols(
-        region_table(),
-        num_exclude = "LA Number"
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          region_table(),
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, region_table(), region_la_ldn_clean())
@@ -407,13 +407,14 @@ server_dev <- function(input, output, session) {
       region_stats_table(),
       columns = modifyList(
         # Create the reactable with specific column alignments
-        align_reactable_cols(
+        format_num_reactable_cols(
           region_stats_table(),
-          num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding")
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
         ),
         # Define specific formatting for the Trend and Quartile Banding columns
         list(
+          set_custom_default_col_widths(),
           Trend = reactable::colDef(
             cell = trend_icon_renderer
           )

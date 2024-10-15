@@ -29,15 +29,25 @@ ui_mod <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header("Regional Authorities"),
-      bslib::card_body(
-        # Region LA Table -------------------------------------------------------
-        RegionLA_TableUI("la_table"),
-        # Region Table ----------------------------------------------------------
-        Region_TableUI("region_table"),
+    bslib::navset_tab(
+      id = "region_table_tabs",
+      bslib::nav_panel(
+        title = "Tables",
+        bslib::card(
+          bslib::card_header("Regional Authorities"),
+          bslib::card_body(
+            # Region LA Table -------------------------------------------------------
+            RegionLA_TableUI("la_table"),
+            # Region Table ----------------------------------------------------------
+            Region_TableUI("region_table")
+          )
+        ),
+        br(),
         # Region Stats Table ----------------------------------------------------
         Region_StatsTableUI("stats_table")
+      ),
+      bslib::nav_panel(
+        title = "Download"
       )
     )
   ),
