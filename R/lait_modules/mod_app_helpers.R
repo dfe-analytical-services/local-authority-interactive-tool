@@ -202,7 +202,22 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
 
 
 
-# Download Chart Modal UI Module
+#' Download Chart Modal UI Module
+#'
+#' Creates a modal dialog for downloading a chart in different formats.
+#'
+#' This UI module generates a modal that allows users to select the file type
+#' and download the chart. It includes a file type selection button and a
+#' download button specific to the chart type.
+#'
+#' @param id A unique identifier for the modal instance.
+#' @param chart_type A string representing the type of chart (e.g., "Line",
+#'   "Bar") to include in the title and download button label.
+#'
+#' @return A modal dialog UI for downloading the specified chart type.
+#'
+#' @examples
+#' DownloadChartModalUI("chart_modal", "Line")
 DownloadChartModalUI <- function(id, chart_type) {
   ns <- NS(id) # Create a namespace
   shiny::modalDialog(
@@ -218,6 +233,20 @@ DownloadChartModalUI <- function(id, chart_type) {
 }
 
 
+#' Download Chart Button UI Module
+#'
+#' Creates a button that triggers the download modal for a chart.
+#'
+#' This UI module generates an action button that users can click to open a
+#' modal dialog for downloading a chart. The button is styled and positioned
+#' to appear to the right of the chart.
+#'
+#' @param id A unique identifier for the button instance.
+#'
+#' @return An action button UI element for triggering the download modal.
+#'
+#' @examples
+#' DownloadChartBtnUI("download_btn")
 DownloadChartBtnUI <- function(id) {
   ns <- NS(id)
 
@@ -231,6 +260,23 @@ DownloadChartBtnUI <- function(id) {
 }
 
 
+#' Download Chart Button Server Module
+#'
+#' Handles the server-side logic for triggering the download modal.
+#'
+#' This server module listens for clicks on the download button and, upon
+#' clicking, displays the corresponding modal dialog for chart downloads.
+#'
+#' @param id A unique identifier for the server module instance.
+#' @param parent_id The ID of the parent module that will handle the modal
+#'   display.
+#' @param chart_type A string indicating the type of chart (e.g., "Line",
+#'   "Bar") to include in the modal title and download button.
+#'
+#' @return None. Triggers a modal dialog for chart download upon button click.
+#'
+#' @examples
+#' DownloadChartBtnServer("download_btn", "parent_module", "Line")
 DownloadChartBtnServer <- function(id, parent_id, chart_type) {
   moduleServer(id, function(input, output, session) {
     observeEvent(input$open_modal, {
