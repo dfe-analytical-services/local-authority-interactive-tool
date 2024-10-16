@@ -209,10 +209,42 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 #' @examples
 #' RegionLA_TableUI("region_la_table")
 #'
-RegionLA_TableUI <- function(id) {
+RegionLevel_TableUI <- function(id) {
   ns <- NS(id)
 
-  reactable::reactableOutput(ns("region_la_table"))
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_tab(
+      id = "region_table_tabs",
+      bslib::nav_panel(
+        title = "Tables",
+        bslib::card(
+          bslib::card_body(
+            # Region LA Table -------------------------------------------------
+            bslib::card_header("Local Authorities"),
+            reactable::reactableOutput(ns("la_table")),
+            # Region Table ----------------------------------------------------
+            div(
+              # Add black border between the tables
+              style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+              bslib::card_header("Regions"),
+              reactable::reactableOutput(ns("region_table"))
+            )
+          )
+        ),
+        br(),
+        # Region Stats Table --------------------------------------------------
+        Region_StatsTableUI("stats_table_mod")
+      ),
+      bslib::nav_panel(
+        title = "Download",
+        file_type_input_btn(ns("file_type")),
+        Download_DataUI(ns("la_download"), "LA Table"),
+        Download_DataUI(ns("region_download"), "Region Table")
+      )
+    )
+  )
 }
 
 
@@ -266,8 +298,16 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
         dplyr::arrange(.data[[current_year()]], `LA and Regions`)
     })
 
-    # Table output
-    output$region_la_table <- reactable::renderReactable({
+    # Download ----------------------------------------------------------------
+    Download_DataServer(
+      "la_download",
+      reactive(input$file_type),
+      reactive(region_la_table_raw()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Regional-Level"))
+    )
+
+    # Table output ------------------------------------------------------------
+    output$la_table <- reactable::renderReactable({
       dfe_reactable(
         region_la_table(),
         columns = utils::modifyList(
@@ -280,7 +320,8 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, region_la_table(), app_inputs$la())
-        }
+        },
+        pagination = FALSE
       )
     })
   })
@@ -388,16 +429,18 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
 #' @examples
 #' Region_TableUI("region_table_ui")
 #'
-Region_TableUI <- function(id) {
-  ns <- NS(id)
-
-  div(
-    # Add black border between the tables
-    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    reactable::reactableOutput(ns("region_table"))
-  )
-}
-
+# Region_TableUI <- function(id) {
+#   ns <- NS(id)
+#' #
+#   shiny::tagList(
+#     div(
+#       # Add black border between the tables
+#       style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+#       reactable::reactableOutput(ns("region_table"))
+#     ),
+#     Download_DataUI(ns("region_download"), "Region Table")
+#   )
+# }
 
 #' Region Table Server
 #'
@@ -470,6 +513,14 @@ Region_TableServer <- function(id,
       bds_metrics
     )
 
+    # Download ----------------------------------------------------------------
+    Download_DataServer(
+      "region_download",
+      reactive(input$file_type),
+      reactive(region_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Region-Regional-Level"))
+    )
+
     # Table output
     output$region_table <- reactable::renderReactable({
       dfe_reactable(
@@ -509,13 +560,9 @@ Region_TableServer <- function(id,
 Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_body(
-        reactable::reactableOutput(ns("region_stats_table"))
-      )
+  bslib::card(
+    bslib::card_body(
+      reactable::reactableOutput(ns("stats_table"))
     )
   )
 }
@@ -619,7 +666,7 @@ Region_StatsTableServer <- function(id,
     })
 
     # Table output
-    output$region_stats_table <- reactable::renderReactable({
+    output$stats_table <- reactable::renderReactable({
       dfe_reactable(
         region_stats_table(),
         columns = modifyList(

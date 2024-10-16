@@ -26,31 +26,7 @@ ui_mod <- bslib::page_fillable(
   appInputsUI("region_inputs"),
 
   # Region tables =============================================================
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::navset_tab(
-      id = "region_table_tabs",
-      bslib::nav_panel(
-        title = "Tables",
-        bslib::card(
-          bslib::card_header("Regional Authorities"),
-          bslib::card_body(
-            # Region LA Table -------------------------------------------------------
-            RegionLA_TableUI("la_table"),
-            # Region Table ----------------------------------------------------------
-            Region_TableUI("region_table")
-          )
-        ),
-        br(),
-        # Region Stats Table ----------------------------------------------------
-        Region_StatsTableUI("stats_table")
-      ),
-      bslib::nav_panel(
-        title = "Download"
-      )
-    )
-  ),
+  RegionLevel_TableUI("region_tables"),
 
   # Region charts =============================================================
   div(
@@ -81,7 +57,7 @@ server_mod <- function(input, output, session) {
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------
   RegionLA_TableServer(
-    "la_table",
+    "region_tables",
     app_inputs,
     bds_metrics,
     stat_n_geog
@@ -89,7 +65,7 @@ server_mod <- function(input, output, session) {
 
   # Region table --------------------------------------------------------------
   Region_TableServer(
-    "region_table",
+    "region_tables",
     app_inputs,
     bds_metrics,
     stat_n_geog,
@@ -98,7 +74,7 @@ server_mod <- function(input, output, session) {
 
   # Region stats table --------------------------------------------------------
   Region_StatsTableServer(
-    "stats_table",
+    "stats_table_mod",
     app_inputs,
     bds_metrics,
     stat_n_geog,
