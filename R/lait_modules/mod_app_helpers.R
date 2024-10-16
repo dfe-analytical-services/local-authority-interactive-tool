@@ -179,8 +179,8 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
       local$file_name <- download_name()
 
       # For charts we need to pull the relevant object from the reactive list
-      if (grepl("png", local$file_type, ignore.case = TRUE)) {
-        local$data <- data_for_download()$"png"
+      if (grepl("svg", local$file_type, ignore.case = TRUE)) {
+        local$data <- data_for_download()$"svg"
       } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
         local$data <- data_for_download()$"html"
       } else {

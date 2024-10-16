@@ -132,7 +132,7 @@ generate_download_file <- function(data, file_type) {
   out <- tempfile(fileext = dplyr::case_when(
     grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
     grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
-    grepl("png", file_type, ignore.case = TRUE) ~ ".png",
+    grepl("svg", file_type, ignore.case = TRUE) ~ ".svg",
     grepl("html", file_type, ignore.case = TRUE) ~ ".html",
     TRUE ~ "Error"
   ))
@@ -141,7 +141,7 @@ generate_download_file <- function(data, file_type) {
     write.csv(data, file = out, row.names = FALSE)
   } else if (grepl("xlsx", file_type, ignore.case = TRUE)) {
     openxlsx::write.xlsx(data, file = out, colWidths = "Auto")
-  } else if (grepl("png", file_type, ignore.case = TRUE)) {
+  } else if (grepl("svg", file_type, ignore.case = TRUE)) {
     ggplot2::ggsave(filename = out, plot = data, width = 8.5, height = 6)
   } else if (grepl("html", file_type, ignore.case = TRUE)) {
     htmlwidgets::saveWidget(widget = data, file = out)
@@ -189,7 +189,7 @@ create_download_handler <- function(local) {
       file_ext <- dplyr::case_when(
         grepl("xlsx", local$file_type, ignore.case = TRUE) ~ ".xlsx",
         grepl("csv", local$file_type, ignore.case = TRUE) ~ ".csv",
-        grepl("png", local$file_type, ignore.case = TRUE) ~ ".png",
+        grepl("svg", local$file_type, ignore.case = TRUE) ~ ".svg",
         grepl("html", local$file_type, ignore.case = TRUE) ~ ".html",
         TRUE ~ "Error"
       )
@@ -256,8 +256,8 @@ file_type_input_btn <- function(input_id, file_type = "table") {
     choices = if (file_type == "table") {
       c("CSV", "XLSX")
     } else {
-      c("PNG", "HTML")
+      c("SVG", "HTML")
     },
-    selected = if (file_type == "table") "CSV" else "PNG"
+    selected = if (file_type == "table") "CSV" else "SVG"
   )
 }
