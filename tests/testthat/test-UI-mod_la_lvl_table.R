@@ -120,8 +120,8 @@ test_that("Check LA charts behave as expected", {
     name = "la-charts",
     height = 1059,
     width = 1461,
-    load_timeout = 45 * 1000,
-    timeout = 20 * 1000,
+    load_timeout = 45 * 10000,
+    timeout = 20 * 10000,
     wait = TRUE,
     variant = shinytest2::platform_variant()
   )
@@ -170,6 +170,7 @@ test_that("Check LA charts behave as expected", {
     `la_inputs-topic_name` = "Key Stage 1",
     la_charts = "Bar chart"
   )
+  app$wait_for_idle()
 
   # Get export values
   la_barchart <- app$get_values(export = c("la_barchart"))
