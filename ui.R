@@ -134,21 +134,7 @@ ui <- function(input, output, session) {
         appInputsUI("region_inputs"),
 
         # Region tables =======================================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Regional Authorities"),
-            bslib::card_body(
-              # Region LA Table -----------------------------------------------
-              RegionLA_TableUI("region_la_table"),
-              # Region Table --------------------------------------------------
-              Region_TableUI("region_table")
-            )
-          )
-        ),
-        # Region Stats Table --------------------------------------------
-        Region_StatsTableUI("stats_table"),
+        RegionLevel_TableUI("region_tables"),
 
         # Region charts =======================================================
         div(

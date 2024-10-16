@@ -235,7 +235,7 @@ RegionLevel_TableUI <- function(id) {
         ),
         br(),
         # Region Stats Table --------------------------------------------------
-        Region_StatsTableUI("stats_table_mod")
+        Region_StatsTableUI("region_stats_mod")
       ),
       bslib::nav_panel(
         title = "Download",
