@@ -149,30 +149,29 @@ Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
 Region_FocusLine_chartUI <- function(id) {
   ns <- NS(id)
 
-  # Define the nav panel properly
+  # Define the UI panel for the focus line chart
   bslib::nav_panel(
     title = "Line chart - Focus",
 
-    # Main UI with modal trigger button to the right of the chart
+    # Main UI layout: chart on the left, download button on the right
     div(
       style = "display: flex; justify-content: space-between; align-items: center;",
 
-      # Chart on the left
+      # Line chart display with horizontal padding
       bslib::card(
         bslib::card_body(
           ggiraph::girafeOutput(ns("region_focus_line_chart")),
-          style = "padding: 0 15px;" # Add padding to the left and right!!!!!!!
+          style = "padding: 0 15px;" # Horizontal padding for chart
         ),
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
 
-      # Modal trigger button on the right
+      # Download button to trigger chart download modal
       DownloadChartBtnUI(ns("download_btn"))
     )
   )
 }
-
 
 
 #' Region Focus Line Chart Server Module
@@ -202,10 +201,10 @@ Region_FocusLine_chartServer <- function(id,
                                          stat_n_geog,
                                          region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Modal button server - produces download options
+    # Initialize server logic for download button and modal
     DownloadChartBtnServer("download_btn", id, "Line")
 
-    # Get Region plotting data
+    # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
       app_inputs,
@@ -213,7 +212,7 @@ Region_FocusLine_chartServer <- function(id,
       region_names_bds
     )
 
-    # Get clean Region names
+    # Clean region names based on selected inputs
     region_clean <- Clean_RegionServer(
       "region_clean",
       app_inputs,
@@ -221,22 +220,20 @@ Region_FocusLine_chartServer <- function(id,
       bds_metrics
     )
 
-    # Filter for selected topic and indicator
+    # Filter data for the selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
-    # Current year
+    # Retrieve the current year from the region plot data
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Plot data
-    # Set selected region to last level so appears at front of plot
+    # Prepare the chart data, setting the selected region to appear at the front
     chart_data <- reactive({
       region_long_plot() |>
         reorder_la_regions(region_clean(), after = Inf)
     })
 
-    # Build focus line plot
+    # Build the static version of the focus line chart
     static_chart <- reactive({
-      # Built focus plot
       region_line_chart <- chart_data() |>
         ggplot2::ggplot() +
         ggiraph::geom_line_interactive(
@@ -245,12 +242,13 @@ Region_FocusLine_chartServer <- function(id,
             y = values_num,
             color = `LA and Regions`,
             size = `LA and Regions`,
-            data_id = `LA and Regions`,
+            data_id = `LA and Regions`
           ),
           na.rm = TRUE
         ) +
         format_axes(chart_data()) +
-        set_plot_colours(chart_data(),
+        set_plot_colours(
+          chart_data(),
           colour_type = "focus",
           focus_group = region_clean()
         ) +
@@ -279,8 +277,8 @@ Region_FocusLine_chartServer <- function(id,
         guides(colour = "none", size = "none")
     })
 
+    # Create the interactive version of the focus line chart
     interactive_chart <- reactive({
-      # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(chart_data()),
         tooltip_vlines,
@@ -288,7 +286,7 @@ Region_FocusLine_chartServer <- function(id,
         get_indicator_dps(filtered_bds())
       )
 
-      # Plotting interactive graph
+      # Return an interactive chart with vertical hover tooltip lines
       ggiraph::girafe(
         ggobj = (static_chart() + vertical_hover),
         width_svg = 12,
@@ -301,7 +299,7 @@ Region_FocusLine_chartServer <- function(id,
       )
     })
 
-    # Download handler for the line chart
+    # Set up the download functionality for both static and interactive charts
     Download_DataServer(
       "chart_download",
       reactive(input$file_type),
@@ -309,7 +307,7 @@ Region_FocusLine_chartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Line-Chart"))
     )
 
-    # Chart output
+    # Render the interactive line chart in the UI
     output$region_focus_line_chart <- ggiraph::renderGirafe({
       interactive_chart()
     })
@@ -334,30 +332,37 @@ Region_FocusLine_chartServer <- function(id,
 Region_Multi_chartUI <- function(id) {
   ns <- NS(id)
 
+  # Create a navigation panel for the multi-line chart
   bslib::nav_panel(
     title = "Line chart - user selection",
 
-    # Main UI with modal trigger button to the right of the chart
+    # Main UI layout with chart and modal trigger button
     div(
       style = "display: flex; justify-content: space-between; align-items: center;",
+
+      # Card for the chart and filter inputs
       bslib::card(
         id = "region_multi_line",
         bslib::card_body(
+          # Sidebar for filter options and chart display
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               title = "Filter options",
               position = "left",
               width = "30%",
               open = list(desktop = "open", mobile = "always-above"),
+              # UI for chart input filters
               Chart_InputUI(ns("chart_input"))
             ),
+            # Chart display area
             ggiraph::girafeOutput(ns("region_multi_line_chart"))
           )
         ),
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
-      # Modal trigger button on the right
+
+      # Modal trigger button for chart download on the right
       DownloadChartBtnUI(ns("download_btn"))
     )
   )
@@ -391,10 +396,10 @@ Region_Multi_chartServer <- function(id,
                                      stat_n_geog,
                                      region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Modal button server - produces download options
+    # Initialize the download button server for the chart
     DownloadChartBtnServer("download_btn", id, "Bar")
 
-    # Get Region plotting data
+    # Obtain data for plotting by region
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
       app_inputs,
@@ -402,7 +407,7 @@ Region_Multi_chartServer <- function(id,
       region_names_bds
     )
 
-    # Get clean Region names
+    # Get cleaned region names for use in filtering and plotting
     region_clean <- Clean_RegionServer(
       "region_clean",
       app_inputs,
@@ -410,13 +415,13 @@ Region_Multi_chartServer <- function(id,
       bds_metrics
     )
 
-    # Filter for selected topic and indicator
+    # Filter BDS metrics based on selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
-    # Current year
+    # Retrieve the current year for analysis
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Pulling specific choices available for selected LA & indicator
+    # Get user-selected choices for the chart
     chart_input <- Chart_InputServer(
       "chart_input",
       app_inputs,
@@ -424,24 +429,24 @@ Region_Multi_chartServer <- function(id,
       region_clean
     )
 
-    # Create chart data
-    # Filtering plotting data for selected LA region and others user choices
+    # Create reactive chart data based on selected regions and user choices
     chart_data <- reactive({
       region_long_plot() |>
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |
             (`LA and Regions` %in% region_clean())
         ) |>
-        # Reordering so lines are layered by selection choice, ensuring no duplicates
+        # Reorder regions to layer lines based on selection
         reorder_la_regions(
           rev(c(region_clean(), chart_input()))
         )
     })
 
-    # Built static multi-choice chart
+    # Build a static multi-choice chart
     static_chart <- reactive({
       region_multi_line <- chart_data() |>
         ggplot2::ggplot() +
+        # Add interactive points for user engagement
         ggiraph::geom_point_interactive(
           ggplot2::aes(
             x = Years_num,
@@ -451,6 +456,7 @@ Region_Multi_chartServer <- function(id,
           ),
           na.rm = TRUE
         ) +
+        # Add interactive lines for visual representation
         ggiraph::geom_line_interactive(
           ggplot2::aes(
             x = Years_num,
@@ -467,13 +473,13 @@ Region_Multi_chartServer <- function(id,
         ) +
         set_plot_labs(filtered_bds()) +
         custom_theme() +
-        # Revert order of the legend so goes from right to left
+        # Reverse legend order for better readability
         ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
     })
 
-    # Create interactive multi choice line chart
+    # Create an interactive version of the multi-choice line chart
     interactive_chart <- reactive({
-      # Creating vertical geoms to make vertical hover tooltip
+      # Generate vertical lines for hover tooltips
       vertical_hover <- lapply(
         get_years(chart_data()),
         tooltip_vlines,
@@ -481,7 +487,7 @@ Region_Multi_chartServer <- function(id,
         get_indicator_dps(filtered_bds())
       )
 
-      # Plotting interactive graph
+      # Create and return the interactive chart
       ggiraph::girafe(
         ggobj = static_chart() + vertical_hover,
         width_svg = 8.5,
@@ -494,7 +500,7 @@ Region_Multi_chartServer <- function(id,
       )
     })
 
-    # Download handler for the line chart
+    # Set up the download handler for the chart
     Download_DataServer(
       "chart_download",
       reactive(input$file_type),
@@ -502,7 +508,7 @@ Region_Multi_chartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Line-Chart"))
     )
 
-    # Render the reactive plot output separately
+    # Render the interactive plot output
     output$region_multi_line_chart <- ggiraph::renderGirafe({
       interactive_chart()
     })
