@@ -161,7 +161,7 @@ Region_FocusLine_chartUI <- function(id) {
       bslib::card(
         bslib::card_body(
           ggiraph::girafeOutput(ns("region_focus_line_chart")),
-          style = "padding: 0 15px;" # Add padding to the left and right
+          style = "padding: 0 15px;" # Add padding to the left and right!!!!!!!
         ),
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
@@ -203,7 +203,7 @@ Region_FocusLine_chartServer <- function(id,
                                          region_names_bds) {
   moduleServer(id, function(input, output, session) {
     # Modal button server - produces download options
-    DownloadChartBtnServer("download_btn", id)
+    DownloadChartBtnServer("download_btn", id, "Line")
 
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(
@@ -336,21 +336,29 @@ Region_Multi_chartUI <- function(id) {
 
   bslib::nav_panel(
     title = "Line chart - user selection",
-    bslib::card(
-      id = "region_multi_line",
-      bslib::card_body(
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(
-            title = "Filter options",
-            position = "left",
-            width = "30%",
-            open = list(desktop = "open", mobile = "always-above"),
-            Chart_InputUI(ns("chart_input"))
-          ),
-          ggiraph::girafeOutput(ns("region_multi_line_chart"))
-        )
+
+    # Main UI with modal trigger button to the right of the chart
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center;",
+      bslib::card(
+        id = "region_multi_line",
+        bslib::card_body(
+          bslib::layout_sidebar(
+            sidebar = bslib::sidebar(
+              title = "Filter options",
+              position = "left",
+              width = "30%",
+              open = list(desktop = "open", mobile = "always-above"),
+              Chart_InputUI(ns("chart_input"))
+            ),
+            ggiraph::girafeOutput(ns("region_multi_line_chart"))
+          )
+        ),
+        full_screen = TRUE,
+        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
-      full_screen = TRUE
+      # Modal trigger button on the right
+      DownloadChartBtnUI(ns("download_btn"))
     )
   )
 }
@@ -383,6 +391,9 @@ Region_Multi_chartServer <- function(id,
                                      stat_n_geog,
                                      region_names_bds) {
   moduleServer(id, function(input, output, session) {
+    # Modal button server - produces download options
+    DownloadChartBtnServer("download_btn", id, "Bar")
+
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
@@ -413,10 +424,10 @@ Region_Multi_chartServer <- function(id,
       region_clean
     )
 
-    # Built multi-choice plot
-    region_multi_line_chart <- reactive({
-      # Filtering plotting data for selected LA region and others user choices
-      region_multi_choice_data <- region_long_plot() |>
+    # Create chart data
+    # Filtering plotting data for selected LA region and others user choices
+    chart_data <- reactive({
+      region_long_plot() |>
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |
             (`LA and Regions` %in% region_clean())
@@ -425,9 +436,11 @@ Region_Multi_chartServer <- function(id,
         reorder_la_regions(
           rev(c(region_clean(), chart_input()))
         )
+    })
 
-      # Reactive expression to handle plot building
-      region_multi_line <- region_multi_choice_data |>
+    # Built static multi-choice chart
+    static_chart <- reactive({
+      region_multi_line <- chart_data() |>
         ggplot2::ggplot() +
         ggiraph::geom_point_interactive(
           ggplot2::aes(
@@ -447,7 +460,7 @@ Region_Multi_chartServer <- function(id,
           ),
           na.rm = TRUE
         ) +
-        format_axes(region_multi_choice_data) +
+        format_axes(chart_data()) +
         manual_colour_mapping(
           unique(c(region_clean(), chart_input())),
           type = "line"
@@ -456,18 +469,21 @@ Region_Multi_chartServer <- function(id,
         custom_theme() +
         # Revert order of the legend so goes from right to left
         ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+    })
 
+    # Create interactive multi choice line chart
+    interactive_chart <- reactive({
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
-        get_years(region_multi_choice_data),
+        get_years(chart_data()),
         tooltip_vlines,
-        region_multi_choice_data,
+        chart_data(),
         get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = region_multi_line + vertical_hover,
+        ggobj = static_chart() + vertical_hover,
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -478,9 +494,17 @@ Region_Multi_chartServer <- function(id,
       )
     })
 
+    # Download handler for the line chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Line-Chart"))
+    )
+
     # Render the reactive plot output separately
     output$region_multi_line_chart <- ggiraph::renderGirafe({
-      region_multi_line_chart()
+      interactive_chart()
     })
   })
 }
