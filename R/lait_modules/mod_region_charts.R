@@ -208,19 +208,8 @@ Region_FocusLine_chartServer <- function(id,
                                          stat_n_geog,
                                          region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Modal UI
-    ns <- NS(id)
-    modal_ui <- shiny::modalDialog(
-      title = "Download Line Chart",
-      file_type_input_btn(ns("file_type"), file_type = "chart"),
-      Download_DataUI(ns("chart_download"), "Download line chart"),
-      easyClose = TRUE,
-      footer = shiny::modalButton("Close")
-    )
-
-    # Show the modal when the button is clicked (move observeEvent to server)
     observeEvent(input$open_modal, {
-      shiny::showModal(modal_ui)
+      shiny::showModal(DownloadChartModalUI(id))
     })
 
     # Get Region plotting data
@@ -293,7 +282,7 @@ Region_FocusLine_chartServer <- function(id,
         ) +
         custom_theme() +
         coord_cartesian(clip = "off") +
-        # theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+        theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
         guides(colour = "none", size = "none")
     })
 

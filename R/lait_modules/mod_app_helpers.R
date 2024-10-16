@@ -200,4 +200,17 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
   })
 }
 
+
+# Download Chart Modal UI Module
+DownloadChartModalUI <- function(id) {
+  ns <- NS(id) # Create a namespace
+  shiny::modalDialog(
+    title = "Download Line Chart",
+    file_type_input_btn(ns("file_type"), file_type = "chart"),
+    Download_DataUI(ns("chart_download"), "Download line chart"),
+    easyClose = TRUE,
+    footer = shiny::modalButton("Close")
+  )
+}
+
 # nolint end
