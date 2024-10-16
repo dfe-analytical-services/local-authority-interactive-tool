@@ -168,13 +168,7 @@ Region_FocusLine_chartUI <- function(id) {
       ),
 
       # Modal trigger button on the right
-      shiny::actionButton(
-        ns("open_modal"),
-        label = "Download Chart",
-        icon = shiny::icon("download"),
-        class = "gov-uk-button",
-        style = "margin-left: 15px; align-self: flex-start;"
-      )
+      DownloadChartBtnUI(ns("download_btn"))
     )
   )
 }
@@ -208,9 +202,8 @@ Region_FocusLine_chartServer <- function(id,
                                          stat_n_geog,
                                          region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    observeEvent(input$open_modal, {
-      shiny::showModal(DownloadChartModalUI(id))
-    })
+    # Modal button server - produces download options
+    DownloadChartBtnServer("download_btn", id)
 
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(

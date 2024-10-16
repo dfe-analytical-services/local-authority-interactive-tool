@@ -201,6 +201,7 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
 }
 
 
+
 # Download Chart Modal UI Module
 DownloadChartModalUI <- function(id) {
   ns <- NS(id) # Create a namespace
@@ -209,8 +210,33 @@ DownloadChartModalUI <- function(id) {
     file_type_input_btn(ns("file_type"), file_type = "chart"),
     Download_DataUI(ns("chart_download"), "Download line chart"),
     easyClose = TRUE,
-    footer = shiny::modalButton("Close")
+    footer = shiny::tagAppendAttributes(
+      shiny::modalButton("Close"),
+      class = "govuk-button--secondary"
+    )
   )
+}
+
+
+DownloadChartBtnUI <- function(id) {
+  ns <- NS(id)
+
+  # Modal trigger button on the right
+  shiny::actionButton(
+    ns("open_modal"),
+    label = "Download Chart",
+    class = "govuk-button--secondary",
+    style = "margin-left: 15px; align-self: flex-start;"
+  )
+}
+
+
+DownloadChartBtnServer <- function(id, parent_id) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(input$open_modal, {
+      shiny::showModal(DownloadChartModalUI(parent_id))
+    })
+  })
 }
 
 # nolint end

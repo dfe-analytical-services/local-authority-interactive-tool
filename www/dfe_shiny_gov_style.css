@@ -551,3 +551,25 @@ html {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* shinyGovstyle secondary button */
+.govuk-button--secondary {
+    background-color: #f3f2f1;
+    box-shadow: 0 2px 0 #929191
+}
+
+.govuk-button--secondary,
+.govuk-button--secondary:active,
+.govuk-button--secondary:hover,
+.govuk-button--secondary:link,
+.govuk-button--secondary:visited {
+    color: #0b0c0c
+}
+
+.govuk-button--secondary:hover {
+    background-color: #dbdad9
+}
+
+.govuk-button--secondary:hover[disabled] {
+    background-color: #f3f2f1
+}
