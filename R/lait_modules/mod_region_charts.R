@@ -149,16 +149,36 @@ Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
 Region_FocusLine_chartUI <- function(id) {
   ns <- NS(id)
 
+  # Define the nav panel properly
   bslib::nav_panel(
     title = "Line chart - Focus",
-    bslib::card(
-      bslib::card_body(
-        ggiraph::girafeOutput(ns("region_focus_line_chart"))
+
+    # Main UI with modal trigger button to the right of the chart
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center;",
+
+      # Chart on the left
+      bslib::card(
+        bslib::card_body(
+          ggiraph::girafeOutput(ns("region_focus_line_chart")),
+          style = "padding: 0 15px;" # Add padding to the left and right
+        ),
+        full_screen = TRUE,
+        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
-      full_screen = TRUE
+
+      # Modal trigger button on the right
+      shiny::actionButton(
+        ns("open_modal"),
+        label = "Download Chart",
+        icon = shiny::icon("download"),
+        class = "gov-uk-button",
+        style = "margin-left: 15px; align-self: flex-start;"
+      )
     )
   )
 }
+
 
 
 #' Region Focus Line Chart Server Module
@@ -188,6 +208,21 @@ Region_FocusLine_chartServer <- function(id,
                                          stat_n_geog,
                                          region_names_bds) {
   moduleServer(id, function(input, output, session) {
+    # Modal UI
+    ns <- NS(id)
+    modal_ui <- shiny::modalDialog(
+      title = "Download Line Chart",
+      file_type_input_btn(ns("file_type"), file_type = "chart"),
+      Download_DataUI(ns("chart_download"), "Download line chart"),
+      easyClose = TRUE,
+      footer = shiny::modalButton("Close")
+    )
+
+    # Show the modal when the button is clicked (move observeEvent to server)
+    observeEvent(input$open_modal, {
+      shiny::showModal(modal_ui)
+    })
+
     # Get Region plotting data
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
@@ -210,14 +245,17 @@ Region_FocusLine_chartServer <- function(id,
     # Current year
     current_year <- Current_YearServer("current_year", region_long_plot)
 
-    # Build focus line plot
-    region_focus_line_chart <- reactive({
-      # Set selected region to last level so appears at front of plot
-      region_focus_line_data <- region_long_plot() |>
+    # Plot data
+    # Set selected region to last level so appears at front of plot
+    chart_data <- reactive({
+      region_long_plot() |>
         reorder_la_regions(region_clean(), after = Inf)
+    })
 
+    # Build focus line plot
+    static_chart <- reactive({
       # Built focus plot
-      region_line_chart <- region_focus_line_data |>
+      region_line_chart <- chart_data() |>
         ggplot2::ggplot() +
         ggiraph::geom_line_interactive(
           ggplot2::aes(
@@ -229,14 +267,14 @@ Region_FocusLine_chartServer <- function(id,
           ),
           na.rm = TRUE
         ) +
-        format_axes(region_focus_line_data) +
-        set_plot_colours(region_focus_line_data,
+        format_axes(chart_data()) +
+        set_plot_colours(chart_data(),
           colour_type = "focus",
           focus_group = region_clean()
         ) +
         set_plot_labs(filtered_bds()) +
         ggrepel::geom_label_repel(
-          data = subset(region_focus_line_data, Years == current_year()),
+          data = subset(chart_data(), Years == current_year()),
           aes(
             x = Years_num,
             y = values_num,
@@ -255,20 +293,22 @@ Region_FocusLine_chartServer <- function(id,
         ) +
         custom_theme() +
         coord_cartesian(clip = "off") +
-        theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+        # theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
         guides(colour = "none", size = "none")
+    })
 
+    interactive_chart <- reactive({
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
-        get_years(region_focus_line_data),
+        get_years(chart_data()),
         tooltip_vlines,
-        region_focus_line_data,
+        chart_data(),
         get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = (region_line_chart + vertical_hover),
+        ggobj = (static_chart() + vertical_hover),
         width_svg = 12,
         options = generic_ggiraph_options(
           opts_hover(
@@ -279,9 +319,17 @@ Region_FocusLine_chartServer <- function(id,
       )
     })
 
+    # Download handler for the line chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Line-Chart"))
+    )
+
     # Chart output
     output$region_focus_line_chart <- ggiraph::renderGirafe({
-      region_focus_line_chart()
+      interactive_chart()
     })
   })
 }

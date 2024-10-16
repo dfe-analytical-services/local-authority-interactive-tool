@@ -128,7 +128,7 @@ create_measure_key <- function(data) {
 #' generate_download_file(plot_data, "png")
 #' }
 #'
-generate_download_file <- function(data, file_type) {
+generate_download_file <- function(data, file_type, svg_width = 8.5) {
   out <- tempfile(fileext = dplyr::case_when(
     grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
     grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
@@ -142,7 +142,7 @@ generate_download_file <- function(data, file_type) {
   } else if (grepl("xlsx", file_type, ignore.case = TRUE)) {
     openxlsx::write.xlsx(data, file = out, colWidths = "Auto")
   } else if (grepl("svg", file_type, ignore.case = TRUE)) {
-    ggplot2::ggsave(filename = out, plot = data, width = 8.5, height = 6)
+    ggplot2::ggsave(filename = out, plot = data, width = svg_width, height = 6)
   } else if (grepl("html", file_type, ignore.case = TRUE)) {
     htmlwidgets::saveWidget(widget = data, file = out)
   }

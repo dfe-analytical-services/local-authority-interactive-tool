@@ -167,7 +167,7 @@ Download_DataUI <- function(id, download_label) {
 Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
   moduleServer(id, function(input, output, session) {
     # Reactive values for storing file path
-    local <- reactiveValues(export_file = NULL, data = NULL, file_type = NULL, file_name = NULL)
+    local <- reactiveValues(export_file = NULL, data = NULL, plot_width = NULL, file_type = NULL, file_name = NULL)
 
     # Observe changes in file type or data and generate export file
     observeEvent(list(file_type_input(), data_for_download(), download_name()), {
@@ -181,6 +181,8 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
       # For charts we need to pull the relevant object from the reactive list
       if (grepl("svg", local$file_type, ignore.case = TRUE)) {
         local$data <- data_for_download()$"svg"
+        # Getting plot width from ggiraph obj ratio
+        local$plot_width <- data_for_download()$"html"$x$ratio * 5
       } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
         local$data <- data_for_download()$"html"
       } else {
@@ -188,7 +190,7 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
       }
 
       # Generate the file based on the selected file type
-      local$export_file <- generate_download_file(local$data, local$file_type)
+      local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
     })
 
     # Download handler
