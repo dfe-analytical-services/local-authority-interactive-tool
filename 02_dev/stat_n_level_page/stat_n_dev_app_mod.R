@@ -26,22 +26,7 @@ ui_mod <- bslib::page_fillable(
   appInputsUI("stat_n_inputs"),
 
   # Region tables =============================================================
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header("Statistical Neighbours"),
-      # Statistical Neighbour LA SNs Table ----------------------------------
-      StatN_LASNsTableUI("stat_n_sns_table"),
-      # Statistical Neighbour LA Geog Compare Table -------------------------
-      StatN_GeogCompTableUI("stat_n_comp_table")
-    )
-  ),
-  div(
-    class = "well",
-    # Statistical Neighbour Statistics Table ------------------------------
-    StatN_StatsTableUI("stat_n_stats_table")
-  ),
+  StatN_TablesUI("stat_n_tables"),
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -74,7 +59,7 @@ server_mod <- function(input, output, session) {
   # Statistical Neighbour tables ==============================================
   # LA statistical neighbours table -------------------------------------------
   StatN_LASNsTableServer(
-    "stat_n_sns_table",
+    "stat_n_tables",
     app_inputs,
     bds_metrics,
     stat_n_la
@@ -82,7 +67,7 @@ server_mod <- function(input, output, session) {
 
   # LA geographic comparison table --------------------------------------------
   StatN_GeogCompTableServer(
-    "stat_n_comp_table",
+    "stat_n_tables",
     app_inputs,
     bds_metrics,
     stat_n_la
@@ -90,7 +75,7 @@ server_mod <- function(input, output, session) {
 
   # Statistics Table ----------------------------------------------------------
   StatN_StatsTableServer(
-    "stat_n_stats_table",
+    "stat_n_stats_mod",
     app_inputs,
     bds_metrics,
     stat_n_la,
