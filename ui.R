@@ -24,8 +24,10 @@ ui <- function(input, output, session) {
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
-    tags$head(includeHTML(("google-analytics.html"))),
     tags$head(htmltools::includeScript("www/custom_js.js")),
+    tags$head(
+      tags$script(HTML(js))
+    ),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -162,21 +164,7 @@ ui <- function(input, output, session) {
         appInputsUI("stat_n_inputs"),
 
         # Statistical Neighbour tables ========================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Statistical Neighbours"),
-            bslib::card_body(
-              # Statistical Neighbour LA SNs Table ------------------------------
-              StatN_LASNsTableUI("stat_n_sns_table"),
-              # Statistical Neighbour LA Geog Compare Table ---------------------
-              StatN_GeogCompTableUI("stat_n_comp_table")
-            )
-          )
-        ),
-        # Statistical Neighbour Statistics Table ----------------------------
-        StatN_StatsTableUI("stat_n_stats_table"),
+        StatN_TablesUI("stat_n_tables"),
 
         # Statistical Neighbour charts ========================================
         div(
