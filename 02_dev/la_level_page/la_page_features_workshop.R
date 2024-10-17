@@ -311,7 +311,7 @@ ggiraph_test_save <- ggiraph::girafe(
 
 # Saving plot as a png
 ggsave(
-  "test.png",
+  "test.svg",
   plot = la_line_chart, # Use the ggplot object inside the girafe output
   width = 8.5,
   height = 6

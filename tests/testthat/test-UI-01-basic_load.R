@@ -21,7 +21,7 @@ app <- AppDriver$new(
 )
 
 # Wait until Shiny is not busy for 5ms so we know any processes are complete
-app$wait_for_idle(5)
+# app$wait_for_idle(5)
 
 # Test that the app will start up without error
 # Checks that the title is as expected

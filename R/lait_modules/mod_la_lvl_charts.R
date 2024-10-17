@@ -158,7 +158,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     Download_DataServer(
       "line_download",
       reactive(input$file_type),
-      reactive(list("png" = la_line_chart(), "html" = interactive_line_chart())),
+      reactive(list("svg" = la_line_chart(), "html" = interactive_line_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
     )
 
@@ -256,7 +256,7 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     Download_DataServer(
       "bar_download",
       reactive(input$file_type),
-      reactive(list("png" = bar_chart(), "html" = interactive_bar_chart())),
+      reactive(list("svg" = bar_chart(), "html" = interactive_bar_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
     )
 

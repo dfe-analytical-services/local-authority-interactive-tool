@@ -226,21 +226,26 @@ server_dev <- function(input, output, session) {
 
   # Observe when input$file_type or all_la_table is updated and create relevant file
   observeEvent(c(input$file_type, all_la_table()), {
+    # LA table
     # Setting parameters
     la_local$file_type <- input$file_type
-    la_local$file_name <- "AllLA_LA_table"
+    la_local$file_name <- c(input$la_input, input$indicator, "All-LA-LA-table")
 
-    # LA table
+    # Extracting data for download
     la_local$data <- all_la_table() |>
       filter_la_data_all_la(la_names_bds)
 
-    generate_download_file(la_local$data, input$file_type)
+    # Creating download
+    la_local$export_file <- generate_download_file(la_local$data, input$file_type)
 
     # Region table
+    region_local$file_type <- input$file_type
+    region_local$file_name <- c(input$la_input, input$indicator, "All-LA-Region-table")
+
     region_local$data <- all_la_table() |>
       filter_region_data_all_la(la_names_bds)
 
-    generate_download_file(region_local$data, input$file_type)
+    region_local$export_file <- generate_download_file(region_local$data, input$file_type)
   })
 
   # Download handlers

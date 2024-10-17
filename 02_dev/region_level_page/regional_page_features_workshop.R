@@ -374,7 +374,7 @@ vertical_hover <- lapply(
 )
 
 # Plotting interactive graph
-ggiraph::girafe(
+test <- ggiraph::girafe(
   ggobj = (region_line_chart + vertical_hover),
   width_svg = 12,
   options = generic_ggiraph_options(
