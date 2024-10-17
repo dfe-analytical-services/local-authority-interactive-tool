@@ -102,6 +102,7 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
     )
 
     reactive({
+      req(filtered_bds(), la_input(), stat_n_sns(), stat_n_region())
       # Calculate SN average
       stat_n_sn_avg <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
@@ -116,7 +117,7 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
         )
 
       # Statistical Neighbours long data
-      filtered_bds() |>
+      test <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% c(la_input(), stat_n_sns(), stat_n_region(), "England")) |>
         dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
         dplyr::bind_rows(stat_n_sn_avg) |>
@@ -129,6 +130,7 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
             )
           )
         )
+      test
     })
   })
 }
@@ -218,6 +220,7 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 
     # Build main Statistical Neighbour formatted table (used to create the others)
     shiny::reactive({
+      req(stat_n_long(), stat_n_diff())
       # Join difference and pivot wider
       stat_n_long() |>
         dplyr::bind_rows(stat_n_diff()) |>
