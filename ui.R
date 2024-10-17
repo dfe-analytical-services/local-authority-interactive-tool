@@ -24,7 +24,7 @@ ui <- function(input, output, session) {
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
-    tags$head(htmltools::includeScript("www/custom_js.js")),
+    # tags$head(htmltools::includeScript("www/custom_js.js")),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -51,8 +51,8 @@ ui <- function(input, output, session) {
     set_css_style_sheet("dfe_shiny_gov_style.css"),
 
     # Load javascript dependencies --------------------------------------------
-    shinyWidgets::useShinydashboard(),
-    shinyjs::useShinyjs(),
+    # shinyWidgets::useShinydashboard(),
+    # shinyjs::useShinyjs(),
 
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
