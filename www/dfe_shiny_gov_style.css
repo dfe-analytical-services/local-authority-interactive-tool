@@ -383,15 +383,21 @@ html {
 
 
 /* Make full-screen bslib cards aesthetic */
-/* Set the SVG to fill the available space within the card */
-.ggiraph-svg {
-  max-height: 80vh !important;
+/* Set card size when not expanded */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
+  align-self: center;
 }
 
-/* Target the specific card using classes */
-.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
-  width: 50vw !important;
-  align-self: center;
+/* Set the ggiraph SVG to fill the available space within the card */
+/* When the card is in full-screen mode */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="true"] .ggiraph-svg {
+  height: 80vh !important;
+  max-height: none !important;
+}
+
+/* When the card is not in full-screen mode */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] .ggiraph-svg {
+  height: 50vh !important;
 }
 
 /* Set default reactable styles */

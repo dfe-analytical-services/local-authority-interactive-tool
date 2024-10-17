@@ -1,11 +1,23 @@
 
-document.addEventListener("copy", (event) => {
-  const anchorNode = document.getSelection().anchorNode;
-  if (anchorNode instanceof HTMLElement &&
-    anchorNode.classList.contains("selectize-input")) {
-    const items = Array.from(anchorNode.getElementsByClassName("item active"));
-    const string = items.map(i => i.innerText).join(", ");
-    event.clipboardData.setData("text/plain", string);
-    event.preventDefault();
-  }
+async function getImageBlobFromUrl(url) {
+  const fetchedImageData = await fetch(url);
+  const blob = await fetchedImageData.blob();
+  return blob;
+}
+$(document).ready(function () {
+  $("#copybtn").on("click", async () => {
+    const src = $("#stat_n_focus_line-plotDF>img").attr("src");
+    try {
+      const blob = await getImageBlobFromUrl(src);
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+      alert("Image copied to clipboard!");
+    } catch (err) {
+      console.error(err.name, err.message);
+      alert("There was an error while copying image to clipboard :/");
+    }
+  });
 });

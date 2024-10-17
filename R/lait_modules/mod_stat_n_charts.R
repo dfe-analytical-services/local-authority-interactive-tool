@@ -18,11 +18,36 @@ StatN_FocusLineChartUI <- function(id) {
 
   bslib::nav_panel(
     title = "Line chart - Focus",
-    bslib::card(
-      bslib::card_body(
-        ggiraph::girafeOutput(ns("output_chart"))
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center;",
+      bslib::card(
+        bslib::card_body(
+          ggiraph::girafeOutput(ns("output_chart"))
+        ),
+        full_screen = TRUE,
+        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
-      full_screen = TRUE
+      div(
+        shiny::tagAppendAttributes(
+          Download_DataUI(ns("svg_download"), "Download SVG"),
+          style = "max-width: none;"
+        ),
+        Download_DataUI(ns("html_download"), "Download HTML"),
+        shiny::tagAppendAttributes(
+          actionButton(
+            "copybtn",
+            "Copy Chart to Clipboard",
+            icon = icon("copy"),
+            class = "gov-uk-button"
+          ),
+          style = "max-width: none;"
+        ),
+        style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
+      )
+    ),
+    div(
+      shiny::plotOutput(ns("plotDF")),
+      style = "content-visibility: hidden;"
     )
   )
 }
@@ -74,24 +99,22 @@ StatN_FocusLineChartServer <- function(id,
     # Current year
     current_year <- Current_YearServer("current_year", stat_n_long)
 
-    output$output_chart <- ggiraph::renderGirafe({
-      # Filter SN long for LAs and SNs
-      # Set selected LA to last level so appears at front of plot
-      focus_line_data <- stat_n_long() |>
+    # Chart data
+    # Filter SN long for LAs and SNs
+    # Set selected LA to last level so appears at front of plot
+    focus_chart_data <- reactive({
+      stat_n_long() |>
         dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
         reorder_la_regions(app_inputs$la(), after = Inf)
+    })
 
+    static_chart <- reactive({
       # Check to see if any data - if not display error plot
-      if (all(is.na(focus_line_data$values_num))) {
-        ggiraph::girafe(
-          ggobj = display_no_data_plot(),
-          width_svg = 8.5,
-          options = generic_ggiraph_options(),
-          fonts = list(sans = "Arial")
-        )
+      if (all(is.na(focus_chart_data()$values_num))) {
+        display_no_data_plot()
       } else {
         # Build plot
-        focus_line_chart <- focus_line_data |>
+        focus_chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_line_interactive(
             ggplot2::aes(
@@ -103,11 +126,11 @@ StatN_FocusLineChartServer <- function(id,
             ),
             na.rm = TRUE
           ) +
-          format_axes(focus_line_data) +
-          set_plot_colours(focus_line_data, colour_type = "focus", focus_group = app_inputs$la()) +
+          format_axes(focus_chart_data()) +
+          set_plot_colours(focus_chart_data(), colour_type = "focus", focus_group = app_inputs$la()) +
           set_plot_labs(filtered_bds()) +
           ggrepel::geom_label_repel(
-            data = subset(focus_line_data, Years == current_year()),
+            data = subset(focus_chart_data(), Years == current_year()),
             aes(
               x = Years_num,
               y = values_num,
@@ -127,19 +150,36 @@ StatN_FocusLineChartServer <- function(id,
           coord_cartesian(clip = "off") +
           theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
           guides(color = "none", size = "none")
+      }
+    })
 
-
+    interactive_chart <- reactive({
+      if (all(is.na(focus_chart_data()$values_num))) {
+        ggiraph::girafe(
+          ggobj = static_chart(),
+          width_svg = 12,
+          options = generic_ggiraph_options(
+            opts_hover(
+              css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+            )
+          ),
+          fonts = list(sans = "Arial")
+        )
+      } else {
         # Creating vertical geoms to make vertical hover tooltip
         vertical_hover <- lapply(
-          get_years(focus_line_data),
+          get_years(focus_chart_data()),
           tooltip_vlines,
-          focus_line_data,
+          focus_chart_data(),
           get_indicator_dps(filtered_bds())
         )
 
-        # Plotting interactive graph
+        # Combine static chart and vertical hover into one ggplot object
+        full_plot <- static_chart() + vertical_hover
+
+        # Now pass the full ggplot object to ggiraph::girafe
         ggiraph::girafe(
-          ggobj = (focus_line_chart + vertical_hover),
+          ggobj = full_plot,
           width_svg = 12,
           options = generic_ggiraph_options(
             opts_hover(
@@ -149,6 +189,34 @@ StatN_FocusLineChartServer <- function(id,
           fonts = list(sans = "Arial")
         )
       }
+    })
+
+    # Set up the download handlers for the chart -------------------------------
+    Download_DataServer(
+      "svg_download",
+      reactive("SVG"),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
+    )
+
+    Download_DataServer(
+      "html_download",
+      reactive("HTML"),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
+    )
+
+    output$plotDF <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
+    output$output_chart <- ggiraph::renderGirafe({
+      interactive_chart()
     })
   })
 }
@@ -513,23 +581,27 @@ StatN_MultiLineChartUI <- function(id) {
 
   bslib::nav_panel(
     title = "Line chart - user selection",
-    bslib::card(
-      id = "stat_n_multi_line",
-      bslib::card_body(
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(
-            title = "Filter options",
-            position = "left",
-            width = "30%",
-            open = list(desktop = "open", mobile = "always-above"),
-            StatN_Chart_InputUI(
-              ns("chart_line_input") # Line chart input only
-            )[[1]]
-          ),
-          ggiraph::girafeOutput(ns("output_chart"))
-        )
-      ),
-      full_screen = TRUE
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center;",
+      bslib::card(
+        id = "stat_n_multi_line",
+        bslib::card_body(
+          bslib::layout_sidebar(
+            sidebar = bslib::sidebar(
+              title = "Filter options",
+              position = "left",
+              width = "30%",
+              open = list(desktop = "open", mobile = "always-above"),
+              StatN_Chart_InputUI(
+                ns("chart_line_input") # Line chart input only
+              )[[1]]
+            ),
+            ggiraph::girafeOutput(ns("output_chart"))
+          )
+        ),
+        full_screen = TRUE,
+        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+      )
     )
   )
 }
