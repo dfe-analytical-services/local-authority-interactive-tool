@@ -33,22 +33,22 @@ StatN_FocusLineChartUI <- function(id) {
           style = "max-width: none;"
         ),
         Download_DataUI(ns("html_download"), "Download HTML"),
-        shiny::tagAppendAttributes(
-          actionButton(
-            "copybtn",
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
+        #   shiny::tagAppendAttributes(
+        #     actionButton(
+        #       "copybtn",
+        #       "Copy Chart to Clipboard",
+        #       icon = icon("copy"),
+        #       class = "gov-uk-button"
+        #     ),
+        #     style = "max-width: none;"
+        #   ),
+        #   style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
       )
-    ),
-    div(
-      shiny::plotOutput(ns("plotDF")),
-      style = "content-visibility: hidden;"
     )
+    # div(
+    #   shiny::plotOutput(ns("plotDF")),
+    #   style = "content-visibility: hidden;"
+    # )
   )
 }
 
@@ -206,14 +206,14 @@ StatN_FocusLineChartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
     )
 
-    output$plotDF <- shiny::renderPlot(
-      {
-        static_chart()
-      },
-      res = 200,
-      width = 24 * 96,
-      height = 12 * 96
-    )
+    # output$plotDF <- shiny::renderPlot(
+    #   {
+    #     static_chart()
+    #   },
+    #   res = 200,
+    #   width = 24 * 96,
+    #   height = 12 * 96
+    # )
 
     output$output_chart <- ggiraph::renderGirafe({
       interactive_chart()
