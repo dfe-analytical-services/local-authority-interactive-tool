@@ -45,8 +45,6 @@ if (FALSE) {
   shhh(library(svglite)) # For saving plots as svg
 }
 
-cat(getOption("shiny.testmode"))
-
 # Source scripts ==============================================================
 
 # Source any scripts here. Scripts may be needed to process data before it gets
