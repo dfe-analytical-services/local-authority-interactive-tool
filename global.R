@@ -30,6 +30,7 @@ if (FALSE) {
   shhh(library(lintr))
   shhh(library(roxygen2))
   shhh(library(rstudioapi))
+  shhh(library(rsconnect)) # Needs to be removed once internal testing done
   # Housekeeping
   shhh(library(devtools))
   shhh(library(usethis))
@@ -40,8 +41,9 @@ if (FALSE) {
   shhh(library(dfeR))
   shhh(library(dfeshiny))
   shhh(library(shinyGovstyle))
+  # Plotting
+  shhh(library(svglite)) # For saving plots as svg
 }
-
 
 # Source scripts ==============================================================
 

@@ -134,21 +134,7 @@ ui <- function(input, output, session) {
         appInputsUI("region_inputs"),
 
         # Region tables =======================================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Regional Authorities"),
-            bslib::card_body(
-              # Region LA Table -----------------------------------------------
-              RegionLA_TableUI("region_la_table"),
-              # Region Table --------------------------------------------------
-              Region_TableUI("region_table")
-            )
-          )
-        ),
-        # Region Stats Table --------------------------------------------
-        Region_StatsTableUI("stats_table"),
+        RegionLevel_TableUI("region_tables"),
 
         # Region charts =======================================================
         div(
@@ -176,19 +162,7 @@ ui <- function(input, output, session) {
         appInputsUI("stat_n_inputs"),
 
         # Statistical Neighbour tables ========================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Statistical Neighbours"),
-            bslib::card_body(
-              # Statistical Neighbour LA SNs Table ------------------------------
-              StatN_LASNsTableUI("stat_n_sns_table"),
-              # Statistical Neighbour LA Geog Compare Table ---------------------
-              StatN_GeogCompTableUI("stat_n_comp_table")
-            )
-          )
-        ),
+        StatN_TablesUI("stat_n_tables"),
         # Statistical Neighbour Statistics Table ----------------------------
         StatN_StatsTableUI("stat_n_stats_table"),
 

@@ -79,7 +79,6 @@ appInputsServer <- function(id, shared_values) {
         dplyr::filter(.data$Topic == debounced_topic_name()) |>
         pull_uniques("Measure")
 
-
       # Update the Indicator dropdown based on selected Topic
       updateSelectInput(
         session = session,

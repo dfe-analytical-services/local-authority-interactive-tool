@@ -169,7 +169,7 @@ server <- function(input, output, session) {
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------
   RegionLA_TableServer(
-    "region_la_table",
+    "region_tables",
     region_app_inputs,
     bds_metrics,
     stat_n_geog
@@ -177,7 +177,7 @@ server <- function(input, output, session) {
 
   # Region table --------------------------------------------------------------
   Region_TableServer(
-    "region_table",
+    "region_tables",
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
@@ -186,7 +186,7 @@ server <- function(input, output, session) {
 
   # Region stats table --------------------------------------------------------
   Region_StatsTableServer(
-    "stats_table",
+    "region_stats_mod",
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
@@ -231,7 +231,7 @@ server <- function(input, output, session) {
   # Statistical Neighbour tables ==============================================
   # LA statistical neighbours table -------------------------------------------
   StatN_LASNsTableServer(
-    "stat_n_sns_table",
+    "stat_n_tables",
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la
@@ -239,7 +239,7 @@ server <- function(input, output, session) {
 
   # LA geographic comparison table --------------------------------------------
   StatN_GeogCompTableServer(
-    "stat_n_comp_table",
+    "stat_n_tables",
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la
@@ -247,7 +247,7 @@ server <- function(input, output, session) {
 
   # Statistics Table ----------------------------------------------------------
   StatN_StatsTableServer(
-    "stat_n_stats_table",
+    "stat_n_stats_mod",
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,

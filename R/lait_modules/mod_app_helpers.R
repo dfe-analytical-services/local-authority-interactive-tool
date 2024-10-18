@@ -167,34 +167,124 @@ Download_DataUI <- function(id, download_label) {
 Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
   moduleServer(id, function(input, output, session) {
     # Reactive values for storing file path
-    local <- reactiveValues(export_file = NULL, data = NULL, file_type = NULL, file_name = NULL)
+    local <- reactiveValues(export_file = NULL, data = NULL, plot_width = NULL, file_type = NULL, file_name = NULL)
 
     # Observe changes in file type or data and generate export file
-    observeEvent(list(file_type_input(), data_for_download(), download_name()), {
-      # Ensure inputs are not NULL
-      req(file_type_input(), data_for_download(), download_name())
+    observeEvent(list(file_type_input(), data_for_download(), download_name()),
+      {
+        # Ensure inputs are not NULL
+        req(file_type_input(), data_for_download(), download_name())
 
-      # Setting parameters
-      local$file_type <- file_type_input()
-      local$file_name <- download_name()
+        # Setting parameters
+        local$file_type <- file_type_input()
+        local$file_name <- download_name()
 
-      # For charts we need to pull the relevant object from the reactive list
-      if (grepl("png", local$file_type, ignore.case = TRUE)) {
-        local$data <- data_for_download()$"png"
-      } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
-        local$data <- data_for_download()$"html"
-      } else {
-        local$data <- data_for_download()
-      }
+        # For charts we need to pull the relevant object from the reactive list
+        if (grepl("svg", local$file_type, ignore.case = TRUE)) {
+          local$data <- data_for_download()$"svg"
+          # Getting plot width from ggiraph obj ratio
+          local$plot_width <- data_for_download()$"html"$x$ratio * 5
+        } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
+          local$data <- data_for_download()$"html"
+        } else {
+          local$data <- data_for_download()
+        }
 
-      # Generate the file based on the selected file type
-      local$export_file <- generate_download_file(local$data, local$file_type)
-    })
+        # Generate the file based on the selected file type
+        local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
+      },
+      ignoreInit = TRUE
+    )
 
     # Download handler
     output$download <- create_download_handler(
       local
     )
+  })
+}
+
+
+
+#' Download Chart Modal UI Module
+#'
+#' Creates a modal dialog for downloading a chart in different formats.
+#'
+#' This UI module generates a modal that allows users to select the file type
+#' and download the chart. It includes a file type selection button and a
+#' download button specific to the chart type.
+#'
+#' @param id A unique identifier for the modal instance.
+#' @param chart_type A string representing the type of chart (e.g., "Line",
+#'   "Bar") to include in the title and download button label.
+#'
+#' @return A modal dialog UI for downloading the specified chart type.
+#'
+#' @examples
+#' DownloadChartModalUI("chart_modal", "Line")
+DownloadChartModalUI <- function(id, chart_type) {
+  ns <- NS(id) # Create a namespace
+  shiny::modalDialog(
+    title = paste0("Download ", chart_type, " Chart"),
+    file_type_input_btn(ns("file_type"), file_type = "chart"),
+    Download_DataUI(ns("chart_download"), paste0(chart_type, " chart")),
+    easyClose = TRUE,
+    footer = shiny::tagAppendAttributes(
+      shiny::modalButton("Close"),
+      class = "govuk-button--secondary"
+    )
+  )
+}
+
+
+#' Download Chart Button UI Module
+#'
+#' Creates a button that triggers the download modal for a chart.
+#'
+#' This UI module generates an action button that users can click to open a
+#' modal dialog for downloading a chart. The button is styled and positioned
+#' to appear to the right of the chart.
+#'
+#' @param id A unique identifier for the button instance.
+#'
+#' @return An action button UI element for triggering the download modal.
+#'
+#' @examples
+#' DownloadChartBtnUI("download_btn")
+DownloadChartBtnUI <- function(id) {
+  ns <- NS(id)
+
+  # Modal trigger button on the right
+  shiny::actionButton(
+    ns("open_modal"),
+    label = "Download Chart",
+    class = "govuk-button--secondary",
+    style = "margin-left: 15px; align-self: flex-start;"
+  )
+}
+
+
+#' Download Chart Button Server Module
+#'
+#' Handles the server-side logic for triggering the download modal.
+#'
+#' This server module listens for clicks on the download button and, upon
+#' clicking, displays the corresponding modal dialog for chart downloads.
+#'
+#' @param id A unique identifier for the server module instance.
+#' @param parent_id The ID of the parent module that will handle the modal
+#'   display.
+#' @param chart_type A string indicating the type of chart (e.g., "Line",
+#'   "Bar") to include in the modal title and download button.
+#'
+#' @return None. Triggers a modal dialog for chart download upon button click.
+#'
+#' @examples
+#' DownloadChartBtnServer("download_btn", "parent_module", "Line")
+DownloadChartBtnServer <- function(id, parent_id, chart_type) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(input$open_modal, {
+      shiny::showModal(DownloadChartModalUI(parent_id, chart_type))
+    })
   })
 }
 

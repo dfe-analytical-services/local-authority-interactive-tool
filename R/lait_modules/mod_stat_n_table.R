@@ -102,6 +102,7 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
     )
 
     reactive({
+      req(filtered_bds(), la_input(), stat_n_sns(), stat_n_region())
       # Calculate SN average
       stat_n_sn_avg <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
@@ -218,6 +219,7 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 
     # Build main Statistical Neighbour formatted table (used to create the others)
     shiny::reactive({
+      req(stat_n_long(), stat_n_diff())
       # Join difference and pivot wider
       stat_n_long() |>
         dplyr::bind_rows(stat_n_diff()) |>
@@ -241,10 +243,40 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 #' @return A UI component containing a reactable output for displaying the
 #' statistical neighbour table.
 #'
-StatN_LASNsTableUI <- function(id) {
+StatN_TablesUI <- function(id) {
   ns <- NS(id)
 
-  reactable::reactableOutput(ns("output_table"))
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_tab(
+      id = "stat_n_tables_tabs",
+      bslib::nav_panel(
+        "Tables",
+        bslib::card(
+          # Statistical Neighbour LA SNs Table --------------------------------
+          bslib::card_header("Statistical Neighbours"),
+          reactable::reactableOutput(ns("statn_table")),
+          # Statistical Neighbour LA Geog Compare Table -----------------------
+          div(
+            # Add black border between the tables
+            style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+            bslib::card_header("Other Geographies"),
+            reactable::reactableOutput(ns("geog_table"))
+          )
+        ),
+        br(),
+        # Statistical Neighbour Statistics Table ------------------------------
+        StatN_StatsTableUI("stat_n_stats_mod")
+      ),
+      bslib::nav_panel(
+        "Download",
+        file_type_input_btn(ns("file_type")),
+        Download_DataUI(ns("statn_download"), "Statistical Neighbour Table"),
+        Download_DataUI(ns("geog_download"), "Other Geographies Table")
+      )
+    )
+  )
 }
 
 
@@ -301,26 +333,36 @@ StatN_LASNsTableServer <- function(id,
     # Current year
     current_year <- Current_YearServer("current_year", stat_n_table, "wide")
 
-    # Table output
-    output$output_table <- reactable::renderReactable({
-      # Filter to LA and SNs
-      stat_n_sns_table <- stat_n_table() |>
+    # Filter for selected LA and its SNs - ready for table output
+    stat_n_sns_table <- reactive({
+      stat_n_table() |>
         dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+    })
 
+    # Download ----------------------------------------------------------------
+    Download_DataServer(
+      "statn_download",
+      reactive(input$file_type),
+      reactive(stat_n_sns_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "SN-Stat-Neighbour-Level"))
+    )
+
+    # Table output ------------------------------------------------------------
+    output$statn_table <- reactable::renderReactable({
       # Create table with correct formatting
       dfe_reactable(
-        stat_n_sns_table,
+        stat_n_sns_table(),
         columns = utils::modifyList(
           format_num_reactable_cols(
-            stat_n_sns_table,
+            stat_n_sns_table(),
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number"
           ),
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_sns_table, app_inputs$la())
+          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la())
         },
         pagination = FALSE
       )
@@ -403,24 +445,34 @@ StatN_GeogCompTableServer <- function(id,
       stat_n_la
     )
 
-    # Table output
-    output$output_table <- reactable::renderReactable({
-      # Keep LA geographic comparison areas
-      stat_n_comp_table <- stat_n_table() |>
+    # Keep LA geographic comparison areas
+    stat_n_geog_table <- reactive({
+      stat_n_table() |>
         dplyr::filter(`LA and Regions` %in% c(
           "Statistical Neighbours",
           stat_n_region(),
           "England"
         )) |>
         dplyr::arrange(`LA and Regions`)
+    })
 
+    # Download ----------------------------------------------------------------
+    Download_DataServer(
+      "geog_download",
+      reactive(input$file_type),
+      reactive(stat_n_geog_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Geog-Stat-Neighbour-Level"))
+    )
+
+    # Table output ------------------------------------------------------------
+    output$geog_table <- reactable::renderReactable({
       # Output table
       dfe_reactable(
-        stat_n_comp_table,
+        stat_n_geog_table(),
         # Create the reactable with specific column alignments
         columns = utils::modifyList(
           format_num_reactable_cols(
-            stat_n_comp_table,
+            stat_n_geog_table(),
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number"
           ),
@@ -452,7 +504,6 @@ StatN_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    style = "overflow-y: visible;",
     bslib::card(
       # bslib::card_header(""),
       bslib::card_body(
