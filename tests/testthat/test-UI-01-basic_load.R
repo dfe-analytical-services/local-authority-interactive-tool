@@ -17,6 +17,7 @@ app <- AppDriver$new(
   load_timeout = 45 * 1000,
   timeout = 20 * 1000,
   wait = TRUE,
+  options = list(test.mode = TRUE),
   expect_values_screenshot_args = FALSE # Turn off as we don't need screenshots
 )
 
@@ -33,3 +34,5 @@ testthat::test_that("App loads and title of app appears as expected", {
     "Local Authority Interactive Tool (LAIT) - LA Level: Barking and Dagenham, Infant Mortality"
   )
 })
+
+app$stop()

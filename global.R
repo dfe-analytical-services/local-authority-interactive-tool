@@ -45,6 +45,7 @@ if (FALSE) {
   shhh(library(svglite)) # For saving plots as svg
 }
 
+cat(getOption("shiny.testmode"))
 
 # Source scripts ==============================================================
 
