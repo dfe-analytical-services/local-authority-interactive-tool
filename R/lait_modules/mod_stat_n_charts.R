@@ -32,16 +32,16 @@ StatN_FocusLineChartUI <- function(id) {
           Download_DataUI(ns("svg_download"), "Download SVG"),
           style = "max-width: none;"
         ),
-        Download_DataUI(ns("html_download"), "Download HTML"),
-        # shiny::tagAppendAttributes(
-        #   actionButton(
-        #     "copybtn",
-        #     "Copy Chart to Clipboard",
-        #     icon = icon("copy"),
-        #     class = "gov-uk-button"
-        #   ),
-        #   style = "max-width: none;"
-        # ),
+        # Download_DataUI(ns("html_download"), "Download HTML"),
+        shiny::tagAppendAttributes(
+          actionButton(
+            "copybtn",
+            "Copy Chart to Clipboard",
+            icon = icon("copy"),
+            class = "gov-uk-button"
+          ),
+          style = "max-width: none;"
+        ),
         style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
       )
     )
@@ -199,12 +199,12 @@ StatN_FocusLineChartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
     )
 
-    Download_DataServer(
-      "html_download",
-      reactive("HTML"),
-      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
-    )
+    # Download_DataServer(
+    #   "html_download",
+    #   reactive("HTML"),
+    #   reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+    #   reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
+    # )
 
     # output$plotDF <- shiny::renderPlot(
     #   {
