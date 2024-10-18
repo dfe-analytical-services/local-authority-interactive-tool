@@ -201,6 +201,8 @@ StatN_FocusLineChartServer <- function(id,
 
     Download_DataServer(
       "html_download",
+      # Determine HTML file type based on shiny test mode
+      # HTML doesn't work due to github shiny not having pandoc so need to use svg for tests
       reactive({
         # Check if shiny.testmode is enabled
         if (is.null(getOption("shiny.testmode"))) {
