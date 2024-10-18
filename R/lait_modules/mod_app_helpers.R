@@ -186,7 +186,6 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
           local$plot_width <- data_for_download()$"html"$x$ratio * 5
         } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
           local$data <- data_for_download()$"html"
-          cat("HTML")
         } else {
           local$data <- data_for_download()
         }

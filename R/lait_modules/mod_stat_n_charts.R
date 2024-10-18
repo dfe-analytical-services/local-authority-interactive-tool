@@ -35,7 +35,7 @@ StatN_FocusLineChartUI <- function(id) {
         Download_DataUI(ns("html_download"), "Download HTML"),
         shiny::tagAppendAttributes(
           actionButton(
-            "copybtn",
+            ns("copybtn"),
             "Copy Chart to Clipboard",
             icon = icon("copy"),
             class = "gov-uk-button"
@@ -46,7 +46,7 @@ StatN_FocusLineChartUI <- function(id) {
       )
     ),
     div(
-      shiny::plotOutput(ns("plotDF")),
+      shiny::plotOutput(ns("copy_plot")),
       style = "content-visibility: hidden;"
     )
   )
@@ -213,7 +213,7 @@ StatN_FocusLineChartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
     )
 
-    output$plotDF <- shiny::renderPlot(
+    output$copy_plot <- shiny::renderPlot(
       {
         static_chart()
       },
@@ -608,7 +608,29 @@ StatN_MultiLineChartUI <- function(id) {
         ),
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+      ),
+      div(
+        # Download button to trigger chart download modal
+        shiny::tagAppendAttributes(
+          DownloadChartBtnUI(ns("download_btn")),
+          style = "max-width: none; margin-left: 0;"
+        ),
+        br(),
+        shiny::tagAppendAttributes(
+          actionButton(
+            ns("copybtn"),
+            "Copy Chart to Clipboard",
+            icon = icon("copy"),
+            class = "gov-uk-button"
+          ),
+          style = "max-width: none;"
+        ),
+        style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
       )
+    ),
+    div(
+      shiny::plotOutput(ns("copy_plot")),
+      style = "content-visibility: hidden;"
     )
   )
 }
@@ -647,6 +669,9 @@ StatN_MultiLineChartServer <- function(id,
                                        stat_n_la,
                                        shared_values) {
   moduleServer(id, function(input, output, session) {
+    # Initialize server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Line")
+
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
@@ -666,13 +691,21 @@ StatN_MultiLineChartServer <- function(id,
       shared_values
     )$line_input
 
-    # Statistical Neighbour Level SN multi-choice line plot -----------------------
-    output$output_chart <- ggiraph::renderGirafe({
+    # Pulling specific choices available for selected LA & indicator
+    chart_input <- StatN_Chart_InputServer(
+      "chart_line_input",
+      app_inputs$la,
+      stat_n_long,
+      shared_values
+    )$line_input
+
+    # Build chart data
+    chart_data <- reactive({
       # Stores all valid regions in data
       valid_regions <- stat_n_long()$`LA and Regions`
 
       # Filter Statistical Neighbour data for these areas
-      stat_n_line_chart_data <- stat_n_long() |>
+      stat_n_long() |>
         # Filter for random areas - simulate user choosing up to 6 areas
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |
@@ -683,18 +716,16 @@ StatN_MultiLineChartServer <- function(id,
           rev(intersect(c(app_inputs$la(), chart_input()), valid_regions)),
           after = Inf
         )
+    })
 
+    # Statistical Neighbour Level SN multi-choice line plot -----------------------
+    static_chart <- reactive({
       # Check to see if any data - if not display error plot
-      if (all(is.na(stat_n_line_chart_data$values_num))) {
-        ggiraph::girafe(
-          ggobj = display_no_data_plot(),
-          width_svg = 8.5,
-          options = generic_ggiraph_options(),
-          fonts = list(sans = "Arial")
-        )
+      if (all(is.na(chart_data()$values_num))) {
+        display_no_data_plot()
       } else {
         # Plot - selected areas
-        multi_line_chart <- stat_n_line_chart_data |>
+        chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_point_interactive(
             ggplot2::aes(
@@ -714,7 +745,7 @@ StatN_MultiLineChartServer <- function(id,
             ),
             na.rm = TRUE
           ) +
-          format_axes(stat_n_line_chart_data) +
+          format_axes(chart_data()) +
           manual_colour_mapping(
             c(app_inputs$la(), chart_input()),
             type = "line"
@@ -723,20 +754,37 @@ StatN_MultiLineChartServer <- function(id,
           custom_theme() +
           # Revert order of the legend so goes from right to left
           ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+      }
+    })
 
-
+    interactive_chart <- reactive({
+      if (all(is.na(chart_data()$values_num))) {
+        ggiraph::girafe(
+          ggobj = static_chart(),
+          width_svg = 12,
+          options = generic_ggiraph_options(
+            opts_hover(
+              css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+            )
+          ),
+          fonts = list(sans = "Arial")
+        )
+      } else {
         # Creating vertical geoms to make vertical hover tooltip
         vertical_hover <- lapply(
-          get_years(stat_n_line_chart_data),
+          get_years(chart_data()),
           tooltip_vlines,
-          stat_n_line_chart_data,
+          chart_data(),
           get_indicator_dps(filtered_bds())
         )
 
-        # Plotting interactive graph
+        # Combine static chart and vertical hover into one ggplot object
+        full_plot <- static_chart() + vertical_hover
+
+        # Now pass the full ggplot object to ggiraph::girafe
         ggiraph::girafe(
-          ggobj = (multi_line_chart + vertical_hover),
-          width_svg = 8.5,
+          ggobj = full_plot,
+          width_svg = 12,
           options = generic_ggiraph_options(
             opts_hover(
               css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -745,6 +793,29 @@ StatN_MultiLineChartServer <- function(id,
           fonts = list(sans = "Arial")
         )
       }
+    })
+
+    # Set up the download handlers for the chart -------------------------------
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Line-Chart"))
+    )
+
+    # Plot used for copy to clipboard
+    output$copy_plot <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
+    # Interactive plot output
+    output$output_chart <- ggiraph::renderGirafe({
+      interactive_chart()
     })
   })
 }
