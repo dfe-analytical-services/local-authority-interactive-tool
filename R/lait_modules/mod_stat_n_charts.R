@@ -44,11 +44,11 @@ StatN_FocusLineChartUI <- function(id) {
         ),
         style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
       )
+    ),
+    div(
+      shiny::plotOutput(ns("plotDF")),
+      style = "content-visibility: hidden;"
     )
-    # div(
-    #   shiny::plotOutput(ns("plotDF")),
-    #   style = "content-visibility: hidden;"
-    # )
   )
 }
 
@@ -206,14 +206,14 @@ StatN_FocusLineChartServer <- function(id,
     #   reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
     # )
 
-    # output$plotDF <- shiny::renderPlot(
-    #   {
-    #     static_chart()
-    #   },
-    #   res = 200,
-    #   width = 24 * 96,
-    #   height = 12 * 96
-    # )
+    output$plotDF <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
 
     output$output_chart <- ggiraph::renderGirafe({
       interactive_chart()
