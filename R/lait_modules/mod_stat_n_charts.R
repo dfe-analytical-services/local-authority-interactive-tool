@@ -33,15 +33,15 @@ StatN_FocusLineChartUI <- function(id) {
           style = "max-width: none;"
         ),
         Download_DataUI(ns("html_download"), "Download HTML"),
-        #   shiny::tagAppendAttributes(
-        #     actionButton(
-        #       "copybtn",
-        #       "Copy Chart to Clipboard",
-        #       icon = icon("copy"),
-        #       class = "gov-uk-button"
-        #     ),
-        #     style = "max-width: none;"
-        #   ),
+        shiny::tagAppendAttributes(
+          actionButton(
+            "copybtn",
+            "Copy Chart to Clipboard",
+            icon = icon("copy"),
+            class = "gov-uk-button"
+          ),
+          style = "max-width: none;"
+        ),
         #   style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
       )
     )
