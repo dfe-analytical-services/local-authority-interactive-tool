@@ -162,19 +162,7 @@ ui <- function(input, output, session) {
         appInputsUI("stat_n_inputs"),
 
         # Statistical Neighbour tables ========================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Statistical Neighbours"),
-            bslib::card_body(
-              # Statistical Neighbour LA SNs Table ------------------------------
-              StatN_LASNsTableUI("stat_n_sns_table"),
-              # Statistical Neighbour LA Geog Compare Table ---------------------
-              StatN_GeogCompTableUI("stat_n_comp_table")
-            )
-          )
-        ),
+        StatN_TablesUI("stat_n_tables"),
         # Statistical Neighbour Statistics Table ----------------------------
         StatN_StatsTableUI("stat_n_stats_table"),
 

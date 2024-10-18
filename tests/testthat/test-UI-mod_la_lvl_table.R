@@ -120,8 +120,8 @@ test_that("Check LA charts behave as expected", {
     name = "la-charts",
     height = 1059,
     width = 1461,
-    load_timeout = 45 * 10000,
-    timeout = 20 * 10000,
+    load_timeout = 45 * 1000,
+    timeout = 20 * 1000,
     wait = TRUE,
     variant = shinytest2::platform_variant()
   )
