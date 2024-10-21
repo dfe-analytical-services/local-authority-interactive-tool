@@ -393,7 +393,7 @@ StatN_Chart_InputUI <- function(id) {
   tagList(
     shiny::selectizeInput(
       inputId = ns("chart_line_input"),
-      label = "Select region to compare (max 3)",
+      label = "Select statistical neighbour to compare (max 3)",
       choices = NULL,
       multiple = TRUE,
       options = list(
@@ -404,7 +404,7 @@ StatN_Chart_InputUI <- function(id) {
     ),
     shiny::selectizeInput(
       inputId = ns("chart_bar_input"),
-      label = "Select region to compare (max 3)",
+      label = "Select statistical neighbour to compare (max 3)",
       choices = NULL,
       multiple = TRUE,
       options = list(
