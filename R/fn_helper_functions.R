@@ -407,3 +407,35 @@ af_colours_focus <- function() {
     }
   )
 }
+
+
+
+get_geog_selection <- function(input, la_names_bds, region_names_bds) {
+  # Initialize an empty vector to store the results
+  selection <- c()
+
+  # If all regions are selected, add "All Regions" and exclude region_names_bds
+  if (input$all_regions && input$all_las) {
+    selection <- c(selection, "All LAs", "All Regions")
+  }
+
+  # If all local authorities (LAs) are selected, add "All LAs" and exclude la_names_bds
+  if (input$all_las && !input$all_regions) {
+    cleaned_selection <- setdiff(input$geog_input, la_names_bds)
+    selection <- c(selection, "All LAs", cleaned_selection)
+  }
+
+  # If all regions are selected, add "All Regions" and exclude region_names_bds
+  if (input$all_regions && !input$all_las) {
+    cleaned_selection <- setdiff(input$geog_input, region_names_bds)
+    selection <- c(selection, "All Regions", cleaned_selection)
+  }
+
+  # If neither all_las nor all_regions are selected, include input$geog_input as is
+  if (!input$all_las && !input$all_regions) {
+    selection <- c(selection, input$geog_input)
+  }
+
+  # Return the final selection
+  selection
+}

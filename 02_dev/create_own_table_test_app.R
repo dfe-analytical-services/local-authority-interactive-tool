@@ -23,11 +23,10 @@ ui <- bslib::page_fillable(
     bslib::layout_column_wrap(
       width = "15rem",
       shiny::selectInput(
-        inputId = "la_input",
-        label = "Change Authority:",
-        choices = la_names_bds,
-        multiple = TRUE,
-        selected = "Barking and Dagenham"
+        inputId = "geog_input",
+        label = "LAs and Regions:",
+        choices = c(la_names_bds, region_names_bds),
+        multiple = TRUE
       ),
       shiny::selectInput(
         inputId = "topic_input",
@@ -39,28 +38,34 @@ ui <- bslib::page_fillable(
         label = "Indicator:",
         choices = metric_names
       ),
-      checkboxInput("all_las", "Include All LAs", FALSE),
-      checkboxInput("all_regions", "Include All Regions", FALSE),
-      actionButton("add_query", "Add Query")
+      shiny::checkboxInput("all_las", "Include All LAs", FALSE),
+      shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
+      shiny::actionButton("add_query", "Add Query", class = "gov-uk-button")
     )
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
     h3("Staging Table (View of Current Query)"),
-    reactable::reactableOutput("staging_table")
+    bslib::card(
+      reactable::reactableOutput("staging_table")
+    )
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Query Table"),
-    reactable::reactableOutput("query_table")
+    h3("List of queries"),
+    bslib::card(
+      reactable::reactableOutput("query_table")
+    )
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
     h3("Final Output Table (View of Saved Queries)"),
-    reactable::reactableOutput("output_table")
+    bslib::card(
+      reactable::reactableOutput("output_table")
+    )
   )
 )
 
@@ -84,7 +89,7 @@ server <- function(input, output, session) {
   # Setting combination of user input choices (regarding geographies)
   user_geog_inputs <- reactive({
     # Selected LAs
-    inputs <- input$la_input
+    inputs <- input$geog_input
 
     # Append all LAs
     if (isTRUE(input$all_las)) {
@@ -119,7 +124,7 @@ server <- function(input, output, session) {
       Topic = I(list()),
       Measure = I(list()),
       `LA and Regions` = I(list()),
-      Remove = character(),
+      `Click to remove query` = character(),
       check.names = FALSE
     )
   )
@@ -152,15 +157,9 @@ server <- function(input, output, session) {
       Topic = I(list(input$topic_input)),
       Measure = I(list(input$indicator)),
       `LA and Regions` = I(list(
-        if (input$all_las) {
-          "All LAs"
-        } else if (input$all_regions) {
-          "All Regions"
-        } else {
-          input$la_input
-        }
+        get_geog_selection(input, la_names_bds, region_names_bds)
       )),
-      Remove = "Remove",
+      `Click to remove query` = "Remove",
       check.names = FALSE
     )
 
@@ -183,7 +182,7 @@ server <- function(input, output, session) {
       columns = list(
         # JS used from `reactable.extras::button_extra()` to create btn in table
         # Uses the row identifier to know which row to remove
-        Remove = reactable::colDef(
+        `Click to remove query` = reactable::colDef(
           cell = reactable::JS(
             "function(cellInfo) {
             // Use the unique row identifier as the button ID
@@ -193,8 +192,8 @@ server <- function(input, output, session) {
               label: 'Remove',
               uuid: cellInfo.row['.internal_uuid'],
               column: cellInfo.column.id,
-              class: 'button-extra',
-              className: 'button-extra'
+              class: 'govuk-button--warning',
+              className: 'govuk-button--warning'
             }, cellInfo.index);
           }"
           )
@@ -234,7 +233,12 @@ server <- function(input, output, session) {
 
     # Check if there are any selected measures
     if (nrow(query$data) == 0) {
-      return(reactable::reactable(data.frame(Message = "Please add queries.")))
+      return(reactable::reactable(
+        data.frame(
+          `Message from tool` = "Please add queries.",
+          check.names = FALSE
+        )
+      ))
     }
 
     # Get max and min years to expand each measure (if needed)
@@ -259,7 +263,10 @@ server <- function(input, output, session) {
       all_years <- data.frame(Years_num = seq(min_year, max_year))
     } else {
       return(reactable::reactable(
-        data.frame(Message = "No years available for selected measures.")
+        data.frame(
+          `Message from tool` = "No years available for selected measures.",
+          check.names = FALSE
+        )
       ))
     }
 
@@ -273,8 +280,20 @@ server <- function(input, output, session) {
       current_measure <- query$data$Measure[[i]]
       current_geog <- query$data$`LA and Regions`[[i]]
 
-      # Create a temporary filtered BDS for the current query
-      temp_query_data <- bds_metrics |>
+      # Set geography filters
+      # Append all LAs
+      if ("All LAs" %in% current_geog) {
+        current_geog <- c(current_geog, la_names_bds)
+      }
+      # Append all Regions
+      if ("All Regions" %in% current_geog) {
+        current_geog <- c(current_geog, region_names_bds)
+      }
+      # Return unique geogs
+      current_geog <- unique(current_geog)
+
+      # Filter BDS for the current query
+      raw_query_data <- bds_metrics |>
         dplyr::filter(
           Topic %in% current_topic,
           Measure %in% current_measure,
@@ -285,11 +304,11 @@ server <- function(input, output, session) {
           Measure, Years, Years_num, values_num, Values
         )
 
-      # Create the complete query
+      # Create the cleaned query
       # Merge the temp_data with the all_years data to ensure query has
       # year cols to match other queries (for easy row join)
-      complete_query_data <- dplyr::full_join(
-        temp_query_data,
+      clean_query_data <- dplyr::full_join(
+        raw_query_data,
         all_years,
         by = c("Years_num")
       ) |>
@@ -303,13 +322,16 @@ server <- function(input, output, session) {
         dplyr::filter(!dplyr::if_all(everything(), is.na))
 
       # Combine the current query into the final query data frame
-      final_query_data <- dplyr::bind_rows(final_query_data, complete_query_data)
+      final_query_data <- dplyr::bind_rows(final_query_data, clean_query_data)
     }
 
     # Check if final_data has any rows before rendering
     if (nrow(final_query_data) == 0) {
       return(reactable::reactable(
-        data.frame(Message = "No data available based on the selected queries.")
+        data.frame(
+          `Message from tool` = "No data available based on the selected queries.",
+          check.names = FALSE
+        )
       ))
     }
 
