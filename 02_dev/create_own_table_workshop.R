@@ -82,23 +82,35 @@ test_data <- data.frame(
   Topic = I(list(selected_topic)),
   Measure = I(list(selected_indicator)),
   `LA and Regions` = I(list(selected_la)),
-  Remove = "Remove",
+  `Click to remove query` = "Remove",
+  .internal_uuid = 1,
   check.names = FALSE,
   stringsAsFactors = FALSE
 )
 
 
-test <- reactable::reactable(
+reactable::reactable(
   test_data,
   columns = list(
-    Remove = reactable::colDef(
+    # JS used from `reactable.extras::button_extra()` to create btn in table
+    # Uses the row identifier to know which row to remove
+    `Click to remove query` = reactable::colDef(
       cell = reactable::JS(
-        "function(cellInfo, rowInfo) {
-            return React.createElement(ButtonExtras,
-            {id: 'remove_' + rowInfo.index, label: cellInfo.value,
-            uuid: cellInfo.row['.internal_uuid'] ? cellInfo.row['.internal_uuid'] : (Number(cellInfo.id) + 1), column: cellInfo.column.id }, cellInfo.id)
-            }"
+        "function(cellInfo) {
+            // Use the unique row identifier as the button ID
+            const buttonId = 'remove_' + cellInfo.row['.internal_uuid'];
+            return React.createElement(ButtonExtras, {
+              id: buttonId,
+              label: 'Remove',
+              uuid: cellInfo.row['.internal_uuid'],
+              column: cellInfo.column.id,
+              class: 'govuk-button--warning',
+              className: 'govuk-button--warning'
+            }, cellInfo.index);
+          }"
       )
-    )
+    ),
+    # Don't show row identifier
+    .internal_uuid = reactable::colDef(show = FALSE)
   )
 )

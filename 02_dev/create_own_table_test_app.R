@@ -199,7 +199,7 @@ server <- function(input, output, session) {
           )
         ),
         # Don't show row identifier
-        .internal_uuid = reactable::colDef(show = F)
+        .internal_uuid = reactable::colDef(show = FALSE)
       )
     )
   })
