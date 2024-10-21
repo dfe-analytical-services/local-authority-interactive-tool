@@ -47,29 +47,28 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Staging Table (Current Query)"),
-    reactable::reactableOutput("react_staging")
+    h3("Staging Table (View of Current Query)"),
+    reactable::reactableOutput("staging_table")
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
     h3("Query Table"),
-    reactable::reactableOutput("react_query_table")
+    reactable::reactableOutput("query_table")
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Final Output Table (Saved Queries)"),
-    reactable::reactableOutput("react_final_output")
+    h3("Final Output Table (View of Saved Queries)"),
+    reactable::reactableOutput("output_table")
   )
 )
 
 
 server <- function(input, output, session) {
   # Input ----------------------------------
-  # Using the server to power to the provider dropdown for increased speed
+  # Get and set indicator choices for selected topic
   shiny::observeEvent(input$topic_input, {
-    # Get indicator choices for selected topic
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(Topic %in% input$topic_input) |>
       pull_uniques("Measure")
@@ -82,15 +81,17 @@ server <- function(input, output, session) {
     )
   })
 
+  # Setting combination of user input choices (regarding geographies)
   user_geog_inputs <- reactive({
+    # Selected LAs
     inputs <- input$la_input
 
-    # Append all LAs if the checkbox is checked
+    # Append all LAs
     if (isTRUE(input$all_las)) {
       inputs <- c(inputs, la_names_bds)
     }
 
-    # Append all Regions if the checkbox is checked
+    # Append all Regions
     if (isTRUE(input$all_regions)) {
       inputs <- c(inputs, region_names_bds)
     }
@@ -100,7 +101,7 @@ server <- function(input, output, session) {
   })
 
 
-  # Filtered data for staging table based on inputs
+  # Filter BDS based on user inputs (topic, indicator, geographies)
   filtered_bds <- reactive({
     req(input$topic_input, input$indicator)
     bds_metrics |>
@@ -111,21 +112,21 @@ server <- function(input, output, session) {
       )
   })
 
-  # Reactive values to store data
-  query_table <- reactiveValues(
+  # Reactive value "query" used to store query data
+  # Uses lists to store multiple inputs (geographies)
+  query <- reactiveValues(
     data = data.frame(
       Topic = I(list()),
       Measure = I(list()),
       `LA and Regions` = I(list()),
       Remove = character(),
-      check.names = FALSE,
-      stringsAsFactors = FALSE
+      check.names = FALSE
     )
   )
 
-  # Building the staging table
-  create_own_bds <- reactive({
-    staging_table <- filtered_bds() |>
+  # Build the staging table (select data and make wide)
+  staging_table <- reactive({
+    filtered_bds() |>
       dplyr::select(
         `LA Number`, `LA and Regions`, Topic,
         Measure, Years, Years_num, values_num, Values
@@ -135,20 +136,19 @@ server <- function(input, output, session) {
         names_from = Years,
         values_from = values_num,
       )
-    staging_table
   })
 
-  # Staging table based on current inputs
-  output$react_staging <- reactable::renderReactable({
+  # Staging table output
+  output$staging_table <- reactable::renderReactable({
     reactable::reactable(
-      create_own_bds()
+      staging_table()
     )
   })
 
-  # Add query button action
+  # When "Add query" button clicked - add query to saved queries
   observeEvent(input$add_query, {
-    new_row <- data.frame(
-      # Store as a list to allow multiple topics
+    # Get query information
+    new_query <- data.frame(
       Topic = I(list(input$topic_input)),
       Measure = I(list(input$indicator)),
       `LA and Regions` = I(list(
@@ -161,21 +161,28 @@ server <- function(input, output, session) {
         }
       )),
       Remove = "Remove",
-      check.names = FALSE,
-      stringsAsFactors = FALSE
+      check.names = FALSE
     )
-    query_table$data <- rbind(query_table$data |> dplyr::select(-.internal_uuid), new_row)
+
+    # Append query to existing query data
+    query$data <- query$data |>
+      # Remove row identifier as not needed yet (and not available initially)
+      dplyr::select(-.internal_uuid) |>
+      rbind(new_query)
   })
 
 
-  # Render Reactable with unique button IDs using UUID
-  output$react_query_table <- reactable::renderReactable({
-    req(nrow(query_table$data)) # Ensure there is data to render
-    query_table$data$.internal_uuid <- seq_len(nrow(query_table$data))
+  # Query table output
+  output$query_table <- reactable::renderReactable({
+    req(nrow(query$data))
+    # Set the new row identifier (a counter)
+    query$data$.internal_uuid <- seq_len(nrow(query$data))
 
     reactable::reactable(
-      query_table$data,
+      query$data,
       columns = list(
+        # JS used from `reactable.extras::button_extra()` to create btn in table
+        # Uses the row identifier to know which row to remove
         Remove = reactable::colDef(
           cell = reactable::JS(
             "function(cellInfo) {
@@ -192,26 +199,28 @@ server <- function(input, output, session) {
           }"
           )
         ),
+        # Don't show row identifier
         .internal_uuid = reactable::colDef(show = F)
       )
     )
   })
 
-  # Reactive observer for remove buttons
+  # Remove query button
   observe({
-    req(nrow(query_table$data)) # Ensure there's data
-    query_table$data$.internal_uuid <- seq_len(nrow(query_table$data))
+    req(nrow(query$data))
+    # Set the row identifier
+    query$data$.internal_uuid <- seq_len(nrow(query$data))
 
-    # Create observers for each row using the unique ID
-    lapply(query_table$data$.internal_uuid, function(uuid) {
-      # Create a unique input ID for each remove button
+    # Create btn observers for each row using the unique row identifier
+    lapply(query$data$.internal_uuid, function(uuid) {
+      # Create matching row identifier for each remove button
       remove_button_id <- paste0("remove_", uuid)
 
       # Observe the button click
       observeEvent(input[[remove_button_id]],
         {
-          # Remove the corresponding row from query_table$data using the UUID
-          query_table$data <- query_table$data[query_table$data$.internal_uuid != uuid, , drop = FALSE]
+          # Remove the corresponding row from query$data using the row identifier
+          query$data <- query$data[query$data$.internal_uuid != uuid, , drop = FALSE]
         },
         ignoreInit = TRUE
       )
@@ -219,23 +228,23 @@ server <- function(input, output, session) {
   })
 
 
-
-
-
-  # Final output table based on saved queries
-  output$react_final_output <- reactable::renderReactable({
-    req(query_table$data)
+  # Final output table (based on saved queries)
+  output$output_table <- reactable::renderReactable({
+    req(query$data)
 
     # Check if there are any selected measures
-    if (nrow(query_table$data) == 0) {
+    if (nrow(query$data) == 0) {
       return(reactable::reactable(data.frame(Message = "Please add queries.")))
     }
 
-    # Extracting filters while ensuring that lists are flattened
-    selected_indicators <- unique(unlist(query_table$data$Measure))
+    # Get max and min years to expand each measure (if needed)
+    # to match indicators with more years data
+    # Extracting selected measures
+    selected_indicators <- unique(unlist(query$data$Measure))
 
-    # Get max year and min year for reference only if there are selected indicators
+    # Create a simple data frame with col for all years from min_year to max_year
     if (length(selected_indicators) > 0) {
+      # Get max year and min year
       max_year <- bds_metrics |>
         dplyr::filter(Measure %in% selected_indicators) |>
         dplyr::pull(Years_num) |>
@@ -246,23 +255,26 @@ server <- function(input, output, session) {
         dplyr::pull(Years_num) |>
         min(na.rm = TRUE)
 
-      # Create a complete data frame for all years from min_year to max_year
+      # Years col df
       all_years <- data.frame(Years_num = seq(min_year, max_year))
     } else {
-      return(reactable::reactable(data.frame(Message = "No data available for selected measures.")))
+      return(reactable::reactable(
+        data.frame(Message = "No years available for selected measures.")
+      ))
     }
 
-    final_data <- data.frame() # Initialize the final_data variable
+    # Setup the final_data which stores all the query data
+    final_query_data <- data.frame()
 
-    # Loop through each row in the query table
-    for (i in seq_len(nrow(query_table$data))) {
-      # Get the current row values
-      current_topic <- query_table$data$Topic[[i]]
-      current_measure <- query_table$data$Measure[[i]]
-      current_geog <- query_table$data$`LA and Regions`[[i]]
+    # Loop through each row in the query table and query results to final_table
+    for (i in seq_len(nrow(query$data))) {
+      # Get the current query values
+      current_topic <- query$data$Topic[[i]]
+      current_measure <- query$data$Measure[[i]]
+      current_geog <- query$data$`LA and Regions`[[i]]
 
-      # Create a temporary filtered data set for the current row
-      temp_data <- bds_metrics |>
+      # Create a temporary filtered BDS for the current query
+      temp_query_data <- bds_metrics |>
         dplyr::filter(
           Topic %in% current_topic,
           Measure %in% current_measure,
@@ -273,10 +285,11 @@ server <- function(input, output, session) {
           Measure, Years, Years_num, values_num, Values
         )
 
-      # Create a complete data frame for the current temp_data
-      # Merge the temp_data with the complete years data to fill in NAs
-      complete_temp_data <- dplyr::full_join(
-        temp_data,
+      # Create the complete query
+      # Merge the temp_data with the all_years data to ensure query has
+      # year cols to match other queries (for easy row join)
+      complete_query_data <- dplyr::full_join(
+        temp_query_data,
         all_years,
         by = c("Years_num")
       ) |>
@@ -285,22 +298,23 @@ server <- function(input, output, session) {
           names_from = Years_num,
           values_from = values_num
         ) |>
-        # Remove any NA rows (created from join)
+        # Remove any all NA rows
+        # (created from join where indicator has missing year)
         dplyr::filter(!dplyr::if_all(everything(), is.na))
 
-      # Combine the filtered data into the final data frame
-      final_data <- dplyr::bind_rows(final_data, complete_temp_data)
+      # Combine the current query into the final query data frame
+      final_query_data <- dplyr::bind_rows(final_query_data, complete_query_data)
     }
 
     # Check if final_data has any rows before rendering
-    if (nrow(final_data) == 0) {
+    if (nrow(final_query_data) == 0) {
       return(reactable::reactable(
         data.frame(Message = "No data available based on the selected queries.")
       ))
     }
 
     # Output final table
-    reactable::reactable(final_data)
+    reactable::reactable(final_query_data)
   })
 }
 
