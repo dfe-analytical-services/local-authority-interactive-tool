@@ -1,5 +1,7 @@
 # Load global
-source(here::here("global.R"))
+if (!exists("bds_metrics")) {
+  source(here::here("global.R"))
+}
 
 # Load functions
 list.files("R/", full.names = TRUE) |>

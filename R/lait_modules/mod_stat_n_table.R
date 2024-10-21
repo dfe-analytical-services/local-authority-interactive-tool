@@ -243,6 +243,11 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 #' @return A UI component containing a reactable output for displaying the
 #' statistical neighbour table.
 #'
+StatN_LASNsTableUI <- function(id) {
+  ns <- NS(id)
+
+  reactable::reactableOutput(ns("output_table"))
+}
 StatN_TablesUI <- function(id) {
   ns <- NS(id)
 
