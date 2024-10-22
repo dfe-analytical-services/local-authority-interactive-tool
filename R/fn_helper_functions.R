@@ -439,3 +439,51 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds) {
   # Return the final selection
   selection
 }
+
+
+# Function to get min and max years from the data
+get_min_max_years <- function(data) {
+  query_num_years <- data |>
+    dplyr::pull(Years_num)
+
+  max_year <- query_num_years |> max(na.rm = TRUE)
+  min_year <- query_num_years |> min(na.rm = TRUE)
+
+  return(list(min_year = min_year, max_year = max_year))
+}
+
+# Function to create a data frame for all years
+create_years_df <- function(min_year, max_year) {
+  data.frame(Years_num = seq(min_year, max_year))
+}
+
+# Function to filter BDS for selected indicators
+filter_bds_for_indicators <- function(bds_data, selected_indicators) {
+  bds_data |>
+    dplyr::filter(
+      Measure %in% selected_indicators,
+      !is.na(Years)
+    )
+}
+
+# Function to check if all year suffixes are the same
+check_year_suffix_consistency <- function(data) {
+  data |>
+    pull_uniques("Years") |>
+    substring(5) |>
+    stringr::str_replace_all("\\d", "") |>
+    {
+      \(x) all(x == x[1])
+    }()
+}
+
+# Function to sort year columns with full names preserved
+sort_year_columns <- function(full_query_data) {
+  full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
+
+  full_query_year_cols |>
+    purrr::set_names() |>
+    purrr::map_chr(~ stringr::str_sub(.x, 1, 4)) |>
+    sort() |>
+    names()
+}
