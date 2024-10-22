@@ -113,7 +113,8 @@ server <- function(input, output, session) {
       dplyr::filter(
         Topic %in% input$topic_input,
         Measure %in% input$indicator,
-        `LA and Regions` %in% user_geog_inputs()
+        `LA and Regions` %in% user_geog_inputs(),
+        !is.na(Years)
       )
   })
 
@@ -245,18 +246,36 @@ server <- function(input, output, session) {
     # to match indicators with more years data
     # Extracting selected measures
     selected_indicators <- unique(unlist(query$data$Measure))
+    no_selected_indicators <- length(selected_indicators)
 
     # Create a simple data frame with col for all years from min_year to max_year
-    if (length(selected_indicators) > 0) {
+    if (no_selected_indicators > 0) {
+      # Filter BDS for indicators (BEWARE of duplicate indicators belonging to different topics)
+      raw_indicator_filtered_bds <- bds_metrics |>
+        dplyr::filter(
+          Measure %in% selected_indicators,
+          !is.na(Years)
+        )
+
+      # Test to see if all years are same format
+      query_str_years <- raw_indicator_filtered_bds |>
+        pull_uniques("Years") |>
+        substring(5) |>
+        stringr::str_replace_all("\\d", "") |> # Remove any digits from position 5 onwards
+        {
+          \(x) all(x == x[1])
+        }()
+
+
+      # Pull years num
+      query_num_years <- raw_indicator_filtered_bds |>
+        dplyr::pull(Years_num)
+
       # Get max year and min year
-      max_year <- bds_metrics |>
-        dplyr::filter(Measure %in% selected_indicators) |>
-        dplyr::pull(Years_num) |>
+      max_year <- query_num_years |>
         max(na.rm = TRUE)
 
-      min_year <- bds_metrics |>
-        dplyr::filter(Measure %in% selected_indicators) |>
-        dplyr::pull(Years_num) |>
+      min_year <- query_num_years |>
         min(na.rm = TRUE)
 
       # Years col df
@@ -297,7 +316,8 @@ server <- function(input, output, session) {
         dplyr::filter(
           Topic %in% current_topic,
           Measure %in% current_measure,
-          `LA and Regions` %in% current_geog
+          `LA and Regions` %in% current_geog,
+          !is.na(Years)
         ) |>
         dplyr::select(
           `LA Number`, `LA and Regions`, Topic,
@@ -307,25 +327,43 @@ server <- function(input, output, session) {
       # Create the cleaned query
       # Merge the temp_data with the all_years data to ensure query has
       # year cols to match other queries (for easy row join)
-      clean_query_data <- dplyr::full_join(
+      full_query_data <- dplyr::full_join(
         raw_query_data,
         all_years,
         by = c("Years_num")
       ) |>
+        # Use string Years if just one indicator or all suffix are the same
         tidyr::pivot_wider(
           id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
-          names_from = Years_num,
+          names_from = ifelse(
+            (query_str_years | no_selected_indicators == 1),
+            "Years",
+            "Years_num"
+          ),
           values_from = values_num
-        ) |>
+        )
+
+      # Extract and sort year columns with full names preserved
+      full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
+
+      # Create a named vector of years - sorting numeric versions
+      full_query_sorted_year_cols <- full_query_year_cols |>
+        purrr::set_names() |>
+        purrr::map_chr(~ stringr::str_sub(.x, 1, 4)) |>
+        sort() |>
+        names()
+
+      clean_query_data <- full_query_data |>
         # Remove any all NA rows
         # (created from join where indicator has missing year)
         dplyr::filter(!dplyr::if_all(everything(), is.na)) |>
+        # Order years cols suitably
         dplyr::select(
           `LA Number`,
           `LA and Regions`,
           Topic,
           Measure,
-          tidyselect::num_range("", min_year:max_year)
+          dplyr::all_of(full_query_sorted_year_cols)
         )
 
       # Combine the current query into the final query data frame

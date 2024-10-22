@@ -117,7 +117,7 @@ reactable::reactable(
 
 
 
-bds_metrics <- data.frame(
+test_bds_metrics <- data.frame(
   `LA Number` = c(1, 1, 1, 2, 2, 2, 3, 3),
   `LA and Regions` = c(
     "East Midlands", "East Midlands", "East Midlands",
@@ -130,14 +130,14 @@ bds_metrics <- data.frame(
     "Measure B", "Measure B", "Measure B",
     "Measure C", "Measure C"
   ),
-  Years = c("2016", "2014", "2015", "2016", "2015", "2014", "2016", "2014"),
+  Years = c("2016 (prov)", "2014", "2015", "2016 (prov)", "2015", "2014", "2016 (prov)", "2014"),
   Years_num = c(2016, 2014, 2015, 2016, 2015, 2014, 2016, 2014),
   values_num = c(100, 80, 90, 95, 85, 75, 110, 70),
   Values = c("100k", "80k", "90k", "95k", "85k", "75k", "110k", "70k"),
   check.names = FALSE
 )
 
-query <- list(
+test_query <- list(
   data = data.frame(
     Topic = I(list("Health", "Education")),
     Measure = I(list("Measure A", "Measure B")),
@@ -146,12 +146,20 @@ query <- list(
   )
 )
 
-all_years <- data.frame(Years_num = seq(2014, 2016))
+test_bds_metrics |>
+  pull_uniques("Years") |>
+  substring(5) |>
+  stringr::str_replace_all("\\d", "") |> # Remove any digits from position 5 onwards
+  {
+    \(x) all(x == x[1])
+  }()
+
+test_all_years <- data.frame(Years_num = seq(2014, 2016))
 
 # Get the current query values
-current_topic <- query$data$Topic[[1]]
-current_measure <- query$data$Measure[[1]]
-current_geog <- query$data$`LA and Regions`[[1]]
+current_topic <- test_query$data$Topic[1]
+current_measure <- test_query$data$Measure[1]
+current_geog <- test_query$data$`LA and Regions`[1]
 
 # Set geography filters
 # Append all LAs
@@ -166,7 +174,7 @@ if ("All Regions" %in% current_geog) {
 current_geog <- unique(current_geog)
 
 # Filter BDS for the current query
-raw_query_data <- bds_metrics |>
+raw_query_data <- test_bds_metrics |>
   dplyr::filter(
     Topic %in% current_topic,
     Measure %in% current_measure,
@@ -180,25 +188,39 @@ raw_query_data <- bds_metrics |>
 # Create the cleaned query
 # Merge the temp_data with the all_years data to ensure query has
 # year cols to match other queries (for easy row join)
-clean_query_data <- dplyr::full_join(
+full_query_data <- dplyr::full_join(
   raw_query_data,
-  all_years,
+  test_all_years,
   by = c("Years_num")
 ) |>
+  # Use string Years if all suffix is the same
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
-    names_from = Years_num,
+    names_from = ifelse(TRUE, "Years", "Years_num"),
     values_from = values_num
-  ) |>
+  )
+
+# Extract and sort year columns with full names preserved
+full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
+
+# Create a named vector for sorting
+full_query_sorted_year_cols <- full_query_year_cols |>
+  purrr::set_names() |>
+  purrr::map_chr(~ stringr::str_sub(.x, 1, 4)) |> # Extract first 4 characters
+  sort() |> # Sort numerically
+  names()
+
+clean_query_data <- full_query_data |>
   # Remove any all NA rows
   # (created from join where indicator has missing year)
   dplyr::filter(!dplyr::if_all(everything(), is.na)) |>
+  # Order years cols suitably
   dplyr::select(
     `LA Number`,
     `LA and Regions`,
     Topic,
     Measure,
-    tidyselect::num_range("", min(all_years):max(all_years))
+    dplyr::all_of(full_query_sorted_year_cols) # Select sorted year columns
   )
 
 # Combine the current query into the final query data frame
