@@ -203,7 +203,7 @@ test_that("Check LA charts behave as expected", {
   # Check title
   testthat::expect_true(
     grepl(
-      "Pupils achieving Key Stage 1 Reading Expected Standard (%)",
+      "Pupils achieving expected level in Phonics decoding - all pupils (%)",
       cleaned_barplot_str,
       fixed = TRUE
     )

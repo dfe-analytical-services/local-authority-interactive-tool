@@ -25,8 +25,8 @@ source(here::here("R/fn_load_data.R"))
 ```{r pull-latest-bds-data}
 # Load raw BDS wide from shared folder
 bds_wide_raw_sf <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/../Project Documentation/BDS - 2024 (JAKE).xlsx"),
-  sheet = "BDS",
+  path = paste0(shared_folder, "/../Information for App Development/BDS - 2024 (JAKE).xlsx"),
+  sheet = "BDS for new LAIT",
   col_names = TRUE,
   skip = 1,
   # Replace multi-space with single-space
@@ -136,7 +136,7 @@ bds_long_la <- bds_long_clean |>
 # only public-safe/in-use measures)
 # NOTE: Children_away changed to Children_Away to match BDS
 data_dict <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/LAIT Data Dictionary (To QA!).xlsx"),
+  path = paste0("01_data/02_prod/LAIT Data Dictionary.xlsx"),
   sheet = "Data_prod"
 ) |>
   dplyr::mutate(Measure_short = trimws(Measure_short)) |>
