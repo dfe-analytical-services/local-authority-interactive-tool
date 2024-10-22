@@ -202,7 +202,6 @@ testthat::test_that(
   {
     testthat::expect_equal(
       bds_clean |>
-        dplyr::filter(`Short Desc` %notin% metrics_discontinued) |>
         nrow(),
       nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)
     )
@@ -211,12 +210,24 @@ testthat::test_that(
 # Using waldo to do same as test
 waldo::compare(
   x = bds_clean |>
-    dplyr::filter(`Short Desc` %notin% metrics_discontinued) |>
     nrow() |>
     as.numeric(),
   y = (nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)) |>
     as.numeric()
 )
+
+# Measures that have not been joined by BDS clean
+bds_metrics |>
+  dplyr::filter(is.na(`LA and Regions`)) |>
+  pull_uniques("Measure_short")
+
+# Measures in BDS metrics but not in BDS clean
+setdiff(
+  bds_metrics |> pull_uniques("Measure_short"),
+  bds_clean |> pull_uniques("Short Desc")
+)
+
+
 
 # PROOF 2: The unique values of Measure Short + Topic are the same
 testthat::test_that(
