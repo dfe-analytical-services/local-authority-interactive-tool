@@ -319,7 +319,14 @@ server <- function(input, output, session) {
         ) |>
         # Remove any all NA rows
         # (created from join where indicator has missing year)
-        dplyr::filter(!dplyr::if_all(everything(), is.na))
+        dplyr::filter(!dplyr::if_all(everything(), is.na)) |>
+        dplyr::select(
+          `LA Number`,
+          `LA and Regions`,
+          Topic,
+          Measure,
+          tidyselect::num_range("", min_year:max_year)
+        )
 
       # Combine the current query into the final query data frame
       final_query_data <- dplyr::bind_rows(final_query_data, clean_query_data)
