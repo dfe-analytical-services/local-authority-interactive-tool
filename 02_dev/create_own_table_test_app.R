@@ -40,6 +40,8 @@ ui <- bslib::page_fillable(
       ),
       shiny::checkboxInput("all_las", "Include All LAs", FALSE),
       shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
+      shiny::checkboxInput("region_las", "Include LAs in the same Region", FALSE),
+      shiny::checkboxInput("la_sns", "Include statistical neighbours", FALSE),
       shiny::actionButton("add_query", "Add Query", class = "gov-uk-button")
     )
   ),
@@ -86,6 +88,13 @@ server <- function(input, output, session) {
     )
   })
 
+  # Get Regions from LAs
+  user_regions <- reactive({
+    stat_n_geog |>
+      dplyr::filter(`LA Name` %in% input$geog_input) |>
+      pull_uniques("GOReg")
+  })
+
   # Setting combination of user input choices (regarding geographies)
   user_geog_inputs <- reactive({
     # Selected LAs
@@ -100,6 +109,23 @@ server <- function(input, output, session) {
     if (isTRUE(input$all_regions)) {
       inputs <- c(inputs, region_names_bds)
     }
+
+    # Append Regions LAs
+    if (isTRUE(input$region_las)) {
+      # Get all LAs in the regions
+      all_region_las <- get_las_in_regions(stat_n_geog, user_regions())
+
+      inputs <- c(inputs, all_region_las)
+    }
+
+    # # Append LAs statistical neighbours
+    # if (isTRUE(input$la_sns)) {
+    #   stat_neighbours <- stat_n_la |>
+    #     dplyr::filter(`LA Name` %in% input$geog_input) |>
+    #     pull_uniques("LA Name_sn")
+    #
+    #   inputs <- c(inputs, stat_neighbours)
+    # }
 
     # Return unique values to avoid duplication
     unique(inputs)
@@ -158,7 +184,7 @@ server <- function(input, output, session) {
       Topic = I(list(input$topic_input)),
       Measure = I(list(input$indicator)),
       `LA and Regions` = I(list(
-        get_geog_selection(input, la_names_bds, region_names_bds)
+        get_geog_selection(input, la_names_bds, region_names_bds, user_regions())
       )),
       `Click to remove query` = "Remove",
       check.names = FALSE
@@ -227,7 +253,6 @@ server <- function(input, output, session) {
     })
   })
 
-
   # Final output table (based on saved queries)
   output$output_table <- reactable::renderReactable({
     req(query$data)
@@ -241,8 +266,6 @@ server <- function(input, output, session) {
         )
       ))
     }
-
-
 
     # Main logic for query data processing
     selected_indicators <- unique(unlist(query$data$Measure))
@@ -275,6 +298,17 @@ server <- function(input, output, session) {
       current_measure <- query$data$Measure[[i]]
       current_geog <- query$data$`LA and Regions`[[i]]
 
+      # Sorting geography filters
+      # Adding all LAs in selected LA regions
+      if (any(grepl("LAs in ", current_geog))) {
+        current_la_regions <- current_geog |>
+          stringr::str_subset("^LAs in ") |> # Subset strings that start with "LAs in "
+          stringr::str_remove("^LAs in ") # Remove the "LAs in " prefix
+
+        # Extract all LAs in the region and add to current geog
+        current_region_las <- get_las_in_regions(stat_n_geog, current_la_regions)
+        current_geog <- c(current_geog, current_region_las)
+      }
       # Append all LAs or Regions to the current geography if needed
       if ("All LAs" %in% current_geog) current_geog <- c(current_geog, la_names_bds)
       if ("All Regions" %in% current_geog) current_geog <- c(current_geog, region_names_bds)

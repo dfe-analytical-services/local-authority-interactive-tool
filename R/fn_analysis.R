@@ -298,3 +298,11 @@ filter_region_data_all_la <- function(data, la_names) {
     dplyr::mutate(Rank = "") |>
     dplyr::arrange(`LA Number`)
 }
+
+
+
+get_las_in_regions <- function(data_geog, regions) {
+  data_geog |>
+    dplyr::filter(GOReg %in% regions) |>
+    pull_uniques("LA Name")
+}

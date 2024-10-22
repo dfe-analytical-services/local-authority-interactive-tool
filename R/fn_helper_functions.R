@@ -410,30 +410,27 @@ af_colours_focus <- function() {
 
 
 
-get_geog_selection <- function(input, la_names_bds, region_names_bds) {
+get_geog_selection <- function(input, la_names_bds, region_names_bds, selected_la_regions) {
   # Initialize an empty vector to store the results
-  selection <- c()
+  selection <- input$geog_input
+
+  # If Region LAs are selected, add "[LA] Region" and exclude those LAs
+  if (input$region_las) {
+    all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
+
+    selection <- c(setdiff(selection, all_region_las), paste0("LAs in ", selected_la_regions))
+  }
+
+  # If all LAs are selected, add "All LAs" and exclude la_names_bds and any "LAs in "
+  if (input$all_las) {
+    selection <- c(setdiff(selection, la_names_bds), "All LAs") |>
+      (\(x) x[!grepl("^LAs in ", x)])()
+  }
 
   # If all regions are selected, add "All Regions" and exclude region_names_bds
-  if (input$all_regions && input$all_las) {
-    selection <- c(selection, "All LAs", "All Regions")
-  }
-
-  # If all local authorities (LAs) are selected, add "All LAs" and exclude la_names_bds
-  if (input$all_las && !input$all_regions) {
-    cleaned_selection <- setdiff(input$geog_input, la_names_bds)
-    selection <- c(selection, "All LAs", cleaned_selection)
-  }
-
-  # If all regions are selected, add "All Regions" and exclude region_names_bds
-  if (input$all_regions && !input$all_las) {
-    cleaned_selection <- setdiff(input$geog_input, region_names_bds)
-    selection <- c(selection, "All Regions", cleaned_selection)
-  }
-
-  # If neither all_las nor all_regions are selected, include input$geog_input as is
-  if (!input$all_las && !input$all_regions) {
-    selection <- c(selection, input$geog_input)
+  if (input$all_regions) {
+    selection <- c(setdiff(selection, region_names_bds), "All Regions") |>
+      (\(x) x[!grepl(" statistical neighbours$", x)])()
   }
 
   # Return the final selection
