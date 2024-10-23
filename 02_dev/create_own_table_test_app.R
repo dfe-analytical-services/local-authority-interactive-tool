@@ -24,8 +24,8 @@ ui <- bslib::page_fillable(
       width = "15rem",
       shiny::selectInput(
         inputId = "geog_input",
-        label = "LAs and Regions:",
-        choices = c(la_names_bds, region_names_bds),
+        label = "LAs, Regions and England:",
+        choices = c(la_names_bds, region_names_bds, "England"),
         multiple = TRUE
       ),
       shiny::selectInput(
@@ -244,6 +244,20 @@ server <- function(input, output, session) {
         ignoreInit = TRUE
       )
     })
+  })
+
+  # When Region LAs is selected, uncheck statistical neighbours
+  observeEvent(input$region_las, {
+    if (input$region_las) {
+      updateCheckboxInput(session, "la_stat_ns", value = FALSE)
+    }
+  })
+
+  # When statistical neighbours is selected, uncheck Region LAs
+  observeEvent(input$la_stat_ns, {
+    if (input$la_stat_ns) {
+      updateCheckboxInput(session, "region_las", value = FALSE)
+    }
   })
 
   # Final output table (based on saved queries)
