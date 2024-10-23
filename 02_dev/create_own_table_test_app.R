@@ -19,31 +19,62 @@ ui <- bslib::page_fillable(
   h1("Create your own"),
   div(
     class = "well",
-    style = "overflow-y: visible;",
+    style = "overflow-y: visible; padding: 1rem;",
+
+    # Using layout_column_wrap for responsive design
     bslib::layout_column_wrap(
-      width = "15rem",
-      shiny::selectInput(
-        inputId = "geog_input",
-        label = "LAs, Regions and England:",
-        choices = c(la_names_bds, region_names_bds, "England"),
-        multiple = TRUE
+      # Geographic input
+      div(
+        style = "margin-bottom: 1rem;",
+        shiny::selectInput(
+          inputId = "geog_input",
+          label = "LAs, Regions, and England:",
+          choices = c(la_names_bds, region_names_bds, "England"),
+          multiple = TRUE
+        )
       ),
-      shiny::selectInput(
-        inputId = "topic_input",
-        label = "Topic:",
-        choices = metric_topics
+      # Topic input
+      div(
+        style = "margin-bottom: 1rem;",
+        shiny::selectInput(
+          inputId = "topic_input",
+          label = "Topic:",
+          choices = metric_topics
+        )
       ),
-      shiny::selectInput(
-        inputId = "indicator",
-        label = "Indicator:",
-        choices = metric_names
-      ),
-      shiny::checkboxInput("all_las", "Include All LAs", FALSE),
-      shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
-      shiny::checkboxInput("region_las", "Include LAs in the same Region", FALSE),
-      shiny::checkboxInput("la_stat_ns", "Include statistical neighbours", FALSE),
-      shiny::actionButton("add_query", "Add Query", class = "gov-uk-button")
-    )
+      # Indicator input
+      div(
+        style = "margin-bottom: 1rem;",
+        shiny::selectInput(
+          inputId = "indicator",
+          label = "Indicator:",
+          choices = metric_names
+        )
+      )
+    ),
+    # Checkbox inputs for LAs, Regions, etc
+    bslib::accordion(
+      id = "geography_accordion",
+      width = "fit-content",
+      bslib::accordion_panel(
+        title = "More Geographic Options",
+        shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
+        shiny::radioButtons(
+          inputId = "la_groups",
+          label = "LA Groupings",
+          choices = list(
+            "None" = "no_groups",
+            "Include All LAs" = "all_las",
+            "Include LAs in the same Region" = "region_las",
+            "Include statistical neighbours" = "la_stat_ns"
+          ),
+          selected = NULL,
+          inline = FALSE
+        )
+      )
+    ),
+    # Action button
+    shiny::actionButton("add_query", "Add Query", class = "gov-uk-button")
   ),
   div(
     class = "well",
@@ -94,7 +125,7 @@ server <- function(input, output, session) {
     inputs <- input$geog_input
 
     # Append all LAs
-    if (isTRUE(input$all_las)) {
+    if (isTRUE(input$la_groups == "all_las")) {
       inputs <- c(inputs, la_names_bds)
     }
 
@@ -104,7 +135,7 @@ server <- function(input, output, session) {
     }
 
     # Append Regions LAs
-    if (isTRUE(input$region_las)) {
+    if (isTRUE(input$la_groups == "region_las")) {
       # Get all LAs in the regions
       selected_la_regions <- get_la_region(stat_n_geog, input$geog_input)
       all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
@@ -113,7 +144,7 @@ server <- function(input, output, session) {
     }
 
     # Append LA statistical neighbours
-    if (isTRUE(input$la_stat_ns)) {
+    if (isTRUE(input$la_groups == "la_stat_ns")) {
       # Get statistical neighbours
       selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, input$geog_input)
 
@@ -246,19 +277,6 @@ server <- function(input, output, session) {
     })
   })
 
-  # When Region LAs is selected, uncheck statistical neighbours
-  observeEvent(input$region_las, {
-    if (input$region_las) {
-      updateCheckboxInput(session, "la_stat_ns", value = FALSE)
-    }
-  })
-
-  # When statistical neighbours is selected, uncheck Region LAs
-  observeEvent(input$la_stat_ns, {
-    if (input$la_stat_ns) {
-      updateCheckboxInput(session, "region_las", value = FALSE)
-    }
-  })
 
   # Final output table (based on saved queries)
   output$output_table <- reactable::renderReactable({

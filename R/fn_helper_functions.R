@@ -415,7 +415,7 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
   selection <- input$geog_input
 
   # If Region LAs are selected, add "LAs in [Region]" and exclude those LAs
-  if (input$region_las) {
+  if (input$la_groups == "region_las") {
     # LAs in same region as selected LA
     selected_las <- intersect(input$geog_input, la_names_bds)
     selected_la_regions <- get_la_region(stat_n_geog, selected_las)
@@ -424,13 +424,13 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
   }
 
   # If LA statistical neighbours selected add "[LA] statistical neighbours"
-  if (isTRUE(input$la_stat_ns)) {
+  if (isTRUE(input$la_groups == "la_stat_ns")) {
     selected_las <- intersect(input$geog_input, la_names_bds)
     selection <- c(setdiff(selection, selected_las), paste0(selected_las, " statistical neighbours"))
   }
 
   # If all LAs are selected, add "All LAs" and exclude all other LA terms
-  if (input$all_las) {
+  if (input$la_groups == "all_las") {
     selection <- c(setdiff(selection, la_names_bds), "All LAs") |>
       (\(x) x[!grepl("^LAs in ", x)])() |>
       (\(x) x[!grepl(" statistical neighbours$", x)])()
