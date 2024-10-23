@@ -106,11 +106,15 @@ ui <- bslib::page_fillable(
 server <- function(input, output, session) {
   # Input ----------------------------------
   # Reactive to store all selected indicators along with their topics
-  selected_indicators <- reactiveVal(data.frame(Topic = character(), Measure = character()))
+  selected_indicators <- reactiveVal({
+    data.frame(
+      Topic = character(),
+      Measure = character()
+    )
+  })
 
   # Filter indicator choices based on the selected topic
   shiny::observeEvent(input$topic_input, {
-    # Filtered choices based on topic
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(Topic %in% input$topic_input) |>
       dplyr::select(Topic, Measure) # Select both Topic and Measure
@@ -118,19 +122,21 @@ server <- function(input, output, session) {
     # Get the currently selected indicators
     current_selection <- selected_indicators()
 
-    # Combine previously selected indicators with the new filtered ones
+    # Combine currently selected indicators with the new filtered ones
     combined_choices <- unique(rbind(current_selection, filtered_topic_bds))
 
-    # Update the selectInput choices and retain the currently selected measures
+    # Update the choices with new topic whilst retaining the
+    # already selected measures
     updateSelectInput(
       session = session,
       inputId = "indicator",
-      choices = combined_choices$Measure, # Show only measures in the dropdown
-      selected = current_selection$Measure # Retain previously selected indicators
+      choices = combined_choices$Measure,
+      selected = current_selection$Measure
     )
   })
 
-  # Automatically update the reactive value for selected indicators
+  # Update the selected values reactive for selected indicators
+  # This keeps selection consistent across topics
   shiny::observeEvent(input$indicator,
     {
       # Get the current topic-filtered measures
@@ -158,56 +164,93 @@ server <- function(input, output, session) {
     ignoreNULL = FALSE
   )
 
-  # Setting combination of user input choices (regarding geographies)
-  user_geog_inputs <- reactive({
-    # Selected LAs
+  # Reactive to handle geography user input choices
+  geog_inputs <- reactive({
+    # Value from LA & Region input
     inputs <- input$geog_input
 
-    # Append all LAs
+    # Add geography groupings
+    # All LAs
     if (isTRUE(input$la_groups == "all_las")) {
-      inputs <- c(inputs, la_names_bds)
+      inputs <- unique(c(inputs, la_names_bds))
     }
 
-    # Append all Regions
+    # All Regions
     if (isTRUE(input$all_regions)) {
-      inputs <- c(inputs, region_names_bds)
+      inputs <- unique(c(inputs, region_names_bds))
     }
 
-    # Append Regions LAs
+    # All LAs from selected LA region
     if (isTRUE(input$la_groups == "region_las")) {
-      # Get all LAs in the regions
       selected_la_regions <- get_la_region(stat_n_geog, input$geog_input)
       all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
 
-      inputs <- c(inputs, all_region_las)
+      inputs <- unique(c(inputs, all_region_las))
     }
 
-    # Append LA statistical neighbours
+    # LA statistical neighbours
     if (isTRUE(input$la_groups == "la_stat_ns")) {
-      # Get statistical neighbours
       selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, input$geog_input)
 
       inputs <- c(inputs, selected_la_stat_n)
     }
 
-    # Return unique values to avoid duplication
+    # Return unique geographies
     unique(inputs)
   })
 
+  # Assign LA statistical neighbours their selected LA association
+  stat_n_association <- reactive({
+    association_table <- data.frame(
+      `LA and Regions` = character(),
+      `sn_group` = character(),
+      check.names = FALSE
+    )
 
-  # Filter BDS based on user inputs (topic, indicator, geographies)
+    # Create mini df of sns and selected LA
+    if (isTRUE(input$la_groups == "la_stat_ns")) {
+      stat_n_groups <- lapply(input$geog_input, function(la) {
+        data.frame(
+          `LA and Regions` = c(la, get_la_stat_neighbrs(stat_n_la, la)),
+          `sn_group` = la,
+          check.names = FALSE
+        )
+      })
+
+      # Combine all statistical neighbour associations into a single data frame
+      if (length(stat_n_groups) > 0) {
+        association_table <- do.call(rbind, stat_n_groups)
+      }
+    }
+
+    # Return the association data
+    association_table
+  })
+
+
+  # Filter BDS for topic and indicator duos in selected values reactive
+  # and geographies
   filtered_bds <- reactive({
     req(input$topic_input, input$indicator)
     req(nrow(selected_indicators()) > 0)
 
-    # Filter bds_metrics based on the selected topic-indicator pairs and geographies
-    bds_metrics |>
-      dplyr::semi_join(selected_indicators(), by = c("Topic" = "Topic", "Measure" = "Measure")) |>
+    # Filter the bds_metrics by topic, measure, and geography
+    bds_filtered <- bds_metrics |>
+      dplyr::semi_join(selected_indicators(),
+        by = c(
+          "Topic" = "Topic",
+          "Measure" = "Measure"
+        )
+      ) |>
       dplyr::filter(
-        `LA and Regions` %in% user_geog_inputs(), # Assuming user_geog_inputs() returns selected geographies
+        `LA and Regions` %in% geog_inputs(),
         !is.na(Years)
       )
+
+    # Return the filtered data with the associated LA column
+    bds_filtered
   })
+
 
   # Reactive value "query" used to store query data
   # Uses lists to store multiple inputs (geographies)
@@ -223,7 +266,7 @@ server <- function(input, output, session) {
 
   # Build the staging table (select data and make wide)
   staging_table <- reactive({
-    filtered_bds() |>
+    wide_table <- filtered_bds() |>
       dplyr::select(
         `LA Number`, `LA and Regions`, Topic,
         Measure, Years, Years_num, values_num, Values
@@ -233,11 +276,24 @@ server <- function(input, output, session) {
         names_from = Years,
         values_from = values_num,
       )
+
+    # If sns included, add sns LA association column
+    if (isTRUE(input$la_groups == "la_stat_ns")) {
+      wide_table <- wide_table |>
+        dplyr::left_join(
+          stat_n_association(),
+          by = "LA and Regions"
+        ) |>
+        dplyr::relocate(sn_group, .after = "Measure") |>
+        dplyr::rename("Statistical Neighbour group" = "sn_group")
+    }
+
+    wide_table
   })
 
   # Staging table output
   output$staging_table <- reactable::renderReactable({
-    # Check if there are correct selections
+    # Display messages if there are incorrect selections
     if (is.null(input$indicator) && is.null(input$geog_input)) {
       return(reactable::reactable(
         data.frame(
@@ -261,6 +317,7 @@ server <- function(input, output, session) {
       ))
     }
 
+    # Output table
     reactable::reactable(
       staging_table()
     )
@@ -269,7 +326,7 @@ server <- function(input, output, session) {
   # When "Add query" button clicked - add query to saved queries
   observeEvent(input$add_query, {
     # Check if anything selected
-    if (length(user_geog_inputs()) > 0 && nrow(selected_indicators()) > 0) {
+    if (length(geog_inputs()) > 0 && nrow(selected_indicators()) > 0) {
       # Get query information
       new_query <- data.frame(
         Topic = I(list(selected_indicators()$Topic)),
@@ -360,7 +417,6 @@ server <- function(input, output, session) {
   # Final output table (based on saved queries)
   output$output_table <- reactable::renderReactable({
     req(query$data)
-    print(query$data)
 
     # Check if there are any selected measures
     if (nrow(query$data) == 0) {
@@ -372,10 +428,12 @@ server <- function(input, output, session) {
       ))
     }
 
-    # Main logic for query data processing
+    ### Main logic for query data processing
+    # Get indicators (& number of)
     selected_indicators <- unique(unlist(query$data$Indicator))
     no_selected_indicators <- length(selected_indicators)
 
+    # Message for no indicators
     if (no_selected_indicators == 0) {
       return(reactable::reactable(
         data.frame(
@@ -385,6 +443,10 @@ server <- function(input, output, session) {
       ))
     }
 
+    # Logic to calculate what to do with years cols
+    # Check if consistent suffix (no cleaning needed)
+    # Create an all years df (min to max years of dataset)
+    # for expanding data so rbind works
     # Filter BDS for selected indicators
     raw_indicator_filtered_bds <- filter_bds_for_indicators(bds_metrics, selected_indicators)
 
@@ -395,32 +457,34 @@ server <- function(input, output, session) {
     year_bounds <- get_min_max_years(raw_indicator_filtered_bds)
     all_years <- create_years_df(year_bounds$min_year, year_bounds$max_year)
 
+    # Initialise output table
     final_query_data <- data.frame()
 
     # Loop through each row in the query table and process data
     for (i in seq_len(nrow(query$data))) {
+      # Extract current query topics, indicators and geogs
       current_topic <- query$data$Topic[[i]]
       current_measure <- query$data$Indicator[[i]]
+      current_geog <- query$data$`LA and Regions`[[i]]
 
-      # Create a data frame for the current topic-indicator pair
+      # Create a data frame for the current topic-indicator pairings
       current_topic_indicator <- data.frame(
         Topic = current_topic,
         Indicator = current_measure
       )
 
-      current_geog <- query$data$`LA and Regions`[[i]]
-
-      # Sorting geography filters
+      # Sorting geography filters - from query (shortened names)
       # Adding all LAs in selected LA regions
       if (any(grepl("LAs in ", current_geog))) {
         current_la_regions <- current_geog |>
-          stringr::str_subset("^LAs in ") |> # Subset strings that start with "LAs in "
-          stringr::str_remove("^LAs in ") # Remove the "LAs in " prefix
+          stringr::str_subset("^LAs in ") |>
+          stringr::str_remove("^LAs in ")
 
-        # Extract all LAs in the region and add to current geog
+        # Extract all LAs in the regions and add to current geog
         current_region_las <- get_las_in_regions(stat_n_geog, current_la_regions)
         current_geog <- c(current_geog, current_region_las)
       }
+
       # Adding statistical neighbours of selected LAs
       if (any(grepl(" statistical neighbours", current_geog))) {
         current_la_sns <- current_geog |>
@@ -431,34 +495,53 @@ server <- function(input, output, session) {
         selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, current_la_sns)
         current_geog <- c(current_geog, selected_la_stat_n)
       }
+
       # Append all LAs or Regions to the current geography if needed
       if ("All LAs" %in% current_geog) current_geog <- c(current_geog, la_names_bds)
       if ("All Regions" %in% current_geog) current_geog <- c(current_geog, region_names_bds)
 
+      # Collect current geog filters
       current_geog <- unique(current_geog)
 
+      ### Main current query filtering
       # Filter BDS for the current query
       raw_query_data <- bds_metrics |>
-        dplyr::semi_join(current_topic_indicator, by = c("Topic" = "Topic", "Measure" = "Indicator")) |>
+        # Semi join to filter for indicator & topic (avoids duplicates)
+        dplyr::semi_join(
+          current_topic_indicator,
+          by = c(
+            "Topic" = "Topic",
+            "Measure" = "Indicator"
+          )
+        ) |>
         dplyr::filter(
           `LA and Regions` %in% current_geog,
           !is.na(Years)
         ) |>
         dplyr::select(
-          `LA Number`, `LA and Regions`, Topic, Measure, Years, Years_num, values_num, Values
+          `LA Number`, `LA and Regions`, Topic, Measure,
+          Years, Years_num, values_num, Values
         )
 
-      # Join the data with the full years to fill gaps
-      full_query_data <- dplyr::full_join(raw_query_data, all_years, by = "Years_num") |>
+      # Join the data with the full years to fill gaps in years
+      full_query_data <- dplyr::full_join(
+        raw_query_data,
+        all_years,
+        by = "Years_num"
+      ) |>
         tidyr::pivot_wider(
           id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
-          names_from = ifelse(query_str_years || no_selected_indicators == 1, "Years", "Years_num"),
+          names_from = ifelse(query_str_years || no_selected_indicators == 1,
+            "Years",
+            "Years_num"
+          ),
           values_from = values_num
         )
 
       # Sort year columns with full names preserved
       sorted_year_cols <- sort_year_columns(full_query_data)
 
+      # Clean data for new col order and any NAs from missing year joins
       clean_query_data <- full_query_data |>
         dplyr::filter(!dplyr::if_all(everything(), is.na)) |>
         dplyr::select(
