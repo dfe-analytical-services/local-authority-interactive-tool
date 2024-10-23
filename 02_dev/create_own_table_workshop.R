@@ -22,50 +22,54 @@ selected_indicator <- "Total Services for Young People  (finance) - Gross"
 input <- list()
 input$all_las <- FALSE
 input$all_regions <- FALSE
-input$region_las <- TRUE
+input$region_las <- FALSE
+input$stat_ns <- TRUE
 
 
 # User inputs which depend off selected LA and indicator
 selectable_years <- filtered_bds |>
   pull_uniques("Years")
 
-# Get selected LA region
-selected_regions <- stat_n_la |>
-  dplyr::filter(`LA Name` == selected_la) |>
-  pull_uniques("GOReg")
-
-# LA statistical neighbours
-all_la_stat_ns <- stat_n_la |>
-  dplyr::filter(`LA Name` == selected_la) |>
-  pull_uniques("LA Name_sn")
-
 # Setting combination of user input choices (regarding geographies)
 input$geog_input <- selected_la
+user_geog_inputs <- c()
 
 # Append all LAs
 if (isTRUE(input$all_las)) {
-  input$geog_input <- c(input$geog_input, la_names_bds)
+  user_geog_inputs <- c(user_geog_inputs, la_names_bds)
 }
 
 # Append all Regions
 if (isTRUE(input$all_regions)) {
-  input$geog_input <- c(input$geog_input, region_names_bds)
+  user_geog_inputs <- c(user_geog_inputs, region_names_bds)
 }
 
 # Append Regions LAs
 if (isTRUE(input$region_las)) {
   # LAs in same region as selected LA
-  all_region_las <- get_las_in_regions(stat_n_geog, selected_regions)
+  selected_la_regions <- get_la_region(stat_n_geog, input$geog_input)
+  all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
 
-  input$geog_input <- c(input$geog_input, all_region_las)
+  user_geog_inputs <- c(user_geog_inputs, all_region_las)
 }
+
+# Append LA statistical neighbours
+if (isTRUE(input$stat_ns)) {
+  # LA statistical neighbours
+  selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, input$geog_input)
+
+  user_geog_inputs <- c(user_geog_inputs, selected_la_stat_n)
+}
+
+user_geog_inputs <- unique(user_geog_inputs)
+
 
 # Filtering BDS for inputs
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic %in% selected_topic,
     Measure %in% selected_indicator,
-    `LA and Regions` %in% input$geog_input,
+    `LA and Regions` %in% user_geog_inputs,
     !is.na(Years)
   )
 
@@ -101,7 +105,7 @@ new_query <- data.frame(
   Topic = I(list(selected_topic)),
   Indicator = I(list(selected_indicator)),
   `LA and Regions` = I(list(
-    get_geog_selection(input, la_names_bds, region_names_bds, selected_regions)
+    get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
   )),
   `Click to remove query` = "Remove",
   check.names = FALSE
@@ -151,9 +155,9 @@ final_query_data <- data.frame()
 
 # Loop through each row in the query table and process data
 for (i in seq_len(nrow(query))) {
-  current_topic <- query$Topic[[i]]
-  current_measure <- query$Indicator[[i]]
-  current_geog <- query$`LA and Regions`[[i]]
+  current_topic <- query$Topic[[2]]
+  current_measure <- query$Indicator[[2]]
+  current_geog <- query$`LA and Regions`[[2]]
 
   # Sorting geography filters
   # Adding all LAs in selected LA regions
@@ -165,6 +169,16 @@ for (i in seq_len(nrow(query))) {
     # Extract all LAs in the region and add to current geog
     current_region_las <- get_las_in_regions(stat_n_geog, current_la_regions)
     current_geog <- c(current_geog, current_region_las)
+  }
+  # Adding statistical neighbours of selected LAs
+  if (any(grepl(" statistical neighbours", current_geog))) {
+    current_la_sns <- current_geog |>
+      stringr::str_subset(" statistical neighbours$") |>
+      stringr::str_remove(" statistical neighbours$")
+
+    # Extract all statistical neighbours
+    selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, current_la_sns)
+    current_geog <- c(current_geog, selected_la_stat_n)
   }
   # Append all LAs or Regions to the current geography if needed
   if ("All LAs" %in% current_geog) current_geog <- c(current_geog, la_names_bds)

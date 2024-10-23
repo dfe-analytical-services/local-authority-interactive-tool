@@ -301,8 +301,20 @@ filter_region_data_all_la <- function(data, la_names) {
 
 
 
-get_las_in_regions <- function(data_geog, regions) {
+get_las_in_regions <- function(data_geog, selected_regions) {
   data_geog |>
-    dplyr::filter(GOReg %in% regions) |>
+    dplyr::filter(GOReg %in% selected_regions) |>
     pull_uniques("LA Name")
+}
+
+get_la_region <- function(data_geog, selected_las) {
+  data_geog |>
+    dplyr::filter(`LA Name` %in% selected_las) |>
+    pull_uniques("GOReg")
+}
+
+get_la_stat_neighbrs <- function(data_stat_n, selected_las) {
+  data_stat_n |>
+    dplyr::filter(`LA Name` %in% selected_las) |>
+    pull_uniques("LA Name_sn")
 }
