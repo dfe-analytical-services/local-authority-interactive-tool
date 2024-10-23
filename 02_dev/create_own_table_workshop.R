@@ -18,61 +18,222 @@ selected_la <- c("Barking and Dagenham", "Barnet")
 selected_topic <- "Children's Service Finance"
 selected_indicator <- "Total Services for Young People  (finance) - Gross"
 
+# Other input groupings
+input <- list()
+input$all_las <- FALSE
+input$all_regions <- FALSE
+input$region_las <- TRUE
 
-# Filter BDS for topic and indicator
-filtered_bds <- bds_metrics |>
-  dplyr::filter(
-    Topic == selected_topic,
-    Measure == selected_indicator,
-    !is.na(Years)
-  )
 
 # User inputs which depend off selected LA and indicator
 selectable_years <- filtered_bds |>
   pull_uniques("Years")
 
-# Cleaned selected LA region
-selected_region <- stat_n_la |>
+# Get selected LA region
+selected_regions <- stat_n_la |>
   dplyr::filter(`LA Name` == selected_la) |>
-  pull_uniques("GOReg") |>
-  clean_ldn_region(filtered_bds)
-
-# LAs in same region as selected LA
-selectable_region_las <- filtered_bds |>
-  # Apply cleaning London region to df
-  dplyr::mutate(clean_region = sapply(Region, clean_ldn_region)) |>
-  dplyr::filter(clean_region %in% selected_region)
+  pull_uniques("GOReg")
 
 # LA statistical neighbours
-selectable_sns <- stat_n_la |>
+all_la_stat_ns <- stat_n_la |>
   dplyr::filter(`LA Name` == selected_la) |>
   pull_uniques("LA Name_sn")
 
-# General categories
-la_names_bds
-region_names_bds
-"England"
-core_cities <- c(
-  "Birmingham", "Bristol", "Leeds", "Liverpool",
-  "Manchester", "Newcastle", "Nottingham", "Sheffield"
+# Setting combination of user input choices (regarding geographies)
+input$geog_input <- selected_la
+
+# Append all LAs
+if (isTRUE(input$all_las)) {
+  input$geog_input <- c(input$geog_input, la_names_bds)
+}
+
+# Append all Regions
+if (isTRUE(input$all_regions)) {
+  input$geog_input <- c(input$geog_input, region_names_bds)
+}
+
+# Append Regions LAs
+if (isTRUE(input$region_las)) {
+  # LAs in same region as selected LA
+  all_region_las <- get_las_in_regions(stat_n_geog, selected_regions)
+
+  input$geog_input <- c(input$geog_input, all_region_las)
+}
+
+# Filtering BDS for inputs
+filtered_bds <- bds_metrics |>
+  dplyr::filter(
+    Topic %in% selected_topic,
+    Measure %in% selected_indicator,
+    `LA and Regions` %in% input$geog_input,
+    !is.na(Years)
+  )
+
+# Reactive value "query" used to store query data
+# Uses lists to store multiple inputs (geographies)
+query <- data.frame(
+  Topic = I(list()),
+  Measure = I(list()),
+  `LA and Regions` = I(list()),
+  `Click to remove query` = character(),
+  check.names = FALSE
 )
 
-# Creating the table ready for
-create_own_bds <- filtered_bds |>
-  dplyr::filter(`LA and Regions` %in% selected_la) |>
-  dplyr::select(`LA Number`, `LA and Regions`, Topic, Measure, Years, Years_num, values_num, Values) |>
+# Build the staging table (select data and make wide)
+staging_table <- filtered_bds |>
+  dplyr::select(
+    `LA Number`, `LA and Regions`, Topic,
+    Measure, Years, Years_num, values_num, Values
+  ) |>
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
     names_from = Years,
     values_from = values_num,
   )
 
-create_own_bds <- create_own_bds |>
-  dplyr::mutate(
-    Include = rep(TRUE, nrow(create_own_bds)),
-    `Region LAs` = rep(FALSE, nrow(create_own_bds)),
-    `Remove Row` = rep("Remove", nrow(create_own_bds))
-  )
+# Output staging table
+reactable::reactable(
+  staging_table
+)
+
+# Get query information
+new_query <- data.frame(
+  Topic = I(list(selected_topic)),
+  Indicator = I(list(selected_indicator)),
+  `LA and Regions` = I(list(
+    get_geog_selection(input, la_names_bds, region_names_bds, selected_regions)
+  )),
+  `Click to remove query` = "Remove",
+  check.names = FALSE
+)
+
+# Append query to existing query data
+query <- query |>
+  # Remove row identifier as not needed yet (and not available initially)
+  # dplyr::select(-.internal_uuid) |>
+  rbind(new_query)
+
+
+# Check if there are any selected measures
+if (nrow(query) == 0) {
+  return(reactable::reactable(
+    data.frame(
+      `Message from tool` = "Please add queries.",
+      check.names = FALSE
+    )
+  ))
+}
+
+# Main logic for query data processing
+selected_indicators <- unique(unlist(query$Indicator))
+no_selected_indicators <- length(selected_indicators)
+
+if (no_selected_indicators == 0) {
+  return(reactable::reactable(
+    data.frame(
+      `Message from tool` = "No years available for selected measures.",
+      check.names = FALSE
+    )
+  ))
+}
+
+# Filter BDS for selected indicators
+raw_indicator_filtered_bds <- filter_bds_for_indicators(bds_metrics, selected_indicators)
+
+# Check if all years have consistent suffix
+query_str_years <- check_year_suffix_consistency(raw_indicator_filtered_bds)
+
+# Get min and max years
+year_bounds <- get_min_max_years(raw_indicator_filtered_bds)
+all_years <- create_years_df(year_bounds$min_year, year_bounds$max_year)
+
+final_query_data <- data.frame()
+
+# Loop through each row in the query table and process data
+for (i in seq_len(nrow(query))) {
+  current_topic <- query$Topic[[i]]
+  current_measure <- query$Indicator[[i]]
+  current_geog <- query$`LA and Regions`[[i]]
+
+  # Sorting geography filters
+  # Adding all LAs in selected LA regions
+  if (any(grepl("LAs in ", current_geog))) {
+    current_la_regions <- current_geog |>
+      stringr::str_subset("^LAs in ") |> # Subset strings that start with "LAs in "
+      stringr::str_remove("^LAs in ") # Remove the "LAs in " prefix
+
+    # Extract all LAs in the region and add to current geog
+    current_region_las <- get_las_in_regions(stat_n_geog, current_la_regions)
+    current_geog <- c(current_geog, current_region_las)
+  }
+  # Append all LAs or Regions to the current geography if needed
+  if ("All LAs" %in% current_geog) current_geog <- c(current_geog, la_names_bds)
+  if ("All Regions" %in% current_geog) current_geog <- c(current_geog, region_names_bds)
+
+  current_geog <- unique(current_geog)
+
+  # Filter BDS for the current query
+  raw_query_data <- bds_metrics |>
+    dplyr::filter(
+      Topic %in% current_topic,
+      Measure %in% current_measure,
+      `LA and Regions` %in% current_geog,
+      !is.na(Years)
+    ) |>
+    dplyr::select(
+      `LA Number`, `LA and Regions`, Topic, Measure, Years, Years_num, values_num, Values
+    )
+
+  # Join the data with the full years to fill gaps
+  full_query_data <- dplyr::full_join(raw_query_data, all_years, by = "Years_num") |>
+    tidyr::pivot_wider(
+      id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
+      names_from = ifelse(query_str_years || no_selected_indicators == 1, "Years", "Years_num"),
+      values_from = values_num
+    )
+
+  # Sort year columns with full names preserved
+  sorted_year_cols <- sort_year_columns(full_query_data)
+
+  clean_query_data <- full_query_data |>
+    dplyr::filter(!dplyr::if_all(everything(), is.na)) |>
+    dplyr::select(
+      `LA Number`, `LA and Regions`, Topic, Measure,
+      dplyr::all_of(sorted_year_cols)
+    )
+
+  # Append the cleaned query data to final query data
+  final_query_data <- dplyr::bind_rows(final_query_data, clean_query_data)
+}
+
+# Check if final_data has any rows before rendering
+if (nrow(final_query_data) == 0) {
+  return(reactable::reactable(
+    data.frame(
+      `Message from tool` = "No data available based on the selected queries.",
+      check.names = FALSE
+    )
+  ))
+}
+
+# Output final table
+reactable::reactable(final_query_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
