@@ -131,24 +131,32 @@ server <- function(input, output, session) {
   })
 
   # Automatically update the reactive value for selected indicators
-  shiny::observeEvent(input$indicator, {
-    # Get the current topic-filtered measures
-    current_filtered <- bds_metrics |>
-      dplyr::filter(
-        Topic %in% input$topic_input,
-        Measure %in% input$indicator
-      ) |>
-      dplyr::distinct(Topic, Measure)
+  shiny::observeEvent(input$indicator,
+    {
+      # Get the current topic-filtered measures
+      current_filtered <- bds_metrics |>
+        dplyr::filter(
+          Topic %in% input$topic_input,
+          Measure %in% input$indicator
+        ) |>
+        dplyr::distinct(Topic, Measure)
 
-    # Get previously selected indicators
-    previous_selection <- selected_indicators()
+      # Get previously selected indicators
+      previous_selection <- selected_indicators()
 
-    # Combine the current filtered selection with the previous selection
-    combined_selection <- unique(rbind(previous_selection, current_filtered))
+      # Remove any indicators that have been deselected
+      deselected_measures <- setdiff(previous_selection$Measure, input$indicator)
+      updated_selection <- previous_selection |>
+        dplyr::filter(!Measure %in% deselected_measures)
 
-    # Update the reactive value for all selected indicators
-    selected_indicators(combined_selection)
-  })
+      # Combine the current filtered selection with the previous selection
+      combined_selection <- unique(rbind(updated_selection, current_filtered))
+
+      # Update the reactive value for all selected indicators
+      selected_indicators(combined_selection)
+    },
+    ignoreNULL = FALSE
+  )
 
   # Setting combination of user input choices (regarding geographies)
   user_geog_inputs <- reactive({
