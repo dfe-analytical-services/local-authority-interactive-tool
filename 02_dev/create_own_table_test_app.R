@@ -52,27 +52,26 @@ ui <- bslib::page_fillable(
         )
       )
     ),
-    # Checkbox inputs for LAs, Regions, etc
-    bslib::accordion(
-      id = "geography_accordion",
-      width = "fit-content",
-      bslib::accordion_panel(
-        title = "More Geographic Options",
-        shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
-        shiny::radioButtons(
-          inputId = "la_groups",
-          label = "LA Groupings",
-          choices = list(
-            "None" = "no_groups",
-            "Include All LAs" = "all_las",
-            "Include LAs in the same Region" = "region_las",
-            "Include statistical neighbours" = "la_stat_ns"
-          ),
-          selected = NULL,
-          inline = FALSE
-        )
+    bslib::layout_column_wrap(
+      # Checkbox inputs for LAs, Regions, etc
+      shiny::radioButtons(
+        inputId = "la_groups",
+        label = "LA Groupings",
+        choices = list(
+          "None" = "no_groups",
+          "Include All LAs" = "all_las",
+          "Include LAs in the same Region" = "region_las",
+          "Include statistical neighbours" = "la_stat_ns"
+        ),
+        selected = NULL,
+        inline = FALSE
+      ),
+      div(
+        shiny::p("Other groupings"),
+        shiny::checkboxInput("all_regions", "Include All Regions", FALSE)
       )
     ),
+    shiny::br(),
     # Action button
     shiny::actionButton("add_query", "Add Query", class = "gov-uk-button")
   ),
@@ -203,22 +202,25 @@ server <- function(input, output, session) {
 
   # When "Add query" button clicked - add query to saved queries
   observeEvent(input$add_query, {
-    # Get query information
-    new_query <- data.frame(
-      Topic = I(list(input$topic_input)),
-      Indicator = I(list(input$indicator)),
-      `LA and Regions` = I(list(
-        get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
-      )),
-      `Click to remove query` = "Remove",
-      check.names = FALSE
-    )
+    # Check if anything selected
+    if (length(user_geog_inputs()) > 0) {
+      # Get query information
+      new_query <- data.frame(
+        Topic = I(list(input$topic_input)),
+        Indicator = I(list(input$indicator)),
+        `LA and Regions` = I(list(
+          get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
+        )),
+        `Click to remove query` = "Remove",
+        check.names = FALSE
+      )
 
-    # Append query to existing query data
-    query$data <- query$data |>
-      # Remove row identifier as not needed yet (and not available initially)
-      dplyr::select(-.internal_uuid) |>
-      rbind(new_query)
+      # Append query to existing query data
+      query$data <- query$data |>
+        # Remove row identifier as not needed yet (and not available initially)
+        dplyr::select(-.internal_uuid) |>
+        rbind(new_query)
+    }
   })
 
 
