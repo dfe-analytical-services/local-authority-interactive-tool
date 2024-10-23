@@ -294,14 +294,10 @@ server <- function(input, output, session) {
     req(nrow(query$data))
 
     # Set the new row identifier (a counter)
-    query_table_data <- query$data |>
-      dplyr::mutate(
-        .internal_uuid = seq_len(nrow(query$data)),
-        Topic = purrr::map(Topic, ~ unique(unlist(.)))
-      )
+    query$data$.internal_uuid <- seq_len(nrow(query$data))
 
     reactable::reactable(
-      query_table_data,
+      query$data,
       columns = list(
         # JS used from `reactable.extras::button_extra()` to create btn in table
         # Uses the row identifier to know which row to remove
@@ -320,6 +316,17 @@ server <- function(input, output, session) {
             }, cellInfo.index);
           }"
           )
+        ),
+        # Returning unique topics
+        Topic = reactable::colDef(
+          cell = function(value) {
+            unique_values <- unique(unlist(value))
+            if (length(unique_values) > 0) {
+              return(paste(unique_values, collapse = ", "))
+            } else {
+              return("")
+            }
+          }
         ),
         # Don't show row identifier
         .internal_uuid = reactable::colDef(show = FALSE)
@@ -353,6 +360,7 @@ server <- function(input, output, session) {
   # Final output table (based on saved queries)
   output$output_table <- reactable::renderReactable({
     req(query$data)
+    print(query$data)
 
     # Check if there are any selected measures
     if (nrow(query$data) == 0) {
@@ -393,6 +401,13 @@ server <- function(input, output, session) {
     for (i in seq_len(nrow(query$data))) {
       current_topic <- query$data$Topic[[i]]
       current_measure <- query$data$Indicator[[i]]
+
+      # Create a data frame for the current topic-indicator pair
+      current_topic_indicator <- data.frame(
+        Topic = current_topic,
+        Indicator = current_measure
+      )
+
       current_geog <- query$data$`LA and Regions`[[i]]
 
       # Sorting geography filters
@@ -424,9 +439,8 @@ server <- function(input, output, session) {
 
       # Filter BDS for the current query
       raw_query_data <- bds_metrics |>
+        dplyr::semi_join(current_topic_indicator, by = c("Topic" = "Topic", "Measure" = "Indicator")) |>
         dplyr::filter(
-          Topic %in% current_topic,
-          Measure %in% current_measure,
           `LA and Regions` %in% current_geog,
           !is.na(Years)
         ) |>
