@@ -48,7 +48,8 @@ ui <- bslib::page_fillable(
         shiny::selectInput(
           inputId = "indicator",
           label = "Indicator:",
-          choices = metric_names
+          choices = metric_names,
+          multiple = TRUE
         )
       )
     ),
@@ -104,18 +105,49 @@ ui <- bslib::page_fillable(
 
 server <- function(input, output, session) {
   # Input ----------------------------------
-  # Get and set indicator choices for selected topic
+  # Reactive to store all selected indicators along with their topics
+  selected_indicators <- reactiveVal(data.frame(Topic = character(), Measure = character()))
+
+  # Filter indicator choices based on the selected topic
   shiny::observeEvent(input$topic_input, {
+    # Filtered choices based on topic
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(Topic %in% input$topic_input) |>
-      pull_uniques("Measure")
+      dplyr::select(Topic, Measure) # Select both Topic and Measure
 
+    # Get the currently selected indicators
+    current_selection <- selected_indicators()
+
+    # Combine previously selected indicators with the new filtered ones
+    combined_choices <- unique(rbind(current_selection, filtered_topic_bds))
+
+    # Update the selectInput choices and retain the currently selected measures
     updateSelectInput(
       session = session,
       inputId = "indicator",
-      label = "Indicator:",
-      choices = filtered_topic_bds
+      choices = combined_choices$Measure, # Show only measures in the dropdown
+      selected = current_selection$Measure # Retain previously selected indicators
     )
+  })
+
+  # Automatically update the reactive value for selected indicators
+  shiny::observeEvent(input$indicator, {
+    # Get the current topic-filtered measures
+    current_filtered <- bds_metrics |>
+      dplyr::filter(
+        Topic %in% input$topic_input,
+        Measure %in% input$indicator
+      ) |>
+      dplyr::distinct(Topic, Measure)
+
+    # Get previously selected indicators
+    previous_selection <- selected_indicators()
+
+    # Combine the current filtered selection with the previous selection
+    combined_selection <- unique(rbind(previous_selection, current_filtered))
+
+    # Update the reactive value for all selected indicators
+    selected_indicators(combined_selection)
   })
 
   # Setting combination of user input choices (regarding geographies)
@@ -158,11 +190,13 @@ server <- function(input, output, session) {
   # Filter BDS based on user inputs (topic, indicator, geographies)
   filtered_bds <- reactive({
     req(input$topic_input, input$indicator)
+    req(nrow(selected_indicators()) > 0)
+
+    # Filter bds_metrics based on the selected topic-indicator pairs and geographies
     bds_metrics |>
+      dplyr::semi_join(selected_indicators(), by = c("Topic" = "Topic", "Measure" = "Measure")) |>
       dplyr::filter(
-        Topic %in% input$topic_input,
-        Measure %in% input$indicator,
-        `LA and Regions` %in% user_geog_inputs(),
+        `LA and Regions` %in% user_geog_inputs(), # Assuming user_geog_inputs() returns selected geographies
         !is.na(Years)
       )
   })
@@ -195,6 +229,30 @@ server <- function(input, output, session) {
 
   # Staging table output
   output$staging_table <- reactable::renderReactable({
+    # Check if there are correct selections
+    if (is.null(input$indicator) && is.null(input$geog_input)) {
+      return(reactable::reactable(
+        data.frame(
+          `Message from tool` = "Please add data selections (above).",
+          check.names = FALSE
+        )
+      ))
+    } else if (is.null(input$indicator)) {
+      return(reactable::reactable(
+        data.frame(
+          `Message from tool` = "Please add an indicator selection (above).",
+          check.names = FALSE
+        )
+      ))
+    } else if (is.null(input$geog_input)) {
+      return(reactable::reactable(
+        data.frame(
+          `Message from tool` = "Please add a geography selection (above).",
+          check.names = FALSE
+        )
+      ))
+    }
+
     reactable::reactable(
       staging_table()
     )
@@ -203,11 +261,11 @@ server <- function(input, output, session) {
   # When "Add query" button clicked - add query to saved queries
   observeEvent(input$add_query, {
     # Check if anything selected
-    if (length(user_geog_inputs()) > 0) {
+    if (length(user_geog_inputs()) > 0 && nrow(selected_indicators()) > 0) {
       # Get query information
       new_query <- data.frame(
-        Topic = I(list(input$topic_input)),
-        Indicator = I(list(input$indicator)),
+        Topic = I(list(selected_indicators()$Topic)),
+        Indicator = I(list(selected_indicators()$Measure)),
         `LA and Regions` = I(list(
           get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
         )),
@@ -223,15 +281,19 @@ server <- function(input, output, session) {
     }
   })
 
-
   # Query table output
   output$query_table <- reactable::renderReactable({
     req(nrow(query$data))
+
     # Set the new row identifier (a counter)
-    query$data$.internal_uuid <- seq_len(nrow(query$data))
+    query_table_data <- query$data |>
+      dplyr::mutate(
+        .internal_uuid = seq_len(nrow(query$data)),
+        Topic = purrr::map(Topic, ~ unique(unlist(.)))
+      )
 
     reactable::reactable(
-      query$data,
+      query_table_data,
       columns = list(
         # JS used from `reactable.extras::button_extra()` to create btn in table
         # Uses the row identifier to know which row to remove

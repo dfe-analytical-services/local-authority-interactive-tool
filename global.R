@@ -228,7 +228,6 @@ setdiff(
 )
 
 
-
 # PROOF 2: The unique values of Measure Short + Topic are the same
 testthat::test_that(
   "Unique vals of measure_short + topic are the same in BDS & Metrics",
