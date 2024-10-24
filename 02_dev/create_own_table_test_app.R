@@ -69,7 +69,8 @@ ui <- bslib::page_fillable(
       ),
       div(
         shiny::p("Other groupings"),
-        shiny::checkboxInput("all_regions", "Include All Regions", FALSE)
+        shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
+        shiny::checkboxInput("inc_england", "Include England", FALSE)
       )
     ),
     shiny::br(),
@@ -178,6 +179,11 @@ server <- function(input, output, session) {
     # All Regions
     if (isTRUE(input$all_regions)) {
       inputs <- unique(c(inputs, region_names_bds))
+    }
+
+    # Include England
+    if (isTRUE(input$inc_england)) {
+      inputs <- unique(c(inputs, "England"))
     }
 
     # All LAs from selected LA region
@@ -341,7 +347,7 @@ server <- function(input, output, session) {
   # Staging table output
   output$staging_table <- reactable::renderReactable({
     # Display messages if there are incorrect selections
-    if (is.null(input$indicator) && is.null(input$geog_input)) {
+    if (is.null(geog_inputs()) && is.null(input$geog_input)) {
       return(reactable::reactable(
         data.frame(
           `Message from tool` = "Please add data selections (above).",
@@ -355,7 +361,7 @@ server <- function(input, output, session) {
           check.names = FALSE
         )
       ))
-    } else if (is.null(input$geog_input)) {
+    } else if (is.null(geog_inputs())) {
       return(reactable::reactable(
         data.frame(
           `Message from tool` = "Please add a geography selection (above).",

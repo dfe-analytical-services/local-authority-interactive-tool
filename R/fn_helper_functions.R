@@ -448,6 +448,11 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
     selection <- c(setdiff(selection, region_names_bds), "All Regions")
   }
 
+  # If include England is selected, add "England"
+  if (input$inc_england) {
+    selection <- c(setdiff(selection, "England"), "England")
+  }
+
   # Return the final selection
   selection
 }
