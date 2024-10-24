@@ -332,7 +332,7 @@ server <- function(input, output, session) {
           relationship = "many-to-many"
         ) |>
         dplyr::relocate(sn_group, .after = "Measure") |>
-        dplyr::rename("Statistical Neighbour group" = "sn_group")
+        dplyr::rename("Statistical Neighbour Group" = "sn_group")
     }
 
     wide_table_ordered
@@ -534,11 +534,11 @@ server <- function(input, output, session) {
       query$output <- query$output[, colnames(query$output) %in% valid_year_cols | !grepl("^\\d{4}", colnames(query$output))]
     }
 
-
     query_table_ordered_cols <- query$output |>
       dplyr::select(
         `LA Number`, `LA and Regions`,
         Region, Topic, Measure,
+        tidyselect::any_of("Statistical Neighbour Group"),
         dplyr::all_of(sort_year_columns(query$output))
       )
 
