@@ -57,7 +57,7 @@ ui <- bslib::page_fillable(
       # Checkbox inputs for LAs, Regions, etc
       shiny::radioButtons(
         inputId = "la_groups",
-        label = "LA Groupings",
+        label = "LA Groupings (choose one)",
         choices = list(
           "None" = "no_groups",
           "Include All LAs" = "all_las",
@@ -251,6 +251,17 @@ server <- function(input, output, session) {
         !is.na(Years)
       )
 
+    # Check if all years have consistent suffix
+    consistent_str_years <- check_year_suffix_consistency(bds_filtered)
+
+    # If more than one indicator and not consistent cols use the cleaned cols
+    if (length(input$indicator) > 1 && !consistent_str_years) {
+      bds_filtered <- bds_filtered |>
+        dplyr::mutate(
+          Years = Years_num
+        )
+    }
+
     # Return the filtered data with the associated LA column
     bds_filtered
   })
@@ -280,6 +291,7 @@ server <- function(input, output, session) {
         names_from = Years,
         values_from = values_num,
       ) |>
+      # Join region col
       dplyr::left_join(
         stat_n_geog |>
           dplyr::select(`LA num`, GOReg),
@@ -289,14 +301,22 @@ server <- function(input, output, session) {
       dplyr::mutate(GOReg = dplyr::case_when(
         `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
         TRUE ~ GOReg
-      )) |>
-      dplyr::relocate(GOReg, .after = `LA and Regions`) |>
-      dplyr::rename("Region" = "GOReg")
+      ))
+
+    # Order columns (sort years)
+    wide_table_ordered <- wide_table |>
+      dplyr::select(
+        `LA Number`, `LA and Regions`,
+        "Region" = "GOReg",
+        Topic, Measure,
+        dplyr::all_of(sort_year_columns(wide_table))
+      )
+
 
     # If sns included, add sns LA association column
     # Multi-join as want to include an association for every row (even duplicates)
     if (isTRUE(input$la_groups == "la_stat_ns")) {
-      wide_table <- wide_table |>
+      wide_table_ordered <- wide_table_ordered |>
         dplyr::left_join(
           stat_n_association(),
           by = "LA and Regions",
@@ -306,7 +326,7 @@ server <- function(input, output, session) {
         dplyr::rename("Statistical Neighbour group" = "sn_group")
     }
 
-    wide_table
+    wide_table_ordered
   })
 
   # Staging table output
