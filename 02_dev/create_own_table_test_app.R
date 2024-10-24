@@ -124,8 +124,10 @@ server <- function(input, output, session) {
     )
   })
 
-  # Observe changes in the selected indicator
-  observeEvent(input$indicator, {
+  # Reactive expression to compute years_choices based on selected indicator
+  years_choices <- reactive({
+    req(input$indicator) # Ensure indicator is selected
+
     # Filter the bds_metrics dataset based on the selected indicator
     years_dict <- bds_metrics |>
       dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
@@ -137,18 +139,21 @@ server <- function(input, output, session) {
     no_indicators <- length(input$indicator)
 
     if (no_indicators > 1 && !consistent_year_suffix) {
-      years_choices <- unique(years_dict$Years_num) |>
+      years_dict$Years_num |>
         sort()
     } else {
-      years_choices <- unique(years_dict$Years) |>
+      years_dict$Years |>
         sort()
     }
+  })
 
+  # Observe changes in the selected indicator and update pickerInput
+  observeEvent(input$indicator, {
     # Update the pickerInput choices with the filtered years
     shinyWidgets::updatePickerInput(
       session = session,
       inputId = "year_range",
-      choices = years_choices
+      choices = years_choices() # Use the reactive expression
     )
   })
 
@@ -436,6 +441,18 @@ server <- function(input, output, session) {
       # Get a unique identifier for this new query (UUID)
       new_uuid <- max(c(0, query$data$.internal_uuid), na.rm = TRUE) + 1
 
+      # Get the full range of available years from the reactive expression
+      available_years <- range(years_choices())
+
+      # Define the year range display logic
+      year_range_display <- if (length(input$year_range) == 0) {
+        paste0("All years (", available_years[1], " to ", available_years[2], ")")
+      } else if (length(input$year_range) == 1) {
+        paste(input$year_range[1], "onwards")
+      } else if (length(input$year_range) == 2) {
+        paste(input$year_range[1], "to", input$year_range[2])
+      }
+
       # Get query information
       new_query <- data.frame(
         .internal_uuid = new_uuid, # Assign the new UUID to the query
@@ -444,7 +461,7 @@ server <- function(input, output, session) {
         `LA and Regions` = I(list(
           get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
         )),
-        `Year range` = I(list(input$year_range)),
+        `Year range` = I(list(year_range_display)),
         `Click to remove query` = "Remove",
         check.names = FALSE
       )
