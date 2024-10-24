@@ -485,18 +485,45 @@ server <- function(input, output, session) {
 
         # Extract all LAs in the regions and add to current geog
         current_region_las <- get_las_in_regions(stat_n_geog, current_la_regions)
+
+        # Add all LAs in Region (also includes clean selected LA...
+        # i.e., no "LAs in..."
         current_geog <- c(current_geog, current_region_las)
       }
 
       # Adding statistical neighbours of selected LAs
       if (any(grepl(" statistical neighbours", current_geog))) {
+        include_stat_n <- TRUE
         current_la_sns <- current_geog |>
           stringr::str_subset(" statistical neighbours$") |>
           stringr::str_remove(" statistical neighbours$")
 
         # Extract all statistical neighbours
         selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, current_la_sns)
-        current_geog <- c(current_geog, selected_la_stat_n)
+
+        # Add stat neigh LAs and cleaned LA (minus the "statistical...")
+        current_geog <- c(current_geog, current_la_sns, selected_la_stat_n)
+
+        # Adding sn LA associations
+        current_association <- data.frame(
+          `LA and Regions` = character(),
+          `sn_group` = character(),
+          check.names = FALSE
+        )
+
+        # Create mini df of sns and selected LA
+        current_stat_n_groups <- lapply(current_la_sns, function(la) {
+          data.frame(
+            `LA and Regions` = c(la, get_la_stat_neighbrs(stat_n_la, la)),
+            `sn_group` = la,
+            check.names = FALSE
+          )
+        })
+
+        # Combine all statistical neighbour associations into a single data frame
+        if (length(current_stat_n_groups) > 0) {
+          current_association <- do.call(rbind, current_stat_n_groups)
+        }
       }
 
       # Append all LAs or Regions to the current geography if needed
@@ -551,6 +578,18 @@ server <- function(input, output, session) {
           `LA Number`, `LA and Regions`, Topic, Measure,
           dplyr::all_of(sorted_year_cols)
         )
+
+      # If sns included, add sns LA association column
+      if (include_stat_n) {
+        clean_query_data <- clean_query_data |>
+          dplyr::left_join(
+            current_association,
+            by = "LA and Regions",
+            relationship = "many-to-many"
+          ) |>
+          dplyr::relocate(sn_group, .after = "Measure") |>
+          dplyr::rename("Statistical Neighbour group" = "sn_group")
+      }
 
       # Append the cleaned query data to final query data
       final_query_data <- dplyr::bind_rows(final_query_data, clean_query_data)
