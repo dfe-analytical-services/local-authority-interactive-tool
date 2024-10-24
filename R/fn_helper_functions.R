@@ -420,13 +420,20 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
     selected_las <- intersect(input$geog_input, la_names_bds)
     selected_la_regions <- get_la_region(stat_n_geog, selected_las)
 
-    selection <- c(setdiff(selection, selected_las), paste0("LAs in ", selected_la_regions))
+    # Only add Region LAs if they are LAs
+    if (length(selected_las) > 0) {
+      selection <- c(setdiff(selection, selected_las), paste0("LAs in ", selected_la_regions))
+    }
   }
 
   # If LA statistical neighbours selected add "[LA] statistical neighbours"
   if (isTRUE(input$la_groups == "la_stat_ns")) {
     selected_las <- intersect(input$geog_input, la_names_bds)
-    selection <- c(setdiff(selection, selected_las), paste0(selected_las, " statistical neighbours"))
+
+    # Only add stat neighbours if they are LAs
+    if (length(selected_las) > 0) {
+      selection <- c(setdiff(selection, selected_las), paste0(selected_las, " statistical neighbours"))
+    }
   }
 
   # If all LAs are selected, add "All LAs" and exclude all other LA terms
