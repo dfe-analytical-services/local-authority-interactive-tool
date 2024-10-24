@@ -207,9 +207,12 @@ server <- function(input, output, session) {
       check.names = FALSE
     )
 
-    # Create mini df of sns and selected LA
+    # Create mini df of sns and selected LAs
     if (isTRUE(input$la_groups == "la_stat_ns")) {
-      stat_n_groups <- lapply(input$geog_input, function(la) {
+      # Get LAs
+      input_las <- intersect(input$geog_input, la_names_bds)
+      # Build association df
+      stat_n_groups <- lapply(input_las, function(la) {
         data.frame(
           `LA and Regions` = c(la, get_la_stat_neighbrs(stat_n_la, la)),
           `sn_group` = la,
@@ -276,7 +279,19 @@ server <- function(input, output, session) {
         id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
         names_from = Years,
         values_from = values_num,
-      )
+      ) |>
+      dplyr::left_join(
+        stat_n_geog |>
+          dplyr::select(`LA num`, GOReg),
+        by = c("LA Number" = "LA num")
+      ) |>
+      # Set regions and England as themselves for Region
+      dplyr::mutate(GOReg = dplyr::case_when(
+        `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
+        TRUE ~ GOReg
+      )) |>
+      dplyr::relocate(GOReg, .after = `LA and Regions`) |>
+      dplyr::rename("Region" = "GOReg")
 
     # If sns included, add sns LA association column
     # Multi-join as want to include an association for every row (even duplicates)
@@ -490,6 +505,9 @@ server <- function(input, output, session) {
         # i.e., no "LAs in..."
         current_geog <- c(current_geog, current_region_las)
       }
+
+      # Stat neigh inclusion param
+      include_stat_n <- FALSE
 
       # Adding statistical neighbours of selected LAs
       if (any(grepl(" statistical neighbours", current_geog))) {
