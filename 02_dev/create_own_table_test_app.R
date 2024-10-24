@@ -275,6 +275,15 @@ server <- function(input, output, session) {
       Indicator = I(list()),
       `LA and Regions` = I(list()),
       `Click to remove query` = character(),
+      `.internal_uuid` = numeric(),
+      check.names = FALSE
+    ),
+    output = data.frame(
+      `LA Number` = character(),
+      `LA and Regions` = character(),
+      Region = character(),
+      Topic = character(),
+      Measure = character(),
       check.names = FALSE
     )
   )
@@ -365,8 +374,12 @@ server <- function(input, output, session) {
   observeEvent(input$add_query, {
     # Check if anything selected
     if (length(geog_inputs()) > 0 && nrow(selected_indicators()) > 0) {
+      # Get a unique identifier for this new query (UUID)
+      new_uuid <- max(c(0, query$data$.internal_uuid), na.rm = TRUE) + 1
+
       # Get query information
       new_query <- data.frame(
+        .internal_uuid = new_uuid, # Assign the new UUID to the query
         Topic = I(list(selected_indicators()$Topic)),
         Indicator = I(list(selected_indicators()$Measure)),
         `LA and Regions` = I(list(
@@ -378,9 +391,37 @@ server <- function(input, output, session) {
 
       # Append query to existing query data
       query$data <- query$data |>
-        # Remove row identifier as not needed yet (and not available initially)
-        dplyr::select(-.internal_uuid) |>
         rbind(new_query)
+
+      # Append the corresponding staging table data with the same .internal_uuid
+      staging_data <- staging_table()
+      staging_data$.internal_uuid <- new_uuid # Assign the same UUID to staging data
+
+      # If more than one indicator and not consistent cols use the cleaned cols
+      # Check if all years have consistent suffix
+      consistent_staging_final_yrs <- data.frame(
+        Years = c(
+          colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
+          colnames(staging_data)[grepl("^\\d{4}", colnames(staging_data))]
+        )
+      ) |>
+        check_year_suffix_consistency()
+
+      staging_indicators <- query$data |>
+        pull_uniques("Indicator")
+      final_table_indicators <- query$output |>
+        pull_uniques("Measure")
+      total_unique_indicators <- unique(c(staging_indicators, final_table_indicators)) |>
+        length()
+
+      if (total_unique_indicators > 1 && !consistent_staging_final_yrs && nrow(query$output) > 0) {
+        query$output <- query$output |>
+          rename_columns_with_year() |>
+          dplyr::bind_rows(rename_columns_with_year(staging_data))
+      } else {
+        query$output <- query$output |>
+          rbind(staging_data)
+      }
     }
   })
 
@@ -388,18 +429,12 @@ server <- function(input, output, session) {
   output$query_table <- reactable::renderReactable({
     req(nrow(query$data))
 
-    # Set the new row identifier (a counter)
-    query$data$.internal_uuid <- seq_len(nrow(query$data))
-
     reactable::reactable(
       query$data,
       columns = list(
-        # JS used from `reactable.extras::button_extra()` to create btn in table
-        # Uses the row identifier to know which row to remove
         `Click to remove query` = reactable::colDef(
           cell = reactable::JS(
             "function(cellInfo) {
-            // Use the unique row identifier as the button ID
             const buttonId = 'remove_' + cellInfo.row['.internal_uuid'];
             return React.createElement(ButtonExtras, {
               id: buttonId,
@@ -412,7 +447,7 @@ server <- function(input, output, session) {
           }"
           )
         ),
-        # Returning unique topics
+        # Customize the other columns (e.g., Topic)
         Topic = reactable::colDef(
           cell = function(value) {
             unique_values <- unique(unlist(value))
@@ -423,7 +458,6 @@ server <- function(input, output, session) {
             }
           }
         ),
-        # Don't show row identifier
         .internal_uuid = reactable::colDef(show = FALSE)
       )
     )
@@ -432,10 +466,7 @@ server <- function(input, output, session) {
   # Remove query button
   observe({
     req(nrow(query$data))
-    # Set the row identifier
-    query$data$.internal_uuid <- seq_len(nrow(query$data))
-
-    # Create btn observers for each row using the unique row identifier
+    # Create button observers for each row using the unique row identifier
     lapply(query$data$.internal_uuid, function(uuid) {
       # Create matching row identifier for each remove button
       remove_button_id <- paste0("remove_", uuid)
@@ -445,18 +476,20 @@ server <- function(input, output, session) {
         {
           # Remove the corresponding row from query$data using the row identifier
           query$data <- query$data[query$data$.internal_uuid != uuid, , drop = FALSE]
+
+          # Also remove the corresponding rows from query$output
+          query$output <- query$output[query$output$.internal_uuid != uuid, , drop = FALSE]
         },
         ignoreInit = TRUE
       )
     })
   })
 
-
   # Final output table (based on saved queries)
   output$output_table <- reactable::renderReactable({
-    req(query$data)
+    req(nrow(query$data))
 
-    # Check if there are any selected measures
+    # Check if there are any selected queries
     if (nrow(query$data) == 0) {
       return(reactable::reactable(
         data.frame(
@@ -466,202 +499,52 @@ server <- function(input, output, session) {
       ))
     }
 
-    ### Main logic for query data processing
-    # Get indicators (& number of)
-    selected_indicators <- unique(unlist(query$data$Indicator))
-    no_selected_indicators <- length(selected_indicators)
+    output_indicators <- query$output |>
+      pull_uniques("Measure")
 
-    # Message for no indicators
-    if (no_selected_indicators == 0) {
-      return(reactable::reactable(
-        data.frame(
-          `Message from tool` = "No years available for selected measures.",
-          check.names = FALSE
-        )
-      ))
-    }
+    share_year_suffix <- bds_metrics |>
+      dplyr::filter(
+        Measure %in% output_indicators,
+        !is.na(Years)
+      ) |>
+      check_year_suffix_consistency()
 
-    # Logic to calculate what to do with years cols
-    # Check if consistent suffix (no cleaning needed)
-    # Create an all years df (min to max years of dataset)
-    # for expanding data so rbind works
-    # Filter BDS for selected indicators
-    raw_indicator_filtered_bds <- filter_bds_for_indicators(bds_metrics, selected_indicators)
 
-    # Check if all years have consistent suffix
-    query_str_years <- check_year_suffix_consistency(raw_indicator_filtered_bds)
 
-    # Get min and max years
-    year_bounds <- get_min_max_years(raw_indicator_filtered_bds)
-    all_years <- create_years_df(year_bounds$min_year, year_bounds$max_year)
-
-    # Initialise output table
-    final_query_data <- data.frame()
-
-    # Loop through each row in the query table and process data
-    for (i in seq_len(nrow(query$data))) {
-      # Extract current query topics, indicators and geogs
-      current_topic <- query$data$Topic[[i]]
-      current_measure <- query$data$Indicator[[i]]
-      current_geog <- query$data$`LA and Regions`[[i]]
-
-      # Create a data frame for the current topic-indicator pairings
-      current_topic_indicator <- data.frame(
-        Topic = current_topic,
-        Indicator = current_measure
-      )
-
-      # Sorting geography filters - from query (shortened names)
-      # Adding all LAs in selected LA regions
-      if (any(grepl("LAs in ", current_geog))) {
-        current_la_regions <- current_geog |>
-          stringr::str_subset("^LAs in ") |>
-          stringr::str_remove("^LAs in ")
-
-        # Extract all LAs in the regions and add to current geog
-        current_region_las <- get_las_in_regions(stat_n_geog, current_la_regions)
-
-        # Add all LAs in Region (also includes clean selected LA...
-        # i.e., no "LAs in..."
-        current_geog <- c(current_geog, current_region_las)
-      }
-
-      # Stat neigh inclusion param
-      include_stat_n <- FALSE
-
-      # Adding statistical neighbours of selected LAs
-      if (any(grepl(" statistical neighbours", current_geog))) {
-        include_stat_n <- TRUE
-        # Clean the geog terms and extract just LAs
-        current_la_sns <- current_geog |>
-          stringr::str_subset(" statistical neighbours$") |>
-          stringr::str_remove(" statistical neighbours$") |>
-          intersect(la_names_bds)
-
-        # Extract all statistical neighbours
-        selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, current_la_sns)
-
-        # Add stat neigh LAs and cleaned LA (minus the "statistical...")
-        current_geog <- c(current_geog, current_la_sns, selected_la_stat_n)
-
-        # Adding sn LA associations
-        current_association <- data.frame(
-          `LA and Regions` = character(),
-          `sn_group` = character(),
-          check.names = FALSE
-        )
-
-        # Create mini df of sns and selected LA
-        current_stat_n_groups <- lapply(current_la_sns, function(la) {
-          data.frame(
-            `LA and Regions` = c(la, get_la_stat_neighbrs(stat_n_la, la)),
-            `sn_group` = la,
-            check.names = FALSE
-          )
-        })
-
-        # Combine all statistical neighbour associations into a single data frame
-        if (length(current_stat_n_groups) > 0) {
-          current_association <- do.call(rbind, current_stat_n_groups)
-        }
-      }
-
-      # Append all LAs or Regions to the current geography if needed
-      if ("All LAs" %in% current_geog) current_geog <- c(current_geog, la_names_bds)
-      if ("All Regions" %in% current_geog) current_geog <- c(current_geog, region_names_bds)
-
-      # Collect current geog filters
-      current_geog <- unique(current_geog)
-
-      ### Main current query filtering
-      # Filter BDS for the current query
-      raw_query_data <- bds_metrics |>
-        # Semi join to filter for indicator & topic (avoids duplicates)
-        dplyr::semi_join(
-          current_topic_indicator,
-          by = c(
-            "Topic" = "Topic",
-            "Measure" = "Indicator"
-          )
-        ) |>
+    if (length(output_indicators) == 1 || share_year_suffix) {
+      years_dict <- bds_metrics |>
         dplyr::filter(
-          `LA and Regions` %in% current_geog,
+          Measure %in% output_indicators,
           !is.na(Years)
         ) |>
-        dplyr::select(
-          `LA Number`, `LA and Regions`, Topic, Measure,
-          Years, Years_num, values_num, Values
-        )
+        dplyr::distinct(Years, Years_num)
 
-      # Join the data with the full years to fill gaps in years
-      full_query_data <- dplyr::full_join(
-        raw_query_data,
-        all_years,
-        by = "Years_num"
-      ) |>
-        tidyr::pivot_wider(
-          id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
-          names_from = ifelse(query_str_years || no_selected_indicators == 1,
-            "Years",
-            "Years_num"
-          ),
-          values_from = values_num
-        )
+      # Replace the matching column names in query$output using Years_num -> Years
+      new_col_names <- colnames(query$output) |>
+        (\(cols) ifelse(cols %in% years_dict$Years_num,
+          years_dict$Years[match(cols, years_dict$Years_num)],
+          cols
+        ))()
 
-      # Sort year columns with full names preserved
-      sorted_year_cols <- sort_year_columns(full_query_data)
+      # Apply the new column names to query$output
+      colnames(query$output) <- new_col_names
 
-      # Clean data for new col order,
-      # remove any full NAs rows from missing year joins
-      # and add Region column
-      clean_query_data <- full_query_data |>
-        dplyr::filter(!dplyr::if_all(everything(), is.na)) |>
-        dplyr::select(
-          `LA Number`, `LA and Regions`, Topic, Measure,
-          dplyr::all_of(sorted_year_cols)
-        ) |>
-        dplyr::left_join(
-          stat_n_geog |>
-            dplyr::select(`LA num`, GOReg),
-          by = c("LA Number" = "LA num")
-        ) |>
-        # Set regions and England as themselves for Region
-        dplyr::mutate(GOReg = dplyr::case_when(
-          `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
-          TRUE ~ GOReg
-        )) |>
-        dplyr::relocate(GOReg, .after = `LA and Regions`) |>
-        dplyr::rename("Region" = "GOReg")
-
-      # Append the cleaned query data to final query data
-      final_query_data <- final_query_data |>
-        dplyr::bind_rows(clean_query_data)
-
-      # If sns included, add sns LA association column
-      if (include_stat_n) {
-        final_query_data <- final_query_data |>
-          dplyr::left_join(
-            current_association,
-            by = "LA and Regions",
-            relationship = "many-to-many"
-          ) |>
-          dplyr::relocate(sn_group, .after = "Measure") |>
-          dplyr::rename("Statistical Neighbour group" = "sn_group")
-      }
+      # Drop columns not in the new_col_names years
+      valid_year_cols <- years_dict$Years
+      query$output <- query$output[, colnames(query$output) %in% valid_year_cols | !grepl("^\\d{4}", colnames(query$output))]
     }
 
-    # Check if final_data has any rows before rendering
-    if (nrow(final_query_data) == 0) {
-      return(reactable::reactable(
-        data.frame(
-          `Message from tool` = "No data available based on the selected queries.",
-          check.names = FALSE
-        )
-      ))
-    }
 
-    # Output final table
-    reactable::reactable(final_query_data)
+    query_table_ordered_cols <- query$output |>
+      dplyr::select(
+        `LA Number`, `LA and Regions`,
+        Region, Topic, Measure,
+        dplyr::all_of(sort_year_columns(query$output))
+      )
+
+
+    # Display the final query table data
+    reactable::reactable(query_table_ordered_cols)
   })
 }
 

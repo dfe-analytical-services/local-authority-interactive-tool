@@ -499,3 +499,21 @@ sort_year_columns <- function(full_query_data) {
     sort() |>
     names()
 }
+
+
+rename_columns_with_year <- function(df) {
+  # Use `gsub` to extract the first 4 digits if they start the column name
+  new_names <- sapply(names(df), function(col) {
+    if (grepl("^\\d{4}", col)) {
+      # Extract the first 4 digits
+      return(substr(col, start = 1, stop = 4))
+    } else {
+      # Return the original name if it doesn't start with 4 digits
+      return(col)
+    }
+  })
+
+  # Rename columns with the modified names
+  colnames(df) <- new_names
+  return(df)
+}
