@@ -70,7 +70,17 @@ ui <- bslib::page_fillable(
       div(
         shiny::p("Other groupings"),
         shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
-        shiny::checkboxInput("inc_england", "Include England", FALSE)
+        shiny::checkboxInput("inc_england", "Include England", FALSE),
+        shinyWidgets::pickerInput(
+          inputId = "year_range",
+          label = "Select year range:",
+          choices = NULL,
+          multiple = TRUE,
+          options = list(
+            "max-options" = 2,
+            "max-options-text" = "No more!"
+          )
+        ),
       )
     ),
     shiny::br(),
@@ -111,6 +121,34 @@ server <- function(input, output, session) {
     data.frame(
       Topic = character(),
       Measure = character()
+    )
+  })
+
+  # Observe changes in the selected indicator
+  observeEvent(input$indicator, {
+    # Filter the bds_metrics dataset based on the selected indicator
+    years_dict <- bds_metrics |>
+      dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
+      dplyr::distinct(Years, Years_num)
+
+    consistent_year_suffix <- years_dict |>
+      check_year_suffix_consistency()
+
+    no_indicators <- length(input$indicator)
+
+    if (no_indicators > 1 && !consistent_year_suffix) {
+      years_choices <- unique(years_dict$Years_num) |>
+        sort()
+    } else {
+      years_choices <- unique(years_dict$Years) |>
+        sort()
+    }
+
+    # Update the pickerInput choices with the filtered years
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = "year_range",
+      choices = years_choices
     )
   })
 
@@ -268,6 +306,20 @@ server <- function(input, output, session) {
         )
     }
 
+    # Filter years
+    if (length(input$year_range) == 1) {
+      bds_filtered <- bds_filtered |>
+        dplyr::filter(
+          Years >= input$year_range[1]
+        )
+    } else if (length(input$year_range) == 2) {
+      bds_filtered <- bds_filtered |>
+        dplyr::filter(
+          Years >= input$year_range[1],
+          Years <= input$year_range[2]
+        )
+    }
+
     # Return the filtered data with the associated LA column
     bds_filtered
   })
@@ -280,6 +332,7 @@ server <- function(input, output, session) {
       Topic = I(list()),
       Indicator = I(list()),
       `LA and Regions` = I(list()),
+      `Year range` = I(list()),
       `Click to remove query` = character(),
       `.internal_uuid` = numeric(),
       check.names = FALSE
@@ -391,6 +444,7 @@ server <- function(input, output, session) {
         `LA and Regions` = I(list(
           get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
         )),
+        `Year range` = I(list(input$year_range)),
         `Click to remove query` = "Remove",
         check.names = FALSE
       )
@@ -426,7 +480,7 @@ server <- function(input, output, session) {
           dplyr::bind_rows(rename_columns_with_year(staging_data))
       } else {
         query$output <- query$output |>
-          rbind(staging_data)
+          dplyr::bind_rows(staging_data)
       }
     }
   })
