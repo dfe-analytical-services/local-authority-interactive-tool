@@ -236,7 +236,8 @@ server <- function(input, output, session) {
 
     # Filter the bds_metrics by topic, measure, and geography
     bds_filtered <- bds_metrics |>
-      dplyr::semi_join(selected_indicators(),
+      dplyr::semi_join(
+        selected_indicators(),
         by = c(
           "Topic" = "Topic",
           "Measure" = "Measure"
@@ -278,11 +279,13 @@ server <- function(input, output, session) {
       )
 
     # If sns included, add sns LA association column
+    # Multi-join as want to include an association for every row (even duplicates)
     if (isTRUE(input$la_groups == "la_stat_ns")) {
       wide_table <- wide_table |>
         dplyr::left_join(
           stat_n_association(),
-          by = "LA and Regions"
+          by = "LA and Regions",
+          relationship = "many-to-many"
         ) |>
         dplyr::relocate(sn_group, .after = "Measure") |>
         dplyr::rename("Statistical Neighbour group" = "sn_group")
