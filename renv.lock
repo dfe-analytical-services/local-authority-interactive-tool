@@ -1701,6 +1701,24 @@
       ],
       "Hash": "6069eb2a6597963eae0605c1875ff14c"
     },
+    "reactable.extras": {
+      "Package": "reactable.extras",
+      "Version": "0.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "checkmate",
+        "dplyr",
+        "htmltools",
+        "purrr",
+        "reactable",
+        "rjson",
+        "rlang",
+        "shiny"
+      ],
+      "Hash": "e8b10b074b0ef3d393d195115e8e249b"
+    },
     "reactablefmtr": {
       "Package": "reactablefmtr",
       "Version": "2.0.0",
@@ -1790,6 +1808,16 @@
         "lazyeval"
       ],
       "Hash": "ae34cd56890607370665bee5bd17812f"
+    },
+    "rjson": {
+      "Package": "rjson",
+      "Version": "0.2.23",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "7a04e9eff95857dbf557b4e5f0b3d1a8"
     },
     "rlang": {
       "Package": "rlang",
