@@ -601,3 +601,11 @@ sort_numeric_vector <- function(vec) {
 
   sorted_vec # Return the sorted vector
 }
+
+
+# Define a helper function for HTML-rendering columns
+html_colDef <- function() {
+  reactable::colDef(
+    html = TRUE
+  )
+}

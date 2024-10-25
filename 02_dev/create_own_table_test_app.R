@@ -82,24 +82,18 @@ ui <- bslib::page_fillable(
           inputId = "year_range",
           label = "Select year range:",
           choices = NULL,
-          multiple = TRUE,
-          options = shinyWidgets::pickerOptions(
-            maxOptions = 2,
-            maxOptionsText = "No more!",
-            multipleSeparator = " to ",
-            noneSelectedText = "All years available"
-          )
+          multiple = TRUE
         ),
       )
     ),
     shiny::br(),
     # Action button
-    shiny::actionButton("add_query", "Add Query", class = "gov-uk-button")
+    shiny::actionButton("add_query", "Add table", class = "gov-uk-button")
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Staging Table (View of Current Query)"),
+    h3("Staging Table (View of current selections)"),
     bslib::card(
       reactable::reactableOutput("staging_table")
     )
@@ -107,7 +101,7 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("List of queries"),
+    h3("Summary of Selections"),
     bslib::card(
       reactable::reactableOutput("query_table")
     )
@@ -115,7 +109,7 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Final Output Table (View of Saved Queries)"),
+    h3("Output Table (View of all saved selections)"),
     bslib::card(
       reactable::reactableOutput("output_table")
     )
@@ -135,8 +129,6 @@ server <- function(input, output, session) {
 
   # Reactive expression to compute years_choices based on selected indicator
   years_choices <- reactive({
-    req(input$indicator) # Ensure indicator is selected
-
     # Filter the bds_metrics dataset based on the selected indicator
     years_dict <- bds_metrics |>
       dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
@@ -162,8 +154,28 @@ server <- function(input, output, session) {
     shinyWidgets::updatePickerInput(
       session = session,
       inputId = "year_range",
-      choices = years_choices() # Use the reactive expression
+      choices = years_choices(),
+      options = shinyWidgets::pickerOptions(
+        maxOptions = 2,
+        maxOptionsText = "Deselect a year",
+        multipleSeparator = " to ",
+        noneSelectedText = "All years available"
+      )
     )
+  })
+
+  # Initialize the picker input with "Select an indicator" when the app starts
+  observe({
+    if (is.null(input$indicator) || length(input$indicator) == 0) {
+      shinyWidgets::updatePickerInput(
+        session = session,
+        inputId = "year_range",
+        choices = "Please select an indicator.",
+        options = shinyWidgets::pickerOptions(
+          noneSelectedText = "Select an indicator"
+        )
+      )
+    }
   })
 
   # Filter indicator choices based on the selected topic
@@ -324,7 +336,7 @@ server <- function(input, output, session) {
     if (length(input$year_range) == 1) {
       bds_filtered <- bds_filtered |>
         dplyr::filter(
-          Years >= input$year_range[1]
+          Years == input$year_range[1]
         )
     } else if (length(input$year_range) == 2) {
       bds_filtered <- bds_filtered |>
@@ -417,7 +429,7 @@ server <- function(input, output, session) {
     if (is.null(geog_inputs()) && is.null(input$geog_input)) {
       return(reactable::reactable(
         data.frame(
-          `Message from tool` = "Please add data selections (above).",
+          `Message from tool` = "Please add selections (above).",
           check.names = FALSE
         )
       ))
@@ -443,7 +455,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # When "Add query" button clicked - add query to saved queries
+  # When "Add table" button clicked - add query to saved queries
   observeEvent(input$add_query, {
     # Check if anything selected
     if (length(geog_inputs()) > 0 && nrow(selected_indicators()) > 0) {
@@ -454,23 +466,27 @@ server <- function(input, output, session) {
       available_years <- range(years_choices())
 
       # Define the year range display logic
-      year_range_display <- if (length(input$year_range) == 0) {
-        paste0("All years (", available_years[1], " to ", available_years[2], ")")
-      } else if (length(input$year_range) == 1) {
-        paste(input$year_range[1], "onwards")
-      } else if (length(input$year_range) == 2) {
-        paste(input$year_range[1], "to", input$year_range[2])
-      }
+      year_range_display <- dplyr::case_when(
+        length(input$year_range) == 0 ~ paste0(
+          "All years (", available_years[1], " to ", available_years[2], ")"
+        ),
+        length(input$year_range) == 2 ~ paste(
+          input$year_range[1], "to", input$year_range[2]
+        ),
+        TRUE ~ input$year_range[1]
+      )
 
       # Get query information
+      # Format with commas and line breaks
       new_query <- data.frame(
         .internal_uuid = new_uuid, # Assign the new UUID to the query
         Topic = I(list(selected_indicators()$Topic)),
-        Indicator = I(list(selected_indicators()$Measure)),
-        `LA and Regions` = I(list(
-          get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog)
-        )),
-        `Year range` = I(list(year_range_display)),
+        Indicator = paste(selected_indicators()$Measure, collapse = ",<br>"),
+        `LA and Regions` = paste(
+          get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog),
+          collapse = ",<br>"
+        ),
+        `Year range` = year_range_display,
         `Click to remove query` = "Remove",
         check.names = FALSE
       )
@@ -515,9 +531,21 @@ server <- function(input, output, session) {
   output$query_table <- reactable::renderReactable({
     req(nrow(query$data))
 
+    # Check if there are any selected queries
+    if (nrow(query$data) == 0) {
+      return(reactable::reactable(
+        data.frame(
+          `Message from tool` = "No saved selections.",
+          check.names = FALSE
+        )
+      ))
+    }
+
     reactable::reactable(
       query$data,
       columns = list(
+        Indicator = html_colDef(),
+        `LA and Regions` = html_colDef(),
         `Click to remove query` = reactable::colDef(
           cell = reactable::JS(
             "function(cellInfo) {
@@ -538,11 +566,12 @@ server <- function(input, output, session) {
           cell = function(value) {
             unique_values <- unique(unlist(value))
             if (length(unique_values) > 0) {
-              return(paste(unique_values, collapse = ", "))
+              return(paste(unique_values, collapse = ",<br>"))
             } else {
               return("")
             }
-          }
+          },
+          html = TRUE
         ),
         .internal_uuid = reactable::colDef(show = FALSE)
       )
@@ -579,7 +608,7 @@ server <- function(input, output, session) {
     if (nrow(query$data) == 0) {
       return(reactable::reactable(
         data.frame(
-          `Message from tool` = "Please add queries.",
+          `Message from tool` = "No saved selections.",
           check.names = FALSE
         )
       ))
