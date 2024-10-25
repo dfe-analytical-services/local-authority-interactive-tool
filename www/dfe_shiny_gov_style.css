@@ -601,3 +601,10 @@ html {
 .govuk-button--warning:hover[disabled] {
     background-color: #d4351c
 }
+
+
+/* Gives pickerInput defaultlook */
+.bootstrap-select .dropdown-toggle {
+  background-color: white !important;
+  color: black !important;
+}

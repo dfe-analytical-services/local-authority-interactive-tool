@@ -26,17 +26,20 @@ ui <- bslib::page_fillable(
       # Geographic input
       div(
         style = "margin-bottom: 1rem;",
-        shiny::selectInput(
+        shiny::selectizeInput(
           inputId = "geog_input",
           label = "LAs, Regions, and England:",
           choices = c(la_names_bds, region_names_bds, "England"),
-          multiple = TRUE
+          multiple = TRUE,
+          options = list(
+            "placeholder" = "Select a LA, Region or England"
+          )
         )
       ),
       # Topic input
       div(
         style = "margin-bottom: 1rem;",
-        shiny::selectInput(
+        shiny::selectizeInput(
           inputId = "topic_input",
           label = "Topic:",
           choices = metric_topics
@@ -45,11 +48,14 @@ ui <- bslib::page_fillable(
       # Indicator input
       div(
         style = "margin-bottom: 1rem;",
-        shiny::selectInput(
+        shiny::selectizeInput(
           inputId = "indicator",
           label = "Indicator:",
           choices = metric_names,
-          multiple = TRUE
+          multiple = TRUE,
+          options = list(
+            "placeholder" = "Select an indicator"
+          )
         )
       )
     ),
@@ -68,6 +74,7 @@ ui <- bslib::page_fillable(
         inline = FALSE
       ),
       div(
+        style = "width: fit-content;",
         shiny::p("Other groupings"),
         shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
         shiny::checkboxInput("inc_england", "Include England", FALSE),
@@ -76,9 +83,11 @@ ui <- bslib::page_fillable(
           label = "Select year range:",
           choices = NULL,
           multiple = TRUE,
-          options = list(
-            "max-options" = 2,
-            "max-options-text" = "No more!"
+          options = shinyWidgets::pickerOptions(
+            maxOptions = 2,
+            maxOptionsText = "No more!",
+            multipleSeparator = " to ",
+            noneSelectedText = "All years available"
           )
         ),
       )
@@ -171,7 +180,7 @@ server <- function(input, output, session) {
 
     # Update the choices with new topic whilst retaining the
     # already selected measures
-    updateSelectInput(
+    shiny::updateSelectizeInput(
       session = session,
       inputId = "indicator",
       choices = combined_choices$Measure,
