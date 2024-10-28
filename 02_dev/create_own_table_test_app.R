@@ -63,7 +63,7 @@ ui <- bslib::page_fillable(
       # Checkbox inputs for LAs, Regions, etc
       shiny::radioButtons(
         inputId = "la_groups",
-        label = "LA Groupings (choose one)",
+        label = "LA Groupings (choose one):",
         choices = list(
           "None" = "no_groups",
           "Include All LAs" = "all_las",
@@ -75,7 +75,7 @@ ui <- bslib::page_fillable(
       ),
       div(
         style = "width: fit-content;",
-        shiny::p("Other groupings"),
+        shiny::p("Other groupings:"),
         shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
         shiny::checkboxInput("inc_england", "Include England", FALSE),
         shinyWidgets::pickerInput(
@@ -88,7 +88,7 @@ ui <- bslib::page_fillable(
     ),
     shiny::br(),
     # Action button
-    shiny::actionButton("add_query", "Add table", class = "gov-uk-button")
+    shiny::actionButton("add_query", "Add selections", class = "gov-uk-button")
   ),
   div(
     class = "well",
@@ -170,9 +170,9 @@ server <- function(input, output, session) {
       shinyWidgets::updatePickerInput(
         session = session,
         inputId = "year_range",
-        choices = "Please select an indicator.",
+        choices = "Please select an indicator first",
         options = shinyWidgets::pickerOptions(
-          noneSelectedText = "Select an indicator"
+          noneSelectedText = "Select an indicator to see year range"
         )
       )
     }

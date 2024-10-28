@@ -607,4 +607,9 @@ html {
 .bootstrap-select .dropdown-toggle {
   background-color: white !important;
   color: black !important;
+  border: 1px solid #ced4da; /* matches the default border color of selectInput */
+  border-radius: 4px; /* gives a slight rounded corner */
+  padding: 5px 10px; /* add padding for a similar appearance */
+  box-shadow: none; /* remove any default shadow */
 }
+
