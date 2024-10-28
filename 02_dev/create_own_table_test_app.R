@@ -121,6 +121,13 @@ ui <- bslib::page_fillable(
         Download_DataUI("table_download", "Output Table")
       )
     )
+  ),
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::card(
+      ggiraph::girafeOutput("line_chart")
+    )
   )
 )
 
@@ -680,6 +687,85 @@ server <- function(input, output, session) {
   output$output_table <- reactable::renderReactable({
     # Display the final query table data
     reactable::reactable(clean_final_table())
+  })
+
+
+  chart_data <- reactive({
+    clean_final_table() |>
+      tidyr::pivot_longer(
+        cols = dplyr::starts_with("20"),
+        names_to = "Years",
+        values_to = "Values"
+      ) |>
+      dplyr::mutate(
+        Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
+        values_num = as.numeric(Values)
+      )
+  })
+
+  # Build main static plot
+  line_chart <- reactive({
+    chart_data() |>
+      ggplot2::ggplot() +
+      ggiraph::geom_point_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          shape = `LA and Regions`,
+          data_id = `LA and Regions`
+        ),
+        na.rm = TRUE
+      ) +
+      ggiraph::geom_line_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`,
+          data_id = `LA and Regions`
+        ),
+        na.rm = TRUE
+      ) +
+      format_axes(chart_data()) +
+      set_plot_colours(chart_data()) +
+      set_plot_labs(filtered_bds()) +
+      custom_theme()
+  })
+
+  # Build interactive line chart
+  interactive_line_chart <- reactive({
+    # Creating vertical geoms to make vertical hover tooltip
+    vertical_hover <- lapply(
+      get_years(chart_data()),
+      tooltip_vlines,
+      chart_data(),
+      get_indicator_dps(filtered_bds())
+    )
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = (line_chart() + vertical_hover),
+      width_svg = 8.5,
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      ),
+      fonts = list(sans = "Arial")
+    )
+  })
+
+  # # Download handler for the line chart
+  # Download_DataServer(
+  #   "line_download",
+  #   reactive(input$file_type),
+  #   reactive(list("svg" = la_line_chart(), "html" = interactive_line_chart())),
+  #   reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
+  # )
+
+  # LA Level line chart plot ------------------------------------------------
+  output$line_chart <- ggiraph::renderGirafe({
+    interactive_line_chart()
   })
 }
 
