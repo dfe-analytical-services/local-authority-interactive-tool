@@ -694,8 +694,18 @@ server <- function(input, output, session) {
 
 
   chart_filtered_bds <- reactive({
-    filtered_bds() |>
-      dplyr::distinct()
+    output_table_filters <- clean_final_table() |>
+      dplyr::distinct(
+        `LA and Regions`,
+        Topic,
+        Measure
+      )
+
+    bds_metrics |>
+      dplyr::semi_join(
+        output_table_filters,
+        by = c("LA and Regions", "Topic", "Measure")
+      )
   })
 
   chart_plotting_data <- reactive({

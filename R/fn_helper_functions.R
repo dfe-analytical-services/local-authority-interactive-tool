@@ -483,16 +483,28 @@ filter_bds_for_indicators <- function(bds_data, selected_indicators) {
     )
 }
 
-# Function to check if all year suffixes are the same
+
+# Function to check if all years have consistent suffixes
 check_year_suffix_consistency <- function(data) {
   data |>
     pull_uniques("Years") |>
-    substring(5) |>
-    stringr::str_replace_all("\\d", "") |>
-    {
-      \(x) all(x == x[1])
-    }()
+    (\(years_list) {
+      # Extract the first four characters as the year and remaining as the suffix
+      years <- substring(years_list, 1, 4)
+      suffixes <- substring(years_list, 5)
+
+      # For each unique year, check if there is more than one unique suffix
+      all(
+        sapply(unique(years), function(year) {
+          # Get the suffixes for the current year and check for consistency
+          unique_suffixes <- unique(suffixes[years == year])
+          length(unique_suffixes) <= 1
+        })
+      )
+    })()
 }
+
+
 
 # Function to sort year columns with full names preserved
 sort_year_columns <- function(full_query_data) {

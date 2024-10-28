@@ -253,12 +253,7 @@ get_years <- function(data_long, type = "numeric") {
     dplyr::arrange(Years_num)
 
   # Choose Years column based on the type
-  year_column <- ifelse(
-    type == "numeric" &
-      check_year_suffix_consistency(data_long),
-    "Years_num",
-    "Years"
-  )
+  year_column <- ifelse(type == "numeric", "Years_num", "Years")
 
   # Return unique years
   data_ordered |>
@@ -301,6 +296,11 @@ format_axes <- function(data_long) {
 
   # Get X-axis year labels (these can be non-numeric such as 2019-20)
   year_labels <- get_years(data_long, "character")
+
+  # Check if suffixes consistent
+  if (!check_year_suffix_consistency(data)) {
+    year_labels <- num_years
+  }
 
   # Axes formatting
   list(
