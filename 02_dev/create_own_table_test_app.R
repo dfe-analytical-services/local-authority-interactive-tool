@@ -691,6 +691,7 @@ server <- function(input, output, session) {
 
 
   chart_data <- reactive({
+    req("Message from tool" %notin% colnames(clean_final_table()))
     clean_final_table() |>
       tidyr::pivot_longer(
         cols = dplyr::starts_with("20"),
@@ -705,6 +706,7 @@ server <- function(input, output, session) {
 
   # Build main static plot
   line_chart <- reactive({
+    req("Message from tool" %notin% colnames(clean_final_table()))
     chart_data() |>
       ggplot2::ggplot() +
       ggiraph::geom_point_interactive(
@@ -734,6 +736,7 @@ server <- function(input, output, session) {
 
   # Build interactive line chart
   interactive_line_chart <- reactive({
+    req("Message from tool" %notin% colnames(clean_final_table()))
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
       get_years(chart_data()),
@@ -765,7 +768,20 @@ server <- function(input, output, session) {
 
   # LA Level line chart plot ------------------------------------------------
   output$line_chart <- ggiraph::renderGirafe({
-    interactive_line_chart()
+    if ("Message from tool" %notin% colnames(clean_final_table())) {
+      interactive_line_chart()
+    } else {
+      ggiraph::girafe(
+        ggobj = (display_no_data_plot()),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    }
   })
 }
 
