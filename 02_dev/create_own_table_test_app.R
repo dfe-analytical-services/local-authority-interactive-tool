@@ -110,8 +110,16 @@ ui <- bslib::page_fillable(
     class = "well",
     style = "overflow-y: visible;",
     h3("Output Table (View of all saved selections)"),
-    bslib::card(
-      reactable::reactableOutput("output_table")
+    bslib::navset_card_tab(
+      bslib::nav_panel(
+        title = "Output Table",
+        reactable::reactableOutput("output_table")
+      ),
+      bslib::nav_panel(
+        title = "Download",
+        file_type_input_btn("file_type"),
+        Download_DataUI("table_download", "Output Table")
+      )
     )
   )
 )
@@ -473,7 +481,7 @@ server <- function(input, output, session) {
         length(input$year_range) == 2 ~ paste(
           input$year_range[1], "to", input$year_range[2]
         ),
-        TRUE ~ input$year_range[1]
+        length(input$year_range) == 1 ~ paste0("", input$year_range[1])
       )
 
       # Get query information
@@ -600,18 +608,18 @@ server <- function(input, output, session) {
     })
   })
 
-  # Final output table (based on saved queries)
-  output$output_table <- reactable::renderReactable({
+  # Cleaned final table
+  clean_final_table <- reactive({
     req(nrow(query$data))
 
     # Check if there are any selected queries
     if (nrow(query$data) == 0) {
-      return(reactable::reactable(
+      return(
         data.frame(
           `Message from tool` = "No saved selections.",
           check.names = FALSE
         )
-      ))
+      )
     }
 
     output_indicators <- query$output |>
@@ -649,17 +657,29 @@ server <- function(input, output, session) {
       query$output <- query$output[, colnames(query$output) %in% valid_year_cols | !grepl("^\\d{4}", colnames(query$output))]
     }
 
-    query_table_ordered_cols <- query$output |>
+    # Final query output table with ordered columns
+    query$output |>
       dplyr::select(
         `LA Number`, `LA and Regions`,
         Region, Topic, Measure,
         tidyselect::any_of("Statistical Neighbour Group"),
         dplyr::all_of(sort_year_columns(query$output))
       )
+  })
+
+  # Download the final table --------------------------------------------------
+  Download_DataServer(
+    "table_download",
+    reactive(input$file_type),
+    reactive(clean_final_table()),
+    reactive("LAIT-create-your-own-table")
+  )
 
 
+  # Final output table (based on saved queries)
+  output$output_table <- reactable::renderReactable({
     # Display the final query table data
-    reactable::reactable(query_table_ordered_cols)
+    reactable::reactable(clean_final_table())
   })
 }
 
