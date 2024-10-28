@@ -699,7 +699,11 @@ server <- function(input, output, session) {
   })
 
   chart_plotting_data <- reactive({
-    req("Message from tool" %notin% colnames(clean_final_table()))
+    req(
+      "Message from tool" %notin% colnames(clean_final_table()),
+      length(pull_uniques(clean_final_table(), "Measure")) < 4,
+      length(pull_uniques(clean_final_table(), "Measure")) <= 4
+    )
     chart_data <- clean_final_table() |>
       dplyr::distinct() |>
       tidyr::pivot_longer(
@@ -711,13 +715,16 @@ server <- function(input, output, session) {
         Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
         values_num = Values
       )
-    print(chart_data)
     chart_data
   })
 
   # Build main static plot
   line_chart <- reactive({
-    req("Message from tool" %notin% colnames(clean_final_table()))
+    req(
+      "Message from tool" %notin% colnames(clean_final_table()),
+      length(pull_uniques(clean_final_table(), "Measure")) < 4,
+      length(pull_uniques(clean_final_table(), "Measure")) <= 4
+    )
     chart_plotting_data() |>
       ggplot2::ggplot() +
       ggiraph::geom_line_interactive(
@@ -738,7 +745,11 @@ server <- function(input, output, session) {
 
   # Build interactive line chart
   interactive_line_chart <- reactive({
-    req("Message from tool" %notin% colnames(clean_final_table()))
+    req(
+      "Message from tool" %notin% colnames(clean_final_table()),
+      length(pull_uniques(clean_final_table(), "Measure")) < 4,
+      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
+    )
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
       get_years(chart_plotting_data()),
@@ -771,9 +782,7 @@ server <- function(input, output, session) {
 
   # LA Level line chart plot ------------------------------------------------
   output$line_chart <- ggiraph::renderGirafe({
-    if ("Message from tool" %notin% colnames(clean_final_table())) {
-      interactive_line_chart()
-    } else {
+    if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
         ggobj = (display_no_data_plot()),
         width_svg = 8.5,
@@ -784,6 +793,22 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
+    } else if (
+      length(pull_uniques(clean_final_table(), "Measure")) >= 4 ||
+        length(pull_uniques(clean_final_table(), "LA and Regions")) > 4
+    ) {
+      ggiraph::girafe(
+        ggobj = (display_no_data_plot()),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    } else {
+      interactive_line_chart()
     }
   })
 }
