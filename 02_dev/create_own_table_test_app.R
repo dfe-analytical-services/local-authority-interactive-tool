@@ -744,7 +744,8 @@ server <- function(input, output, session) {
       get_years(chart_plotting_data()),
       tooltip_vlines,
       chart_plotting_data(),
-      get_indicator_dps(chart_filtered_bds())
+      get_indicator_dps(chart_filtered_bds()),
+      TRUE
     )
 
     # Plotting interactive graph

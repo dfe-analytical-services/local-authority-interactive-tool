@@ -443,49 +443,107 @@ custom_theme <- function() {
 }
 
 
-#' Create Interactive Vertical Lines for Tooltips
+#' Generate year text for tooltip
 #'
-#' This function generates vertical lines on a ggplot2 plot that display
-#' tooltips when hovered over, using the ggiraph package.
+#' This function creates a text string indicating the year based on the
+#' specified years number and the provided data frame.
 #'
-#' @param x A numeric value representing the x-axis position (year)
-#' for the vertical line.
-#' @param data A data frame containing the data for the plot,
-#' filtered for the relevant year.
+#' @param data A data frame containing year information.
+#' @param years_num A numeric value representing the year.
 #'
-#' @return A `ggiraph::geom_vline_interactive` object representing the
-#' vertical line with attached tooltips.
+#' @return A formatted string with the year information.
+#' @export
+generate_year_text <- function(data, years_num) {
+  glue::glue(
+    "Year: {data |>
+      dplyr::filter(Years_num == years_num) |>
+      get_years(type = 'character')}"
+  )
+}
+
+#' Generate tooltip text when including measures
 #'
-#' @details
-#' The function creates an interactive vertical line at the specified
-#' x-axis position.
-#' The tooltip displays the year and corresponding values for each
-#' `LA and Regions` group present in the data.
-#' The line is dashed and only becomes visible upon hovering,
-#' enhancing the interactivity of the plot.
+#' This function generates a tooltip text string that includes the measures
+#' along with the corresponding LA and region values.
 #'
-tooltip_vlines <- function(x, data, indicator_dp = 1) {
+#' @param data A data frame containing the measures and values.
+#' @param years_num A numeric value representing the year for filtering.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#'
+#' @return A formatted string containing measures and corresponding values.
+#' @export
+generate_tooltip_with_measures <- function(data, years_num, indicator_dp) {
+  measure_summary <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+    dplyr::filter(Years_num == years_num) |>
+    dplyr::group_by(Measure) |>
+    dplyr::summarise(
+      tooltip_text = paste(
+        paste0(`LA and Regions`, ": ", values_num),
+        collapse = "\n"
+      ),
+      .groups = "drop"
+    )
+
+  glue::glue_data(
+    measure_summary,
+    "{Measure}:\n  {tooltip_text}",
+    .sep = "\n"
+  ) |>
+    paste(collapse = "\n\n")
+}
+
+#' Generate tooltip text when not including measures
+#'
+#' This function generates a tooltip text string that lists LA and region
+#' values without including measures.
+#'
+#' @param data A data frame containing the values.
+#' @param years_num A numeric value representing the year for filtering.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#'
+#' @return A formatted string containing LA and region values.
+#' @export
+generate_tooltip_without_measures <- function(data, years_num, indicator_dp) {
+  paste0(
+    glue::glue_data(
+      data |>
+        pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+        dplyr::filter(Years_num == years_num) |>
+        dplyr::arrange(dplyr::desc(values_num)),
+      "{`LA and Regions`}: {values_num}"
+    ),
+    collapse = "\n"
+  )
+}
+
+#' Generate interactive vertical line with tooltip
+#'
+#' This function creates a vertical line on a plot with an interactive
+#' tooltip that shows year information and related values, optionally
+#' including measures.
+#'
+#' @param x A numeric value representing the x-intercept for the vertical line.
+#' @param data A data frame containing the relevant data for tooltips.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#' @param include_measure A logical value indicating whether to include
+#' measures in the tooltip.
+#'
+#' @return A `geom_vline_interactive` object for use in a plot.
+#' @export
+tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
+  year_text <- generate_year_text(data, x)
+
+  tooltip_content <- if (include_measure) {
+    generate_tooltip_with_measures(data, x, indicator_dp)
+  } else {
+    generate_tooltip_without_measures(data, x, indicator_dp)
+  }
+
   geom_vline_interactive(
     xintercept = x,
     data_id = x,
-    tooltip = glue::glue(
-      # Get Years (descriptive)
-      "Year: {data |>
-      dplyr::filter(Years_num == x) |>
-      get_years(type = 'character')}",
-      # Get Geog area: Value
-      paste0(
-        "\n",
-        glue::glue_data(
-          data |>
-            pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-            dplyr::filter(Years_num == x) |>
-            dplyr::arrange(dplyr::desc(values_num)),
-          "{`LA and Regions`}: {values_num}"
-        ),
-        collapse = ""
-      )
-    ),
+    tooltip = paste(year_text, tooltip_content, sep = "\n\n"),
     hover_nearest = TRUE,
     linetype = "dashed",
     size = 2.5,
