@@ -748,7 +748,16 @@ server <- function(input, output, session) {
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data()) +
       # set_plot_labs(chart_filtered_bds()) +
-      custom_theme()
+      custom_theme() +
+      ggplot2::theme(
+        legend.title = ggplot2::element_text(),
+        legend.title.position = "top",
+        legend.spacing.x = unit(5, "lines")
+      ) +
+      guides(
+        color = ggplot2::guide_legend(ncol = 1, title = "Geographies:"),
+        linetype = ggplot2::guide_legend(ncol = 1, title = "Indicators:")
+      )
   })
 
   # Build interactive line chart
