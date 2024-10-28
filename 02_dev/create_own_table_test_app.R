@@ -155,13 +155,11 @@ server <- function(input, output, session) {
     consistent_year_suffix <- years_dict |>
       check_year_suffix_consistency()
 
-    no_indicators <- length(input$indicator)
-
-    if (no_indicators > 1 && !consistent_year_suffix) {
-      years_dict$Years_num |>
+    if (consistent_year_suffix) {
+      years_dict$Years |>
         sort()
     } else {
-      years_dict$Years |>
+      years_dict$Years_num |>
         sort()
     }
   })
@@ -343,7 +341,7 @@ server <- function(input, output, session) {
     consistent_str_years <- check_year_suffix_consistency(bds_filtered)
 
     # If more than one indicator and not consistent cols use the cleaned cols
-    if (length(input$indicator) > 1 && !consistent_str_years) {
+    if (!consistent_str_years) {
       bds_filtered <- bds_filtered |>
         dplyr::mutate(
           Years = Years_num
@@ -534,7 +532,7 @@ server <- function(input, output, session) {
       total_unique_indicators <- unique(c(staging_indicators, final_table_indicators)) |>
         length()
 
-      if (total_unique_indicators > 1 && !consistent_staging_final_yrs && nrow(query$output) > 0) {
+      if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
         query$output <- query$output |>
           rename_columns_with_year() |>
           dplyr::bind_rows(rename_columns_with_year(staging_data))
@@ -644,7 +642,7 @@ server <- function(input, output, session) {
 
 
 
-    if (length(output_indicators) == 1 || share_year_suffix) {
+    if (share_year_suffix) {
       years_dict <- bds_metrics |>
         dplyr::filter(
           Measure %in% output_indicators,
