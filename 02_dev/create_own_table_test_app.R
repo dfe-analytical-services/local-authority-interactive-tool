@@ -126,7 +126,10 @@ ui <- bslib::page_fillable(
     class = "well",
     style = "overflow-y: visible;",
     bslib::card(
-      ggiraph::girafeOutput("line_chart")
+      bslib::card_body(
+        ggiraph::girafeOutput("line_chart")
+      ),
+      full_screen = TRUE
     )
   )
 )
@@ -690,9 +693,15 @@ server <- function(input, output, session) {
   })
 
 
-  chart_data <- reactive({
+  chart_filtered_bds <- reactive({
+    filtered_bds() |>
+      dplyr::distinct()
+  })
+
+  chart_plotting_data <- reactive({
     req("Message from tool" %notin% colnames(clean_final_table()))
-    clean_final_table() |>
+    chart_data <- clean_final_table() |>
+      dplyr::distinct() |>
       tidyr::pivot_longer(
         cols = dplyr::starts_with("20"),
         names_to = "Years",
@@ -700,37 +709,30 @@ server <- function(input, output, session) {
       ) |>
       dplyr::mutate(
         Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
-        values_num = as.numeric(Values)
+        values_num = Values
       )
+    print(chart_data)
+    chart_data
   })
 
   # Build main static plot
   line_chart <- reactive({
     req("Message from tool" %notin% colnames(clean_final_table()))
-    chart_data() |>
+    chart_plotting_data() |>
       ggplot2::ggplot() +
-      ggiraph::geom_point_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          shape = `LA and Regions`,
-          data_id = `LA and Regions`
-        ),
-        na.rm = TRUE
-      ) +
       ggiraph::geom_line_interactive(
         ggplot2::aes(
           x = Years_num,
           y = values_num,
           color = `LA and Regions`,
+          linetype = Measure,
           data_id = `LA and Regions`
         ),
         na.rm = TRUE
       ) +
-      format_axes(chart_data()) +
-      set_plot_colours(chart_data()) +
-      set_plot_labs(filtered_bds()) +
+      format_axes(chart_plotting_data()) +
+      set_plot_colours(chart_plotting_data()) +
+      # set_plot_labs(chart_filtered_bds()) +
       custom_theme()
   })
 
@@ -739,10 +741,10 @@ server <- function(input, output, session) {
     req("Message from tool" %notin% colnames(clean_final_table()))
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
-      get_years(chart_data()),
+      get_years(chart_plotting_data()),
       tooltip_vlines,
-      chart_data(),
-      get_indicator_dps(filtered_bds())
+      chart_plotting_data(),
+      get_indicator_dps(chart_filtered_bds())
     )
 
     # Plotting interactive graph
