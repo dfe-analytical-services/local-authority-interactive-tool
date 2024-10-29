@@ -911,7 +911,15 @@ server <- function(input, output, session) {
       set_plot_colours(chart_plotting_data(), "fill") +
       set_plot_labs(chart_filtered_bds()) +
       custom_theme() +
-      guides(fill = "none")
+      ggplot2::theme(
+        legend.title = ggplot2::element_text(),
+        legend.title.position = "top",
+        legend.spacing.x = unit(5, "lines")
+      ) +
+      guides(
+        fill = ggplot2::guide_legend(ncol = 1, title = "Geographies:"),
+        linetype = ggplot2::guide_legend(ncol = 1, title = "Indicators:")
+      )
   })
 
   # Build interactive line chart
