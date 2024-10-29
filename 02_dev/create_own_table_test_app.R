@@ -886,13 +886,19 @@ server <- function(input, output, session) {
     )
 
     chart_names <- chart_filtered_bds() |>
-      dplyr::distinct(Measure, Chart_title) |>
-      dplyr::mutate(Chart_title = stringr::str_wrap(Chart_title,
-        width = 40
+      dplyr::distinct(Measure, Chart_title)
+
+    chart_names_wrapped <- chart_names |>
+      dplyr::mutate(Chart_title = stringr::str_wrap(
+        Chart_title,
+        width = 60 - length(chart_names$Measure) * 10
       ))
 
     # Create a named vector for custom labels from chart_names
-    custom_labels <- setNames(chart_names$Chart_title, chart_names$Measure)
+    custom_labels <- setNames(
+      chart_names_wrapped$Chart_title,
+      chart_names_wrapped$Measure
+    )
 
 
     # Custom color scale for LA and Regions with variations for Measures
