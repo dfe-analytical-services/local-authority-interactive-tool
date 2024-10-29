@@ -801,7 +801,7 @@ server <- function(input, output, session) {
   output$line_chart <- ggiraph::renderGirafe({
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
-        ggobj = (display_no_data_plot()),
+        ggobj = display_no_data_plot(),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -815,7 +815,7 @@ server <- function(input, output, session) {
         length(pull_uniques(clean_final_table(), "LA and Regions")) > 4
     ) {
       ggiraph::girafe(
-        ggobj = (display_no_data_plot()),
+        ggobj = display_no_data_plot(),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(

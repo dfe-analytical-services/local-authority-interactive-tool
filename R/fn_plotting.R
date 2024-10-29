@@ -298,7 +298,7 @@ format_axes <- function(data_long) {
   year_labels <- get_years(data_long, "character")
 
   # Check if suffixes consistent
-  if (!check_year_suffix_consistency(data)) {
+  if (!check_year_suffix_consistency(data_long)) {
     year_labels <- num_years
   }
 
