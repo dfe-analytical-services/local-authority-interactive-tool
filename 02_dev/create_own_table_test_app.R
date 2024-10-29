@@ -747,7 +747,7 @@ server <- function(input, output, session) {
       ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data()) +
-      # set_plot_labs(chart_filtered_bds()) +
+      set_plot_labs(chart_filtered_bds()) +
       custom_theme() +
       ggplot2::theme(
         legend.title = ggplot2::element_text(),

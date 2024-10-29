@@ -9,8 +9,22 @@
 #' }
 #' @export
 get_yaxis_title <- function(data_full) {
-  data_full |>
+  y_axis_title <- data_full |>
     pull_uniques("y_axis_name")
+
+  # If more than one y-axis title then give generic
+  if (length(y_axis_title) == 1) {
+    y_axis_title
+  } else {
+    paste(
+      "Mixed units:\n",
+      paste(
+        paste(y_axis_title[-length(y_axis_title)], collapse = ",\n"),
+        y_axis_title[length(y_axis_title)],
+        sep = " and\n"
+      )
+    )
+  }
 }
 
 
@@ -27,8 +41,23 @@ get_yaxis_title <- function(data_full) {
 #' }
 #' @export
 get_plot_title <- function(data_full) {
-  data_full |>
+  chart_title <- data_full |>
     pull_uniques("Chart_title")
+
+  # If more than one title, format with "," & "and"s
+  if (length(chart_title) == 1) {
+    chart_title
+  } else {
+    paste(
+      "Chart showing -",
+      paste(
+        paste(chart_title[-length(chart_title)], collapse = ",<br>"),
+        chart_title[length(chart_title)],
+        sep = " and<br>"
+      ),
+      sep = "<br>"
+    )
+  }
 }
 
 
