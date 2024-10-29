@@ -157,6 +157,23 @@ ui <- bslib::page_fillable(
           )
         )
       )
+    ),
+    bslib::nav_panel(
+      title = "Bar chart",
+      div(
+        class = "well",
+        style = "overflow-y: visible;",
+        div(
+          style = "display: flex; justify-content: space-between; align-items: center;",
+          bslib::card(
+            bslib::card_body(
+              ggiraph::girafeOutput("bar_chart")
+            ),
+            full_screen = TRUE,
+            style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          )
+        )
+      )
     )
   )
 )
@@ -856,6 +873,93 @@ server <- function(input, output, session) {
       )
     } else {
       interactive_line_chart()
+    }
+  })
+
+
+  # Build main bar static plot ------------------------------------------------
+  bar_chart <- reactive({
+    req(
+      "Message from tool" %notin% colnames(clean_final_table()),
+      length(pull_uniques(clean_final_table(), "Measure")) < 4,
+      length(pull_uniques(clean_final_table(), "Measure")) <= 4
+    )
+    chart_plotting_data() |>
+      ggplot2::ggplot() +
+      ggiraph::geom_col_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          fill = `LA and Regions`,
+          linetype = Measure,
+          tooltip = glue::glue_data(
+            chart_plotting_data() |>
+              pretty_num_table(
+                include_columns = "values_num",
+                dp = get_indicator_dps(chart_filtered_bds())
+              ),
+            "Year: {Years}\n\n{`LA and Regions`}: {values_num}"
+          ),
+          data_id = `LA and Regions`
+        ),
+        position = "dodge",
+        width = 0.6,
+        na.rm = TRUE,
+        colour = "black"
+      ) +
+      format_axes(chart_plotting_data()) +
+      set_plot_colours(chart_plotting_data(), "fill") +
+      set_plot_labs(chart_filtered_bds()) +
+      custom_theme() +
+      guides(fill = "none")
+  })
+
+  # Build interactive line chart
+  interactive_bar_chart <- reactive({
+    req(
+      "Message from tool" %notin% colnames(clean_final_table()),
+      length(pull_uniques(clean_final_table(), "Measure")) < 4,
+      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
+    )
+
+    # Plotting interactive graph
+    ggiraph::girafe(
+      ggobj = (bar_chart()),
+      width_svg = 8.5,
+      options = generic_ggiraph_options(),
+      fonts = list(sans = "Arial")
+    )
+  })
+
+  # LA Level bar chart plot -------------------------------------------------
+  output$bar_chart <- ggiraph::renderGirafe({
+    if ("Message from tool" %in% colnames(clean_final_table())) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    } else if (
+      length(pull_uniques(clean_final_table(), "Measure")) >= 4 ||
+        length(pull_uniques(clean_final_table(), "LA and Regions")) > 4
+    ) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    } else {
+      interactive_bar_chart()
     }
   })
 }
