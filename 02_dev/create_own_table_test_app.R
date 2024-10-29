@@ -885,6 +885,16 @@ server <- function(input, output, session) {
       length(pull_uniques(clean_final_table(), "Measure")) <= 4
     )
 
+    chart_names <- chart_filtered_bds() |>
+      dplyr::distinct(Measure, Chart_title) |>
+      dplyr::mutate(Chart_title = stringr::str_wrap(Chart_title,
+        width = 40
+      ))
+
+    # Create a named vector for custom labels from chart_names
+    custom_labels <- setNames(chart_names$Chart_title, chart_names$Measure)
+
+
     # Custom color scale for LA and Regions with variations for Measures
     chart_plotting_data() |>
       ggplot2::ggplot() +
@@ -914,8 +924,7 @@ server <- function(input, output, session) {
       custom_theme() +
       ggplot2::theme(
         legend.title = ggplot2::element_text(),
-        legend.title.position = "top",
-        legend.spacing.x = unit(5, "lines")
+        legend.title.position = "top"
       ) +
       guides(
         fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
@@ -923,9 +932,12 @@ server <- function(input, output, session) {
       ggplot2::labs(title = "Bar charts showing selected indicators") +
       ggplot2::facet_wrap(
         ~Measure,
-        labeller = labeller(Measure = label_wrap_gen(width = 40))
+        labeller = labeller(Measure = as_labeller(custom_labels)),
       ) +
-      theme(axis.text.x = element_text(hjust = c(0, 1)))
+      theme(
+        panel.spacing.x = unit(15, "mm"),
+        plot.margin = ggplot2::margin(r = 20)
+      )
   })
 
   # Build interactive line chart
