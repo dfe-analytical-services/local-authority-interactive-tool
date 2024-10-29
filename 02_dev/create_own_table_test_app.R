@@ -885,58 +885,28 @@ server <- function(input, output, session) {
       length(pull_uniques(clean_final_table(), "Measure")) <= 4
     )
 
-    # Define a list of patterns to choose from
-    available_patterns <- c("point", "stripe", "none")
-
-    # Base interactive layer with ggiraph for interactivity
-    base_layer <- ggiraph::geom_col_interactive(
-      ggplot2::aes(
-        x = Years_num,
-        y = values_num,
-        fill = `LA and Regions`,
-        tooltip = glue::glue_data(
-          chart_plotting_data() |>
-            pretty_num_table(
-              include_columns = "values_num",
-              dp = get_indicator_dps(chart_filtered_bds())
-            ),
-          "Year: {Years}\n\n{`LA and Regions`}: {values_num}"
-        ),
-        data_id = `LA and Regions`
-      ),
-      position = position_dodge(width = 0.6),
-      width = 0.6,
-      na.rm = TRUE,
-      color = "white"
-    )
-
-    # Create a mapping of measures to patterns dynamically
-    pattern_mapping <- unique(chart_plotting_data()$Measure)
-    pattern_choices <- available_patterns[1:length(pattern_mapping)]
-    names(pattern_choices) <- pattern_mapping
-
-    # Static pattern layer using ggpattern (no interactivity)
-    pattern_layer <- ggpattern::geom_col_pattern(
-      ggplot2::aes(
-        x = Years_num,
-        y = values_num,
-        fill = `LA and Regions`, # Keep fill consistent
-        pattern = pattern_choices[as.character(Measure)], # Use mapped patterns
-        pattern_density = 0.1
-      ),
-      position = position_dodge(width = 0.6), # Consistent positioning
-      width = 0.6,
-      na.rm = TRUE,
-      color = NA # No outline for pattern layer
-    )
-
-    # Combine layers
+    # Custom color scale for LA and Regions with variations for Measures
     chart_plotting_data() |>
       ggplot2::ggplot() +
-      base_layer + # Interactive layer
-      pattern_layer + # Pattern overlay layer
-      ggpattern::scale_pattern_type_manual(
-        values = available_patterns
+      ggiraph::geom_col_interactive(
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          fill = `LA and Regions`,
+          tooltip = glue::glue_data(
+            chart_plotting_data() |>
+              pretty_num_table(
+                include_columns = "values_num",
+                dp = get_indicator_dps(chart_filtered_bds())
+              ),
+            "Year: {Years}\n\n{`LA and Regions`}: {values_num}"
+          ),
+          data_id = `LA and Regions`
+        ),
+        position = position_dodge(width = 0.6),
+        width = 0.6,
+        na.rm = TRUE,
+        color = "black"
       ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data(), "fill") +
@@ -948,8 +918,14 @@ server <- function(input, output, session) {
         legend.spacing.x = unit(5, "lines")
       ) +
       guides(
-        fill = ggplot2::guide_legend(ncol = 1, title = "Geographies:")
-      )
+        fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
+      ) +
+      ggplot2::labs(title = "Bar charts showing selected indicators") +
+      ggplot2::facet_wrap(
+        ~Measure,
+        labeller = labeller(Measure = label_wrap_gen(width = 40))
+      ) +
+      theme(axis.text.x = element_text(hjust = c(0, 1)))
   })
 
   # Build interactive line chart
