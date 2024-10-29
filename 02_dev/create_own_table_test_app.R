@@ -122,14 +122,41 @@ ui <- bslib::page_fillable(
       )
     )
   ),
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_body(
-        ggiraph::girafeOutput("line_chart")
-      ),
-      full_screen = TRUE
+  bslib::navset_tab(
+    bslib::nav_panel(
+      title = "Line chart",
+      div(
+        class = "well",
+        style = "overflow-y: visible;",
+        div(
+          style = "display: flex; justify-content: space-between; align-items: center;",
+          bslib::card(
+            bslib::card_body(
+              ggiraph::girafeOutput("line_chart")
+            ),
+            full_screen = TRUE,
+            style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          ),
+          div(
+            # Download button to trigger chart download modal
+            shiny::tagAppendAttributes(
+              DownloadChartBtnUI("download_btn"),
+              style = "max-width: none; margin-left: 0;"
+            ),
+            br(),
+            shiny::tagAppendAttributes(
+              actionButton(
+                "copybtn",
+                "Copy Chart to Clipboard",
+                icon = icon("copy"),
+                class = "gov-uk-button"
+              ),
+              style = "max-width: none;"
+            ),
+            style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
+          )
+        )
+      )
     )
   )
 )
@@ -789,13 +816,16 @@ server <- function(input, output, session) {
     )
   })
 
-  # # Download handler for the line chart
-  # Download_DataServer(
-  #   "line_download",
-  #   reactive(input$file_type),
-  #   reactive(list("svg" = la_line_chart(), "html" = interactive_line_chart())),
-  #   reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
-  # )
+  # Initialize server logic for download button and modal
+  DownloadChartBtnServer("download_btn", "line", "Line")
+
+  # Set up the download handlers for the chart -------------------------------
+  Download_DataServer(
+    "line-chart_download",
+    reactive(input$`line-file_type`),
+    reactive(list("svg" = line_chart(), "html" = interactive_line_chart())),
+    reactive(c("LAIT-create-your-own-line-chart"))
+  )
 
   # LA Level line chart plot ------------------------------------------------
   output$line_chart <- ggiraph::renderGirafe({
