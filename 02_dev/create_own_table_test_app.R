@@ -869,13 +869,27 @@ server <- function(input, output, session) {
     chart_data
   })
 
+  number_of_indicators <- reactive({
+    length(pull_uniques(clean_final_table(), "Measure"))
+  })
+
+  number_of_geogs <- reactive({
+    length(pull_uniques(clean_final_table(), "LA and Regions"))
+  })
+
   # Build main static plot
   line_chart <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
-      length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "Measure")) <= 4
+      number_of_indicators() <= 3,
+      number_of_geogs() <= 4
     )
+
+    # Count year cols (start with 2)
+    num_year_cols <- chart_plotting_data() |>
+      dplyr::distinct(Years) |>
+      nrow()
+
     chart_plotting_data() |>
       ggplot2::ggplot() +
       ggiraph::geom_line_interactive(
@@ -890,12 +904,12 @@ server <- function(input, output, session) {
       ) +
       ggplot2::geom_point(
         ggplot2::aes(
-          x = Inf,
-          y = Inf,
+          x = Years_num,
+          y = values_num,
           color = `LA and Regions`
         ),
-        size = 0,
-        shape = 15
+        size = ifelse(num_year_cols == 1, 3, 0),
+        shape = 16
       ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data()) +
@@ -911,7 +925,7 @@ server <- function(input, output, session) {
           order = 1,
           ncol = 1,
           title = "Geographies (colour):",
-          override.aes = list(size = 3, linetype = NULL)
+          override.aes = list(size = 3, shape = 15, linetype = NULL)
         ),
         linetype = ggplot2::guide_legend(
           order = 2,
@@ -925,8 +939,8 @@ server <- function(input, output, session) {
   interactive_line_chart <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
-      length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
+      number_of_indicators() <= 3,
+      number_of_geogs() <= 4
     )
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
@@ -964,8 +978,8 @@ server <- function(input, output, session) {
         fonts = list(sans = "Arial")
       )
     } else if (
-      length(pull_uniques(clean_final_table(), "Measure")) >= 4 ||
-        length(pull_uniques(clean_final_table(), "LA and Regions")) > 4
+      number_of_indicators() > 3 ||
+        number_of_geogs() > 4
     ) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
@@ -1007,8 +1021,8 @@ server <- function(input, output, session) {
   bar_chart <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
-      length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
+      number_of_indicators() <= 3,
+      number_of_geogs() <= 4
     )
 
     chart_names <- chart_filtered_bds() |>
@@ -1076,8 +1090,8 @@ server <- function(input, output, session) {
   interactive_bar_chart <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
-      length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
+      number_of_indicators() <= 3,
+      number_of_geogs() <= 4
     )
 
     # Plotting interactive graph
@@ -1103,8 +1117,8 @@ server <- function(input, output, session) {
         fonts = list(sans = "Arial")
       )
     } else if (
-      length(pull_uniques(clean_final_table(), "Measure")) >= 4 ||
-        length(pull_uniques(clean_final_table(), "LA and Regions")) > 4
+      number_of_indicators() > 3 ||
+        number_of_geogs() > 4
     ) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
