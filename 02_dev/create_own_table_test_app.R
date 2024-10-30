@@ -908,6 +908,7 @@ server <- function(input, output, session) {
           y = values_num,
           color = `LA and Regions`
         ),
+        na.rm = TRUE,
         size = ifelse(num_year_cols == 1, 3, 0),
         shape = 16
       ) +
@@ -1067,9 +1068,8 @@ server <- function(input, output, session) {
                 include_columns = "values_num",
                 dp = get_indicator_dps(chart_filtered_bds())
               ),
-            "Year: {Years}\n\n{`LA and Regions`}: {values_num}"
-          ),
-          data_id = `LA and Regions`
+            "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
+          )
         ),
         position = position_dodge(width = 0.6),
         width = 0.6,
