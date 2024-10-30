@@ -132,35 +132,34 @@ ui <- bslib::page_fillable(
       bslib::nav_panel(
         title = "Line chart",
         div(
-          class = "well",
-          style = "overflow-y: visible;",
-          div(
-            style = "display: flex; justify-content: space-between; align-items: center;",
-            bslib::card(
-              bslib::card_body(
-                ggiraph::girafeOutput("line_chart")
-              ),
-              full_screen = TRUE,
-              style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          style = "display: flex;
+                   justify-content: space-between;
+                   align-items: center;
+                   background: white;",
+          bslib::card(
+            bslib::card_body(
+              ggiraph::girafeOutput("line_chart")
             ),
-            div(
-              # Download button to trigger chart download modal
-              shiny::tagAppendAttributes(
-                DownloadChartBtnUI("download_btn_line"),
-                style = "max-width: none; margin-left: 0;"
+            full_screen = TRUE,
+            style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          ),
+          div(
+            # Download button to trigger chart download modal
+            shiny::tagAppendAttributes(
+              DownloadChartBtnUI("download_btn_line"),
+              style = "max-width: none; margin-left: 0;  align-self: auto;"
+            ),
+            br(),
+            shiny::tagAppendAttributes(
+              actionButton(
+                "copybtn_line",
+                "Copy Chart to Clipboard",
+                icon = icon("copy"),
+                class = "gov-uk-button"
               ),
-              br(),
-              shiny::tagAppendAttributes(
-                actionButton(
-                  "copybtn_line",
-                  "Copy Chart to Clipboard",
-                  icon = icon("copy"),
-                  class = "gov-uk-button"
-                ),
-                style = "max-width: none;"
-              ),
-              style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
-            )
+              style = "max-width: none;"
+            ),
+            style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
           )
         ),
         div(
@@ -171,41 +170,40 @@ ui <- bslib::page_fillable(
       bslib::nav_panel(
         title = "Bar chart",
         div(
-          class = "well",
-          style = "overflow-y: visible;",
-          div(
-            style = "display: flex; justify-content: space-between; align-items: center;",
-            bslib::card(
-              bslib::card_body(
-                ggiraph::girafeOutput("bar_chart")
-              ),
-              full_screen = TRUE,
-              style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          style = "display: flex;
+                   justify-content: space-between;
+                   align-items: center;
+                   background: white;",
+          bslib::card(
+            bslib::card_body(
+              ggiraph::girafeOutput("bar_chart")
             ),
-            div(
-              # Download button to trigger chart download modal
-              shiny::tagAppendAttributes(
-                DownloadChartBtnUI("download_btn_bar"),
-                style = "max-width: none; margin-left: 0;"
+            full_screen = TRUE,
+            style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          ),
+          div(
+            # Download button to trigger chart download modal
+            shiny::tagAppendAttributes(
+              DownloadChartBtnUI("download_btn_bar"),
+              style = "max-width: none; margin-left: 0; align-self: auto;"
+            ),
+            br(),
+            shiny::tagAppendAttributes(
+              actionButton(
+                "copybtn_bar",
+                "Copy Chart to Clipboard",
+                icon = icon("copy"),
+                class = "gov-uk-button"
               ),
-              br(),
-              shiny::tagAppendAttributes(
-                actionButton(
-                  "copybtn_bar",
-                  "Copy Chart to Clipboard",
-                  icon = icon("copy"),
-                  class = "gov-uk-button"
-                ),
-                style = "max-width: none;"
-              ),
-              style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
-            )
+              style = "max-width: none;"
+            ),
+            style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
           )
-        ),
-        div(
-          shiny::plotOutput("copy_plot_bar"),
-          style = "content-visibility: hidden;"
         )
+      ),
+      div(
+        shiny::plotOutput("copy_plot_bar"),
+        style = "content-visibility: hidden;"
       )
     )
   )
@@ -727,7 +725,7 @@ server <- function(input, output, session) {
 
   # Cleaned final table
   clean_final_table <- reactive({
-    req(nrow(query$data))
+    req(query$data)
 
     # Check if there are any selected queries
     if (nrow(query$data) == 0) {
@@ -815,7 +813,7 @@ server <- function(input, output, session) {
       clean_final_table(),
       columns = utils::modifyList(
         format_num_reactable_cols(
-          staging_table(),
+          clean_final_table(),
           get_indicator_dps(chart_filtered_bds()),
           num_exclude = c("LA Number", "Measure")
         ),
