@@ -875,6 +875,15 @@ server <- function(input, output, session) {
         ),
         na.rm = TRUE
       ) +
+      ggplot2::geom_point(
+        ggplot2::aes(
+          x = Inf,
+          y = Inf,
+          color = `LA and Regions`
+        ),
+        size = 0,
+        shape = 15
+      ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data()) +
       set_plot_labs(chart_filtered_bds()) +
@@ -884,9 +893,18 @@ server <- function(input, output, session) {
         legend.title.position = "top",
         legend.spacing.x = unit(5, "lines")
       ) +
-      guides(
-        color = ggplot2::guide_legend(ncol = 1, title = "Geographies:"),
-        linetype = ggplot2::guide_legend(ncol = 1, title = "Indicators:")
+      ggplot2::guides(
+        color = ggplot2::guide_legend(
+          order = 1,
+          ncol = 1,
+          title = "Geographies (colour):",
+          override.aes = list(size = 3, linetype = NULL)
+        ),
+        linetype = ggplot2::guide_legend(
+          order = 2,
+          ncol = 1,
+          title = "Indicators (linetype):"
+        )
       )
   })
 
