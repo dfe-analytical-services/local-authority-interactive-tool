@@ -840,7 +840,7 @@ server <- function(input, output, session) {
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
       length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "Measure")) <= 4
+      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
     )
     chart_data <- clean_final_table() |>
       dplyr::distinct() |>
@@ -977,7 +977,7 @@ server <- function(input, output, session) {
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
       length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "Measure")) <= 4
+      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
     )
 
     chart_names <- chart_filtered_bds() |>
