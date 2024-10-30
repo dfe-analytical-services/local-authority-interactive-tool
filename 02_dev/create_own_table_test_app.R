@@ -842,6 +842,19 @@ server <- function(input, output, session) {
       length(pull_uniques(clean_final_table(), "Measure")) < 4,
       length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
     )
+
+    geog_chart_order <- query$data |>
+      dplyr::distinct(`LA and Regions`) |>
+      tidyr::separate_rows(`LA and Regions`, sep = ",<br>") |>
+      dplyr::mutate(`LA and Regions` = trimws(`LA and Regions`)) |>
+      pull_uniques("LA and Regions")
+
+    indicator_chart_order <- query$data |>
+      dplyr::distinct(Indicator) |>
+      tidyr::separate_rows(Indicator, sep = ",<br>") |>
+      dplyr::mutate(Indicator = trimws(Indicator)) |>
+      pull_uniques("Indicator")
+
     chart_data <- clean_final_table() |>
       dplyr::distinct() |>
       tidyr::pivot_longer(
@@ -851,7 +864,9 @@ server <- function(input, output, session) {
       ) |>
       dplyr::mutate(
         Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
-        values_num = Values
+        values_num = Values,
+        `LA and Regions` = factor(`LA and Regions`, levels = geog_chart_order),
+        Measure = factor(Measure, levels = indicator_chart_order)
       )
     chart_data
   })
