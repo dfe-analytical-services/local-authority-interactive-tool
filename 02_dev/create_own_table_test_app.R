@@ -654,6 +654,12 @@ server <- function(input, output, session) {
 
           # Also remove the corresponding rows from query$output
           query$output <- query$output[query$output$.internal_uuid != uuid, , drop = FALSE]
+
+          # If no rows remove the years cols
+          if (nrow(query$output) == 0) {
+            query$output <- query$output |>
+              dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure)
+          }
         },
         ignoreInit = TRUE
       )
