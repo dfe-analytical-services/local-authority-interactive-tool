@@ -543,8 +543,30 @@ server <- function(input, output, session) {
     }
 
     # Output table
-    reactable::reactable(
-      staging_table()
+    dfe_reactable(
+      staging_table(),
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          staging_table(),
+          get_indicator_dps(filtered_bds()),
+          num_exclude = c("LA Number", "Measure")
+        ),
+        list(
+          set_custom_default_col_widths(
+            Measure = set_min_col_width(90)
+          ),
+          Measure = reactable::colDef(
+            html = TRUE,
+            cell = function(value, index, name) {
+              render.reactable.cell.with.tippy(text = value, tooltip = value)
+            }
+          )
+        )
+      ),
+      defaultPageSize = 3,
+      showPageSizeOptions = TRUE,
+      pageSizeOptions = c(3, 5, 10, 25),
+      compact = TRUE
     )
   })
 
@@ -634,7 +656,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    reactable::reactable(
+    dfe_reactable(
       query$data,
       columns = list(
         Indicator = html_colDef(),
@@ -667,7 +689,11 @@ server <- function(input, output, session) {
           html = TRUE
         ),
         .internal_uuid = reactable::colDef(show = FALSE)
-      )
+      ),
+      defaultPageSize = 5,
+      showPageSizeOptions = TRUE,
+      pageSizeOptions = c(5, 10, 25),
+      compact = TRUE
     )
   })
 
@@ -758,22 +784,6 @@ server <- function(input, output, session) {
       )
   })
 
-  # Download the final table --------------------------------------------------
-  Download_DataServer(
-    "table_download",
-    reactive(input$file_type),
-    reactive(clean_final_table()),
-    reactive("LAIT-create-your-own-table")
-  )
-
-
-  # Final output table (based on saved queries)
-  output$output_table <- reactable::renderReactable({
-    # Display the final query table data
-    reactable::reactable(clean_final_table())
-  })
-
-
   chart_filtered_bds <- reactive({
     output_table_filters <- clean_final_table() |>
       dplyr::distinct(
@@ -787,6 +797,43 @@ server <- function(input, output, session) {
         output_table_filters,
         by = c("LA and Regions", "Topic", "Measure")
       )
+  })
+
+  # Download the final table --------------------------------------------------
+  Download_DataServer(
+    "table_download",
+    reactive(input$file_type),
+    reactive(clean_final_table()),
+    reactive("LAIT-create-your-own-table")
+  )
+
+
+  # Final output table (based on saved queries)
+  output$output_table <- reactable::renderReactable({
+    # Display the final query table data
+    dfe_reactable(
+      clean_final_table(),
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          staging_table(),
+          get_indicator_dps(chart_filtered_bds()),
+          num_exclude = c("LA Number", "Measure")
+        ),
+        list(
+          set_custom_default_col_widths(),
+          Measure = reactable::colDef(
+            html = TRUE,
+            cell = function(value, index, name) {
+              render.reactable.cell.with.tippy(text = value, tooltip = value)
+            }
+          )
+        )
+      ),
+      defaultPageSize = 5,
+      showPageSizeOptions = TRUE,
+      pageSizeOptions = c(5, 10, 25),
+      compact = TRUE
+    )
   })
 
   chart_plotting_data <- reactive({

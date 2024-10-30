@@ -610,3 +610,15 @@ html_colDef <- function() {
     html = TRUE
   )
 }
+
+
+
+render.reactable.cell.with.tippy <- function(text, tooltip) {
+  div(
+    style = "cursor: info;
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;",
+    tippy::tippy(text = text, tooltip = tooltip)
+  )
+}
