@@ -10,13 +10,13 @@ list.files("R/", full.names = TRUE) |>
 
 
 ui <- bslib::page_fillable(
-  ## Custom CSS =============================================================
+  ## Other language dependencies ===============================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
   tags$head(htmltools::includeScript("www/custom_js.js")),
-  # Include reactable.extras in your UI
+  # Makes the remove button work
   reactable.extras::reactable_extras_dependency(),
 
-  # Tab header ==============================================================
+  # Main selections ============================================================
   h1("Create your own"),
   div(
     class = "well",
@@ -91,6 +91,8 @@ ui <- bslib::page_fillable(
     # Action button
     shiny::actionButton("add_query", "Add selections", class = "gov-uk-button")
   ),
+
+  # Staging table ==============================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -99,6 +101,8 @@ ui <- bslib::page_fillable(
       reactable::reactableOutput("staging_table")
     )
   ),
+
+  # Selections table ===========================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -107,6 +111,8 @@ ui <- bslib::page_fillable(
       reactable::reactableOutput("query_table")
     )
   ),
+
+  # Output data table ==========================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -123,11 +129,15 @@ ui <- bslib::page_fillable(
       )
     )
   ),
+
+  # Charts =====================================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
     h3("Output Charts (Charts showing data from saved selections)"),
     p("Note a maximum of 4 geographies and 3 indicators can be shown."),
+
+    # Line chart ---------------------------------------------------------------
     bslib::navset_tab(
       bslib::nav_panel(
         title = "Line chart",
@@ -167,6 +177,8 @@ ui <- bslib::page_fillable(
           style = "content-visibility: hidden;"
         )
       ),
+
+      # Bar chart --------------------------------------------------------------
       bslib::nav_panel(
         title = "Bar chart",
         div(
@@ -211,15 +223,9 @@ ui <- bslib::page_fillable(
 
 
 server <- function(input, output, session) {
-  # Input ----------------------------------
-  # Reactive to store all selected indicators along with their topics
-  selected_indicators <- reactiveVal({
-    data.frame(
-      Topic = character(),
-      Measure = character()
-    )
-  })
+  # Dynamic input choices ======================================================
 
+  # Year range -----------------------------------------------------------------
   # Reactive expression to compute years_choices based on selected indicator
   years_choices <- reactive({
     # Filter the bds_metrics dataset based on the selected indicator
@@ -239,9 +245,8 @@ server <- function(input, output, session) {
     }
   })
 
-  # Observe changes in the selected indicator and update pickerInput
+  # Update the year range choices based on the selected indicator
   observeEvent(input$indicator, {
-    # Update the pickerInput choices with the filtered years
     shinyWidgets::updatePickerInput(
       session = session,
       inputId = "year_range",
@@ -255,7 +260,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # Initialize the picker input with "Select an indicator" when the app starts
+  # When no indicators selected year range displays "Select an indicator"
   observe({
     if (is.null(input$indicator) || length(input$indicator) == 0) {
       shinyWidgets::updatePickerInput(
@@ -267,6 +272,16 @@ server <- function(input, output, session) {
         )
       )
     }
+  })
+
+
+  # Geography and Indicator inputs ---------------------------------------------
+  # Reactive to store all selected indicators along with their topics
+  selected_indicators <- reactiveVal({
+    data.frame(
+      Topic = character(),
+      Measure = character()
+    )
   })
 
   # Filter indicator choices based on the selected topic
@@ -320,7 +335,8 @@ server <- function(input, output, session) {
     ignoreNULL = FALSE
   )
 
-  # Reactive to handle geography user input choices
+  # Collating user selections ==================================================
+  # Geography inputs -----------------------------------------------------------
   geog_inputs <- reactive({
     # Value from LA & Region input
     inputs <- input$geog_input
@@ -360,6 +376,7 @@ server <- function(input, output, session) {
     unique(inputs)
   })
 
+  # Statistical neighbour input ------------------------------------------------
   # Assign LA statistical neighbours their selected LA association
   stat_n_association <- reactive({
     association_table <- data.frame(
@@ -392,6 +409,7 @@ server <- function(input, output, session) {
   })
 
 
+  # Staging table ==============================================================
   # Filter BDS for topic and indicator duos in selected values reactive
   # and geographies
   filtered_bds <- reactive({
@@ -440,29 +458,6 @@ server <- function(input, output, session) {
     # Return the filtered data with the associated LA column
     bds_filtered
   })
-
-
-  # Reactive value "query" used to store query data
-  # Uses lists to store multiple inputs (geographies)
-  query <- reactiveValues(
-    data = data.frame(
-      Topic = I(list()),
-      Indicator = I(list()),
-      `LA and Regions` = I(list()),
-      `Year range` = I(list()),
-      `Click to remove query` = character(),
-      `.internal_uuid` = numeric(),
-      check.names = FALSE
-    ),
-    output = data.frame(
-      `LA Number` = character(),
-      `LA and Regions` = character(),
-      Region = character(),
-      Topic = character(),
-      Measure = character(),
-      check.names = FALSE
-    )
-  )
 
   # Build the staging table (select data and make wide)
   staging_table <- reactive({
@@ -514,7 +509,7 @@ server <- function(input, output, session) {
     wide_table_ordered
   })
 
-  # Staging table output
+  # Staging table output -------------------------------------------------------
   output$staging_table <- reactable::renderReactable({
     # Display messages if there are incorrect selections
     if (is.null(geog_inputs()) && is.null(input$geog_input)) {
@@ -567,6 +562,29 @@ server <- function(input, output, session) {
       compact = TRUE
     )
   })
+
+  # Selection (query) table ====================================================
+  # Reactive value "query" used to store query data
+  # Uses lists to store multiple inputs (geographies)
+  query <- reactiveValues(
+    data = data.frame(
+      Topic = I(list()),
+      Indicator = I(list()),
+      `LA and Regions` = I(list()),
+      `Year range` = I(list()),
+      `Click to remove query` = character(),
+      `.internal_uuid` = numeric(),
+      check.names = FALSE
+    ),
+    output = data.frame(
+      `LA Number` = character(),
+      `LA and Regions` = character(),
+      Region = character(),
+      Topic = character(),
+      Measure = character(),
+      check.names = FALSE
+    )
+  )
 
   # When "Add table" button clicked - add query to saved queries
   observeEvent(input$add_query, {
@@ -640,7 +658,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # Query table output
+  # Query table output ---------------------------------------------------------
   output$query_table <- reactable::renderReactable({
     req(nrow(query$data))
 
@@ -723,6 +741,7 @@ server <- function(input, output, session) {
     })
   })
 
+  # Output data table ==========================================================
   # Cleaned final table
   clean_final_table <- reactive({
     req(query$data)
@@ -746,8 +765,6 @@ server <- function(input, output, session) {
         !is.na(Years)
       ) |>
       check_year_suffix_consistency()
-
-
 
     if (share_year_suffix) {
       years_dict <- bds_metrics |>
@@ -797,7 +814,7 @@ server <- function(input, output, session) {
       )
   })
 
-  # Download the final table --------------------------------------------------
+  # Download the output table --------------------------------------------------
   Download_DataServer(
     "table_download",
     reactive(input$file_type),
@@ -805,8 +822,7 @@ server <- function(input, output, session) {
     reactive("LAIT-create-your-own-table")
   )
 
-
-  # Final output table (based on saved queries)
+  # Final output table (based on saved queries) --------------------------------
   output$output_table <- reactable::renderReactable({
     # Display the final query table data
     dfe_reactable(
@@ -834,6 +850,8 @@ server <- function(input, output, session) {
     )
   })
 
+  # Charts =====================================================================
+  # Create chart data ----------------------------------------------------------
   chart_plotting_data <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
@@ -877,6 +895,7 @@ server <- function(input, output, session) {
     length(pull_uniques(clean_final_table(), "LA and Regions"))
   })
 
+  # Line chart -----------------------------------------------------------------
   # Build main static plot
   line_chart <- reactive({
     req(
@@ -965,7 +984,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # LA Level line chart plot ------------------------------------------------
+  # Line chart plot output -----------------------------------------------------
   output$line_chart <- ggiraph::renderGirafe({
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
@@ -1009,10 +1028,11 @@ server <- function(input, output, session) {
     }
   })
 
+  # Line chart download --------------------------------------------------------
   # Initialize server logic for download button and modal
   DownloadChartBtnServer("download_btn_line", "line", "Line")
 
-  # Set up the download handlers for the chart -------------------------------
+  # Set up the download handlers for the chart
   Download_DataServer(
     "line-chart_download",
     reactive(input$`line-file_type`),
@@ -1030,7 +1050,8 @@ server <- function(input, output, session) {
     height = 12 * 96
   )
 
-  # Build main bar static plot ------------------------------------------------
+  # Bar chart -----------------------------------------------------------------
+  # Build main bar static plot
   bar_chart <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
@@ -1115,7 +1136,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # LA Level bar chart plot -------------------------------------------------
+  # Bar chart plot output ------------------------------------------------------
   output$bar_chart <- ggiraph::renderGirafe({
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
@@ -1159,10 +1180,11 @@ server <- function(input, output, session) {
     }
   })
 
+  # Bar chart download ---------------------------------------------------------
   # Initialize server logic for download button and modal
   DownloadChartBtnServer("download_btn_bar", "bar", "Bar")
 
-  # Set up the download handlers for the chart -------------------------------
+  # Set up the download handlers for the chart
   Download_DataServer(
     "bar-chart_download",
     reactive(input$`bar-file_type`),
