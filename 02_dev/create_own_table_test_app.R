@@ -827,13 +827,11 @@ server <- function(input, output, session) {
       )
   })
 
-  chart_filtered_bds <- reactive({
+  # Filtering BDS for all topic-indicator pairs in the final output table
+  # (The filtered_bds only has the staging topic-indicator pairs)
+  final_filtered_bds <- reactive({
     output_table_filters <- clean_final_table() |>
-      dplyr::distinct(
-        `LA and Regions`,
-        Topic,
-        Measure
-      )
+      dplyr::distinct(`LA and Regions`, Topic, Measure)
 
     bds_metrics |>
       dplyr::semi_join(
@@ -853,12 +851,14 @@ server <- function(input, output, session) {
   # Final output table (based on saved queries) --------------------------------
   output$output_table <- reactable::renderReactable({
     # Display the final query table data
+    # Format numeric cols (using dps based of output table indicators),
+    # Truncate measure with hover and page settings
     dfe_reactable(
       clean_final_table(),
       columns = utils::modifyList(
         format_num_reactable_cols(
           clean_final_table(),
-          get_indicator_dps(chart_filtered_bds()),
+          get_indicator_dps(final_filtered_bds()),
           num_exclude = c("LA Number", "Measure")
         ),
         list(
@@ -961,7 +961,7 @@ server <- function(input, output, session) {
       ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data()) +
-      set_plot_labs(chart_filtered_bds()) +
+      set_plot_labs(final_filtered_bds()) +
       custom_theme() +
       ggplot2::theme(
         legend.title = ggplot2::element_text(),
@@ -995,7 +995,7 @@ server <- function(input, output, session) {
       get_years(chart_plotting_data()),
       tooltip_vlines,
       chart_plotting_data(),
-      get_indicator_dps(chart_filtered_bds()),
+      get_indicator_dps(final_filtered_bds()),
       TRUE
     )
 
@@ -1087,7 +1087,7 @@ server <- function(input, output, session) {
       number_of_geogs() <= 4
     )
 
-    chart_names <- chart_filtered_bds() |>
+    chart_names <- final_filtered_bds() |>
       dplyr::distinct(Measure, Chart_title)
 
     chart_names_wrapped <- chart_names |>
@@ -1115,7 +1115,7 @@ server <- function(input, output, session) {
             chart_plotting_data() |>
               pretty_num_table(
                 include_columns = "values_num",
-                dp = get_indicator_dps(chart_filtered_bds())
+                dp = get_indicator_dps(final_filtered_bds())
               ),
             "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
           )
@@ -1127,7 +1127,7 @@ server <- function(input, output, session) {
       ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data(), "fill") +
-      set_plot_labs(chart_filtered_bds()) +
+      set_plot_labs(final_filtered_bds()) +
       custom_theme() +
       ggplot2::theme(
         legend.title = ggplot2::element_text(),
