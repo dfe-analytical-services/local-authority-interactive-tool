@@ -968,7 +968,7 @@ server <- function(input, output, session) {
   output$line_chart <- ggiraph::renderGirafe({
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(),
+        ggobj = display_no_data_plot("No plot as not enough selections made"),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -978,11 +978,23 @@ server <- function(input, output, session) {
         fonts = list(sans = "Arial")
       )
     } else if (
-      number_of_indicators() > 3 ||
-        number_of_geogs() > 4
+      number_of_geogs() > 4
     ) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(),
+        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected"),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    } else if (
+      number_of_indicators() > 3
+    ) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected"),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1107,7 +1119,7 @@ server <- function(input, output, session) {
   output$bar_chart <- ggiraph::renderGirafe({
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(),
+        ggobj = display_no_data_plot("No plot as not enough selections made"),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1117,11 +1129,23 @@ server <- function(input, output, session) {
         fonts = list(sans = "Arial")
       )
     } else if (
-      number_of_indicators() > 3 ||
-        number_of_geogs() > 4
+      number_of_geogs() > 4
     ) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(),
+        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected"),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    } else if (
+      number_of_indicators() > 3
+    ) {
+      ggiraph::girafe(
+        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected"),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(

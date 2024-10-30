@@ -738,14 +738,15 @@ manual_colour_mapping <- function(chart_groups, type) {
   }
 }
 
-display_no_data_plot <- function() {
+display_no_data_plot <- function(label = "No plot due to no available data.") {
   error_plot <- ggplot() +
     annotate(
       "text",
       x = 0.5,
       y = 0.5, # Position at the center of the plot
       label = paste0(
-        "No plot due to no available data.\n",
+        label,
+        "\n",
         "If you think this is incorrect, ",
         "please report so in the feedback form."
       ),
