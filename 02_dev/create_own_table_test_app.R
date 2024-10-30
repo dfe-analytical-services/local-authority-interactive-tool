@@ -12,6 +12,7 @@ list.files("R/", full.names = TRUE) |>
 ui <- bslib::page_fillable(
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+  tags$head(htmltools::includeScript("www/custom_js.js")),
   # Include reactable.extras in your UI
   reactable.extras::reactable_extras_dependency(),
 
@@ -156,6 +157,10 @@ ui <- bslib::page_fillable(
             style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
           )
         )
+      ),
+      div(
+        shiny::plotOutput("copy_plot_line"),
+        style = "content-visibility: hidden;"
       )
     ),
     bslib::nav_panel(
@@ -857,17 +862,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # Initialize server logic for download button and modal
-  DownloadChartBtnServer("download_btn_line", "line", "Line")
-
-  # Set up the download handlers for the chart -------------------------------
-  Download_DataServer(
-    "line-chart_download",
-    reactive(input$`line-file_type`),
-    reactive(list("svg" = line_chart(), "html" = interactive_line_chart())),
-    reactive(c("LAIT-create-your-own-line-chart"))
-  )
-
   # LA Level line chart plot ------------------------------------------------
   output$line_chart <- ggiraph::renderGirafe({
     if ("Message from tool" %in% colnames(clean_final_table())) {
@@ -900,6 +894,26 @@ server <- function(input, output, session) {
     }
   })
 
+  # Initialize server logic for download button and modal
+  DownloadChartBtnServer("download_btn_line", "line", "Line")
+
+  # Set up the download handlers for the chart -------------------------------
+  Download_DataServer(
+    "line-chart_download",
+    reactive(input$`line-file_type`),
+    reactive(list("svg" = line_chart(), "html" = interactive_line_chart())),
+    reactive(c("LAIT-create-your-own-line-chart"))
+  )
+
+  # Plot used for copy to clipboard
+  output$copy_plot_line <- shiny::renderPlot(
+    {
+      line_chart()
+    },
+    res = 200,
+    width = 24 * 96,
+    height = 12 * 96
+  )
 
   # Build main bar static plot ------------------------------------------------
   bar_chart <- reactive({

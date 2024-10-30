@@ -43,4 +43,9 @@ $(document).ready(function () {
   $("#stat_n_multi_line-copybtn").on("click", async () => {
     await copyImage("stat_n_multi_line-copybtn", "stat_n_multi_line-copy_plot");
   });
+
+  // Event listener for "Create your own line chart"
+  $("#copybtn_line").on("click", async () => {
+    await copyImage("copybtn_line", "copy_plot_line");
+  });
 });
