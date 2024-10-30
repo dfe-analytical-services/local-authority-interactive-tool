@@ -48,4 +48,9 @@ $(document).ready(function () {
   $("#copybtn_line").on("click", async () => {
     await copyImage("copybtn_line", "copy_plot_line");
   });
+
+  // Event listener for "Create your own bar chart"
+  $("#copybtn_bar").on("click", async () => {
+    await copyImage("copybtn_bar", "copy_plot_bar");
+  });
 });
