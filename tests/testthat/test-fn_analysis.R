@@ -423,7 +423,7 @@ test_that("6. filter_la_data_all_la returns empty result with an empty data fram
   expect_true(nrow(result_empty) == 0)
 })
 
-#filter_region_data_all_la--------------------
+# filter_region_data_all_la--------------------
 
 # Sample data for testing
 data_all_la <- data.frame(
@@ -486,8 +486,10 @@ test_that("5. filter_region_data_all_la retains all rows when la_names has no ma
   expected_result <- data_all_la |>
     dplyr::mutate(Rank = "") |>
     dplyr::arrange(`LA Number`) |>
-    dplyr::filter(`LA and Regions` != "London (Inner)",
-           `LA and Regions` != "London (Outer)")
+    dplyr::filter(
+      `LA and Regions` != "London (Inner)",
+      `LA and Regions` != "London (Outer)"
+    )
   result <- filter_region_data_all_la(data_all_la, la_names)
   expect_equal(result, expected_result)
 })
@@ -499,4 +501,3 @@ test_that("6. filter_region_data_all_la returns empty data frame when input is e
   result <- filter_region_data_all_la(empty_data, la_names)
   expect_true(nrow(result) == 0)
 })
-
