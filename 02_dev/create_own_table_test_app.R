@@ -140,13 +140,13 @@ ui <- bslib::page_fillable(
           div(
             # Download button to trigger chart download modal
             shiny::tagAppendAttributes(
-              DownloadChartBtnUI("download_btn"),
+              DownloadChartBtnUI("download_btn_line"),
               style = "max-width: none; margin-left: 0;"
             ),
             br(),
             shiny::tagAppendAttributes(
               actionButton(
-                "copybtn",
+                "copybtn_line",
                 "Copy Chart to Clipboard",
                 icon = icon("copy"),
                 class = "gov-uk-button"
@@ -171,6 +171,24 @@ ui <- bslib::page_fillable(
             ),
             full_screen = TRUE,
             style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+          ),
+          div(
+            # Download button to trigger chart download modal
+            shiny::tagAppendAttributes(
+              DownloadChartBtnUI("download_btn_bar"),
+              style = "max-width: none; margin-left: 0;"
+            ),
+            br(),
+            shiny::tagAppendAttributes(
+              actionButton(
+                "copybtn_bar",
+                "Copy Chart to Clipboard",
+                icon = icon("copy"),
+                class = "gov-uk-button"
+              ),
+              style = "max-width: none;"
+            ),
+            style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
           )
         )
       )
@@ -840,7 +858,7 @@ server <- function(input, output, session) {
   })
 
   # Initialize server logic for download button and modal
-  DownloadChartBtnServer("download_btn", "line", "Line")
+  DownloadChartBtnServer("download_btn_line", "line", "Line")
 
   # Set up the download handlers for the chart -------------------------------
   Download_DataServer(
@@ -1000,6 +1018,17 @@ server <- function(input, output, session) {
       interactive_bar_chart()
     }
   })
+
+  # Initialize server logic for download button and modal
+  DownloadChartBtnServer("download_btn_bar", "bar", "Bar")
+
+  # Set up the download handlers for the chart -------------------------------
+  Download_DataServer(
+    "bar-chart_download",
+    reactive(input$`bar-file_type`),
+    reactive(list("svg" = bar_chart(), "html" = interactive_bar_chart())),
+    reactive(c("LAIT-create-your-own-bar-chart"))
+  )
 }
 
 shinyApp(ui, server)
