@@ -1,14 +1,14 @@
-# Load global
+# Load global ==================================================================
 source(here::here("global.R"))
 
-# Load functions
+# Load functions ===============================================================
 list.files("R/", full.names = TRUE) |>
   (\(x) {
     x[grepl("fn_", x)]
   })() |>
   purrr::walk(source)
 
-
+# UI ===========================================================================
 ui <- bslib::page_fillable(
   ## Other language dependencies ===============================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
@@ -21,8 +21,6 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible; padding: 1rem;",
-
-    # Using layout_column_wrap for responsive design
     bslib::layout_column_wrap(
       # Geographic input
       div(
@@ -74,6 +72,7 @@ ui <- bslib::page_fillable(
         selected = NULL,
         inline = FALSE
       ),
+      # Other groupings
       div(
         style = "width: fit-content;",
         shiny::p("Other groupings:"),
@@ -88,7 +87,7 @@ ui <- bslib::page_fillable(
       )
     ),
     shiny::br(),
-    # Action button
+    # Add selections button
     shiny::actionButton("add_query", "Add selections", class = "gov-uk-button")
   ),
 
@@ -122,6 +121,7 @@ ui <- bslib::page_fillable(
         title = "Output Table",
         reactable::reactableOutput("output_table")
       ),
+      # Download tab
       bslib::nav_panel(
         title = "Download",
         file_type_input_btn("file_type"),
@@ -141,6 +141,7 @@ ui <- bslib::page_fillable(
     bslib::navset_tab(
       bslib::nav_panel(
         title = "Line chart",
+        # Line chart plot with download buttons
         div(
           style = "display: flex;
                    justify-content: space-between;
@@ -172,6 +173,7 @@ ui <- bslib::page_fillable(
             style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
           )
         ),
+        # Hidden static plot for copy-to-clipboard
         div(
           shiny::plotOutput("copy_plot_line"),
           style = "content-visibility: hidden;"
@@ -181,6 +183,7 @@ ui <- bslib::page_fillable(
       # Bar chart --------------------------------------------------------------
       bslib::nav_panel(
         title = "Bar chart",
+        # Line chart plot with download buttons
         div(
           style = "display: flex;
                    justify-content: space-between;
@@ -213,6 +216,7 @@ ui <- bslib::page_fillable(
           )
         )
       ),
+      # Hidden static plot for copy-to-clipboard
       div(
         shiny::plotOutput("copy_plot_bar"),
         style = "content-visibility: hidden;"
@@ -224,18 +228,19 @@ ui <- bslib::page_fillable(
 
 server <- function(input, output, session) {
   # Dynamic input choices ======================================================
-
   # Year range -----------------------------------------------------------------
-  # Reactive expression to compute years_choices based on selected indicator
+  # Compute years choices available based on selected indicator
   years_choices <- reactive({
-    # Filter the bds_metrics dataset based on the selected indicator
+    # Get distinct years
     years_dict <- bds_metrics |>
       dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
       dplyr::distinct(Years, Years_num)
 
+    # Boolean for matching years' suffixes
     consistent_year_suffix <- years_dict |>
       check_year_suffix_consistency()
 
+    # Display string years if matching suffix (numeric/clean if not)
     if (consistent_year_suffix) {
       years_dict$Years |>
         sort()
@@ -286,18 +291,19 @@ server <- function(input, output, session) {
 
   # Filter indicator choices based on the selected topic
   shiny::observeEvent(input$topic_input, {
+    # Available indicators (based on topic chosen)
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(Topic %in% input$topic_input) |>
-      dplyr::select(Topic, Measure) # Select both Topic and Measure
+      dplyr::select(Topic, Measure)
 
-    # Get the currently selected indicators
+    # Get the currently selected topic-indicator pairs
     current_selection <- selected_indicators()
 
-    # Combine currently selected indicators with the new filtered ones
+    # Combine currently selected topic-indicator pairs with the new filtered ones
     combined_choices <- unique(rbind(current_selection, filtered_topic_bds))
 
     # Update the choices with new topic whilst retaining the
-    # already selected measures
+    # already selected indicators
     shiny::updateSelectizeInput(
       session = session,
       inputId = "indicator",
@@ -306,11 +312,11 @@ server <- function(input, output, session) {
     )
   })
 
-  # Update the selected values reactive for selected indicators
+  # Update the selected_indicators reactive for newly selected topic-indicator pairs
   # This keeps selection consistent across topics
   shiny::observeEvent(input$indicator,
     {
-      # Get the current topic-filtered measures
+      # Get the new topic-indicator pairs
       current_filtered <- bds_metrics |>
         dplyr::filter(
           Topic %in% input$topic_input,
@@ -321,15 +327,15 @@ server <- function(input, output, session) {
       # Get previously selected indicators
       previous_selection <- selected_indicators()
 
-      # Remove any indicators that have been deselected
+      # Remove any topic-indicator pairs that have been deselected
       deselected_measures <- setdiff(previous_selection$Measure, input$indicator)
       updated_selection <- previous_selection |>
         dplyr::filter(!Measure %in% deselected_measures)
 
-      # Combine the current filtered selection with the previous selection
+      # Combine the new topic-indicator pairs with the previous selections
       combined_selection <- unique(rbind(updated_selection, current_filtered))
 
-      # Update the reactive value for all selected indicators
+      # Update the reactive value for all topic-indicator pairs
       selected_indicators(combined_selection)
     },
     ignoreNULL = FALSE
@@ -341,7 +347,7 @@ server <- function(input, output, session) {
     # Value from LA & Region input
     inputs <- input$geog_input
 
-    # Add geography groupings
+    # Add geography groupings (if selected)
     # All LAs
     if (isTRUE(input$la_groups == "all_las")) {
       inputs <- unique(c(inputs, la_names_bds))
@@ -379,21 +385,23 @@ server <- function(input, output, session) {
   # Statistical neighbour input ------------------------------------------------
   # Assign LA statistical neighbours their selected LA association
   stat_n_association <- reactive({
+    # Create mini association df of SN LAs and their parent SN LA
     association_table <- data.frame(
       `LA and Regions` = character(),
-      `sn_group` = character(),
+      `sn_parent` = character(),
       check.names = FALSE
     )
 
-    # Create mini df of sns and selected LAs
+    # If SN selected fill out the above SN association df
     if (isTRUE(input$la_groups == "la_stat_ns")) {
-      # Get LAs
+      # Get LAs from geogs selected
       input_las <- intersect(input$geog_input, la_names_bds)
-      # Build association df
+
+      # Build association df (include LA itself too)
       stat_n_groups <- lapply(input_las, function(la) {
         data.frame(
           `LA and Regions` = c(la, get_la_stat_neighbrs(stat_n_la, la)),
-          `sn_group` = la,
+          `sn_parent` = la,
           check.names = FALSE
         )
       })
@@ -410,13 +418,13 @@ server <- function(input, output, session) {
 
 
   # Staging table ==============================================================
-  # Filter BDS for topic and indicator duos in selected values reactive
-  # and geographies
+  # Filter BDS for geographies and
+  # topic-indicator pairs in the selected_values reactive
   filtered_bds <- reactive({
     req(input$topic_input, input$indicator)
     req(nrow(selected_indicators()) > 0)
 
-    # Filter the bds_metrics by topic, measure, and geography
+    # Filter the bds_metrics by topic, indicator, and geography
     bds_filtered <- bds_metrics |>
       dplyr::semi_join(
         selected_indicators(),
@@ -430,10 +438,11 @@ server <- function(input, output, session) {
         !is.na(Years)
       )
 
+    # Cleaning Years
     # Check if all years have consistent suffix
     consistent_str_years <- check_year_suffix_consistency(bds_filtered)
 
-    # If more than one indicator and not consistent cols use the cleaned cols
+    # If not consistent suffix use the cleaned year cols (numeric years)
     if (!consistent_str_years) {
       bds_filtered <- bds_filtered |>
         dplyr::mutate(
@@ -441,7 +450,8 @@ server <- function(input, output, session) {
         )
     }
 
-    # Filter years
+    # Apply the year range filter
+    # If only one year selected then show just that year
     if (length(input$year_range) == 1) {
       bds_filtered <- bds_filtered |>
         dplyr::filter(
@@ -455,12 +465,15 @@ server <- function(input, output, session) {
         )
     }
 
-    # Return the filtered data with the associated LA column
+    # Return the user selection filtered data for staging table
     bds_filtered
   })
 
-  # Build the staging table (select data and make wide)
+  # Build the staging table
   staging_table <- reactive({
+    # Selected relevant cols
+    # Coerce to wide format
+    # Join region col (set regions and England as themselves for Region)
     wide_table <- filtered_bds() |>
       dplyr::select(
         `LA Number`, `LA and Regions`, Topic,
@@ -471,19 +484,17 @@ server <- function(input, output, session) {
         names_from = Years,
         values_from = values_num,
       ) |>
-      # Join region col
       dplyr::left_join(
         stat_n_geog |>
           dplyr::select(`LA num`, GOReg),
         by = c("LA Number" = "LA num")
       ) |>
-      # Set regions and England as themselves for Region
       dplyr::mutate(GOReg = dplyr::case_when(
         `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
         TRUE ~ GOReg
       ))
 
-    # Order columns (sort years)
+    # Order columns (and sort year cols order)
     wide_table_ordered <- wide_table |>
       dplyr::select(
         `LA Number`, `LA and Regions`,
@@ -493,7 +504,7 @@ server <- function(input, output, session) {
       )
 
 
-    # If sns included, add sns LA association column
+    # If SNs included, add SN LA association column
     # Multi-join as want to include an association for every row (even duplicates)
     if (isTRUE(input$la_groups == "la_stat_ns")) {
       wide_table_ordered <- wide_table_ordered |>
@@ -502,10 +513,11 @@ server <- function(input, output, session) {
           by = "LA and Regions",
           relationship = "many-to-many"
         ) |>
-        dplyr::relocate(sn_group, .after = "Measure") |>
-        dplyr::rename("Statistical Neighbour Group" = "sn_group")
+        dplyr::relocate(sn_parent, .after = "Measure") |>
+        dplyr::rename("Statistical Neighbour Group" = "sn_parent")
     }
 
+    # Staging table formatted and ready for output
     wide_table_ordered
   })
 
@@ -535,7 +547,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # Output table
+    # Output table - formatting numbers, long text and page settings
     dfe_reactable(
       staging_table(),
       columns = utils::modifyList(
@@ -548,6 +560,7 @@ server <- function(input, output, session) {
           set_custom_default_col_widths(
             Measure = set_min_col_width(90)
           ),
+          # Truncates long cell values and displays hover with full value
           Measure = reactable::colDef(
             html = TRUE,
             cell = function(value, index, name) {
@@ -565,7 +578,7 @@ server <- function(input, output, session) {
 
   # Selection (query) table ====================================================
   # Reactive value "query" used to store query data
-  # Uses lists to store multiple inputs (geographies)
+  # Uses lists to store multiple inputs (Geographies & Indicators)
   query <- reactiveValues(
     data = data.frame(
       Topic = I(list()),
@@ -573,7 +586,7 @@ server <- function(input, output, session) {
       `LA and Regions` = I(list()),
       `Year range` = I(list()),
       `Click to remove query` = character(),
-      `.internal_uuid` = numeric(),
+      `.query_id` = numeric(),
       check.names = FALSE
     ),
     output = data.frame(
@@ -589,72 +602,78 @@ server <- function(input, output, session) {
   # When "Add table" button clicked - add query to saved queries
   observeEvent(input$add_query, {
     # Check if anything selected
-    if (length(geog_inputs()) > 0 && nrow(selected_indicators()) > 0) {
-      # Get a unique identifier for this new query (UUID)
-      new_uuid <- max(c(0, query$data$.internal_uuid), na.rm = TRUE) + 1
+    req(length(geog_inputs()) > 0 && nrow(selected_indicators()) > 0)
 
-      # Get the full range of available years from the reactive expression
-      available_years <- range(years_choices())
+    # Create a unique identifier for the new query (current no of queries + 1)
+    new_q_id <- max(c(0, query$data$.query_id), na.rm = TRUE) + 1
 
-      # Define the year range display logic
-      year_range_display <- dplyr::case_when(
-        length(input$year_range) == 0 ~ paste0(
-          "All years (", available_years[1], " to ", available_years[2], ")"
-        ),
-        length(input$year_range) == 2 ~ paste(
-          input$year_range[1], "to", input$year_range[2]
-        ),
-        length(input$year_range) == 1 ~ paste0("", input$year_range[1])
+    # Creating year range info
+    # Get the range of available years
+    available_years <- range(years_choices())
+
+    # Define the year range info logic
+    # None selected - all years - "All years (x to y)"
+    # Range selected - "x to y"
+    # One year selected - "x"
+    year_range_display <- dplyr::case_when(
+      length(input$year_range) == 0 ~ paste0(
+        "All years (", available_years[1], " to ", available_years[2], ")"
+      ),
+      length(input$year_range) == 2 ~ paste(
+        input$year_range[1], "to", input$year_range[2]
+      ),
+      length(input$year_range) == 1 ~ paste0("", input$year_range[1])
+    )
+
+    # Create query information
+    # Split multiple input choices with commas and line breaks
+    # (indicator x, indicator y)
+    # Assign the new query ID, selected topic-indicator pairs,
+    # create the geog selections (special formatting  for groupings),
+    # year range (with logic from above) and the remove col
+    new_query <- data.frame(
+      .query_id = new_q_id,
+      Topic = I(list(selected_indicators()$Topic)),
+      Indicator = paste(selected_indicators()$Measure, collapse = ",<br>"),
+      `LA and Regions` = paste(
+        get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog),
+        collapse = ",<br>"
+      ),
+      `Year range` = year_range_display,
+      `Click to remove query` = "Remove",
+      check.names = FALSE
+    )
+
+    # Append new query to the existing queries
+    query$data <- query$data |>
+      rbind(new_query)
+
+    # Appending the data of the new query to the output table
+    # Adding new query ID to staging data
+    # (so remove button also removes relevant data from output table)
+    staging_to_append <- staging_table()
+    staging_to_append$.query_id <- new_q_id
+
+    # Comparing staging table and output table year cols
+    # This checks if suffixes are consistent across the 2 dfs
+    # (Pulls the suffixes from both)
+    consistent_staging_final_yrs <- data.frame(
+      Years = c(
+        colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
+        colnames(staging_to_append)[grepl("^\\d{4}", colnames(staging_to_append))]
       )
+    ) |>
+      check_year_suffix_consistency()
 
-      # Get query information
-      # Format with commas and line breaks
-      new_query <- data.frame(
-        .internal_uuid = new_uuid, # Assign the new UUID to the query
-        Topic = I(list(selected_indicators()$Topic)),
-        Indicator = paste(selected_indicators()$Measure, collapse = ",<br>"),
-        `LA and Regions` = paste(
-          get_geog_selection(input, la_names_bds, region_names_bds, stat_n_geog),
-          collapse = ",<br>"
-        ),
-        `Year range` = year_range_display,
-        `Click to remove query` = "Remove",
-        check.names = FALSE
-      )
-
-      # Append query to existing query data
-      query$data <- query$data |>
-        rbind(new_query)
-
-      # Append the corresponding staging table data with the same .internal_uuid
-      staging_data <- staging_table()
-      staging_data$.internal_uuid <- new_uuid # Assign the same UUID to staging data
-
-      # If more than one indicator and not consistent cols use the cleaned cols
-      # Check if all years have consistent suffix
-      consistent_staging_final_yrs <- data.frame(
-        Years = c(
-          colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
-          colnames(staging_data)[grepl("^\\d{4}", colnames(staging_data))]
-        )
-      ) |>
-        check_year_suffix_consistency()
-
-      staging_indicators <- query$data |>
-        pull_uniques("Indicator")
-      final_table_indicators <- query$output |>
-        pull_uniques("Measure")
-      total_unique_indicators <- unique(c(staging_indicators, final_table_indicators)) |>
-        length()
-
-      if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
-        query$output <- query$output |>
-          rename_columns_with_year() |>
-          dplyr::bind_rows(rename_columns_with_year(staging_data))
-      } else {
-        query$output <- query$output |>
-          dplyr::bind_rows(staging_data)
-      }
+    # If not consistent suffixes then clean both dfs year cols
+    # Otherwise add the suffi years
+    if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
+      query$output <- query$output |>
+        rename_columns_with_year() |>
+        dplyr::bind_rows(rename_columns_with_year(staging_to_append))
+    } else {
+      query$output <- query$output |>
+        dplyr::bind_rows(staging_to_append)
     }
   })
 
@@ -662,7 +681,7 @@ server <- function(input, output, session) {
   output$query_table <- reactable::renderReactable({
     req(nrow(query$data))
 
-    # Check if there are any selected queries
+    # Display messages if there are no saved selections
     if (nrow(query$data) == 0) {
       return(reactable::reactable(
         data.frame(
@@ -672,6 +691,9 @@ server <- function(input, output, session) {
       ))
     }
 
+    # Output table - Allow html (for <br>),
+    # add the JS from reactable.extras::button_extra() for remove button
+    # Show only unique topics and remove the query ID col
     dfe_reactable(
       query$data,
       columns = list(
@@ -680,11 +702,11 @@ server <- function(input, output, session) {
         `Click to remove query` = reactable::colDef(
           cell = reactable::JS(
             "function(cellInfo) {
-            const buttonId = 'remove_' + cellInfo.row['.internal_uuid'];
+            const buttonId = 'remove_' + cellInfo.row['.query_id'];
             return React.createElement(ButtonExtras, {
               id: buttonId,
               label: 'Remove',
-              uuid: cellInfo.row['.internal_uuid'],
+              uuid: cellInfo.row['.query_id'],
               column: cellInfo.column.id,
               class: 'govuk-button--warning',
               className: 'govuk-button--warning'
@@ -704,7 +726,7 @@ server <- function(input, output, session) {
           },
           html = TRUE
         ),
-        .internal_uuid = reactable::colDef(show = FALSE)
+        .query_id = reactable::colDef(show = FALSE)
       ),
       defaultPageSize = 5,
       showPageSizeOptions = TRUE,
@@ -716,21 +738,24 @@ server <- function(input, output, session) {
   # Remove query button
   observe({
     req(nrow(query$data))
-    # Create button observers for each row using the unique row identifier
-    lapply(query$data$.internal_uuid, function(uuid) {
-      # Create matching row identifier for each remove button
-      remove_button_id <- paste0("remove_", uuid)
+
+    # Create button observers for each row using the query ID
+    lapply(query$data$.query_id, function(q_id) {
+      # Create matching query ID for each remove button
+      remove_button_id <- paste0("remove_", q_id)
 
       # Observe the button click
       observeEvent(input[[remove_button_id]],
         {
-          # Remove the corresponding row from query$data using the row identifier
-          query$data <- query$data[query$data$.internal_uuid != uuid, , drop = FALSE]
+          # Remove the corresponding row (query) from query$data using the query ID
+          query$data <- query$data[query$data$.query_id != q_id, , drop = FALSE]
 
           # Also remove the corresponding rows from query$output
-          query$output <- query$output[query$output$.internal_uuid != uuid, , drop = FALSE]
+          query$output <- query$output[query$output$.query_id != q_id, , drop = FALSE]
 
-          # If no rows remove the years cols
+          # If no rows (queries) left then also remove the years cols
+          # This is so that if a user wants a range of years next
+          # the legacy years aren't still there
           if (nrow(query$output) == 0) {
             query$output <- query$output |>
               dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure)
@@ -746,7 +771,7 @@ server <- function(input, output, session) {
   clean_final_table <- reactive({
     req(query$data)
 
-    # Check if there are any selected queries
+    # Check if there are any saved queries
     if (nrow(query$data) == 0) {
       return(
         data.frame(
@@ -756,9 +781,13 @@ server <- function(input, output, session) {
       )
     }
 
+    # Logic to reset the year cols to have year suffixes if they match
+    # (As they may have been cleaned from the code logic at end of the new query chunk)
+    # Get output indicators
     output_indicators <- query$output |>
       pull_uniques("Measure")
 
+    # Boolean for if the output indicators share suffixes
     share_year_suffix <- bds_metrics |>
       dplyr::filter(
         Measure %in% output_indicators,
@@ -766,7 +795,9 @@ server <- function(input, output, session) {
       ) |>
       check_year_suffix_consistency()
 
+    # If suffixes are shared then reapply the years with suffix to col names
     if (share_year_suffix) {
+      # Get the years with suffixes
       years_dict <- bds_metrics |>
         dplyr::filter(
           Measure %in% output_indicators,
@@ -774,22 +805,19 @@ server <- function(input, output, session) {
         ) |>
         dplyr::distinct(Years, Years_num)
 
-      # Replace the matching column names in query$output using Years_num -> Years
+      # Replace the matching year col names with respective year suffix
       new_col_names <- colnames(query$output) |>
         (\(cols) ifelse(cols %in% years_dict$Years_num,
           years_dict$Years[match(cols, years_dict$Years_num)],
           cols
         ))()
 
-      # Apply the new column names to query$output
+      # Apply the new year suffix names to query$output
       colnames(query$output) <- new_col_names
-
-      # Drop columns not in the new_col_names years
-      valid_year_cols <- years_dict$Years
-      query$output <- query$output[, colnames(query$output) %in% valid_year_cols | !grepl("^\\d{4}", colnames(query$output))]
     }
 
-    # Final query output table with ordered columns
+    # Final query output table with ordered columns, (SN parent if selected) and
+    # Sorted year columns
     query$output |>
       dplyr::select(
         `LA Number`, `LA and Regions`,
