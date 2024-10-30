@@ -318,3 +318,12 @@ get_la_stat_neighbrs <- function(data_stat_n, selected_las) {
     dplyr::filter(`LA Name` %in% selected_las) |>
     pull_uniques("LA Name_sn")
 }
+
+# Helper function to get distinct and separated unique values from a column
+get_query_table_values <- function(data, column) {
+  data |>
+    dplyr::distinct({{ column }}) |>
+    tidyr::separate_rows({{ column }}, sep = ",<br>") |>
+    dplyr::mutate({{ column }} := trimws({{ column }})) |>
+    pull_uniques(as.character(substitute(column)))
+}

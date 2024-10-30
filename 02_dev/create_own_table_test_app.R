@@ -879,27 +879,36 @@ server <- function(input, output, session) {
   })
 
   # Charts =====================================================================
+  # Compute number of indicators & geographies - used to determine whether data
+  # is displayed or computed
+  # Allowing a max of 3 and 4 respectively
+  number_of_indicators <- reactive({
+    length(pull_uniques(clean_final_table(), "Measure"))
+  })
+
+  number_of_geogs <- reactive({
+    length(pull_uniques(clean_final_table(), "LA and Regions"))
+  })
+
   # Create chart data ----------------------------------------------------------
   chart_plotting_data <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
-      length(pull_uniques(clean_final_table(), "Measure")) < 4,
-      length(pull_uniques(clean_final_table(), "LA and Regions")) <= 4
+      number_of_indicators() <= 3,
+      number_of_geogs() <= 4
     )
 
+    # Pull order that geogs and indicators are added
+    # This is used to set the levels of the factor (so display in order in chart)
     geog_chart_order <- query$data |>
-      dplyr::distinct(`LA and Regions`) |>
-      tidyr::separate_rows(`LA and Regions`, sep = ",<br>") |>
-      dplyr::mutate(`LA and Regions` = trimws(`LA and Regions`)) |>
-      pull_uniques("LA and Regions")
+      get_query_table_values(`LA and Regions`)
 
     indicator_chart_order <- query$data |>
-      dplyr::distinct(Indicator) |>
-      tidyr::separate_rows(Indicator, sep = ",<br>") |>
-      dplyr::mutate(Indicator = trimws(Indicator)) |>
-      pull_uniques("Indicator")
+      get_query_table_values(Indicator)
 
-    chart_data <- clean_final_table() |>
+    # Coerce final output table to long data (for plotting)
+    # Recreate Years_num & values_num, also factor `LA and Regions` & Measure
+    clean_final_table() |>
       dplyr::distinct() |>
       tidyr::pivot_longer(
         cols = dplyr::starts_with("20"),
@@ -912,19 +921,10 @@ server <- function(input, output, session) {
         `LA and Regions` = factor(`LA and Regions`, levels = geog_chart_order),
         Measure = factor(Measure, levels = indicator_chart_order)
       )
-    chart_data
-  })
-
-  number_of_indicators <- reactive({
-    length(pull_uniques(clean_final_table(), "Measure"))
-  })
-
-  number_of_geogs <- reactive({
-    length(pull_uniques(clean_final_table(), "LA and Regions"))
   })
 
   # Line chart -----------------------------------------------------------------
-  # Build main static plot
+  # Build static main plot
   line_chart <- reactive({
     req(
       "Message from tool" %notin% colnames(clean_final_table()),
@@ -932,11 +932,13 @@ server <- function(input, output, session) {
       number_of_geogs() <= 4
     )
 
-    # Count year cols (start with 2)
+    # Count year cols - used to determine if to show geom_point
+    # (If only one year then no line will show so point needed)
     num_year_cols <- chart_plotting_data() |>
       dplyr::distinct(Years) |>
       nrow()
 
+    # Plot data - colour represents Geographies & linetype represents Indicator
     chart_plotting_data() |>
       ggplot2::ggplot() +
       ggiraph::geom_line_interactive(
@@ -963,11 +965,13 @@ server <- function(input, output, session) {
       set_plot_colours(chart_plotting_data()) +
       set_plot_labs(final_filtered_bds()) +
       custom_theme() +
+      # Setting legend title at top
       ggplot2::theme(
         legend.title = ggplot2::element_text(),
         legend.title.position = "top",
         legend.spacing.x = unit(5, "lines")
       ) +
+      # Creating nice looking legend content
       ggplot2::guides(
         color = ggplot2::guide_legend(
           order = 1,
@@ -978,7 +982,7 @@ server <- function(input, output, session) {
         linetype = ggplot2::guide_legend(
           order = 2,
           ncol = 1,
-          title = "Indicators (linetype):"
+          title = "Indicators (line-type):"
         )
       )
   })
@@ -1014,6 +1018,7 @@ server <- function(input, output, session) {
 
   # Line chart plot output -----------------------------------------------------
   output$line_chart <- ggiraph::renderGirafe({
+    # Error messages for missing selections
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
         ggobj = display_no_data_plot("No plot as not enough selections made"),
@@ -1025,6 +1030,8 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
+
+      # Error messages for too many selections
     } else if (
       number_of_geogs() > 4
     ) {
@@ -1051,13 +1058,15 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
+
+      # Plot line chart
     } else {
       interactive_line_chart()
     }
   })
 
   # Line chart download --------------------------------------------------------
-  # Initialize server logic for download button and modal
+  # Initialise server logic for download button and modal
   DownloadChartBtnServer("download_btn_line", "line", "Line")
 
   # Set up the download handlers for the chart
@@ -1068,7 +1077,7 @@ server <- function(input, output, session) {
     reactive(c("LAIT-create-your-own-line-chart"))
   )
 
-  # Plot used for copy to clipboard
+  # Plot used for copy to clipboard (hidden)
   output$copy_plot_line <- shiny::renderPlot(
     {
       line_chart()
@@ -1077,6 +1086,7 @@ server <- function(input, output, session) {
     width = 24 * 96,
     height = 12 * 96
   )
+
 
   # Bar chart -----------------------------------------------------------------
   # Build main bar static plot
@@ -1087,23 +1097,27 @@ server <- function(input, output, session) {
       number_of_geogs() <= 4
     )
 
+    # Giving facet_wrap charts the correct chart names
+    # Get chart names for each indicator
     chart_names <- final_filtered_bds() |>
       dplyr::distinct(Measure, Chart_title)
 
+    # Wrap the chart names (dependent on number of indicators -
+    # more narrows width available)
     chart_names_wrapped <- chart_names |>
       dplyr::mutate(Chart_title = stringr::str_wrap(
         Chart_title,
         width = 60 - length(chart_names$Measure) * 10
       ))
 
-    # Create a named vector for custom labels from chart_names
-    custom_labels <- setNames(
+    # Create a named vector for custom titles for each indicator
+    custom_titles <- setNames(
       chart_names_wrapped$Chart_title,
       chart_names_wrapped$Measure
     )
 
 
-    # Custom color scale for LA and Regions with variations for Measures
+    # Plot chart - split by indicators, colours represent Geographies
     chart_plotting_data() |>
       ggplot2::ggplot() +
       ggiraph::geom_col_interactive(
@@ -1139,11 +1153,12 @@ server <- function(input, output, session) {
       ggplot2::labs(title = "Bar charts showing selected indicators") +
       ggplot2::facet_wrap(
         ~Measure,
-        labeller = labeller(Measure = as_labeller(custom_labels)),
+        labeller = labeller(Measure = as_labeller(custom_titles)),
       ) +
+      # Gives space between the charts so x-axis labels don't overlap
       theme(
         panel.spacing.x = unit(15, "mm"),
-        plot.margin = ggplot2::margin(r = 20)
+        plot.margin = ggplot2::margin(r = 30)
       )
   })
 
@@ -1166,6 +1181,7 @@ server <- function(input, output, session) {
 
   # Bar chart plot output ------------------------------------------------------
   output$bar_chart <- ggiraph::renderGirafe({
+    # Error messages for missing or too many selections
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
         ggobj = display_no_data_plot("No plot as not enough selections made"),
@@ -1203,6 +1219,8 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
+
+      # Plot chart
     } else {
       interactive_bar_chart()
     }
@@ -1220,7 +1238,7 @@ server <- function(input, output, session) {
     reactive(c("LAIT-create-your-own-bar-chart"))
   )
 
-  # Plot used for copy to clipboard
+  # Plot used for copy to clipboard (hidden)
   output$copy_plot_bar <- shiny::renderPlot(
     {
       bar_chart()
