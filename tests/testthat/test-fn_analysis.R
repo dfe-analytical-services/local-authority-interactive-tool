@@ -347,3 +347,156 @@ test_that("5. calculate_rank returns NA for rank when all values are missing", {
   result_all_missing <- calculate_rank(df_all_missing, "Low")
   expect_equal(result_all_missing, expected_all_missing)
 })
+
+# filter_la_data_all_la--------------------
+
+# Sample data for testing
+data_all_la <- data.frame(
+  `LA and Regions` = c("Region1", "Region2", "Region3", "Region4"),
+  Measure = c("Measure1", "Measure1", "Measure1", "Measure1"),
+  Years = c("2023", "2023", "2023", "2023"),
+  values_num = c(100, 200, 150, 250),
+  check.names = FALSE
+)
+
+# Test 1: Basic Functionality Test
+test_that("1. filter_la_data_all_la filters data based on provided LA names", {
+  la_names <- c("Region1", "Region3")
+  expected_result <- data.frame(
+    `LA and Regions` = c("Region1", "Region3"),
+    Measure = c("Measure1", "Measure1"),
+    Years = c("2023", "2023"),
+    values_num = c(100, 150),
+    check.names = FALSE
+  )
+  result <- filter_la_data_all_la(data_all_la, la_names)
+  expect_equal(result, expected_result)
+})
+
+# Test 2: No Matching LA Names
+test_that("2. filter_la_data_all_la returns empty data frame when no LA names match", {
+  la_names <- c("NonexistentRegion")
+  result <- filter_la_data_all_la(data_all_la, la_names)
+  expect_true(nrow(result) == 0)
+})
+
+# Test 3: Empty la_names Vector
+test_that("3. filter_la_data_all_la returns empty data frame when la_names vector is empty", {
+  la_names <- character(0) # Empty vector
+  result <- filter_la_data_all_la(data_all_la, la_names)
+  expect_true(nrow(result) == 0)
+})
+
+# Test 4: Case Sensitivity Test
+test_that("4. filter_la_data_all_la is case sensitive", {
+  la_names <- c("region1", "Region3") # Incorrect case for "Region1"
+  expected_result_case <- data.frame(
+    `LA and Regions` = c("Region3"),
+    Measure = c("Measure1"),
+    Years = c("2023"),
+    values_num = c(150),
+    check.names = FALSE
+  )
+  result_case <- filter_la_data_all_la(data_all_la, la_names)
+  expect_equal(result_case, expected_result_case)
+})
+
+# Test 5: Alphabetical Order Check
+test_that("5. filter_la_data_all_la arranges results in alphabetical order", {
+  la_names <- c("Region4", "Region1", "Region2")
+  expected_result_order <- data.frame(
+    `LA and Regions` = c("Region1", "Region2", "Region4"),
+    Measure = c("Measure1", "Measure1", "Measure1"),
+    Years = c("2023", "2023", "2023"),
+    values_num = c(100, 200, 250),
+    check.names = FALSE
+  )
+  result_order <- filter_la_data_all_la(data_all_la, la_names)
+  expect_equal(result_order, expected_result_order)
+})
+
+# Test 6: Test with Empty Data Frame
+test_that("6. filter_la_data_all_la returns empty result with an empty data frame", {
+  empty_data <- data_all_la[0, ] # Empty data frame
+  la_names <- c("Region1", "Region2")
+  result_empty <- filter_la_data_all_la(empty_data, la_names)
+  expect_true(nrow(result_empty) == 0)
+})
+
+#filter_region_data_all_la--------------------
+
+# Sample data for testing
+data_all_la <- data.frame(
+  `LA Number` = c(101, 102, 103, 104, 105, 106),
+  `LA and Regions` = c("Region1", "Region2", "London (Inner)", "London (Outer)", "Region5", "Region6"),
+  Measure = c(10, NA, NA, NA, 15, 20),
+  Value = c(100, NA, NA, NA, 200, 300),
+  check.names = FALSE
+)
+
+# Test 1: Basic Functionality Test
+test_that("1. filter_region_data_all_la filters out specified LA names", {
+  la_names <- c("Region1", "Region5")
+  expected_result <- data.frame(
+    `LA Number` = c(102, 106),
+    `LA and Regions` = c("Region2", "Region6"),
+    Measure = c(NA, 20),
+    Value = c(NA, 300),
+    Rank = c("", ""),
+    check.names = FALSE
+  )
+  result <- filter_region_data_all_la(data_all_la, la_names)
+  expect_equal(result, expected_result)
+})
+
+# Test 2: Exclude Rows for "London (Inner)" and "London (Outer)" with NA Columns
+test_that("2. filter_region_data_all_la excludes 'London (Inner)' and 'London (Outer)' rows with all NA values", {
+  la_names <- c("Region5")
+  expected_result <- data.frame(
+    `LA Number` = c(101, 102, 106),
+    `LA and Regions` = c("Region1", "Region2", "Region6"),
+    Measure = c(10, NA, 20),
+    Value = c(100, NA, 300),
+    Rank = c("", "", ""),
+    check.names = FALSE
+  )
+  result <- filter_region_data_all_la(data_all_la, la_names)
+  expect_equal(result, expected_result)
+})
+
+# Test 3: Add Blank Rank Column
+test_that("3. filter_region_data_all_la adds blank Rank column", {
+  la_names <- c("Region1")
+  result <- filter_region_data_all_la(data_all_la, la_names)
+  expect_true("Rank" %in% colnames(result))
+  expect_true(all(result$Rank == ""))
+})
+
+# Test 4: Arrange by LA Number
+test_that("4. filter_region_data_all_la arranges data by LA Number", {
+  la_names <- c("Region5")
+  result <- filter_region_data_all_la(data_all_la, la_names)
+  expect_equal(result$`LA Number`, sort(result$`LA Number`))
+})
+
+# Test 5: No Matching Exclusions
+library(testthat)
+test_that("5. filter_region_data_all_la retains all rows when la_names has no matches", {
+  la_names <- c("NonexistentRegion")
+  expected_result <- data_all_la |>
+    dplyr::mutate(Rank = "") |>
+    dplyr::arrange(`LA Number`) |>
+    dplyr::filter(`LA and Regions` != "London (Inner)",
+           `LA and Regions` != "London (Outer)")
+  result <- filter_region_data_all_la(data_all_la, la_names)
+  expect_equal(result, expected_result)
+})
+
+# Test 6: Empty Input Data Frame
+test_that("6. filter_region_data_all_la returns empty data frame when input is empty", {
+  empty_data <- data_all_la[0, ] # Empty data frame
+  la_names <- c("Region1", "Region5")
+  result <- filter_region_data_all_la(empty_data, la_names)
+  expect_true(nrow(result) == 0)
+})
+
