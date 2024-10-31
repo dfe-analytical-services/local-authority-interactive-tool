@@ -55,7 +55,7 @@ server <- function(input, output, session) {
 
   # Geog Groupings
   geog_groups <- GroupingInputServer(
-    "create_inputs",
+    "geog_groups",
     create_inputs,
     la_names_bds,
     region_names_bds,
@@ -65,8 +65,8 @@ server <- function(input, output, session) {
 
   # Stat neighbour association table
   stat_n_association <- StatN_AssociationServer(
-    "create_inputs",
-    create_inputs$geog,
+    "stat_n_association",
+    create_inputs,
     la_names_bds,
     stat_n_la
   )

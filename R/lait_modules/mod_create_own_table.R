@@ -279,7 +279,7 @@ GroupingInputServer <- function(id, create_inputs, la_names_bds, region_names_bd
 
 
 
-StatN_AssociationServer <- function(id, geog_input, la_names_bds, stat_n_la) {
+StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Statistical neighbour input ------------------------------------------------
     # Assign LA statistical neighbours their selected LA association
@@ -292,9 +292,9 @@ StatN_AssociationServer <- function(id, geog_input, la_names_bds, stat_n_la) {
       )
 
       # If SN selected fill out the above SN association df
-      if (isTRUE(input$la_group == "la_stat_ns")) {
+      if (isTRUE(create_inputs$la_group() == "la_stat_ns")) {
         # Get LAs from geogs selected
-        input_las <- intersect(geog_input(), la_names_bds)
+        input_las <- intersect(create_inputs$geog(), la_names_bds)
 
         # Build association df (include LA itself too)
         stat_n_groups <- lapply(input_las, function(la) {
