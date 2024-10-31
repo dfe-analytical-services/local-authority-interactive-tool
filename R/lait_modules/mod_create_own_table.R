@@ -1,43 +1,39 @@
 Create_MainInputsUI <- function(id) {
   ns <- NS(id)
 
-  div(
-    class = "well",
-    style = "overflow-y: visible; padding: 1rem;",
-    bslib::layout_column_wrap(
-      # Geographic input
-      div(
-        style = "margin-bottom: 1rem;",
-        shiny::selectizeInput(
-          inputId = ns("geog_input"),
-          label = "LAs, Regions, and England:",
-          choices = c(la_names_bds, region_names_bds, "England"),
-          multiple = TRUE,
-          options = list(
-            "placeholder" = "Select a LA, Region or England"
-          )
+  bslib::layout_column_wrap(
+    # Geographic input
+    div(
+      style = "margin-bottom: 1rem;",
+      shiny::selectizeInput(
+        inputId = ns("geog_input"),
+        label = "LAs, Regions, and England:",
+        choices = c(la_names_bds, region_names_bds, "England"),
+        multiple = TRUE,
+        options = list(
+          "placeholder" = "Select a LA, Region or England"
         )
-      ),
-      # Topic input
-      div(
-        style = "margin-bottom: 1rem;",
-        shiny::selectizeInput(
-          inputId = ns("topic_input"),
-          label = "Topic:",
-          choices = metric_topics
-        )
-      ),
-      # Indicator input
-      div(
-        style = "margin-bottom: 1rem;",
-        shiny::selectizeInput(
-          inputId = ns("indicator"),
-          label = "Indicator:",
-          choices = metric_names,
-          multiple = TRUE,
-          options = list(
-            "placeholder" = "Select an indicator"
-          )
+      )
+    ),
+    # Topic input
+    div(
+      style = "margin-bottom: 1rem;",
+      shiny::selectizeInput(
+        inputId = ns("topic_input"),
+        label = "Topic:",
+        choices = metric_topics
+      )
+    ),
+    # Indicator input
+    div(
+      style = "margin-bottom: 1rem;",
+      shiny::selectizeInput(
+        inputId = ns("indicator"),
+        label = "Indicator:",
+        choices = metric_names,
+        multiple = TRUE,
+        options = list(
+          "placeholder" = "Select an indicator"
         )
       )
     )
@@ -129,13 +125,12 @@ Create_MainInputsServer <- function(id, bds_metrics) {
 # Year range input module
 YearRangeUI <- function(id) {
   ns <- NS(id)
-  tagList(
-    shinyWidgets::pickerInput(
-      ns("year_range"),
-      "Select Year Range",
-      choices = NULL,
-      multiple = TRUE
-    )
+
+  shinyWidgets::pickerInput(
+    ns("year_range"),
+    "Select Year Range",
+    choices = NULL,
+    multiple = TRUE
   )
 }
 
@@ -144,7 +139,7 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
     # Compute years choices available based on selected indicator
     years_choices <- reactive({
       years_dict <- bds_metrics |>
-        dplyr::filter(Measure %in% indicator_input, !is.na(Years)) |>
+        dplyr::filter(Measure %in% indicator_input(), !is.na(Years)) |>
         dplyr::distinct(Years, Years_num)
 
       # Boolean to check for matching years' suffixes
@@ -160,7 +155,7 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
     })
 
     # Update the year range choices based on the selected indicator
-    observeEvent(indicator_input, {
+    observeEvent(indicator_input(), {
       shinyWidgets::updatePickerInput(
         session = session,
         inputId = "year_range",
@@ -176,7 +171,7 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
 
     # When no indicators selected year range displays "Select an indicator"
     observe({
-      if (is.null(indicator_input) || length(indicator_input) == 0) {
+      if (is.null(indicator_input()) || length(indicator_input()) == 0) {
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "year_range",
@@ -189,5 +184,78 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
     })
 
     return(year_range = reactive(input$year_range))
+  })
+}
+
+
+GroupingInputUI <- function(id) {
+  ns <- NS(id)
+
+  tagList(
+    "LA groups" = shiny::radioButtons(
+      inputId = ns("la_groups"),
+      label = "LA Groupings (choose one):",
+      choices = list(
+        "None" = "no_groups",
+        "Include All LAs" = "all_las",
+        "Include LAs in the same Region" = "region_las",
+        "Include statistical neighbours" = "la_stat_ns"
+      ),
+      selected = NULL,
+      inline = FALSE
+    ),
+    # Other groupings
+    "Other groups" = list(
+      shiny::p("Other groupings:"),
+      shiny::checkboxInput(ns("all_regions"), "Include All Regions", FALSE),
+      shiny::checkboxInput(ns("inc_england"), "Include England", FALSE)
+    )
+  )
+}
+
+GroupingInputServer <- function(id, geog_input, la_names_bds, region_names_bds, stat_n_geog, stat_n_la) {
+  moduleServer(id, function(input, output, session) {
+    # Collating user selections ==================================================
+    # Geography inputs -----------------------------------------------------------
+    geog_inputs <- reactive({
+      # Value from LA & Region input
+      inputs <- geog_input()
+
+      # Add geography groupings (if selected)
+      # All LAs
+      if (isTRUE(input$la_groups == "all_las")) {
+        inputs <- unique(c(inputs, la_names_bds))
+      }
+
+      # All Regions
+      if (isTRUE(input$all_regions)) {
+        inputs <- unique(c(inputs, region_names_bds))
+      }
+
+      # Include England
+      if (isTRUE(input$inc_england)) {
+        inputs <- unique(c(inputs, "England"))
+      }
+
+      # All LAs from selected LA region
+      if (isTRUE(input$la_groups == "region_las")) {
+        selected_la_regions <- get_la_region(stat_n_geog, geog_input())
+        all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
+
+        inputs <- unique(c(inputs, all_region_las))
+      }
+
+      # LA statistical neighbours
+      if (isTRUE(input$la_groups == "la_stat_ns")) {
+        selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, geog_input())
+
+        inputs <- c(inputs, selected_la_stat_n)
+      }
+
+      # Return unique geographies
+      unique(inputs)
+    })
+
+    geog_inputs
   })
 }
