@@ -445,3 +445,78 @@ StagingDataServer <- function(
     staging_table
   })
 }
+
+
+
+StagingTableUI <- function(id) {
+  ns <- NS(id)
+
+  # Staging table ==============================================================
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    h3("Staging Table (View of current selections)"),
+    bslib::card(
+      reactable::reactableOutput(ns("staging_table"))
+    )
+  )
+}
+
+StagingTableServer <- function(id, create_inputs, staging_data, staging_bds) {
+  moduleServer(id, function(input, output, session) {
+    # Staging table output -------------------------------------------------------
+    output$staging_table <- reactable::renderReactable({
+      # Display messages if there are incorrect selections
+      if (length(create_inputs$indicator()) == 0 && is.null(create_inputs$geog())) {
+        return(reactable::reactable(
+          data.frame(
+            `Message from tool` = "Please add selections (above).",
+            check.names = FALSE
+          )
+        ))
+      } else if (length(create_inputs$indicator()) == 0) {
+        return(reactable::reactable(
+          data.frame(
+            `Message from tool` = "Please add an indicator selection (above).",
+            check.names = FALSE
+          )
+        ))
+      } else if (is.null(create_inputs$geog())) {
+        return(reactable::reactable(
+          data.frame(
+            `Message from tool` = "Please add a geography selection (above).",
+            check.names = FALSE
+          )
+        ))
+      }
+
+      # Output table - formatting numbers, long text and page settings
+      dfe_reactable(
+        staging_data(),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            staging_data(),
+            get_indicator_dps(staging_bds()),
+            num_exclude = c("LA Number", "Measure")
+          ),
+          list(
+            set_custom_default_col_widths(
+              Measure = set_min_col_width(90)
+            ),
+            # Truncates long cell values and displays hover with full value
+            Measure = reactable::colDef(
+              html = TRUE,
+              cell = function(value, index, name) {
+                render.reactable.cell.with.tippy(text = value, tooltip = value)
+              }
+            )
+          )
+        ),
+        defaultPageSize = 3,
+        showPageSizeOptions = TRUE,
+        pageSizeOptions = c(3, 5, 10, 25),
+        compact = TRUE
+      )
+    })
+  })
+}

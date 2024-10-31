@@ -37,6 +37,7 @@ ui <- bslib::page_fillable(
       Create_MainInputsUI("create_inputs")["Add selection"]
     )
   ),
+  StagingTableUI("staging_table"),
   h4("Selected outputs:"),
   verbatimTextOutput("selected_inputs")
 )
@@ -80,6 +81,14 @@ server <- function(input, output, session) {
     region_names_bds,
     la_names_bds,
     stat_n_la
+  )
+
+  # Output staging table
+  StagingTableServer(
+    "staging_table",
+    create_inputs,
+    staging_data,
+    staging_bds
   )
 
 
