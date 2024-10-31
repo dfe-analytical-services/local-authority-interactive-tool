@@ -49,7 +49,11 @@ server <- function(input, output, session) {
   main_inputs <- Create_MainInputsServer("main_inputs", bds_metrics)
 
   # Year range
-  year_range <- YearRangeServer("year_range_input", bds_metrics, main_inputs$indicator)
+  year_range <- YearRangeServer(
+    "year_range_input",
+    bds_metrics,
+    main_inputs$indicator
+  )
 
   # Geog Groupings
   geog_groups <- GroupingInputServer(
@@ -62,16 +66,33 @@ server <- function(input, output, session) {
   )
 
   # Stat neighbour association table
-  stat_n_association <- StatN_AssociationServer("geog_groups", main_inputs$geog, la_names_bds, stat_n_la)
+  stat_n_association <- StatN_AssociationServer(
+    "geog_groups",
+    main_inputs$geog,
+    la_names_bds,
+    stat_n_la
+  )
+
+  # Staging filtered BDS
+  staging_filtered_bds <- FilterBDS_StagingServer(
+    "staging_bds",
+    main_inputs,
+    geog_groups,
+    year_range,
+    bds_metrics
+  )
+
 
   output$selected_inputs <- renderPrint({
     list(
       Geography = main_inputs$geog(),
       Topic = main_inputs$topic(),
       Indicator = main_inputs$indicator(),
+      Topic_Indicator_pair = main_inputs$selected_indicators(),
       Year = year_range(),
       Geog_groups = geog_groups(),
-      stat_n_association = stat_n_association()
+      Stat_N_association = stat_n_association(),
+      Staging_BDS = staging_filtered_bds()
     )
   })
 }

@@ -113,6 +113,9 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       }),
       indicator = reactive({
         selected_indicators()$Measure
+      }),
+      selected_indicators = reactive({
+        selected_indicators()
       })
     )
 
@@ -298,5 +301,65 @@ StatN_AssociationServer <- function(id, geog_input, la_names_bds, stat_n_la) {
       # Return the association data
       association_table
     })
+  })
+}
+
+
+
+FilterBDS_StagingServer <- function(id, main_inputs, geog_groups, year_range, bds_metrics) {
+  moduleServer(id, function(input, output, session) {
+    # Staging table ==============================================================
+    # Filter BDS for geographies and
+    # topic-indicator pairs in the selected_values reactive
+    filtered_bds <- reactive({
+      req(main_inputs$topic(), main_inputs$indicator())
+      req(nrow(main_inputs$selected_indicators()) > 0)
+
+      # Filter the bds_metrics by topic, indicator, and geography
+      bds_filtered <- bds_metrics |>
+        dplyr::semi_join(
+          main_inputs$selected_indicators(),
+          by = c(
+            "Topic" = "Topic",
+            "Measure" = "Measure"
+          )
+        ) |>
+        dplyr::filter(
+          `LA and Regions` %in% geog_groups(),
+          !is.na(Years)
+        )
+
+      # Cleaning Years
+      # Check if all years have consistent suffix
+      consistent_str_years <- check_year_suffix_consistency(bds_filtered)
+
+      # If not consistent suffix use the cleaned year cols (numeric years)
+      if (!consistent_str_years) {
+        bds_filtered <- bds_filtered |>
+          dplyr::mutate(
+            Years = Years_num
+          )
+      }
+
+      # Apply the year range filter
+      # If only one year selected then show just that year
+      if (length(year_range()) == 1) {
+        bds_filtered <- bds_filtered |>
+          dplyr::filter(
+            Years == year_range()[1]
+          )
+      } else if (length(year_range()) == 2) {
+        bds_filtered <- bds_filtered |>
+          dplyr::filter(
+            Years >= year_range()[1],
+            Years <= year_range()[2]
+          )
+      }
+
+      # Return the user selection filtered data for staging table
+      bds_filtered
+    })
+
+    filtered_bds
   })
 }
