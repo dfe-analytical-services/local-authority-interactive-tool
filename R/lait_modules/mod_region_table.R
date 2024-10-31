@@ -333,7 +333,7 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 #'
 #' Server module to process and format long data for regions and England.
 #' It filters the data based on selected regions and transforms it into
-#' a long format suitable for further analysis and visualization.
+#' a long format suitable for further analysis and visualisation.
 #'
 #' @param id The namespace ID for the server module.
 #' @param filtered_bds A reactive expression providing filtered BDS data.

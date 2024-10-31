@@ -411,7 +411,7 @@ af_colours_focus <- function() {
 
 
 get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geog) {
-  # Initialize an empty vector to store the results
+  # Initialise an empty vector to store the results
   selection <- input$geog_input
 
   # If Region LAs are selected, add "LAs in [Region]" and exclude those LAs

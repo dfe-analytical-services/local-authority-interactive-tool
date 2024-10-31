@@ -714,7 +714,7 @@ server <- function(input, output, session) {
           }"
           )
         ),
-        # Customize the other columns (e.g., Topic)
+        # Customise the other columns (e.g., Topic)
         Topic = reactable::colDef(
           cell = function(value) {
             unique_values <- unique(unlist(value))
@@ -1227,7 +1227,7 @@ server <- function(input, output, session) {
   })
 
   # Bar chart download ---------------------------------------------------------
-  # Initialize server logic for download button and modal
+  # Initialise server logic for download button and modal
   DownloadChartBtnServer("download_btn_bar", "bar", "Bar")
 
   # Set up the download handlers for the chart

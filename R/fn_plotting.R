@@ -404,7 +404,7 @@ set_plot_colours <- function(data_long,
 #'
 #' The function uses helper functions to determine appropriate titles for
 #' the axes and the plot, ensuring that the labels are relevant to the data
-#' being visualized.
+#' being visualised.
 #'
 #' @param filtered_bds A data frame or object containing the filtered data
 #'   used for plotting. This should include information necessary to derive
@@ -619,7 +619,7 @@ custom_ggiraph_tooltip <- function() {
 #' Generate Generic ggiraph Options
 #'
 #' This function generates a list of commonly used ggiraph options for
-#' customising tooltips and toolbars in `ggiraph` visualizations.
+#' customising tooltips and toolbars in `ggiraph` visualisations.
 #' It is designed to provide a set of default settings that can be easily
 #' extended or overridden.
 #'
