@@ -259,3 +259,44 @@ GroupingInputServer <- function(id, geog_input, la_names_bds, region_names_bds, 
     geog_inputs
   })
 }
+
+
+
+
+StatN_AssociationServer <- function(id, geog_input, la_names_bds, stat_n_la) {
+  moduleServer(id, function(input, output, session) {
+    # Statistical neighbour input ------------------------------------------------
+    # Assign LA statistical neighbours their selected LA association
+    stat_n_association <- reactive({
+      # Create mini association df of SN LAs and their parent SN LA
+      association_table <- data.frame(
+        `LA and Regions` = character(),
+        `sn_parent` = character(),
+        check.names = FALSE
+      )
+
+      # If SN selected fill out the above SN association df
+      if (isTRUE(input$la_groups == "la_stat_ns")) {
+        # Get LAs from geogs selected
+        input_las <- intersect(geog_input(), la_names_bds)
+
+        # Build association df (include LA itself too)
+        stat_n_groups <- lapply(input_las, function(la) {
+          data.frame(
+            `LA and Regions` = c(la, get_la_stat_neighbrs(stat_n_la, la)),
+            `sn_parent` = la,
+            check.names = FALSE
+          )
+        })
+
+        # Combine all statistical neighbour associations into a single data frame
+        if (length(input_las) > 0) {
+          association_table <- do.call(rbind, stat_n_groups)
+        }
+      }
+
+      # Return the association data
+      association_table
+    })
+  })
+}
