@@ -319,7 +319,7 @@ StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) 
 
 
 
-FilterBDS_StagingServer <- function(id, create_inputs, geog_groups, year_range, bds_metrics) {
+StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Staging table ==============================================================
     # Filter BDS for geographies and
@@ -379,63 +379,69 @@ FilterBDS_StagingServer <- function(id, create_inputs, geog_groups, year_range, 
 
 
 
-# StagingTableUI <- function(id) {
-#   ns <- NS(id)
-#
-# }
-#
-# StagingTableServer <- function(id, staging_bds, stat_n_geog, region_names_bds, stat_n_association) {
-#   moduleServer(id, function(input, output, session) {
-#     # Build the staging table
-#     staging_table <- reactive({
-#       # Selected relevant cols
-#       # Coerce to wide format
-#       # Join region col (set regions and England as themselves for Region)
-#       wide_table <- staging_bds() |>
-#         dplyr::select(
-#           `LA Number`, `LA and Regions`, Topic,
-#           Measure, Years, Years_num, values_num, Values
-#         ) |>
-#         tidyr::pivot_wider(
-#           id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
-#           names_from = Years,
-#           values_from = values_num,
-#         ) |>
-#         dplyr::left_join(
-#           stat_n_geog |>
-#             dplyr::select(`LA num`, GOReg),
-#           by = c("LA Number" = "LA num")
-#         ) |>
-#         dplyr::mutate(GOReg = dplyr::case_when(
-#           `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
-#           TRUE ~ GOReg
-#         ))
-#
-#       # Order columns (and sort year cols order)
-#       wide_table_ordered <- wide_table |>
-#         dplyr::select(
-#           `LA Number`, `LA and Regions`,
-#           "Region" = "GOReg",
-#           Topic, Measure,
-#           dplyr::all_of(sort_year_columns(wide_table))
-#         )
-#
-#
-#       # If SNs included, add SN LA association column
-#       # Multi-join as want to include an association for every row (even duplicates)
-#       if (isTRUE(input$la_groups == "la_stat_ns")) {
-#         wide_table_ordered <- wide_table_ordered |>
-#           dplyr::left_join(
-#             stat_n_association(),
-#             by = "LA and Regions",
-#             relationship = "many-to-many"
-#           ) |>
-#           dplyr::relocate(sn_parent, .after = "Measure") |>
-#           dplyr::rename("Statistical Neighbour Group" = "sn_parent")
-#       }
-#
-#       # Staging table formatted and ready for output
-#       wide_table_ordered
-#     })
-#   })
-# }
+StagingDataServer <- function(
+    id, create_inputs, staging_bds, region_names_bds, la_names_bds, stat_n_la) {
+  moduleServer(id, function(input, output, session) {
+    # Stat neighbour association table
+    stat_n_association <- StatN_AssociationServer(
+      "stat_n_association",
+      create_inputs,
+      la_names_bds,
+      stat_n_la
+    )
+
+    # Build the staging table
+    staging_table <- reactive({
+      # Selected relevant cols
+      # Coerce to wide format
+      # Join region col (set regions and England as themselves for Region)
+      wide_table <- staging_bds() |>
+        dplyr::select(
+          `LA Number`, `LA and Regions`, Topic,
+          Measure, Years, Years_num, values_num, Values
+        ) |>
+        tidyr::pivot_wider(
+          id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
+          names_from = Years,
+          values_from = values_num,
+        ) |>
+        dplyr::left_join(
+          stat_n_geog |>
+            dplyr::select(`LA num`, GOReg),
+          by = c("LA Number" = "LA num")
+        ) |>
+        dplyr::mutate(GOReg = dplyr::case_when(
+          `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
+          TRUE ~ GOReg
+        ))
+
+      # Order columns (and sort year cols order)
+      wide_table_ordered <- wide_table |>
+        dplyr::select(
+          `LA Number`, `LA and Regions`,
+          "Region" = "GOReg",
+          Topic, Measure,
+          dplyr::all_of(sort_year_columns(wide_table))
+        )
+
+
+      # If SNs included, add SN LA association column
+      # Multi-join as want to include an association for every row (even duplicates)
+      if (isTRUE(create_inputs$la_group() == "la_stat_ns")) {
+        wide_table_ordered <- wide_table_ordered |>
+          dplyr::left_join(
+            stat_n_association(),
+            by = "LA and Regions",
+            relationship = "many-to-many"
+          ) |>
+          dplyr::relocate(sn_parent, .after = "Measure") |>
+          dplyr::rename("Statistical Neighbour Group" = "sn_parent")
+      }
+
+      # Staging table formatted and ready for output
+      wide_table_ordered
+    })
+
+    staging_table
+  })
+}

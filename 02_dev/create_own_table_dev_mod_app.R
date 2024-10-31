@@ -63,21 +63,23 @@ server <- function(input, output, session) {
     stat_n_la
   )
 
-  # Stat neighbour association table
-  stat_n_association <- StatN_AssociationServer(
-    "stat_n_association",
-    create_inputs,
-    la_names_bds,
-    stat_n_la
-  )
-
-  # Staging filtered BDS
-  staging_filtered_bds <- FilterBDS_StagingServer(
+  # Filtering BDS for staging data
+  staging_bds <- StagingBDSServer(
     "staging_bds",
     create_inputs,
     geog_groups,
     year_range,
     bds_metrics
+  )
+
+  # Build staging data
+  staging_data <- StagingDataServer(
+    "staging_data",
+    create_inputs,
+    staging_bds,
+    region_names_bds,
+    la_names_bds,
+    stat_n_la
   )
 
 
@@ -89,8 +91,8 @@ server <- function(input, output, session) {
       Topic_Indicator_pair = create_inputs$selected_indicators(),
       Year = year_range(),
       Geog_groups = geog_groups(),
-      Stat_N_association = stat_n_association(),
-      Staging_BDS = staging_filtered_bds()
+      Staging_BDS = staging_bds(),
+      Staging_Data = staging_data()
     )
   })
 }
