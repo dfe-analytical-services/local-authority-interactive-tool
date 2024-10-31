@@ -1,41 +1,67 @@
 Create_MainInputsUI <- function(id) {
   ns <- NS(id)
 
-  bslib::layout_column_wrap(
-    # Geographic input
-    div(
-      style = "margin-bottom: 1rem;",
-      shiny::selectizeInput(
-        inputId = ns("geog_input"),
-        label = "LAs, Regions, and England:",
-        choices = c(la_names_bds, region_names_bds, "England"),
-        multiple = TRUE,
-        options = list(
-          "placeholder" = "Select a LA, Region or England"
+  tagList(
+    "Main choices" = bslib::layout_column_wrap(
+      # Geographic input
+      div(
+        style = "margin-bottom: 1rem;",
+        shiny::selectizeInput(
+          inputId = ns("geog_input"),
+          label = "LAs, Regions, and England:",
+          choices = c(la_names_bds, region_names_bds, "England"),
+          multiple = TRUE,
+          options = list(
+            "placeholder" = "Select a LA, Region or England"
+          )
+        )
+      ),
+      # Topic input
+      div(
+        style = "margin-bottom: 1rem;",
+        shiny::selectizeInput(
+          inputId = ns("topic_input"),
+          label = "Topic:",
+          choices = metric_topics
+        )
+      ),
+      # Indicator input
+      div(
+        style = "margin-bottom: 1rem;",
+        shiny::selectizeInput(
+          inputId = ns("indicator"),
+          label = "Indicator:",
+          choices = metric_names,
+          multiple = TRUE,
+          options = list(
+            "placeholder" = "Select an indicator"
+          )
         )
       )
     ),
-    # Topic input
-    div(
-      style = "margin-bottom: 1rem;",
-      shiny::selectizeInput(
-        inputId = ns("topic_input"),
-        label = "Topic:",
-        choices = metric_topics
-      )
+    # LA groupings
+    "LA grouping" = shiny::radioButtons(
+      inputId = ns("la_group"),
+      label = "LA Groupings (choose one):",
+      choices = list(
+        "None" = "no_groups",
+        "Include All LAs" = "all_las",
+        "Include LAs in the same Region" = "region_las",
+        "Include statistical neighbours" = "la_stat_ns"
+      ),
+      selected = NULL,
+      inline = FALSE
     ),
-    # Indicator input
-    div(
-      style = "margin-bottom: 1rem;",
-      shiny::selectizeInput(
-        inputId = ns("indicator"),
-        label = "Indicator:",
-        choices = metric_names,
-        multiple = TRUE,
-        options = list(
-          "placeholder" = "Select an indicator"
-        )
-      )
+    # Other groupings
+    "Other grouping" = div(
+      shiny::p("Other groupings:"),
+      shiny::checkboxInput(ns("inc_regions"), "Include All Regions", FALSE),
+      shiny::checkboxInput(ns("inc_england"), "Include England", FALSE)
+    ),
+    # Add selection (query) button
+    "Add selection" = div(
+      style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
+      shiny::actionButton("add_query", "Add selections", class = "gov-uk-button")
     )
   )
 }
@@ -104,7 +130,7 @@ Create_MainInputsServer <- function(id, bds_metrics) {
     )
 
     # Return create your own table main inputs
-    create_main_inputs <- list(
+    create_inputs <- list(
       geog = reactive({
         input$geog_input
       }),
@@ -116,10 +142,22 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       }),
       selected_indicators = reactive({
         selected_indicators()
-      })
+      }),
+      la_group = reactive({
+        input$la_group
+      }),
+      inc_regions = reactive({
+        input$inc_regions
+      }),
+      inc_england = reactive({
+        input$inc_england
+      }) # ,
+      # add_query = reactive({
+      #   input$add_query
+      # }),
     )
 
-    return(create_main_inputs)
+    return(create_inputs)
   })
 }
 
@@ -191,66 +229,41 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
 }
 
 
-GroupingInputUI <- function(id) {
-  ns <- NS(id)
-
-  tagList(
-    "LA groups" = shiny::radioButtons(
-      inputId = ns("la_groups"),
-      label = "LA Groupings (choose one):",
-      choices = list(
-        "None" = "no_groups",
-        "Include All LAs" = "all_las",
-        "Include LAs in the same Region" = "region_las",
-        "Include statistical neighbours" = "la_stat_ns"
-      ),
-      selected = NULL,
-      inline = FALSE
-    ),
-    # Other groupings
-    "Other groups" = list(
-      shiny::p("Other groupings:"),
-      shiny::checkboxInput(ns("all_regions"), "Include All Regions", FALSE),
-      shiny::checkboxInput(ns("inc_england"), "Include England", FALSE)
-    )
-  )
-}
-
-GroupingInputServer <- function(id, geog_input, la_names_bds, region_names_bds, stat_n_geog, stat_n_la) {
+GroupingInputServer <- function(id, create_inputs, la_names_bds, region_names_bds, stat_n_geog, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Collating user selections ==================================================
     # Geography inputs -----------------------------------------------------------
     geog_inputs <- reactive({
       # Value from LA & Region input
-      inputs <- geog_input()
+      inputs <- create_inputs$geog()
 
       # Add geography groupings (if selected)
       # All LAs
-      if (isTRUE(input$la_groups == "all_las")) {
+      if (isTRUE(create_inputs$la_group() == "all_las")) {
         inputs <- unique(c(inputs, la_names_bds))
       }
 
       # All Regions
-      if (isTRUE(input$all_regions)) {
+      if (isTRUE(create_inputs$inc_regions())) {
         inputs <- unique(c(inputs, region_names_bds))
       }
 
       # Include England
-      if (isTRUE(input$inc_england)) {
+      if (isTRUE(create_inputs$inc_england())) {
         inputs <- unique(c(inputs, "England"))
       }
 
       # All LAs from selected LA region
-      if (isTRUE(input$la_groups == "region_las")) {
-        selected_la_regions <- get_la_region(stat_n_geog, geog_input())
+      if (isTRUE(create_inputs$la_group() == "region_las")) {
+        selected_la_regions <- get_la_region(stat_n_geog, create_inputs$geog())
         all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
 
         inputs <- unique(c(inputs, all_region_las))
       }
 
       # LA statistical neighbours
-      if (isTRUE(input$la_groups == "la_stat_ns")) {
-        selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, geog_input())
+      if (isTRUE(create_inputs$la_group() == "la_stat_ns")) {
+        selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, create_inputs$geog())
 
         inputs <- c(inputs, selected_la_stat_n)
       }
@@ -279,7 +292,7 @@ StatN_AssociationServer <- function(id, geog_input, la_names_bds, stat_n_la) {
       )
 
       # If SN selected fill out the above SN association df
-      if (isTRUE(input$la_groups == "la_stat_ns")) {
+      if (isTRUE(input$la_group == "la_stat_ns")) {
         # Get LAs from geogs selected
         input_las <- intersect(geog_input(), la_names_bds)
 
@@ -306,19 +319,19 @@ StatN_AssociationServer <- function(id, geog_input, la_names_bds, stat_n_la) {
 
 
 
-FilterBDS_StagingServer <- function(id, main_inputs, geog_groups, year_range, bds_metrics) {
+FilterBDS_StagingServer <- function(id, create_inputs, geog_groups, year_range, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Staging table ==============================================================
     # Filter BDS for geographies and
     # topic-indicator pairs in the selected_values reactive
     filtered_bds <- reactive({
-      req(main_inputs$topic(), main_inputs$indicator())
-      req(nrow(main_inputs$selected_indicators()) > 0)
+      req(create_inputs$topic(), create_inputs$indicator())
+      req(nrow(create_inputs$selected_indicators()) > 0)
 
       # Filter the bds_metrics by topic, indicator, and geography
       bds_filtered <- bds_metrics |>
         dplyr::semi_join(
-          main_inputs$selected_indicators(),
+          create_inputs$selected_indicators(),
           by = c(
             "Topic" = "Topic",
             "Measure" = "Measure"
@@ -363,3 +376,66 @@ FilterBDS_StagingServer <- function(id, main_inputs, geog_groups, year_range, bd
     filtered_bds
   })
 }
+
+
+
+# StagingTableUI <- function(id) {
+#   ns <- NS(id)
+#
+# }
+#
+# StagingTableServer <- function(id, staging_bds, stat_n_geog, region_names_bds, stat_n_association) {
+#   moduleServer(id, function(input, output, session) {
+#     # Build the staging table
+#     staging_table <- reactive({
+#       # Selected relevant cols
+#       # Coerce to wide format
+#       # Join region col (set regions and England as themselves for Region)
+#       wide_table <- staging_bds() |>
+#         dplyr::select(
+#           `LA Number`, `LA and Regions`, Topic,
+#           Measure, Years, Years_num, values_num, Values
+#         ) |>
+#         tidyr::pivot_wider(
+#           id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
+#           names_from = Years,
+#           values_from = values_num,
+#         ) |>
+#         dplyr::left_join(
+#           stat_n_geog |>
+#             dplyr::select(`LA num`, GOReg),
+#           by = c("LA Number" = "LA num")
+#         ) |>
+#         dplyr::mutate(GOReg = dplyr::case_when(
+#           `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
+#           TRUE ~ GOReg
+#         ))
+#
+#       # Order columns (and sort year cols order)
+#       wide_table_ordered <- wide_table |>
+#         dplyr::select(
+#           `LA Number`, `LA and Regions`,
+#           "Region" = "GOReg",
+#           Topic, Measure,
+#           dplyr::all_of(sort_year_columns(wide_table))
+#         )
+#
+#
+#       # If SNs included, add SN LA association column
+#       # Multi-join as want to include an association for every row (even duplicates)
+#       if (isTRUE(input$la_groups == "la_stat_ns")) {
+#         wide_table_ordered <- wide_table_ordered |>
+#           dplyr::left_join(
+#             stat_n_association(),
+#             by = "LA and Regions",
+#             relationship = "many-to-many"
+#           ) |>
+#           dplyr::relocate(sn_parent, .after = "Measure") |>
+#           dplyr::rename("Statistical Neighbour Group" = "sn_parent")
+#       }
+#
+#       # Staging table formatted and ready for output
+#       wide_table_ordered
+#     })
+#   })
+# }

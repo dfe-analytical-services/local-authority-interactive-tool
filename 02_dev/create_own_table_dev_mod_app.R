@@ -27,16 +27,14 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible; padding: 1rem;",
-    Create_MainInputsUI("main_inputs"),
     bslib::layout_column_wrap(
-      GroupingInputUI("geog_groups")["LA groups"],
-      GroupingInputUI("geog_groups")["Other groups"],
-      YearRangeUI("year_range_input"),
-      # Button container with styling
-      div(
-        style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
-        shiny::actionButton("add_query", "Add selections", class = "gov-uk-button")
-      )
+      Create_MainInputsUI("create_inputs")["Main choices"],
+    ),
+    bslib::layout_column_wrap(
+      Create_MainInputsUI("create_inputs")["LA grouping"],
+      Create_MainInputsUI("create_inputs")["Other grouping"],
+      YearRangeUI("year_range"),
+      Create_MainInputsUI("create_inputs")["Add selection"]
     )
   ),
   h4("Selected outputs:"),
@@ -46,19 +44,19 @@ ui <- bslib::page_fillable(
 # Main App Server
 server <- function(input, output, session) {
   # Call the main inputs module
-  main_inputs <- Create_MainInputsServer("main_inputs", bds_metrics)
+  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
 
   # Year range
   year_range <- YearRangeServer(
-    "year_range_input",
+    "year_range",
     bds_metrics,
-    main_inputs$indicator
+    create_inputs$indicator
   )
 
   # Geog Groupings
   geog_groups <- GroupingInputServer(
-    "geog_groups",
-    main_inputs$geog,
+    "create_inputs",
+    create_inputs,
     la_names_bds,
     region_names_bds,
     stat_n_geog,
@@ -67,8 +65,8 @@ server <- function(input, output, session) {
 
   # Stat neighbour association table
   stat_n_association <- StatN_AssociationServer(
-    "geog_groups",
-    main_inputs$geog,
+    "create_inputs",
+    create_inputs$geog,
     la_names_bds,
     stat_n_la
   )
@@ -76,7 +74,7 @@ server <- function(input, output, session) {
   # Staging filtered BDS
   staging_filtered_bds <- FilterBDS_StagingServer(
     "staging_bds",
-    main_inputs,
+    create_inputs,
     geog_groups,
     year_range,
     bds_metrics
@@ -85,10 +83,10 @@ server <- function(input, output, session) {
 
   output$selected_inputs <- renderPrint({
     list(
-      Geography = main_inputs$geog(),
-      Topic = main_inputs$topic(),
-      Indicator = main_inputs$indicator(),
-      Topic_Indicator_pair = main_inputs$selected_indicators(),
+      Geography = create_inputs$geog(),
+      Topic = create_inputs$topic(),
+      Indicator = create_inputs$indicator(),
+      Topic_Indicator_pair = create_inputs$selected_indicators(),
       Year = year_range(),
       Geog_groups = geog_groups(),
       Stat_N_association = stat_n_association(),
