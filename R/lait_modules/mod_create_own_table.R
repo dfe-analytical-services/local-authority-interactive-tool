@@ -685,7 +685,8 @@ QueryTableServer <- function(id, query) {
           `Click to remove query` = reactable::colDef(
             cell = reactable::JS(
               "function(cellInfo) {
-                const buttonId = 'remove_' + cellInfo.row['.query_id'];
+                const buttonId = 'query_table-remove-' + cellInfo.row['.query_id'];
+                console.log('Generated button ID:', buttonId);  // Confirm buttonId in console
                 return React.createElement(ButtonExtras, {
                   id: buttonId,
                   label: 'Remove',
@@ -721,14 +722,11 @@ QueryTableServer <- function(id, query) {
     observe({
       req(nrow(query$data))
       lapply(query$data$.query_id, function(q_id) {
-        remove_button_id <- paste0("remove_", q_id)
-        print(remove_button_id) # Confirm each generated ID
+        remove_button_id <- paste0("remove-", q_id)
 
         # Use dynamic input reference with input[[remove_button_id]]
         observeEvent(input[[remove_button_id]],
           {
-            print(paste("Button clicked:", remove_button_id))
-
             # Remove the query from the data frame based on the query ID
             query$data <- query$data[query$data$.query_id != q_id, , drop = FALSE]
             query$output <- query$output[query$output$.query_id != q_id, , drop = FALSE]
@@ -738,9 +736,6 @@ QueryTableServer <- function(id, query) {
               query$output <- query$output |>
                 dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure)
             }
-
-            # Print the updated query$output to confirm removal
-            print(query$output)
           },
           ignoreInit = TRUE
         )
