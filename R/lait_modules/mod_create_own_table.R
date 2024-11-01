@@ -321,20 +321,25 @@ StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) 
 StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Staging table ==============================================================
-    # Filter BDS for geographies and
-    # topic-indicator pairs in the selected_values reactive
-    filtered_bds <- reactive({
-      req(nrow(create_inputs$selected_indicators()) > 0)
 
-      # Filter the bds_metrics by topic, indicator, and geography
-      bds_filtered <- bds_metrics |>
+    # Filter BDS for topic-indicator pairs in the selected_values reactive
+    topic_indicator_bds <- reactive({
+      req(nrow(create_inputs$selected_indicators()) > 0)
+      bds_metrics |>
         dplyr::semi_join(
           create_inputs$selected_indicators(),
           by = c(
             "Topic" = "Topic",
             "Measure" = "Measure"
           )
-        ) |>
+        )
+    })
+
+    # Filter BDS for geographies and year range
+    staging_bds <- reactive({
+      req(geog_groups(), topic_indicator_bds())
+      # Filter the bds_metrics geography
+      filtered_bds <- topic_indicator_bds() |>
         dplyr::filter(
           `LA and Regions` %in% geog_groups(),
           !is.na(Years)
@@ -342,11 +347,11 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_met
 
       # Cleaning Years
       # Check if all years have consistent suffix
-      consistent_str_years <- check_year_suffix_consistency(bds_filtered)
+      consistent_str_years <- check_year_suffix_consistency(filtered_bds)
 
       # If not consistent suffix use the cleaned year cols (numeric years)
       if (!consistent_str_years) {
-        bds_filtered <- bds_filtered |>
+        filtered_bds <- filtered_bds |>
           dplyr::mutate(
             Years = Years_num
           )
@@ -355,12 +360,12 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_met
       # Apply the year range filter
       # If only one year selected then show just that year
       if (length(year_range()) == 1) {
-        bds_filtered <- bds_filtered |>
+        filtered_bds <- filtered_bds |>
           dplyr::filter(
             Years == year_range()[1]
           )
       } else if (length(year_range()) == 2) {
-        bds_filtered <- bds_filtered |>
+        filtered_bds <- filtered_bds |>
           dplyr::filter(
             Years >= year_range()[1],
             Years <= year_range()[2]
@@ -368,10 +373,10 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_met
       }
 
       # Return the user selection filtered data for staging table
-      bds_filtered
+      filtered_bds
     })
 
-    filtered_bds
+    staging_bds
   })
 }
 
