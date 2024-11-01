@@ -278,12 +278,14 @@ GroupingInputServer <- function(id, create_inputs, la_names_bds, region_names_bd
 
 
 
-
+# Statistical neighbour input ------------------------------------------------
+# Assign LA statistical neighbours their selected LA association
 StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
-    # Statistical neighbour input ------------------------------------------------
-    # Assign LA statistical neighbours their selected LA association
     stat_n_association <- reactive({
+      # If SN selected create the SN association df
+      req(create_inputs$la_group() == "la_stat_ns")
+
       # Create mini association df of SN LAs and their parent SN LA
       association_table <- data.frame(
         `LA and Regions` = character(),
@@ -291,11 +293,10 @@ StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) 
         check.names = FALSE
       )
 
-      # If SN selected fill out the above SN association df
-      if (isTRUE(create_inputs$la_group() == "la_stat_ns")) {
-        # Get LAs from geogs selected
-        input_las <- intersect(create_inputs$geog(), la_names_bds)
+      # Get LAs from geogs selected
+      input_las <- intersect(create_inputs$geog(), la_names_bds)
 
+      if (length(input_las) > 0) {
         # Build association df (include LA itself too)
         stat_n_groups <- lapply(input_las, function(la) {
           data.frame(
@@ -306,9 +307,7 @@ StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) 
         })
 
         # Combine all statistical neighbour associations into a single data frame
-        if (length(input_las) > 0) {
-          association_table <- do.call(rbind, stat_n_groups)
-        }
+        association_table <- do.call(rbind, stat_n_groups)
       }
 
       # Return the association data
@@ -325,7 +324,6 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_met
     # Filter BDS for geographies and
     # topic-indicator pairs in the selected_values reactive
     filtered_bds <- reactive({
-      req(create_inputs$topic(), create_inputs$indicator())
       req(nrow(create_inputs$selected_indicators()) > 0)
 
       # Filter the bds_metrics by topic, indicator, and geography
@@ -462,7 +460,15 @@ StagingTableUI <- function(id) {
   )
 }
 
-StagingTableServer <- function(id, create_inputs, staging_data, staging_bds) {
+StagingTableServer <- function(id,
+                               create_inputs,
+                               staging_bds,
+                               region_names_bds,
+                               la_names_bds,
+                               stat_n_la,
+                               geog_groups,
+                               year_range,
+                               bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Staging table output -------------------------------------------------------
     output$staging_table <- reactable::renderReactable({
@@ -489,6 +495,25 @@ StagingTableServer <- function(id, create_inputs, staging_data, staging_bds) {
           )
         ))
       }
+
+      # Filtering BDS for staging data
+      staging_bds <- StagingBDSServer(
+        "staging_bds",
+        create_inputs,
+        geog_groups,
+        year_range,
+        bds_metrics
+      )
+
+      # Build staging data
+      staging_data <- StagingDataServer(
+        "staging_data",
+        create_inputs,
+        staging_bds,
+        region_names_bds,
+        la_names_bds,
+        stat_n_la
+      )
 
       # Output table - formatting numbers, long text and page settings
       dfe_reactable(

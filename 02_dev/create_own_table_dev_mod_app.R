@@ -64,31 +64,36 @@ server <- function(input, output, session) {
     stat_n_la
   )
 
-  # Filtering BDS for staging data
-  staging_bds <- StagingBDSServer(
-    "staging_bds",
-    create_inputs,
-    geog_groups,
-    year_range,
-    bds_metrics
-  )
+  # # Filtering BDS for staging data
+  # staging_bds <- StagingBDSServer(
+  #   "staging_bds",
+  #   create_inputs,
+  #   geog_groups,
+  #   year_range,
+  #   bds_metrics
+  # )
 
-  # Build staging data
-  staging_data <- StagingDataServer(
-    "staging_data",
-    create_inputs,
-    staging_bds,
-    region_names_bds,
-    la_names_bds,
-    stat_n_la
-  )
+  # # Build staging data
+  # staging_data <- StagingDataServer(
+  #   "staging_data",
+  #   create_inputs,
+  #   staging_bds,
+  #   region_names_bds,
+  #   la_names_bds,
+  #   stat_n_la
+  # )
 
   # Output staging table
   StagingTableServer(
     "staging_table",
     create_inputs,
-    staging_data,
-    staging_bds
+    staging_bds,
+    region_names_bds,
+    la_names_bds,
+    stat_n_la,
+    geog_groups,
+    year_range,
+    bds_metrics
   )
 
 
@@ -99,9 +104,8 @@ server <- function(input, output, session) {
       Indicator = create_inputs$indicator(),
       Topic_Indicator_pair = create_inputs$selected_indicators(),
       Year = year_range(),
-      Geog_groups = geog_groups(),
-      Staging_BDS = staging_bds(),
-      Staging_Data = staging_data()
+      Geog_groups = geog_groups()
+      # Staging_BDS = staging_bds()
     )
   })
 }
