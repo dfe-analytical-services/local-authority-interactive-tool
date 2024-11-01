@@ -100,7 +100,6 @@ server <- function(input, output, session) {
   StagingTableServer(
     "staging_table",
     create_inputs,
-    staging_bds,
     region_names_bds,
     la_names_bds,
     stat_n_la,

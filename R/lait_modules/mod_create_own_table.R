@@ -466,7 +466,6 @@ StagingTableUI <- function(id) {
 
 StagingTableServer <- function(id,
                                create_inputs,
-                               staging_bds,
                                region_names_bds,
                                la_names_bds,
                                stat_n_la,
