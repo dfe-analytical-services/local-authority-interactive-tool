@@ -26,6 +26,7 @@ ui <- function(input, output, session) {
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
     tags$head(htmltools::includeScript("www/custom_js.js")),
+    reactable.extras::reactable_extras_dependency(),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -198,6 +199,47 @@ ui <- function(input, output, session) {
 
         # LA Metadata =========================================================
         LA_LevelMetaUI("all_la_meta")
+      ),
+      bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
+        title = "Create Your Own",
+        value = "Create Your Own",
+
+        # User Inputs =========================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible; padding: 1rem;",
+          bslib::layout_column_wrap(
+            Create_MainInputsUI("create_inputs")["Main choices"],
+          ),
+          bslib::layout_column_wrap(
+            Create_MainInputsUI("create_inputs")["LA grouping"],
+            Create_MainInputsUI("create_inputs")["Other grouping"],
+            YearRangeUI("year_range"),
+            Create_MainInputsUI("create_inputs")["Add selection"]
+          )
+        ),
+
+        # Tables ==============================================================
+        # Staging table -------------------------------------------------------
+        StagingTableUI("staging_table"),
+        # Query table ---------------------------------------------------------
+        QueryTableUI("query_table"),
+        # Create own table ----------------------------------------------------
+        CreateOwnTableUI("create_own_table"),
+        # Charts ==============================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          h3("Output Charts (Charts showing data from saved selections)"),
+          p("Note a maximum of 4 geographies and 3 indicators can be shown."),
+          bslib::navset_tab(
+            # Line chart ------------------------------------------------------
+            CreateOwnLineChartUI("create_own_line"),
+            # Bar chart ------------------------------------------------------
+            CreateOwnBarChartUI("create_own_bar")
+          )
+        )
       ),
       # User guide ============================================================
       user_guide_panel(),
