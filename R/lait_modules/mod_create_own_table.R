@@ -405,29 +405,23 @@ StagingDataServer <- function(
       # Join region col (set regions and England as themselves for Region)
       wide_table <- staging_bds() |>
         dplyr::select(
-          `LA Number`, `LA and Regions`, Topic,
+          `LA Number`, `LA and Regions`, Region, Topic,
           Measure, Years, Years_num, values_num, Values
         ) |>
         tidyr::pivot_wider(
-          id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
+          id_cols = c("LA Number", "LA and Regions", "Region", "Topic", "Measure"),
           names_from = Years,
           values_from = values_num,
         ) |>
-        dplyr::left_join(
-          stat_n_geog |>
-            dplyr::select(`LA num`, GOReg),
-          by = c("LA Number" = "LA num")
-        ) |>
-        dplyr::mutate(GOReg = dplyr::case_when(
+        dplyr::mutate(Region = dplyr::case_when(
           `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
-          TRUE ~ GOReg
+          TRUE ~ Region
         ))
 
       # Order columns (and sort year cols order)
       wide_table_ordered <- wide_table |>
         dplyr::select(
-          `LA Number`, `LA and Regions`,
-          "Region" = "GOReg",
+          `LA Number`, `LA and Regions`, Region,
           Topic, Measure,
           dplyr::all_of(sort_year_columns(wide_table))
         )
