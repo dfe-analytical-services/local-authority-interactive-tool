@@ -49,7 +49,8 @@ ui <- bslib::page_fillable(
 
     # Line chart ---------------------------------------------------------------
     bslib::navset_tab(
-      CreateOwnLineChartUI("create_own_line")
+      CreateOwnLineChartUI("create_own_line"),
+      CreateOwnBarChartUI("create_own_bar")
     )
   )
 )
@@ -129,6 +130,12 @@ server <- function(input, output, session) {
 
   CreateOwnLineChartServer(
     "create_own_line",
+    query_table,
+    bds_metrics
+  )
+
+  CreateOwnBarChartServer(
+    "create_own_bar",
     query_table,
     bds_metrics
   )

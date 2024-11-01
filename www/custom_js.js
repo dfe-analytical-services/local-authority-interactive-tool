@@ -58,4 +58,9 @@ $(document).ready(function () {
   $("#create_own_line-copybtn").on("click", async () => {
     await copyImage("create_own_line-copybtn", "create_own_line-copy_plot");
   });
+
+    // Event listener for "Create your own line chart"
+  $("#create_own_bar-copybtn").on("click", async () => {
+    await copyImage("create_own_bar-copybtn", "create_own_bar-copy_plot");
+  });
 });

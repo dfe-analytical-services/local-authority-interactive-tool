@@ -267,3 +267,217 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
     )
   })
 }
+
+
+
+CreateOwnBarChartUI <- function(id) {
+  ns <- NS(id)
+
+  # Bar chart --------------------------------------------------------------
+  bslib::nav_panel(
+    title = "Bar chart",
+    # Line chart plot with download buttons
+    div(
+      style = "display: flex;
+                   justify-content: space-between;
+                   align-items: center;
+                   background: white;",
+      bslib::card(
+        bslib::card_body(
+          ggiraph::girafeOutput(ns("bar_chart"))
+        ),
+        full_screen = TRUE,
+        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+      ),
+      div(
+        # Download button to trigger chart download modal
+        shiny::tagAppendAttributes(
+          DownloadChartBtnUI(ns("download_btn")),
+          style = "max-width: none; margin-left: 0; align-self: auto;"
+        ),
+        br(),
+        shiny::tagAppendAttributes(
+          actionButton(
+            ns("copybtn"),
+            "Copy Chart to Clipboard",
+            icon = icon("copy"),
+            class = "gov-uk-button"
+          ),
+          style = "max-width: none;"
+        ),
+        style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    div(
+      shiny::plotOutput(ns("copy_plot")),
+      style = "content-visibility: hidden;"
+    )
+  )
+}
+
+CreateOwnBarChartServer <- function(id, query, bds_metrics) {
+  moduleServer(id, function(input, output, session) {
+    create_own_table <- CreateOwnDataServer(
+      "create_own_table",
+      query,
+      bds_metrics
+    )
+
+    create_own_bds <- CreateOwnBDSServer(
+      "create_own_bds",
+      create_own_table,
+      bds_metrics
+    )
+
+    chart_info <- CreateOwnChartDataServer(
+      "chart_info",
+      create_own_table,
+      query
+    )
+
+    # Bar chart -----------------------------------------------------------------
+    # Build main bar static plot
+    bar_chart <- reactive({
+      req(
+        "Message from tool" %notin% colnames(create_own_table()),
+        chart_info$no_indicators() <= 3,
+        chart_info$no_geogs() <= 4
+      )
+
+      # Giving facet_wrap charts the correct chart names
+      # Get chart names for each indicator
+      chart_names <- create_own_bds() |>
+        dplyr::distinct(Measure, Chart_title)
+
+      # Wrap the chart names (dependent on number of indicators -
+      # more narrows width available)
+      chart_names_wrapped <- chart_names |>
+        dplyr::mutate(Chart_title = stringr::str_wrap(
+          Chart_title,
+          width = 60 - length(chart_names$Measure) * 10
+        ))
+
+      # Create a named vector for custom titles for each indicator
+      custom_titles <- setNames(
+        chart_names_wrapped$Chart_title,
+        chart_names_wrapped$Measure
+      )
+
+
+
+
+      # Plot chart - split by indicators, colours represent Geographies
+      chart_info$data() |>
+        ggplot2::ggplot() +
+        ggiraph::geom_col_interactive(
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            fill = `LA and Regions`,
+            tooltip = glue::glue_data(
+              chart_info$data() |>
+                pretty_num_table(
+                  include_columns = "values_num",
+                  dp = get_indicator_dps(create_own_bds())
+                ),
+              "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
+            )
+          ),
+          position = position_dodge(width = 0.6),
+          width = 0.6,
+          na.rm = TRUE,
+          color = "black"
+        ) +
+        format_axes(chart_info$data()) +
+        set_plot_colours(chart_info$data(), "fill") +
+        set_plot_labs(create_own_bds()) +
+        custom_theme() +
+        ggplot2::theme(
+          legend.title = ggplot2::element_text(),
+          legend.title.position = "top"
+        ) +
+        guides(
+          fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
+        ) +
+        ggplot2::labs(title = "Bar charts showing selected indicators") +
+        ggplot2::facet_wrap(
+          ~Measure,
+          labeller = labeller(Measure = as_labeller(custom_titles)),
+        ) +
+        # Gives space between the charts so x-axis labels don't overlap
+        theme(
+          panel.spacing.x = unit(15, "mm"),
+          plot.margin = ggplot2::margin(r = 30)
+        )
+    })
+
+    # Build interactive line chart
+    interactive_bar_chart <- reactive({
+      req(
+        "Message from tool" %notin% colnames(create_own_table()),
+        chart_info$no_indicators() <= 3,
+        chart_info$no_geogs() <= 4
+      )
+
+      # Plotting interactive graph
+      ggiraph::girafe(
+        ggobj = (bar_chart()),
+        width_svg = 8.5,
+        options = generic_ggiraph_options(),
+        fonts = list(sans = "Arial")
+      )
+    })
+
+    # Bar chart plot output ------------------------------------------------------
+    output$bar_chart <- ggiraph::renderGirafe({
+      # Error messages for missing or too many selections
+      if ("Message from tool" %in% colnames(create_own_table())) {
+        ggiraph::girafe(
+          ggobj = display_no_data_plot("No plot as not enough selections made"),
+          width_svg = 8.5
+        )
+      } else if (
+        chart_info$no_geogs() > 4
+      ) {
+        ggiraph::girafe(
+          ggobj = display_no_data_plot(label = "No plot as too many Geographies selected"),
+          width_svg = 8.5
+        )
+      } else if (
+        chart_info$no_indicators() > 3
+      ) {
+        ggiraph::girafe(
+          ggobj = display_no_data_plot(label = "No plot as too many Indicators selected"),
+          width_svg = 8.5
+        )
+
+        # Plot chart
+      } else {
+        interactive_bar_chart()
+      }
+    })
+
+    # Bar chart download ---------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Bar")
+
+    # Set up the download handlers for the chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = bar_chart(), "html" = interactive_bar_chart())),
+      reactive(c("LAIT-create-your-own-bar-chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        bar_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+  })
+}
