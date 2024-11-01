@@ -412,12 +412,12 @@ af_colours_focus <- function() {
 
 get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geog) {
   # Initialise an empty vector to store the results
-  selection <- input$geog_input
+  selection <- input$geog
 
   # If Region LAs are selected, add "LAs in [Region]" and exclude those LAs
-  if (input$la_groups == "region_las") {
+  if (input$la_group == "region_las") {
     # LAs in same region as selected LA
-    selected_las <- intersect(input$geog_input, la_names_bds)
+    selected_las <- intersect(input$geog, la_names_bds)
     selected_la_regions <- get_la_region(stat_n_geog, selected_las)
 
     # Only add Region LAs if they are LAs
@@ -427,8 +427,8 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
   }
 
   # If LA statistical neighbours selected add "[LA] statistical neighbours"
-  if (isTRUE(input$la_groups == "la_stat_ns")) {
-    selected_las <- intersect(input$geog_input, la_names_bds)
+  if (isTRUE(input$la_group == "la_stat_ns")) {
+    selected_las <- intersect(input$geog, la_names_bds)
 
     # Only add stat neighbours if they are LAs
     if (length(selected_las) > 0) {
@@ -437,14 +437,14 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
   }
 
   # If all LAs are selected, add "All LAs" and exclude all other LA terms
-  if (input$la_groups == "all_las") {
+  if (input$la_group == "all_las") {
     selection <- c(setdiff(selection, la_names_bds), "All LAs") |>
       (\(x) x[!grepl("^LAs in ", x)])() |>
       (\(x) x[!grepl(" statistical neighbours$", x)])()
   }
 
   # If all regions are selected, add "All Regions" and exclude region_names_bds
-  if (input$all_regions) {
+  if (input$inc_regions) {
     selection <- c(setdiff(selection, region_names_bds), "All Regions")
   }
 

@@ -61,7 +61,7 @@ Create_MainInputsUI <- function(id) {
     # Add selection (query) button
     "Add selection" = div(
       style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
-      shiny::actionButton("add_query", "Add selections", class = "gov-uk-button")
+      shiny::actionButton(ns("add_query"), "Add selections", class = "gov-uk-button")
     )
   )
 }
@@ -151,13 +151,12 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       }),
       inc_england = reactive({
         input$inc_england
-      }) # ,
-      # add_query = reactive({
-      #   input$add_query
-      # }),
+      }),
+      add_query = reactive(input$add_query)
     )
 
-    return(create_inputs)
+    # Return inputs
+    create_inputs
   })
 }
 
@@ -224,7 +223,13 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
       }
     })
 
-    return(year_range = reactive(input$year_range))
+    year_input <- list(
+      range = reactive(input$year_range),
+      choices = years_choices
+    )
+
+    # Return year inputs
+    year_input
   })
 }
 
@@ -318,7 +323,7 @@ StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) 
 
 
 
-StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_metrics) {
+StagingBDSServer <- function(id, create_inputs, geog_groups, year_input, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Staging table ==============================================================
 
@@ -359,16 +364,16 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_range, bds_met
 
       # Apply the year range filter
       # If only one year selected then show just that year
-      if (length(year_range()) == 1) {
+      if (length(year_input$range()) == 1) {
         filtered_bds <- filtered_bds |>
           dplyr::filter(
-            Years == year_range()[1]
+            Years == year_input$range()[1]
           )
-      } else if (length(year_range()) == 2) {
+      } else if (length(year_input$range()) == 2) {
         filtered_bds <- filtered_bds |>
           dplyr::filter(
-            Years >= year_range()[1],
-            Years <= year_range()[2]
+            Years >= year_input$range()[1],
+            Years <= year_input$range()[2]
           )
       }
 
@@ -472,7 +477,7 @@ StagingTableServer <- function(id,
                                la_names_bds,
                                stat_n_la,
                                geog_groups,
-                               year_range,
+                               year_input,
                                bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Staging table output -------------------------------------------------------
@@ -506,7 +511,7 @@ StagingTableServer <- function(id,
         "staging_bds",
         create_inputs,
         geog_groups,
-        year_range,
+        year_input,
         bds_metrics
       )
 
@@ -547,6 +552,199 @@ StagingTableServer <- function(id,
         pageSizeOptions = c(3, 5, 10, 25),
         compact = TRUE
       )
+    })
+  })
+}
+
+
+
+# QueryDataModule: Manages query data including creating and storing queries
+QueryDataServer <- function(id, create_inputs, geog_groups, year_input, staging_data) {
+  moduleServer(id, function(input, output, session) {
+    # ns <- session$ns
+
+    # Initialize query storage
+    query <- reactiveValues(
+      data = data.frame(
+        Topic = I(list()),
+        Indicator = I(list()),
+        `LA and Regions` = I(list()),
+        `Year range` = I(list()),
+        `Click to remove query` = character(),
+        `.query_id` = numeric(),
+        check.names = FALSE
+      ),
+      output = data.frame(
+        `LA Number` = character(),
+        `LA and Regions` = character(),
+        Region = character(),
+        Topic = character(),
+        Measure = character(),
+        check.names = FALSE
+      )
+    )
+
+    # Adds new query data to the query table
+    observeEvent(create_inputs$add_query(),
+      {
+        req(length(geog_groups()) > 0 && nrow(create_inputs$selected_indicators()) > 0)
+
+        new_q_id <- max(c(0, query$data$.query_id), na.rm = TRUE) + 1
+        available_years <- range(year_input$choices())
+
+        # Create year range display text
+        year_range_display <- dplyr::case_when(
+          length(year_input$range()) == 0 ~ paste0("All years (", available_years[1], " to ", available_years[2], ")"),
+          length(year_input$range()) == 2 ~ paste(year_input$range()[1], "to", year_input$range()[2]),
+          length(year_input$range()) == 1 ~ paste0("", year_input$range()[1])
+        )
+
+        # Evaluate inputs for get_geog_selection()
+        evaluated_inputs <- list(
+          geog = create_inputs$geog(),
+          la_group = create_inputs$la_group(),
+          inc_regions = create_inputs$inc_regions(),
+          inc_england = create_inputs$inc_england()
+        )
+
+        # Prepare new query entry
+        new_query <- data.frame(
+          .query_id = new_q_id,
+          Topic = I(list(create_inputs$selected_indicators()$Topic)),
+          Indicator = paste(create_inputs$selected_indicators()$Measure, collapse = ",<br>"),
+          `LA and Regions` = paste(
+            get_geog_selection(evaluated_inputs, la_names_bds, region_names_bds, stat_n_geog),
+            collapse = ",<br>"
+          ),
+          `Year range` = year_range_display,
+          `Click to remove query` = "Remove",
+          check.names = FALSE
+        )
+
+        query$data <- query$data |> rbind(new_query)
+
+        # Update output data
+        staging_to_append <- staging_data()
+        staging_to_append$.query_id <- new_q_id
+        consistent_staging_final_yrs <- data.frame(
+          Years = c(
+            colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
+            colnames(staging_to_append)[grepl("^\\d{4}", colnames(staging_to_append))]
+          )
+        ) |> check_year_suffix_consistency()
+
+        # Check year consistency and add to output table
+        if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
+          query$output <- query$output |>
+            rename_columns_with_year() |>
+            dplyr::bind_rows(rename_columns_with_year(staging_to_append))
+        } else {
+          query$output <- query$output |> dplyr::bind_rows(staging_to_append)
+        }
+      },
+      ignoreInit = TRUE
+    )
+
+    query
+  })
+}
+
+
+QueryTableUI <- function(id) {
+  ns <- NS(id)
+
+  # Selections table ===========================================================
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    h3("Summary of Selections"),
+    bslib::card(
+      reactable::reactableOutput(ns("query_table"))
+    )
+  )
+}
+
+
+# QueryTableModule: Renders the query table and manages removal actions
+QueryTableServer <- function(id, query) {
+  moduleServer(id, function(input, output, session) {
+    output$query_table <- reactable::renderReactable({
+      req(nrow(query$data))
+      if (nrow(query$data) == 0) {
+        return(reactable::reactable(
+          data.frame(`Message from tool` = "No saved selections.", check.names = FALSE)
+        ))
+      }
+
+      # Render query table with custom columns and button actions
+      dfe_reactable(
+        query$data,
+        columns = list(
+          Indicator = html_colDef(),
+          `LA and Regions` = html_colDef(),
+          `Click to remove query` = reactable::colDef(
+            cell = reactable::JS(
+              "function(cellInfo) {
+                const buttonId = 'remove_' + cellInfo.row['.query_id'];
+                return React.createElement(ButtonExtras, {
+                  id: buttonId,
+                  label: 'Remove',
+                  uuid: cellInfo.row['.query_id'],
+                  column: cellInfo.column.id,
+                  class: 'govuk-button--warning',
+                  className: 'govuk-button--warning'
+                }, cellInfo.index);
+              }"
+            )
+          ),
+          Topic = reactable::colDef(
+            cell = function(value) {
+              unique_values <- unique(unlist(value))
+              if (length(unique_values) > 0) {
+                return(paste(unique_values, collapse = ",<br>"))
+              } else {
+                return("")
+              }
+            },
+            html = TRUE
+          ),
+          .query_id = reactable::colDef(show = FALSE)
+        ),
+        defaultPageSize = 5,
+        showPageSizeOptions = TRUE,
+        pageSizeOptions = c(5, 10, 25),
+        compact = TRUE
+      )
+    })
+
+    # Remove query action
+    observe({
+      req(nrow(query$data))
+      lapply(query$data$.query_id, function(q_id) {
+        remove_button_id <- paste0("remove_", q_id)
+        print(remove_button_id) # Confirm each generated ID
+
+        # Use dynamic input reference with input[[remove_button_id]]
+        observeEvent(input[[remove_button_id]],
+          {
+            print(paste("Button clicked:", remove_button_id))
+
+            # Remove the query from the data frame based on the query ID
+            query$data <- query$data[query$data$.query_id != q_id, , drop = FALSE]
+            query$output <- query$output[query$output$.query_id != q_id, , drop = FALSE]
+
+            # Check if output is empty and reset if necessary
+            if (nrow(query$output) == 0) {
+              query$output <- query$output |>
+                dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure)
+            }
+
+            # Print the updated query$output to confirm removal
+            print(query$output)
+          },
+          ignoreInit = TRUE
+        )
+      })
     })
   })
 }

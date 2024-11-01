@@ -38,6 +38,7 @@ ui <- bslib::page_fillable(
     )
   ),
   StagingTableUI("staging_table"),
+  QueryTableUI("query_table"),
   h4("Selected outputs:"),
   verbatimTextOutput("selected_inputs")
 )
@@ -48,7 +49,7 @@ server <- function(input, output, session) {
   create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
 
   # Year range
-  year_range <- YearRangeServer(
+  year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
     create_inputs$indicator
@@ -64,24 +65,24 @@ server <- function(input, output, session) {
     stat_n_la
   )
 
-  # # Filtering BDS for staging data
-  # staging_bds <- StagingBDSServer(
-  #   "staging_bds",
-  #   create_inputs,
-  #   geog_groups,
-  #   year_range,
-  #   bds_metrics
-  # )
+  # Filtering BDS for staging data
+  staging_bds <- StagingBDSServer(
+    "staging_bds",
+    create_inputs,
+    geog_groups,
+    year_input,
+    bds_metrics
+  )
 
-  # # Build staging data
-  # staging_data <- StagingDataServer(
-  #   "staging_data",
-  #   create_inputs,
-  #   staging_bds,
-  #   region_names_bds,
-  #   la_names_bds,
-  #   stat_n_la
-  # )
+  # Build staging data
+  staging_data <- StagingDataServer(
+    "staging_data",
+    create_inputs,
+    staging_bds,
+    region_names_bds,
+    la_names_bds,
+    stat_n_la
+  )
 
   # Output staging table
   StagingTableServer(
@@ -92,8 +93,21 @@ server <- function(input, output, session) {
     la_names_bds,
     stat_n_la,
     geog_groups,
-    year_range,
+    year_input,
     bds_metrics
+  )
+
+  query_data <- QueryDataServer(
+    "query_data",
+    create_inputs,
+    geog_groups,
+    year_input,
+    staging_data
+  )
+
+  QueryTableServer(
+    "query_table",
+    query_data
   )
 
 
@@ -103,9 +117,10 @@ server <- function(input, output, session) {
       Topic = create_inputs$topic(),
       Indicator = create_inputs$indicator(),
       Topic_Indicator_pair = create_inputs$selected_indicators(),
-      Year = year_range(),
-      Geog_groups = geog_groups()
-      # Staging_BDS = staging_bds()
+      Year = year_input$range(),
+      Geog_groups = geog_groups(),
+      Staging_data = staging_data(),
+      Query = query_data$data
     )
   })
 }

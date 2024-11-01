@@ -26,7 +26,7 @@ ui <- bslib::page_fillable(
       div(
         style = "margin-bottom: 1rem;",
         shiny::selectizeInput(
-          inputId = "geog_input",
+          inputId = "geog",
           label = "LAs, Regions, and England:",
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
@@ -61,7 +61,7 @@ ui <- bslib::page_fillable(
     bslib::layout_column_wrap(
       # Checkbox inputs for LAs, Regions, etc
       shiny::radioButtons(
-        inputId = "la_groups",
+        inputId = "la_group",
         label = "LA Groupings (choose one):",
         choices = list(
           "None" = "no_groups",
@@ -76,7 +76,7 @@ ui <- bslib::page_fillable(
       div(
         style = "width: fit-content;",
         shiny::p("Other groupings:"),
-        shiny::checkboxInput("all_regions", "Include All Regions", FALSE),
+        shiny::checkboxInput("inc_regions", "Include All Regions", FALSE),
         shiny::checkboxInput("inc_england", "Include England", FALSE),
         shinyWidgets::pickerInput(
           inputId = "year_range",
@@ -345,16 +345,16 @@ server <- function(input, output, session) {
   # Geography inputs -----------------------------------------------------------
   geog_inputs <- reactive({
     # Value from LA & Region input
-    inputs <- input$geog_input
+    inputs <- input$geog
 
     # Add geography groupings (if selected)
     # All LAs
-    if (isTRUE(input$la_groups == "all_las")) {
+    if (isTRUE(input$la_group == "all_las")) {
       inputs <- unique(c(inputs, la_names_bds))
     }
 
     # All Regions
-    if (isTRUE(input$all_regions)) {
+    if (isTRUE(input$inc_regions)) {
       inputs <- unique(c(inputs, region_names_bds))
     }
 
@@ -364,16 +364,16 @@ server <- function(input, output, session) {
     }
 
     # All LAs from selected LA region
-    if (isTRUE(input$la_groups == "region_las")) {
-      selected_la_regions <- get_la_region(stat_n_geog, input$geog_input)
+    if (isTRUE(input$la_group == "region_las")) {
+      selected_la_regions <- get_la_region(stat_n_geog, input$geog)
       all_region_las <- get_las_in_regions(stat_n_geog, selected_la_regions)
 
       inputs <- unique(c(inputs, all_region_las))
     }
 
     # LA statistical neighbours
-    if (isTRUE(input$la_groups == "la_stat_ns")) {
-      selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, input$geog_input)
+    if (isTRUE(input$la_group == "la_stat_ns")) {
+      selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, input$geog)
 
       inputs <- c(inputs, selected_la_stat_n)
     }
@@ -393,9 +393,9 @@ server <- function(input, output, session) {
     )
 
     # If SN selected fill out the above SN association df
-    if (isTRUE(input$la_groups == "la_stat_ns")) {
+    if (isTRUE(input$la_group == "la_stat_ns")) {
       # Get LAs from geogs selected
-      input_las <- intersect(input$geog_input, la_names_bds)
+      input_las <- intersect(input$geog, la_names_bds)
 
       # Build association df (include LA itself too)
       stat_n_groups <- lapply(input_las, function(la) {
@@ -506,7 +506,7 @@ server <- function(input, output, session) {
 
     # If SNs included, add SN LA association column
     # Multi-join as want to include an association for every row (even duplicates)
-    if (isTRUE(input$la_groups == "la_stat_ns")) {
+    if (isTRUE(input$la_group == "la_stat_ns")) {
       wide_table_ordered <- wide_table_ordered |>
         dplyr::left_join(
           stat_n_association(),
@@ -524,7 +524,7 @@ server <- function(input, output, session) {
   # Staging table output -------------------------------------------------------
   output$staging_table <- reactable::renderReactable({
     # Display messages if there are incorrect selections
-    if (is.null(geog_inputs()) && is.null(input$geog_input)) {
+    if (is.null(geog_inputs()) && is.null(input$geog)) {
       return(reactable::reactable(
         data.frame(
           `Message from tool` = "Please add selections (above).",
