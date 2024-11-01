@@ -741,5 +741,8 @@ QueryTableServer <- function(id, query) {
         )
       })
     })
+
+    # Output updated query (which is inline with any removed rows)
+    query
   })
 }

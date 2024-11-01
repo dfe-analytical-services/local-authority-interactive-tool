@@ -105,24 +105,10 @@ server <- function(input, output, session) {
     staging_data
   )
 
-  QueryTableServer(
+  query_table <- QueryTableServer(
     "query_table",
     query_data
   )
-
-
-  output$selected_inputs <- renderPrint({
-    list(
-      Geography = create_inputs$geog(),
-      Topic = create_inputs$topic(),
-      Indicator = create_inputs$indicator(),
-      Topic_Indicator_pair = create_inputs$selected_indicators(),
-      Year = year_input$range(),
-      Geog_groups = geog_groups(),
-      Staging_data = staging_data(),
-      Query = query_data$data
-    )
-  })
 }
 
 # Run the application
