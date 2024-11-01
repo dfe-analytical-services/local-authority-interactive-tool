@@ -39,8 +39,7 @@ ui <- bslib::page_fillable(
   ),
   StagingTableUI("staging_table"),
   QueryTableUI("query_table"),
-  h4("Selected outputs:"),
-  verbatimTextOutput("selected_inputs")
+  CreateOwnTableUI("create_own_table")
 )
 
 # Main App Server
@@ -108,6 +107,12 @@ server <- function(input, output, session) {
   query_table <- QueryTableServer(
     "query_table",
     query_data
+  )
+
+  CreateOwnTableServer(
+    "create_own_table",
+    query_table,
+    bds_metrics
   )
 }
 

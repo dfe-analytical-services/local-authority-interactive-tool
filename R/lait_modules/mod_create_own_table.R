@@ -746,3 +746,171 @@ QueryTableServer <- function(id, query) {
     query
   })
 }
+
+
+
+
+CreateOwnDataServer <- function(id, query, bds_metrics) {
+  moduleServer(id, function(input, output, session) {
+    # Output data table ==========================================================
+    # Cleaned final table
+    clean_final_table <- reactive({
+      req(query$data)
+
+      # Check if there are any saved queries
+      if (nrow(query$data) == 0) {
+        return(
+          data.frame(
+            `Message from tool` = "No saved selections.",
+            check.names = FALSE
+          )
+        )
+      }
+
+      # Logic to reset the year cols to have year suffixes if they match
+      # (As they may have been cleaned from the code logic at end of the new query chunk)
+      # Get output indicators
+      output_indicators <- query$output |>
+        pull_uniques("Measure")
+
+      # Boolean for if the output indicators share suffixes
+      share_year_suffix <- bds_metrics |>
+        dplyr::filter(
+          Measure %in% output_indicators,
+          !is.na(Years)
+        ) |>
+        check_year_suffix_consistency()
+
+      # If suffixes are shared then reapply the years with suffix to col names
+      if (share_year_suffix) {
+        # Get the years with suffixes
+        years_dict <- bds_metrics |>
+          dplyr::filter(
+            Measure %in% output_indicators,
+            !is.na(Years)
+          ) |>
+          dplyr::distinct(Years, Years_num)
+
+        # Replace the matching year col names with respective year suffix
+        new_col_names <- colnames(query$output) |>
+          (\(cols) ifelse(cols %in% years_dict$Years_num,
+            years_dict$Years[match(cols, years_dict$Years_num)],
+            cols
+          ))()
+
+        # Apply the new year suffix names to query$output
+        colnames(query$output) <- new_col_names
+      }
+
+      # Final query output table with ordered columns, (SN parent if selected) and
+      # Sorted year columns
+      query$output |>
+        dplyr::select(
+          `LA Number`, `LA and Regions`,
+          Region, Topic, Measure,
+          tidyselect::any_of("Statistical Neighbour Group"),
+          dplyr::all_of(sort_year_columns(query$output))
+        )
+    })
+
+    clean_final_table
+  })
+}
+
+CreateOwnBDSServer <- function(id, create_own_table, bds_metrics) {
+  moduleServer(id, function(input, output, session) {
+    # Filtering BDS for all topic-indicator pairs in the final output table
+    # (The filtered_bds only has the staging topic-indicator pairs)
+    final_filtered_bds <- reactive({
+      output_table_filters <- create_own_table() |>
+        dplyr::distinct(`LA and Regions`, Topic, Measure)
+
+      bds_metrics |>
+        dplyr::semi_join(
+          output_table_filters,
+          by = c("LA and Regions", "Topic", "Measure")
+        )
+    })
+
+    final_filtered_bds
+  })
+}
+
+
+
+CreateOwnTableUI <- function(id) {
+  ns <- NS(id)
+
+  # Output data table ==========================================================
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    h3("Output Table (View of all saved selections)"),
+    bslib::navset_card_tab(
+      bslib::nav_panel(
+        title = "Output Table",
+        reactable::reactableOutput(ns("output_table"))
+      ),
+      # Download tab
+      bslib::nav_panel(
+        title = "Download",
+        file_type_input_btn(ns("file_type")),
+        Download_DataUI(ns("table_download"), "Output Table")
+      )
+    )
+  )
+}
+
+CreateOwnTableServer <- function(id, query, bds_metrics) {
+  moduleServer(id, function(input, output, session) {
+    create_own_table <- CreateOwnDataServer(
+      "create_own_table",
+      query,
+      bds_metrics
+    )
+
+    create_own_bds <- CreateOwnBDSServer(
+      "create_own_bds",
+      create_own_table,
+      bds_metrics
+    )
+
+    # Final output table (based on saved queries) --------------------------------
+    output$output_table <- reactable::renderReactable({
+      # Display the final query table data
+      # Format numeric cols (using dps based of output table indicators),
+      # Truncate measure with hover and page settings
+      dfe_reactable(
+        create_own_table(),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            create_own_table(),
+            get_indicator_dps(create_own_bds()),
+            num_exclude = c("LA Number", "Measure")
+          ),
+          list(
+            set_custom_default_col_widths(),
+            Measure = reactable::colDef(
+              html = TRUE,
+              cell = function(value, index, name) {
+                render.reactable.cell.with.tippy(text = value, tooltip = value)
+              }
+            )
+          )
+        ),
+        defaultPageSize = 5,
+        showPageSizeOptions = TRUE,
+        pageSizeOptions = c(5, 10, 25),
+        compact = TRUE
+      )
+    })
+
+    # Download the output table --------------------------------------------------
+    Download_DataServer(
+      "table_download",
+      reactive(input$file_type),
+      reactive(create_own_table()),
+      reactive("LAIT-create-your-own-table")
+    )
+  })
+}
