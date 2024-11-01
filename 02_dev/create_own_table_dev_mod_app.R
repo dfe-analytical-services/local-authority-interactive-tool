@@ -39,7 +39,19 @@ ui <- bslib::page_fillable(
   ),
   StagingTableUI("staging_table"),
   QueryTableUI("query_table"),
-  CreateOwnTableUI("create_own_table")
+  CreateOwnTableUI("create_own_table"),
+  # Charts =====================================================================
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    h3("Output Charts (Charts showing data from saved selections)"),
+    p("Note a maximum of 4 geographies and 3 indicators can be shown."),
+
+    # Line chart ---------------------------------------------------------------
+    bslib::navset_tab(
+      CreateOwnLineChartUI("create_own_line")
+    )
+  )
 )
 
 # Main App Server
@@ -111,6 +123,12 @@ server <- function(input, output, session) {
 
   CreateOwnTableServer(
     "create_own_table",
+    query_table,
+    bds_metrics
+  )
+
+  CreateOwnLineChartServer(
+    "create_own_line",
     query_table,
     bds_metrics
   )
