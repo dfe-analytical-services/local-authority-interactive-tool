@@ -1,3 +1,7 @@
+# Create Own main user inputs ==================================================
+# Can choose Geography, Topic, Indicator,
+# LA group, England, Regions, Year range and the "Add selection" button
+# Create Own main user inputs UI -----------------------------------------------
 Create_MainInputsUI <- function(id) {
   ns <- NS(id)
 
@@ -66,10 +70,12 @@ Create_MainInputsUI <- function(id) {
   )
 }
 
+# Create Own Inputs Server -----------------------------------------------------
 Create_MainInputsServer <- function(id, bds_metrics) {
   moduleServer(id, function(input, output, session) {
-    # Geography and Indicator inputs ---------------------------------------------
-    # Reactive to store all selected indicators along with their topics
+    # Reactive to store all selected topic-indicator pairs
+    # Used to filter BDS correctly (due to duplication of indicator names
+    # across topics)
     selected_indicators <- reactiveVal({
       data.frame(
         Topic = character(),
@@ -78,16 +84,18 @@ Create_MainInputsServer <- function(id, bds_metrics) {
     })
 
     # Filter indicator choices based on the selected topic
+    # But keep already selected indicators from other topics
     shiny::observeEvent(input$topic_input, {
       # Available indicators (based on topic chosen)
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(Topic %in% input$topic_input) |>
         dplyr::select(Topic, Measure)
 
-      # Get the currently selected topic-indicator pairs
+      # Get the already selected topic-indicator pairs
       current_selection <- selected_indicators()
 
-      # Combine currently selected topic-indicator pairs with the new filtered ones
+      # Combine already selected topic-indicator pairs with new topic indicators
+      # Allows indicators to stay selected despite not being part of the new topic
       combined_choices <- unique(rbind(current_selection, filtered_topic_bds))
 
       # Update the choices with new topic whilst retaining the
@@ -129,29 +137,15 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       ignoreNULL = FALSE
     )
 
-    # Return create your own table main inputs
+    # Return create your own main inputs
     create_inputs <- list(
-      geog = reactive({
-        input$geog_input
-      }),
-      topic = reactive({
-        selected_indicators()$Topic
-      }),
-      indicator = reactive({
-        selected_indicators()$Measure
-      }),
-      selected_indicators = reactive({
-        selected_indicators()
-      }),
-      la_group = reactive({
-        input$la_group
-      }),
-      inc_regions = reactive({
-        input$inc_regions
-      }),
-      inc_england = reactive({
-        input$inc_england
-      }),
+      geog = reactive(input$geog_input),
+      topic = reactive(selected_indicators()$Topic),
+      indicator = reactive(selected_indicators()$Measure),
+      selected_indicators = reactive(selected_indicators()),
+      la_group = reactive(input$la_group),
+      inc_regions = reactive(input$inc_regions),
+      inc_england = reactive(input$inc_england),
       add_query = reactive(input$add_query)
     )
 
@@ -162,7 +156,7 @@ Create_MainInputsServer <- function(id, bds_metrics) {
 
 
 
-# Year range input module
+# Year range input UI ----------------------------------------------------------
 YearRangeUI <- function(id) {
   ns <- NS(id)
 
@@ -174,6 +168,7 @@ YearRangeUI <- function(id) {
   )
 }
 
+# Year range input server ------------------------------------------------------
 YearRangeServer <- function(id, bds_metrics, indicator_input) {
   moduleServer(id, function(input, output, session) {
     # Compute years choices available based on selected indicator
@@ -223,6 +218,8 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
       }
     })
 
+    # Collect selected year range and available year choices
+    # (choices are used in query table to set year range info)
     year_input <- list(
       range = reactive(input$year_range),
       choices = years_choices
@@ -234,12 +231,18 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
 }
 
 
-GroupingInputServer <- function(id, create_inputs, la_names_bds, region_names_bds, stat_n_geog, stat_n_la) {
+# Geography grouping -----------------------------------------------------------
+# Combines the user geography input with any additional geography groupings
+GroupingInputServer <- function(id,
+                                create_inputs,
+                                la_names_bds,
+                                region_names_bds,
+                                stat_n_geog,
+                                stat_n_la) {
   moduleServer(id, function(input, output, session) {
-    # Collating user selections ==================================================
-    # Geography inputs -----------------------------------------------------------
+    # Combine the geography selections
     geog_inputs <- reactive({
-      # Value from LA & Region input
+      # Value from main geography input
       inputs <- create_inputs$geog()
 
       # Add geography groupings (if selected)
@@ -277,28 +280,29 @@ GroupingInputServer <- function(id, create_inputs, la_names_bds, region_names_bd
       unique(inputs)
     })
 
+    # Return full geography input
     geog_inputs
   })
 }
 
 
 
-# Statistical neighbour input ------------------------------------------------
-# Assign LA statistical neighbours their selected LA association
+# Statistical neighbour association --------------------------------------------
+# Assign statistical neighbours their parent LA association
 StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     stat_n_association <- reactive({
-      # If SN selected create the SN association df
+      # Only if SN grouping selected compute rest of module
       req(create_inputs$la_group() == "la_stat_ns")
 
-      # Create mini association df of SN LAs and their parent SN LA
+      # Create mini association df of SNs and their parent LA
       association_table <- data.frame(
         `LA and Regions` = character(),
         `sn_parent` = character(),
         check.names = FALSE
       )
 
-      # Get LAs from geogs selected
+      # Get parent LAs from geogs selected (all LAs in main geog input)
       input_las <- intersect(create_inputs$geog(), la_names_bds)
 
       if (length(input_las) > 0) {
@@ -315,18 +319,23 @@ StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) 
         association_table <- do.call(rbind, stat_n_groups)
       }
 
-      # Return the association data
+      # Return the association df
       association_table
     })
   })
 }
 
 
-
-StagingBDSServer <- function(id, create_inputs, geog_groups, year_input, bds_metrics) {
+# Staging table ================================================================
+# Staging BDS ------------------------------------------------------------------
+# Filter the BDS for current user input selections
+# (used to create the staging table)
+StagingBDSServer <- function(id,
+                             create_inputs,
+                             geog_groups,
+                             year_input,
+                             bds_metrics) {
   moduleServer(id, function(input, output, session) {
-    # Staging table ==============================================================
-
     # Filter BDS for topic-indicator pairs in the selected_values reactive
     topic_indicator_bds <- reactive({
       req(nrow(create_inputs$selected_indicators()) > 0)
@@ -340,10 +349,11 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_input, bds_met
         )
     })
 
-    # Filter BDS for geographies and year range
+    # Now filter BDS for geographies and year range
+    # Split from above so if indicator doesn't change then don't recompute
     staging_bds <- reactive({
       req(geog_groups(), topic_indicator_bds())
-      # Filter the bds_metrics geography
+      # Filter by full geography inputs
       filtered_bds <- topic_indicator_bds() |>
         dplyr::filter(
           `LA and Regions` %in% geog_groups(),
@@ -381,16 +391,18 @@ StagingBDSServer <- function(id, create_inputs, geog_groups, year_input, bds_met
       filtered_bds
     })
 
+
+    # Return staging BDS
     staging_bds
   })
 }
 
 
-
+# Staging data -----------------------------------------------------------------
 StagingDataServer <- function(
     id, create_inputs, staging_bds, region_names_bds, la_names_bds, stat_n_la) {
   moduleServer(id, function(input, output, session) {
-    # Stat neighbour association table
+    # Make statistical neighbour association table available
     stat_n_association <- StatN_AssociationServer(
       "stat_n_association",
       create_inputs,
@@ -402,7 +414,7 @@ StagingDataServer <- function(
     staging_table <- reactive({
       # Selected relevant cols
       # Coerce to wide format
-      # Join region col (set regions and England as themselves for Region)
+      # Set regions and England as themselves for Region
       wide_table <- staging_bds() |>
         dplyr::select(
           `LA Number`, `LA and Regions`, Region, Topic,
@@ -444,16 +456,17 @@ StagingDataServer <- function(
       wide_table_ordered
     })
 
+    # Return staging table
     staging_table
   })
 }
 
 
-
+# Staging table UI -------------------------------------------------------------
+# Simple reactable table inside a well div
 StagingTableUI <- function(id) {
   ns <- NS(id)
 
-  # Staging table ==============================================================
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -464,6 +477,9 @@ StagingTableUI <- function(id) {
   )
 }
 
+# Staging table Server ---------------------------------------------------------
+# Output a formatted reactable table of the staging data
+# Few error message table outputs for incorrect/ missing selections
 StagingTableServer <- function(id,
                                create_inputs,
                                region_names_bds,
