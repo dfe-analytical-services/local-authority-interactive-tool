@@ -199,7 +199,7 @@ dfe_reactable(
       Measure = reactable::colDef(
         html = TRUE,
         cell = function(value, index, name) {
-          render.reactable.cell.with.tippy(text = value, tooltip = value)
+          truncate_cell_with_hover(text = value, tooltip = value)
         }
       )
     )
@@ -319,10 +319,13 @@ if (share_year_suffix) {
 
   # Replace the matching year col names with respective year suffix
   new_col_names <- colnames(query$output) |>
-    (\(cols) ifelse(cols %in% years_dict$Years_num,
-      years_dict$Years[match(cols, years_dict$Years_num)],
-      cols
-    ))()
+    (\(cols) {
+      ifelse(
+        cols %in% years_dict$Years_num,
+        years_dict$Years[match(cols, years_dict$Years_num)],
+        cols
+      )
+    })()
 
   # Apply the new year suffix names to query$output
   colnames(query$output) <- new_col_names

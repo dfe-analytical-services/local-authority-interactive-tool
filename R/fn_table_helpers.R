@@ -605,7 +605,7 @@ sort_numeric_vector <- function(vec) {
 
 
 # Define a helper function for HTML-rendering columns
-html_colDef <- function() {
+html_col_def <- function() {
   reactable::colDef(
     html = TRUE
   )
@@ -613,7 +613,7 @@ html_colDef <- function() {
 
 
 
-render.reactable.cell.with.tippy <- function(text, tooltip) {
+truncate_cell_with_hover <- function(text, tooltip) {
   div(
     style = "cursor: info;
              white-space: nowrap;

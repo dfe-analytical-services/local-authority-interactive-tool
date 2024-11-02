@@ -1,3 +1,5 @@
+# nolint start: object_name
+
 CreateOwnChartDataServer <- function(id, create_own_table, query) {
   moduleServer(id, function(input, output, session) {
     # Compute number of indicators & geographies - used to determine whether data
@@ -481,3 +483,5 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
     )
   })
 }
+
+# nolint end

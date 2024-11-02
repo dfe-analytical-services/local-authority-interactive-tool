@@ -506,7 +506,7 @@ generate_year_text <- function(data, years_num) {
 #'
 #' @return A formatted string containing measures and corresponding values.
 #' @export
-generate_tooltip_with_measures <- function(data, years_num, indicator_dp) {
+tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
   measure_summary <- data |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
     dplyr::filter(Years_num == years_num) |>
@@ -538,7 +538,7 @@ generate_tooltip_with_measures <- function(data, years_num, indicator_dp) {
 #'
 #' @return A formatted string containing LA and region values.
 #' @export
-generate_tooltip_without_measures <- function(data, years_num, indicator_dp) {
+tooltip_text <- function(data, years_num, indicator_dp) {
   paste0(
     glue::glue_data(
       data |>
@@ -569,9 +569,9 @@ tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
   year_text <- generate_year_text(data, x)
 
   tooltip_content <- if (include_measure) {
-    generate_tooltip_with_measures(data, x, indicator_dp)
+    tooltip_text_w_indicator(data, x, indicator_dp)
   } else {
-    generate_tooltip_without_measures(data, x, indicator_dp)
+    tooltip_text(data, x, indicator_dp)
   }
 
   geom_vline_interactive(

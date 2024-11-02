@@ -564,7 +564,7 @@ server <- function(input, output, session) {
           Measure = reactable::colDef(
             html = TRUE,
             cell = function(value, index, name) {
-              render.reactable.cell.with.tippy(text = value, tooltip = value)
+              truncate_cell_with_hover(text = value, tooltip = value)
             }
           )
         )
@@ -697,8 +697,8 @@ server <- function(input, output, session) {
     dfe_reactable(
       query$data,
       columns = list(
-        Indicator = html_colDef(),
-        `LA and Regions` = html_colDef(),
+        Indicator = html_col_def(),
+        `LA and Regions` = html_col_def(),
         `Click to remove query` = reactable::colDef(
           cell = reactable::JS(
             "function(cellInfo) {
@@ -807,10 +807,13 @@ server <- function(input, output, session) {
 
       # Replace the matching year col names with respective year suffix
       new_col_names <- colnames(query$output) |>
-        (\(cols) ifelse(cols %in% years_dict$Years_num,
-          years_dict$Years[match(cols, years_dict$Years_num)],
-          cols
-        ))()
+        (\(cols) {
+          ifelse(
+            cols %in% years_dict$Years_num,
+            years_dict$Years[match(cols, years_dict$Years_num)],
+            cols
+          )
+        })()
 
       # Apply the new year suffix names to query$output
       colnames(query$output) <- new_col_names
@@ -866,7 +869,7 @@ server <- function(input, output, session) {
           Measure = reactable::colDef(
             html = TRUE,
             cell = function(value, index, name) {
-              render.reactable.cell.with.tippy(text = value, tooltip = value)
+              truncate_cell_with_hover(text = value, tooltip = value)
             }
           )
         )

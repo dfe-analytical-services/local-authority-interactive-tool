@@ -1,3 +1,9 @@
+# nolint start: object_name
+#
+# General modules =============================================================
+# These are nested within other modules
+# Should I seperate out the input modules?
+#
 # Create Own main user inputs ==================================================
 # Can choose Geography, Topic, Indicator,
 # LA group, England, Regions, Year range and the "Add selection" button
@@ -551,7 +557,7 @@ StagingTableServer <- function(id,
             Measure = reactable::colDef(
               html = TRUE,
               cell = function(value, index, name) {
-                render.reactable.cell.with.tippy(text = value, tooltip = value)
+                truncate_cell_with_hover(text = value, tooltip = value)
               }
             )
           )
@@ -689,8 +695,8 @@ QueryTableServer <- function(id, query) {
       dfe_reactable(
         query$data,
         columns = list(
-          Indicator = html_colDef(),
-          `LA and Regions` = html_colDef(),
+          Indicator = html_col_def(),
+          `LA and Regions` = html_col_def(),
           `Click to remove query` = reactable::colDef(
             cell = reactable::JS(
               "function(cellInfo) {
@@ -902,7 +908,7 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
             Measure = reactable::colDef(
               html = TRUE,
               cell = function(value, index, name) {
-                render.reactable.cell.with.tippy(text = value, tooltip = value)
+                truncate_cell_with_hover(text = value, tooltip = value)
               }
             )
           )
@@ -923,3 +929,5 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
     )
   })
 }
+
+# nolint end
