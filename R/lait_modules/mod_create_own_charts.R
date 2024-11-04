@@ -1,5 +1,7 @@
 # nolint start: object_name
-
+#
+# Create Own Charts ============================================================
+# Create Own Chart Data --------------------------------------------------------
 CreateOwnChartDataServer <- function(id, create_own_table, query) {
   moduleServer(id, function(input, output, session) {
     # Compute number of indicators & geographies - used to determine whether data
@@ -13,7 +15,7 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
       length(pull_uniques(create_own_table(), "LA and Regions"))
     })
 
-    # Create chart data ----------------------------------------------------------
+    # Create chart data --------------------------------------------------------
     chart_plotting_data <- reactive({
       req(
         "Message from tool" %notin% colnames(create_own_table()),
@@ -46,18 +48,21 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
         )
     })
 
+    # Output number of selected indicators & geogs (for selection error messages)
+    # and data in format for plotting
     chart_info <- list(
       no_indicators = number_of_indicators,
       no_geogs = number_of_geogs,
       data = chart_plotting_data
     )
 
+    # Return information for plotting
     chart_info
   })
 }
 
 
-
+# Create Own Line Chart UI -----------------------------------------------------
 CreateOwnLineChartUI <- function(id) {
   ns <- NS(id)
 
@@ -69,6 +74,7 @@ CreateOwnLineChartUI <- function(id) {
                justify-content: space-between;
                align-items: center;
                background: white;",
+      # Line chart
       bslib::card(
         bslib::card_body(
           ggiraph::girafeOutput(ns("line_chart"))
@@ -76,6 +82,7 @@ CreateOwnLineChartUI <- function(id) {
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
+      # Download options
       div(
         # Download button to trigger chart download modal
         shiny::tagAppendAttributes(
@@ -103,31 +110,35 @@ CreateOwnLineChartUI <- function(id) {
   )
 }
 
+# Create Own Line Chart Server -------------------------------------------------
 CreateOwnLineChartServer <- function(id, query, bds_metrics) {
   moduleServer(id, function(input, output, session) {
-    create_own_table <- CreateOwnDataServer(
+    # Load Create Own Table data
+    create_own_data <- CreateOwnDataServer(
       "create_own_table",
       query,
       bds_metrics
     )
 
+    # Load Create Own BDS
     create_own_bds <- CreateOwnBDSServer(
       "create_own_bds",
-      create_own_table,
+      create_own_data,
       bds_metrics
     )
 
+    # Get Create Own Chart data
     chart_info <- CreateOwnChartDataServer(
       "chart_info",
-      create_own_table,
+      create_own_data,
       query
     )
 
-    # Line chart -----------------------------------------------------------------
+    # Make chart ---------------------------------------------------------------
     # Build static main plot
     line_chart <- reactive({
       req(
-        "Message from tool" %notin% colnames(create_own_table()),
+        "Message from tool" %notin% colnames(create_own_data()),
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
@@ -158,6 +169,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
             color = `LA and Regions`
           ),
           na.rm = TRUE,
+          # Show points if only one year data selected
           size = ifelse(num_year_cols == 1, 3, 0),
           shape = 16
         ) +
@@ -190,7 +202,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
     # Build interactive line chart
     interactive_line_chart <- reactive({
       req(
-        "Message from tool" %notin% colnames(create_own_table()),
+        "Message from tool" %notin% colnames(create_own_data()),
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
@@ -216,15 +228,14 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
       )
     })
 
-    # Line chart plot output -----------------------------------------------------
+    # Line chart plot output ---------------------------------------------------
     output$line_chart <- ggiraph::renderGirafe({
-      # Error messages for missing selections
-      if ("Message from tool" %in% colnames(create_own_table())) {
+      # Error messages for incorrect/ missing selections
+      if ("Message from tool" %in% colnames(create_own_data())) {
         ggiraph::girafe(
           ggobj = display_no_data_plot("No plot as not enough selections made"),
           width_svg = 8.5
         )
-        # Error messages for too many selections
       } else if (
         chart_info$no_geogs() > 4
       ) {
@@ -246,7 +257,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
       }
     })
 
-    # Line chart download --------------------------------------------------------
+    # Line chart download ------------------------------------------------------
     # Initialise server logic for download button and modal
     DownloadChartBtnServer("download_btn", id, "Line")
 
@@ -271,11 +282,10 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
 }
 
 
-
+# Create Own Bar Chart UI ------------------------------------------------------
 CreateOwnBarChartUI <- function(id) {
   ns <- NS(id)
 
-  # Bar chart --------------------------------------------------------------
   bslib::nav_panel(
     title = "Bar chart",
     # Line chart plot with download buttons
@@ -284,6 +294,7 @@ CreateOwnBarChartUI <- function(id) {
                    justify-content: space-between;
                    align-items: center;
                    background: white;",
+      # Bar chart
       bslib::card(
         bslib::card_body(
           ggiraph::girafeOutput(ns("bar_chart"))
@@ -291,6 +302,7 @@ CreateOwnBarChartUI <- function(id) {
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
+      # Download options
       div(
         # Download button to trigger chart download modal
         shiny::tagAppendAttributes(
@@ -318,31 +330,35 @@ CreateOwnBarChartUI <- function(id) {
   )
 }
 
+# Create Own Bar Chart Server --------------------------------------------------
 CreateOwnBarChartServer <- function(id, query, bds_metrics) {
   moduleServer(id, function(input, output, session) {
-    create_own_table <- CreateOwnDataServer(
+    # Load Create Own Table data
+    create_own_data <- CreateOwnDataServer(
       "create_own_table",
       query,
       bds_metrics
     )
 
+    # Load Create Own BDS
     create_own_bds <- CreateOwnBDSServer(
       "create_own_bds",
-      create_own_table,
+      create_own_data,
       bds_metrics
     )
 
+    # Get Create Own Chart data
     chart_info <- CreateOwnChartDataServer(
       "chart_info",
-      create_own_table,
+      create_own_data,
       query
     )
 
-    # Bar chart -----------------------------------------------------------------
+    # Make chart ---------------------------------------------------------------
     # Build main bar static plot
     bar_chart <- reactive({
       req(
-        "Message from tool" %notin% colnames(create_own_table()),
+        "Message from tool" %notin% colnames(create_own_data()),
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
@@ -365,9 +381,6 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         chart_names_wrapped$Chart_title,
         chart_names_wrapped$Measure
       )
-
-
-
 
       # Plot chart - split by indicators, colours represent Geographies
       chart_info$data() |>
@@ -403,6 +416,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
           fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
         ) +
         ggplot2::labs(title = "Bar charts showing selected indicators") +
+        # Split chart by indicator
         ggplot2::facet_wrap(
           ~Measure,
           labeller = labeller(Measure = as_labeller(custom_titles)),
@@ -417,7 +431,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
     # Build interactive line chart
     interactive_bar_chart <- reactive({
       req(
-        "Message from tool" %notin% colnames(create_own_table()),
+        "Message from tool" %notin% colnames(create_own_data()),
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
@@ -431,10 +445,10 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
       )
     })
 
-    # Bar chart plot output ------------------------------------------------------
+    # Bar chart plot output ----------------------------------------------------
     output$bar_chart <- ggiraph::renderGirafe({
       # Error messages for missing or too many selections
-      if ("Message from tool" %in% colnames(create_own_table())) {
+      if ("Message from tool" %in% colnames(create_own_data())) {
         ggiraph::girafe(
           ggobj = display_no_data_plot("No plot as not enough selections made"),
           width_svg = 8.5
@@ -460,7 +474,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
       }
     })
 
-    # Bar chart download ---------------------------------------------------------
+    # Bar chart download -------------------------------------------------------
     # Initialise server logic for download button and modal
     DownloadChartBtnServer("download_btn", id, "Bar")
 

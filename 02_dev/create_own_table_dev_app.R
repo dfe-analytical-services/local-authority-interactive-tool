@@ -666,7 +666,7 @@ server <- function(input, output, session) {
       check_year_suffix_consistency()
 
     # If not consistent suffixes then clean both dfs year cols
-    # Otherwise add the suffi years
+    # Otherwise add the suffix years
     if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
       query$output <- query$output |>
         rename_columns_with_year() |>
@@ -961,6 +961,7 @@ server <- function(input, output, session) {
           color = `LA and Regions`
         ),
         na.rm = TRUE,
+        # Show points if only one year data selected
         size = ifelse(num_year_cols == 1, 3, 0),
         shape = 16
       ) +
@@ -1091,7 +1092,7 @@ server <- function(input, output, session) {
   )
 
 
-  # Bar chart -----------------------------------------------------------------
+  # Bar chart ------------------------------------------------------------------
   # Build main bar static plot
   bar_chart <- reactive({
     req(
