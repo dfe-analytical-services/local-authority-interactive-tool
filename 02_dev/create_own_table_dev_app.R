@@ -225,6 +225,7 @@ ui <- bslib::page_fillable(
   )
 )
 
+# nolint start: cyclocomp_linter
 
 server <- function(input, output, session) {
   # Dynamic input choices ======================================================
@@ -1253,4 +1254,7 @@ server <- function(input, output, session) {
   )
 }
 
+# nolint end
+
+# Run test app =================================================================
 shinyApp(ui, server)
