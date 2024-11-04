@@ -2,6 +2,21 @@
 #
 # Create Own Charts ============================================================
 # Create Own Chart Data --------------------------------------------------------
+#
+#' Create Own Chart Data Server
+#'
+#' This function manages the server logic for creating the chart data
+#' based on saved selections from the output table. It computes the number
+#' of indicators and geographies and prepares the data in a suitable format
+#' for plotting.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param create_own_table A reactive function that returns the data
+#'                          from the saved selections.
+#' @param query A reactive object containing saved queries and their data.
+#' @return A list containing the number of selected indicators, the number
+#'         of selected geographies, and the prepared data for chart plotting.
+#'
 CreateOwnChartDataServer <- function(id, create_own_table, query) {
   moduleServer(id, function(input, output, session) {
     # Compute number of indicators & geographies - used to determine whether data
@@ -63,6 +78,17 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
 
 
 # Create Own Line Chart UI -----------------------------------------------------
+#
+#' Create Own Line Chart UI
+#'
+#' This function generates the user interface for the "Create Own Line Chart"
+#' feature within a Shiny application. It includes a section for displaying
+#' the line chart, download options, and a button to copy the chart to the
+#' clipboard.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @return A UI component that contains the line chart and associated controls.
+#'
 CreateOwnLineChartUI <- function(id) {
   ns <- NS(id)
 
@@ -111,6 +137,20 @@ CreateOwnLineChartUI <- function(id) {
 }
 
 # Create Own Line Chart Server -------------------------------------------------
+#
+#' Create Own Line Chart Server
+#'
+#' This function handles the server logic for generating a line chart based
+#' on saved selections from the output table. It manages data preparation,
+#' rendering of both static and interactive line charts, and
+#' download functionality.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param query A reactive object containing saved queries and their data.
+#' @param bds_metrics A data frame containing metrics for the BDS.
+#' @return None; this function is used to create and manage reactive elements
+#'         within the Shiny application.
+#'
 CreateOwnLineChartServer <- function(id, query, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
@@ -283,6 +323,17 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
 
 
 # Create Own Bar Chart UI ------------------------------------------------------
+#
+#' Create Own Bar Chart UI
+#'
+#' This function generates the user interface for the "Create Own Bar Chart"
+#' feature within a Shiny application. It includes a section for displaying
+#' the bar chart, download options, and a button to copy the chart to the
+#' clipboard.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @return A UI component that contains the bar chart and associated controls.
+#'
 CreateOwnBarChartUI <- function(id) {
   ns <- NS(id)
 
@@ -331,6 +382,20 @@ CreateOwnBarChartUI <- function(id) {
 }
 
 # Create Own Bar Chart Server --------------------------------------------------
+#
+#' Create Own Bar Chart Server
+#'
+#' This function handles the server logic for generating a bar chart based
+#' on saved selections from the output table. It manages data preparation,
+#' rendering of both static and interactive bar charts, and
+#' download functionality.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param query A reactive object containing saved queries and their data.
+#' @param bds_metrics A data frame containing metrics for the BDS.
+#' @return None; this function is used to create and manage reactive elements
+#'         within the Shiny application.
+#'
 CreateOwnBarChartServer <- function(id, query, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
