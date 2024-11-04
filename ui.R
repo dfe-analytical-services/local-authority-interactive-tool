@@ -98,7 +98,10 @@ ui <- function(input, output, session) {
       id = "navsetpillslist",
       widths = c(2, 10),
       well = FALSE,
-      # Content for these panels is defined in the R/ui_panels/ folder
+
+      # =======================================================================
+      # LA Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "LA Level",
@@ -123,6 +126,10 @@ ui <- function(input, output, session) {
         # LA Metadata =========================================================
         LA_LevelMetaUI("la_meta")
       ),
+
+      # =======================================================================
+      # Regional Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "Regional Level",
@@ -151,6 +158,10 @@ ui <- function(input, output, session) {
         # Region Metadata =====================================================
         LA_LevelMetaUI("region_meta")
       ),
+
+      # =======================================================================
+      # Statistical Neighbour Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "Statsitical Neighbour Level",
@@ -183,6 +194,10 @@ ui <- function(input, output, session) {
         # Statistical Neighbour Metadata ======================================
         LA_LevelMetaUI("stat_n_meta")
       ),
+
+      # =======================================================================
+      # All LA Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "All LA Level",
@@ -200,6 +215,10 @@ ui <- function(input, output, session) {
         # LA Metadata =========================================================
         LA_LevelMetaUI("all_la_meta")
       ),
+
+      # =======================================================================
+      # Create Your Own Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "Create Your Own",
@@ -241,11 +260,20 @@ ui <- function(input, output, session) {
           )
         )
       ),
-      # User guide ============================================================
+
+      # =======================================================================
+      # User guide
+      # =======================================================================
       user_guide_panel(),
-      # Accessibility =========================================================
+
+      # =======================================================================
+      # Accessibility
+      # =======================================================================
       a11y_panel(),
-      # Support and feedback ==================================================
+
+      # =======================================================================
+      # Support and feedback
+      # =======================================================================
       bslib::nav_panel(
         value = "support_panel",
         shinyGovstyle::banner(
@@ -270,7 +298,10 @@ ui <- function(input, output, session) {
           form_url = "https://forms.office.com/e/gTNw1EBgsn"
         )
       ),
-      # Cookies info ==========================================================
+
+      # =======================================================================
+      # Cookies info
+      # =======================================================================
       bslib::nav_panel(
         value = "cookies_panel_ui",
         title = "Cookies",
