@@ -81,7 +81,7 @@ Get_LACleanRegionServer <- function(id, la_input, filtered_bds, stat_n_la) {
 #' @details The module makes use of two helper server modules:
 #' \code{\link{Get_LAStatNsServer}} to obtain the LA's statistical neighbours
 #' and \code{\link{Get_LACleanRegionServer}} to retrieve the LA's region with
-#' cleaning applied. The output is suitable for visualization in a time series
+#' cleaning applied. The output is suitable for visualisation in a time series
 #' format or for further analysis.
 #'
 StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
@@ -243,6 +243,11 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 #' @return A UI component containing a reactable output for displaying the
 #' statistical neighbour table.
 #'
+StatN_LASNsTableUI <- function(id) {
+  ns <- NS(id)
+
+  reactable::reactableOutput(ns("output_table"))
+}
 StatN_TablesUI <- function(id) {
   ns <- NS(id)
 

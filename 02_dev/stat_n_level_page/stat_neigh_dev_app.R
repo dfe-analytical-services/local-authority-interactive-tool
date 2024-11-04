@@ -456,7 +456,7 @@ server_dev <- function(input, output, session) {
     bar_chart = NULL
   )
 
-  # Keep line and bar inputs synchronized without resetting selections
+  # Keep line and bar inputs synchronised without resetting selections
   observeEvent(input$chart_line_input,
     {
       # Capture the current reactive values
