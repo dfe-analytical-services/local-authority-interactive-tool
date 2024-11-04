@@ -4,6 +4,17 @@
 # Can choose Geography, Topic, Indicator,
 # LA group, England, Regions, Year range and the "Add selection" button
 # Create Own main user inputs UI -----------------------------------------------
+#
+#' Create Main User Inputs UI
+#'
+#' This function creates a user interface for selecting geographical areas,
+#' topics, and indicators for the "Create Your Own" feature in the Shiny app.
+#' It includes inputs for LA groupings and options to include all regions
+#' or England, along with an action button to add selections.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @return A list of UI elements for user input.
+#'
 Create_MainInputsUI <- function(id) {
   ns <- NS(id)
 
@@ -73,6 +84,20 @@ Create_MainInputsUI <- function(id) {
 }
 
 # Create Own Inputs Server -----------------------------------------------------
+#
+#' Create Main User Inputs Server
+#'
+#' This function handles the server logic for the user inputs in the
+#' "Create Your Own" feature of the Shiny app. It allows users to select
+#' topics and indicators, managing the selections to ensure consistency
+#' across different topics. It also provides reactive outputs for the
+#' selected inputs.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param bds_metrics A data frame containing the available metrics
+#'                   used for filtering indicators based on selected topics.
+#' @return A list of reactive values containing user inputs.
+#'
 Create_MainInputsServer <- function(id, bds_metrics) {
   moduleServer(id, function(input, output, session) {
     # Reactive to store all selected topic-indicator pairs
@@ -158,6 +183,16 @@ Create_MainInputsServer <- function(id, bds_metrics) {
 
 
 # Year range input UI ----------------------------------------------------------
+#
+#' Year Range Input UI
+#'
+#' This function creates a user interface component for selecting a range
+#' of years. It utilizes a picker input to allow users to select one
+#' or more years from the available options.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @return A shinyWidgets picker input for year range selection.
+#'
 YearRangeUI <- function(id) {
   ns <- NS(id)
 
@@ -170,6 +205,22 @@ YearRangeUI <- function(id) {
 }
 
 # Year range input server ------------------------------------------------------
+#
+#' Year Range Input Server
+#'
+#' This function handles the server-side logic for the year range input.
+#' It dynamically generates the choices available for years based on
+#' the selected indicator. The year range can be updated accordingly
+#' and provides feedback when no indicators are selected.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param bds_metrics A data frame containing metrics used to determine
+#'                    available years based on selected indicators.
+#' @param indicator_input A reactive expression that returns the current
+#'                        selection of indicators.
+#' @return A list containing reactive values for selected year range
+#'         and available year choices.
+#'
 YearRangeServer <- function(id, bds_metrics, indicator_input) {
   moduleServer(id, function(input, output, session) {
     # Compute years choices available based on selected indicator
@@ -234,6 +285,29 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
 
 # Geography grouping -----------------------------------------------------------
 # Combines the user geography input with any additional geography groupings
+#
+#' Geography Grouping Server
+#'
+#' This function combines user-selected geography inputs with any additional
+#' geography groupings based on the chosen options. It allows for the
+#' inclusion of all local authorities, regions, or statistical neighbors
+#' based on user input.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param create_inputs A list of reactive inputs created by the main input
+#'                      module, including user selections for geography,
+#'                      indicators, and groupings.
+#' @param la_names_bds A vector of local authority names used for
+#'                      selecting all LAs.
+#' @param region_names_bds A vector of region names used for selecting
+#'                         all regions.
+#' @param stat_n_geog A data frame containing geographical information for
+#'                     local authorities and their regions.
+#' @param stat_n_la A data frame containing statistical neighbor information
+#'                   for local authorities.
+#' @return A reactive value containing the combined geography inputs based
+#'         on user selections and additional groupings.
+#'
 GroupingInputServer <- function(id,
                                 create_inputs,
                                 la_names_bds,
@@ -289,7 +363,30 @@ GroupingInputServer <- function(id,
 
 # Statistical neighbour association --------------------------------------------
 # Assign statistical neighbours their parent LA association
-StatN_AssociationServer <- function(id, create_inputs, la_names_bds, stat_n_la) {
+#
+#' Statistical Neighbour Association Server
+#'
+#' This function establishes associations between statistical neighbours
+#' (SNs) and their parent local authority (LA) based on user selections.
+#' It computes the association only if the statistical neighbour grouping
+#' is selected.
+#'
+#' @param id A unique identifier for the Shiny module.
+#' @param create_inputs A list of reactive inputs created by the main input
+#'                      module, which includes user selections for local
+#'                      authorities and grouping options.
+#' @param la_names_bds A vector of local authority names used to identify
+#'                      which LAs are selected.
+#' @param stat_n_la A data frame containing statistical neighbour information
+#'                   for local authorities.
+#' @return A reactive value containing a data frame that lists local
+#'         authorities and their corresponding statistical neighbours, with
+#'         the parent LA indicated for each SN.
+#'
+StatN_AssociationServer <- function(id,
+                                    create_inputs,
+                                    la_names_bds,
+                                    stat_n_la) {
   moduleServer(id, function(input, output, session) {
     stat_n_association <- reactive({
       # Only if SN grouping selected compute rest of module
