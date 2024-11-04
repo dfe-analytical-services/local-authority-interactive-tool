@@ -555,56 +555,89 @@ set_min_col_width <- function(min_width = 60) {
 }
 
 
+#' Get Geographic Selection Based on User Input
+#'
+#' This function processes user input to generate a selection of
+#' geographic units based on various criteria, including the selection
+#' of local authorities (LAs), regions, and statistical neighbors. It
+#' updates the selection vector to include additional descriptions based
+#' on user choices, ensuring that selections reflect the user's
+#' preferences while excluding unnecessary duplicates.
+#'
+#' @param input A reactive input object containing user selections
+#'              related to geographic units, such as LAs and regions.
+#' @param la_names_bds A character vector of local authority names
+#'                      used for filtering and validation of selections.
+#' @param region_names_bds A character vector of region names to
+#'                         determine if regional selections are valid.
+#' @param stat_n_geog A data frame that contains geographic
+#'                     relationships, particularly for identifying
+#'                     statistical neighbors of LAs.
+#' @return A character vector representing the final geographic
+#'         selection based on the input criteria, including options
+#'         for "LAs in [Region]", statistical neighbors, and "All LAs"
+#'         or "All Regions" as applicable.
+#'
+get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geog) {
+  # Initialise an empty vector to store the results
+  selection <- input$geog
 
-# Updated function to handle an entire column for sorting
-sort_by_numeric_value <- function(df, column_name) {
-  # Helper function to convert string to numeric
-  convert_to_numeric <- function(x) {
-    x <- str_replace_all(x, ",", "") # Remove commas
-    if (str_detect(x, "billion")) {
-      as.numeric(str_replace(x, " billion", "")) * 1e9
-    } else if (str_detect(x, "million")) {
-      as.numeric(str_replace(x, " million", "")) * 1e6
-    } else {
-      as.numeric(x)
+  # If Region LAs are selected, add "LAs in [Region]" and exclude those LAs
+  if (input$la_group == "region_las") {
+    # LAs in same region as selected LA
+    selected_las <- intersect(input$geog, la_names_bds)
+    selected_la_regions <- get_la_region(stat_n_geog, selected_las)
+
+    # Only add Region LAs if they are LAs
+    if (length(selected_las) > 0) {
+      selection <- c(setdiff(selection, selected_las), paste0("LAs in ", selected_la_regions))
     }
   }
 
-  # Apply the conversion function using sapply and sort the data frame
-  df %>%
-    mutate(numeric_value = sapply(.data[[column_name]], convert_to_numeric)) %>% # Apply to the specified column
-    arrange(numeric_value) %>% # Sort by the numeric column
-    select(-numeric_value) # Optionally remove the numeric column
-}
+  # If LA statistical neighbours selected add "[LA] statistical neighbours"
+  if (isTRUE(input$la_group == "la_stat_ns")) {
+    selected_las <- intersect(input$geog, la_names_bds)
 
-
-# Helper function to convert strings with numbers and units (e.g., million, billion) to numeric
-convert_to_numeric <- function(x) {
-  x <- stringr::str_replace_all(x, ",", "") # Remove commas
-
-  if (stringr::str_detect(x, "billion")) {
-    as.numeric(stringr::str_replace(x, " billion", "")) * 1e9 # Convert billion
-  } else if (stringr::str_detect(x, "million")) {
-    as.numeric(stringr::str_replace(x, " million", "")) * 1e6 # Convert million
-  } else {
-    as.numeric(x) # Convert plain numbers
+    # Only add stat neighbours if they are LAs
+    if (length(selected_las) > 0) {
+      selection <- c(setdiff(selection, selected_las), paste0(selected_las, " statistical neighbours"))
+    }
   }
+
+  # If all LAs are selected, add "All LAs" and exclude all other LA terms
+  if (input$la_group == "all_las") {
+    selection <- c(setdiff(selection, la_names_bds), "All LAs") |>
+      (\(x) x[!grepl("^LAs in ", x)])() |>
+      (\(x) x[!grepl(" statistical neighbours$", x)])()
+  }
+
+  # If all regions are selected, add "All Regions" and exclude region_names_bds
+  if (input$inc_regions) {
+    selection <- c(setdiff(selection, region_names_bds), "All Regions")
+  }
+
+  # If include England is selected, add "England"
+  if (input$inc_england) {
+    selection <- c(setdiff(selection, "England"), "England")
+  }
+
+  # Return the final selection
+  selection
 }
 
-# Function to sort a vector of mixed numeric and labeled values
-sort_numeric_vector <- function(vec) {
-  # Convert the vector to numeric values using sapply
-  numeric_vec <- sapply(vec, convert_to_numeric)
 
-  # Sort the original vector based on the numeric values
-  sorted_indices <- order(numeric_vec, na.last = TRUE) # Get indices for sorting
-  sorted_vec <- vec[sorted_indices] # Sort original vector based on indices
-
-  sorted_vec # Return the sorted vector
-}
-
-
-# Define a helper function for HTML-rendering columns
+#' HTML Column Definition Helper
+#'
+#' This helper function creates a column definition for use with the
+#' `reactable` package that enables HTML rendering within the column.
+#' This allows for more flexible formatting options for cell content,
+#' such as including styled text or images. It simplifies the process
+#' of defining columns that require HTML output.
+#'
+#' @return A column definition object for `reactable` with HTML rendering
+#'         enabled, which can be used in a `reactable` table to display
+#'         HTML content in specified columns.
+#'
 html_col_def <- function() {
   reactable::colDef(
     html = TRUE
@@ -612,7 +645,20 @@ html_col_def <- function() {
 }
 
 
-
+#' Truncate Cell with Tooltip Hover
+#'
+#' This function creates a div element that displays truncated text with an
+#' overflow ellipsis effect. When the user hovers over the truncated text,
+#' a tooltip is displayed showing the full text. This is useful for
+#' enhancing user experience by providing additional context without
+#' cluttering the interface.
+#'
+#' @param text A string containing the text to be displayed in the cell.
+#' @param tooltip A string containing the tooltip text that will appear
+#'        when the user hovers over the truncated text.
+#' @return A div element containing the truncated text and tooltip, styled
+#'         for proper display and interaction.
+#'
 truncate_cell_with_hover <- function(text, tooltip) {
   div(
     style = "cursor: info;

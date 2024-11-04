@@ -409,56 +409,19 @@ af_colours_focus <- function() {
 }
 
 
-
-get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geog) {
-  # Initialise an empty vector to store the results
-  selection <- input$geog
-
-  # If Region LAs are selected, add "LAs in [Region]" and exclude those LAs
-  if (input$la_group == "region_las") {
-    # LAs in same region as selected LA
-    selected_las <- intersect(input$geog, la_names_bds)
-    selected_la_regions <- get_la_region(stat_n_geog, selected_las)
-
-    # Only add Region LAs if they are LAs
-    if (length(selected_las) > 0) {
-      selection <- c(setdiff(selection, selected_las), paste0("LAs in ", selected_la_regions))
-    }
-  }
-
-  # If LA statistical neighbours selected add "[LA] statistical neighbours"
-  if (isTRUE(input$la_group == "la_stat_ns")) {
-    selected_las <- intersect(input$geog, la_names_bds)
-
-    # Only add stat neighbours if they are LAs
-    if (length(selected_las) > 0) {
-      selection <- c(setdiff(selection, selected_las), paste0(selected_las, " statistical neighbours"))
-    }
-  }
-
-  # If all LAs are selected, add "All LAs" and exclude all other LA terms
-  if (input$la_group == "all_las") {
-    selection <- c(setdiff(selection, la_names_bds), "All LAs") |>
-      (\(x) x[!grepl("^LAs in ", x)])() |>
-      (\(x) x[!grepl(" statistical neighbours$", x)])()
-  }
-
-  # If all regions are selected, add "All Regions" and exclude region_names_bds
-  if (input$inc_regions) {
-    selection <- c(setdiff(selection, region_names_bds), "All Regions")
-  }
-
-  # If include England is selected, add "England"
-  if (input$inc_england) {
-    selection <- c(setdiff(selection, "England"), "England")
-  }
-
-  # Return the final selection
-  selection
-}
-
-
-# Function to get min and max years from the data
+#' Get Minimum and Maximum Years from Data
+#'
+#' This function extracts the minimum and maximum years from a specified
+#' numeric column of year values within a data frame. It handles
+#' missing values appropriately and returns the results in a list for
+#' easy access.
+#'
+#' @param data A data frame that contains a numeric column representing
+#'              year values, typically labeled as "Years_num".
+#' @return A list containing two elements: `min_year`, the minimum year
+#'         value found in the data, and `max_year`, the maximum year
+#'         value. Both values are numeric and NA is handled appropriately.
+#'
 get_min_max_years <- function(data) {
   query_num_years <- data |>
     dplyr::pull(Years_num)
@@ -466,25 +429,42 @@ get_min_max_years <- function(data) {
   max_year <- query_num_years |> max(na.rm = TRUE)
   min_year <- query_num_years |> min(na.rm = TRUE)
 
-  return(list(min_year = min_year, max_year = max_year))
+  list(min_year = min_year, max_year = max_year)
 }
 
-# Function to create a data frame for all years
+
+#' Create Data Frame for All Years
+#'
+#' This function generates a data frame containing a sequence of year
+#' values from a specified minimum year to a maximum year. The resulting
+#' data frame includes a single column named "Years_num" that holds
+#' the year values in order.
+#'
+#' @param min_year The starting year of the sequence, which should be
+#'                 numeric.
+#' @param max_year The ending year of the sequence, which should also be
+#'                 numeric.
+#' @return A data frame with one column, `Years_num`, containing all
+#'         year values from `min_year` to `max_year`, inclusive.
+#'
 create_years_df <- function(min_year, max_year) {
   data.frame(Years_num = seq(min_year, max_year))
 }
 
-# Function to filter BDS for selected indicators
-filter_bds_for_indicators <- function(bds_data, selected_indicators) {
-  bds_data |>
-    dplyr::filter(
-      Measure %in% selected_indicators,
-      !is.na(Years)
-    )
-}
 
-
-# Function to check if all years have consistent suffixes
+#' Check Year Suffix Consistency
+#'
+#' This function verifies whether all entries in the specified dataset have
+#' consistent suffixes for each year. It extracts the first four characters
+#' from the year strings to identify the year and the remaining characters
+#' as the suffix. The function ensures that for each unique year, there is
+#' only one unique suffix present.
+#'
+#' @param data A data frame containing a column `Years`, which includes year
+#'              values with potential suffixes.
+#' @return A logical value indicating whether all years have consistent
+#'         suffixes (`TRUE`) or not (`FALSE`).
+#'
 check_year_suffix_consistency <- function(data) {
   data |>
     pull_uniques("Years") |>
@@ -505,8 +485,19 @@ check_year_suffix_consistency <- function(data) {
 }
 
 
-
-# Function to sort year columns with full names preserved
+#' Sort Year Columns
+#'
+#' This function identifies and sorts the columns of a data frame that
+#' represent years, while preserving their full names. It searches for
+#' column names that start with a four-digit year (e.g., 2020) and
+#' returns them in ascending order based on the year, maintaining
+#' their original names in the process.
+#'
+#' @param full_query_data A data frame that may contain year columns
+#'                        named with the format of four-digit years.
+#' @return A character vector of sorted column names representing years,
+#'         preserving the original names.
+#'
 sort_year_columns <- function(full_query_data) {
   full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
 
@@ -518,6 +509,20 @@ sort_year_columns <- function(full_query_data) {
 }
 
 
+#' Rename Columns with Year
+#'
+#' This function renames the columns of a data frame by extracting the
+#' first four digits from the column names if they start with a four-digit
+#' year. If a column name does not begin with four digits, it retains
+#' its original name. This is useful for simplifying column names in
+#' data frames that contain year-based columns while keeping other
+#' column names intact.
+#'
+#' @param df A data frame whose column names may include four-digit years
+#'            at the start.
+#' @return A data frame with renamed columns where applicable, with four-digit
+#'         years extracted as the new column names.
+#'
 rename_columns_with_year <- function(df) {
   # Use `gsub` to extract the first 4 digits if they start the column name
   new_names <- sapply(names(df), function(col) {
@@ -532,5 +537,5 @@ rename_columns_with_year <- function(df) {
 
   # Rename columns with the modified names
   colnames(df) <- new_names
-  return(df)
+  df
 }
