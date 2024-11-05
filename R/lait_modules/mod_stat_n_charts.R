@@ -19,36 +19,20 @@ StatN_FocusLineChartUI <- function(id) {
   bslib::nav_panel(
     title = "Line chart - Focus",
     div(
-      style = "display: flex; justify-content: space-between; align-items: center;",
-      bslib::card(
-        bslib::card_body(
-          ggiraph::girafeOutput(ns("output_chart"))
-        ),
-        full_screen = TRUE,
-        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
-      ),
-      div(
-        shiny::tagAppendAttributes(
-          Download_DataUI(ns("svg_download"), "Download SVG"),
-          style = "max-width: none;"
-        ),
-        Download_DataUI(ns("html_download"), "Download HTML"),
-        shiny::tagAppendAttributes(
-          actionButton(
-            ns("copybtn"),
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
+      style = "display: flex;
+               justify-content: space-between;
+               align-items: center;
+               background: white;",
+      # Focus line chart
+      create_chart_card_ui(ns("output_chart")),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
     ),
-    div(
-      shiny::plotOutput(ns("copy_plot")),
-      style = "content-visibility: hidden;"
-    )
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
 
@@ -191,30 +175,19 @@ StatN_FocusLineChartServer <- function(id,
       }
     })
 
-    # Set up the download handlers for the chart -------------------------------
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Line")
+
+    # Set up the download handlers for the chart
     Download_DataServer(
-      "svg_download",
-      reactive("SVG"),
+      "chart_download",
+      reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
     )
 
-    Download_DataServer(
-      "html_download",
-      # Determine HTML file type based on shiny test mode
-      # HTML doesn't work due to github shiny not having pandoc so need to use svg for tests
-      reactive({
-        # Check if shiny.testmode is enabled
-        if (is.null(getOption("shiny.testmode"))) {
-          "HTML" # Use HTML in normal mode
-        } else {
-          "SVG" # Use SVG in test mode
-        }
-      }),
-      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
-    )
-
+    # Plot used for copy to clipboard (hidden)
     output$copy_plot <- shiny::renderPlot(
       {
         static_chart()
@@ -224,6 +197,7 @@ StatN_FocusLineChartServer <- function(id,
       height = 12 * 96
     )
 
+    # Return the interactive plot
     output$output_chart <- ggiraph::renderGirafe({
       interactive_chart()
     })
@@ -591,7 +565,10 @@ StatN_MultiLineChartUI <- function(id) {
   bslib::nav_panel(
     title = "Line chart - user selection",
     div(
-      style = "display: flex; justify-content: space-between; align-items: center;",
+      style = "display: flex;
+               justify-content: space-between;
+               align-items: center;
+               background: white;",
       bslib::card(
         id = "stat_n_multi_line",
         bslib::card_body(
@@ -611,29 +588,14 @@ StatN_MultiLineChartUI <- function(id) {
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
-      div(
-        # Download button to trigger chart download modal
-        shiny::tagAppendAttributes(
-          DownloadChartBtnUI(ns("download_btn")),
-          style = "max-width: none; margin-left: 0;"
-        ),
-        br(),
-        shiny::tagAppendAttributes(
-          actionButton(
-            ns("copybtn"),
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin-left: 15px;"
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
     ),
-    div(
-      shiny::plotOutput(ns("copy_plot")),
-      style = "content-visibility: hidden;"
-    )
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
 
@@ -671,9 +633,6 @@ StatN_MultiLineChartServer <- function(id,
                                        stat_n_la,
                                        shared_values) {
   moduleServer(id, function(input, output, session) {
-    # Initialize server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Line")
-
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
@@ -797,7 +756,11 @@ StatN_MultiLineChartServer <- function(id,
       }
     })
 
-    # Set up the download handlers for the chart -------------------------------
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Line")
+
+    # Set up the download handlers for the chart
     Download_DataServer(
       "chart_download",
       reactive(input$file_type),
