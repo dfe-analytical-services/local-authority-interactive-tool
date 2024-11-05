@@ -34,9 +34,10 @@ filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
     warning("Dataframe seems empty")
   }
 
-  # Filter LA & Regions
+  # Filter LA & Regions (order by filter_col order)
   result <- data |>
-    dplyr::filter(`LA and Regions` %in% filter_col)
+    dplyr::filter(`LA and Regions` %in% filter_col) |>
+    dplyr::arrange(factor(`LA and Regions`, levels = filter_col))
 
   if (nrow(result) < 1) {
     warning("Filter value doesn't exist in LA and Regions")
