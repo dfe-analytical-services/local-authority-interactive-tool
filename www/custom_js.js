@@ -83,4 +83,14 @@ $(document).ready(function () {
   $("#stat_n_multi_line-copybtn").on("click", async () => {
     await copyImage("stat_n_multi_line-copybtn", "stat_n_multi_line-copy_plot");
   });
+
+    // Event listener for "Stat Neigh focus bar chart"
+  $("#stat_n_focus_bar-copybtn").on("click", async () => {
+    await copyImage("stat_n_focus_bar-copybtn", "stat_n_focus_bar-copy_plot");
+  });
+
+    // Event listener for "Stat Neigh multi bar chart"
+  $("#stat_n_multi_bar-copybtn").on("click", async () => {
+    await copyImage("stat_n_multi_bar-copybtn", "stat_n_multi_bar-copy_plot");
+  });
 });
