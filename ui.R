@@ -121,7 +121,15 @@ ui <- function(input, output, session) {
         LA_StatsTableUI("la_stats"),
 
         # LA Charts ===========================================================
-        LA_ChartUI("la_chart"),
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::navset_card_underline(
+            id = "la_charts",
+            LA_LineChartUI("la_line_chart"),
+            LA_BarChartUI("la_bar_chart")
+          )
+        ),
 
         # LA Metadata =========================================================
         LA_LevelMetaUI("la_meta")

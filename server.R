@@ -125,17 +125,17 @@ server <- function(input, output, session) {
   )
 
   # LA level charts ===========================================================
-  # Line chart
-  la_linechart <- LA_LineChartServer(
-    "la_chart",
+  # LA line chart
+  LA_LineChartServer(
+    "la_line_chart",
     la_app_inputs,
     bds_metrics,
     stat_n_la
   )
 
-  # Bar chart
-  la_barchart <- LA_BarChartServer(
-    "la_chart",
+  # LA bar chart
+  LA_BarChartServer(
+    "la_bar_chart",
     la_app_inputs,
     bds_metrics,
     stat_n_la
