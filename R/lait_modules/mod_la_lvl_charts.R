@@ -24,39 +24,23 @@
 #' The charts are named as `line_chart` and `bar_chart`,
 #' and are dynamically rendered based on the inputs and server logic.
 #'
-LA_ChartUI <- function(id) {
+LA_LineChartUI <- function(id) {
   ns <- NS(id)
 
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::navset_card_underline(
-      id = "la_charts",
-      bslib::nav_panel(
-        title = "Line chart",
-        bslib::card(
-          bslib::card_body(
-            ggiraph::girafeOutput(ns("line_chart"))
-          ),
-          full_screen = TRUE
-        ),
-      ),
-      bslib::nav_panel(
-        title = "Bar chart",
-        bslib::card(
-          bslib::card_body(
-            ggiraph::girafeOutput(ns("bar_chart"))
-          ),
-          full_screen = TRUE
-        )
-      ),
-      bslib::nav_panel(
-        "Download",
-        file_type_input_btn(ns("file_type"), file_type = "chart"),
-        Download_DataUI(ns("line_download"), "Line chart"),
-        Download_DataUI(ns("bar_download"), "Bar chart")
+  bslib::nav_panel(
+    title = "Line chart",
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center; background: white;",
+      # Line chart
+      create_chart_card_ui(ns("line_chart")),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
-    )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
 
@@ -103,7 +87,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     )
 
     # Build main static plot
-    la_line_chart <- reactive({
+    line_chart <- reactive({
       la_long() |>
         ggplot2::ggplot() +
         ggiraph::geom_point_interactive(
@@ -143,7 +127,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = (la_line_chart() + vertical_hover),
+        ggobj = (line_chart() + vertical_hover),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -154,12 +138,26 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
-    # Download handler for the line chart
+    # Line chart download ------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Line")
+
+    # Set up the download handlers for the chart
     Download_DataServer(
-      "line_download",
+      "chart_download",
       reactive(input$file_type),
-      reactive(list("svg" = la_line_chart(), "html" = interactive_line_chart())),
+      reactive(list("svg" = line_chart(), "html" = interactive_line_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        line_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
     )
 
     # LA Level line chart plot ------------------------------------------------
@@ -167,6 +165,29 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       interactive_line_chart()
     })
   })
+}
+
+
+
+
+LA_BarChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Bar chart",
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center; background: white;",
+      # Bar chart
+      create_chart_card_ui(ns("bar_chart")),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
+  )
 }
 
 
@@ -214,7 +235,7 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     # Build main static plot
     bar_chart <- reactive({
       # Build plot
-      la_bar_chart <- la_long() |>
+      la_long() |>
         ggplot2::ggplot() +
         ggiraph::geom_col_interactive(
           ggplot2::aes(
@@ -252,12 +273,26 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
-    # Download handler for the bar chart
+    # Bar chart download ------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Bar")
+
+    # Set up the download handlers for the chart
     Download_DataServer(
-      "bar_download",
+      "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = bar_chart(), "html" = interactive_bar_chart())),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        bar_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
     )
 
     # LA Level bar chart plot -------------------------------------------------

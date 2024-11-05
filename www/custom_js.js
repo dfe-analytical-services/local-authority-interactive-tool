@@ -63,4 +63,14 @@ $(document).ready(function () {
   $("#create_own_bar-copybtn").on("click", async () => {
     await copyImage("create_own_bar-copybtn", "create_own_bar-copy_plot");
   });
+
+    // Event listener for "LA Level line chart"
+  $("#la_line_chart-copybtn").on("click", async () => {
+    await copyImage("la_line_chart-copybtn", "la_line_chart-copy_plot");
+  });
+
+    // Event listener for "LA Level bar chart"
+  $("#la_bar_chart-copybtn").on("click", async () => {
+    await copyImage("la_bar_chart-copybtn", "la_bar_chart-copy_plot");
+  });
 });

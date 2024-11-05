@@ -17,6 +17,7 @@ list.files("R/lait_modules/", full.names = TRUE) |>
 ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+  tags$head(htmltools::includeScript("www/custom_js.js")),
 
   # Tab header ================================================================
   h1("Local Authority View"),
@@ -32,7 +33,15 @@ ui_mod <- bslib::page_fillable(
   LA_StatsTableUI("la_stats"),
 
   # LA Charts ----------------------------------
-  LA_ChartUI("la_chart"),
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_underline(
+      id = "la_charts",
+      LA_LineChartUI("la_line_chart"),
+      LA_BarChartUI("la_bar_chart")
+    )
+  ),
 
   # LA Metadata ----------------------------------
   LA_LevelMetaUI("la_meta")
@@ -73,7 +82,7 @@ server_mod <- function(input, output, session) {
 
   # LA line chart  ----------------------------------
   LA_LineChartServer(
-    "la_chart",
+    "la_line_chart",
     app_inputs,
     bds_metrics,
     stat_n_la
@@ -81,7 +90,7 @@ server_mod <- function(input, output, session) {
 
   # LA bar chart  ----------------------------------
   LA_BarChartServer(
-    "la_chart",
+    "la_bar_chart",
     app_inputs,
     bds_metrics,
     stat_n_la
