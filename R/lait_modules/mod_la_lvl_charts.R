@@ -1,28 +1,30 @@
 # nolint start: object_name
 #
-#' Local Authority Chart UI Module
+#' Line Chart UI Module
 #'
-#' This module creates the UI elements for displaying Local Authority
-#' (LA) charts.
-#' It provides a container with navigation tabs to toggle between a line
-#' chart and a bar chart.
+#' Creates a user interface component for displaying a line chart with
+#' download options. This UI module is designed to be used within a Shiny
+#' application and provides a structured layout for presenting a line chart
+#' alongside relevant download buttons.
 #'
-#' @param id A unique identifier for the module instance.
+#' @param id A unique identifier for the module. This is used for namespacing
+#'   the UI elements within the Shiny app.
 #'
-#' @return A `div` containing the UI elements for the Local Authority charts.
+#' @return A `shiny::tagList` containing a navigation panel with a line chart
+#'   display, download options, and a hidden static plot for copy-to-clipboard
+#'   functionality.
 #'
 #' @details
-#' This UI module creates a well-styled container that includes a
-#' tabbed interface.
-#' The tabs allow users to switch between a line chart and a bar chart,
-#' both rendered using the `ggiraph::girafeOutput` for interactive plotting.
+#' The UI includes:
+#' - A navigation panel titled "Line chart".
+#' - A flexbox layout that contains the line chart and download options,
+#'   styled for a cohesive appearance.
+#' - A hidden plot used for copying the chart to the clipboard, ensuring
+#'   users can easily export the chart without additional steps.
 #'
-#' The UI components are wrapped in `bslib::navset_card_underline`,
-#' which provides the tabbed navigation.
-#' Each tab contains a `bslib::card` with a `bslib::card_body` that
-#' holds the chart output.
-#' The charts are named as `line_chart` and `bar_chart`,
-#' and are dynamically rendered based on the inputs and server logic.
+#' @examples
+#' # Example usage in UI
+#' LA_LineChartUI("line_chart_ui")
 #'
 LA_LineChartUI <- function(id) {
   ns <- NS(id)
@@ -168,8 +170,32 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 }
 
 
-
-
+#' Bar Chart UI Module
+#'
+#' Creates a user interface component for displaying a bar chart with
+#' download options. This UI module is intended for use within a Shiny
+#' application and provides a structured layout for presenting a bar chart
+#' alongside relevant download buttons.
+#'
+#' @param id A unique identifier for the module. This is used for namespacing
+#'   the UI elements within the Shiny app.
+#'
+#' @return A `shiny::tagList` containing a navigation panel with a bar chart
+#'   display, download options, and a hidden static plot for copy-to-clipboard
+#'   functionality.
+#'
+#' @details
+#' The UI includes:
+#' - A navigation panel titled "Bar chart".
+#' - A flexbox layout that contains the bar chart and download options,
+#'   styled for a cohesive appearance.
+#' - A hidden plot used for copying the chart to the clipboard, allowing
+#'   users to easily export the chart without additional steps.
+#'
+#' @examples
+#' # Example usage in UI
+#' LA_BarChartUI("bar_chart_ui")
+#'
 LA_BarChartUI <- function(id) {
   ns <- NS(id)
 
