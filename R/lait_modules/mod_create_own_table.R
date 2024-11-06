@@ -45,7 +45,7 @@ StagingBDSServer <- function(id,
     # Now filter BDS for geographies and year range
     # Split from above so if indicator doesn't change then don't recompute
     staging_bds <- reactive({
-      req(geog_groups(), topic_indicator_bds())
+      # req(geog_groups(), topic_indicator_bds())
       # Filter by full geography inputs
       filtered_bds <- topic_indicator_bds() |>
         dplyr::filter(
@@ -235,7 +235,7 @@ StagingTableServer <- function(id,
     # Staging table reactable ouput
     output$staging_table <- reactable::renderReactable({
       # Display messages if there are incorrect selections
-      if (length(create_inputs$indicator()) == 0 && is.null(create_inputs$geog())) {
+      if (length(create_inputs$indicator()) == 0 && is.null(geog_groups())) {
         return(reactable::reactable(
           data.frame(
             `Message from tool` = "Please add selections (above).",
@@ -249,7 +249,7 @@ StagingTableServer <- function(id,
             check.names = FALSE
           )
         ))
-      } else if (is.null(create_inputs$geog())) {
+      } else if (is.null(geog_groups())) {
         return(reactable::reactable(
           data.frame(
             `Message from tool` = "Please add a geography selection (above).",
