@@ -168,7 +168,7 @@ StatN_FocusLineChartServer <- function(id,
 
     # Chart download -----------------------------------------------------------
     # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Line")
+    DownloadChartBtnServer("download_btn", id, "Focus Line")
 
     # Set up the download handlers for the chart
     Download_DataServer(
@@ -345,7 +345,7 @@ StatN_FocusBarChartServer <- function(id,
 
     # Chart download -----------------------------------------------------------
     # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Bar")
+    DownloadChartBtnServer("download_btn", id, "Focus Bar")
 
     # Set up the download handlers for the chart
     Download_DataServer(
@@ -781,7 +781,7 @@ StatN_MultiLineChartServer <- function(id,
 
     # Chart download -----------------------------------------------------------
     # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Line")
+    DownloadChartBtnServer("download_btn", id, "Multi Line")
 
     # Set up the download handlers for the chart
     Download_DataServer(
@@ -993,7 +993,7 @@ StatN_MultiBarChartServer <- function(id,
 
     # Chart download -----------------------------------------------------------
     # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Bar")
+    DownloadChartBtnServer("download_btn", id, "Multi Bar")
 
     # Set up the download handlers for the chart
     Download_DataServer(
