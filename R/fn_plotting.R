@@ -24,7 +24,6 @@ get_yaxis_title <- function(data_full) {
         sep = " and\n"
       )
     )
-    add_line_breaks(mixed_title)
   }
 }
 
