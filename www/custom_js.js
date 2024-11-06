@@ -43,4 +43,24 @@ $(document).ready(function () {
   $("#stat_n_multi_line-copybtn").on("click", async () => {
     await copyImage("stat_n_multi_line-copybtn", "stat_n_multi_line-copy_plot");
   });
+
+  // Event listener for "Create your own line chart"
+  $("#copybtn_line").on("click", async () => {
+    await copyImage("copybtn_line", "copy_plot_line");
+  });
+
+  // Event listener for "Create your own bar chart"
+  $("#copybtn_bar").on("click", async () => {
+    await copyImage("copybtn_bar", "copy_plot_bar");
+  });
+
+    // Event listener for "Create your own line chart"
+  $("#create_own_line-copybtn").on("click", async () => {
+    await copyImage("create_own_line-copybtn", "create_own_line-copy_plot");
+  });
+
+    // Event listener for "Create your own line chart"
+  $("#create_own_bar-copybtn").on("click", async () => {
+    await copyImage("create_own_bar-copybtn", "create_own_bar-copy_plot");
+  });
 });

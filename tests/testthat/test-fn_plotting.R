@@ -8,8 +8,9 @@ y_axis_data <- data.frame(
 
 # Test 1: Check if the function returns unique y_axis_name values
 test_that("1. get_yaxis_title returns unique y_axis_name values", {
-  result <- get_yaxis_title(y_axis_data)
-  expected <- c("Temperature", "Pressure", "Humidity")
+  temp_data <- y_axis_data[y_axis_data$y_axis_name == "Temperature", ]
+  result <- get_yaxis_title(temp_data)
+  expected <- c("Temperature")
   expect_equal(result, expected)
 })
 

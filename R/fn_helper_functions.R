@@ -407,3 +407,135 @@ af_colours_focus <- function() {
     }
   )
 }
+
+
+#' Get Minimum and Maximum Years from Data
+#'
+#' This function extracts the minimum and maximum years from a specified
+#' numeric column of year values within a data frame. It handles
+#' missing values appropriately and returns the results in a list for
+#' easy access.
+#'
+#' @param data A data frame that contains a numeric column representing
+#'              year values, typically labeled as "Years_num".
+#' @return A list containing two elements: `min_year`, the minimum year
+#'         value found in the data, and `max_year`, the maximum year
+#'         value. Both values are numeric and NA is handled appropriately.
+#'
+get_min_max_years <- function(data) {
+  query_num_years <- data |>
+    dplyr::pull(Years_num)
+
+  max_year <- query_num_years |> max(na.rm = TRUE)
+  min_year <- query_num_years |> min(na.rm = TRUE)
+
+  list(min_year = min_year, max_year = max_year)
+}
+
+
+#' Create Data Frame for All Years
+#'
+#' This function generates a data frame containing a sequence of year
+#' values from a specified minimum year to a maximum year. The resulting
+#' data frame includes a single column named "Years_num" that holds
+#' the year values in order.
+#'
+#' @param min_year The starting year of the sequence, which should be
+#'                 numeric.
+#' @param max_year The ending year of the sequence, which should also be
+#'                 numeric.
+#' @return A data frame with one column, `Years_num`, containing all
+#'         year values from `min_year` to `max_year`, inclusive.
+#'
+create_years_df <- function(min_year, max_year) {
+  data.frame(Years_num = seq(min_year, max_year))
+}
+
+
+#' Check Year Suffix Consistency
+#'
+#' This function verifies whether all entries in the specified dataset have
+#' consistent suffixes for each year. It extracts the first four characters
+#' from the year strings to identify the year and the remaining characters
+#' as the suffix. The function ensures that for each unique year, there is
+#' only one unique suffix present.
+#'
+#' @param data A data frame containing a column `Years`, which includes year
+#'              values with potential suffixes.
+#' @return A logical value indicating whether all years have consistent
+#'         suffixes (`TRUE`) or not (`FALSE`).
+#'
+check_year_suffix_consistency <- function(data) {
+  data |>
+    pull_uniques("Years") |>
+    (\(years_list) {
+      # Extract the first four characters as the year and remaining as the suffix
+      years <- substring(years_list, 1, 4)
+      suffixes <- substring(years_list, 5)
+
+      # For each unique year, check if there is more than one unique suffix
+      all(
+        sapply(unique(years), function(year) {
+          # Get the suffixes for the current year and check for consistency
+          unique_suffixes <- unique(suffixes[years == year])
+          length(unique_suffixes) <= 1
+        })
+      )
+    })()
+}
+
+
+#' Sort Year Columns
+#'
+#' This function identifies and sorts the columns of a data frame that
+#' represent years, while preserving their full names. It searches for
+#' column names that start with a four-digit year (e.g., 2020) and
+#' returns them in ascending order based on the year, maintaining
+#' their original names in the process.
+#'
+#' @param full_query_data A data frame that may contain year columns
+#'                        named with the format of four-digit years.
+#' @return A character vector of sorted column names representing years,
+#'         preserving the original names.
+#'
+sort_year_columns <- function(full_query_data) {
+  full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
+
+  full_query_year_cols |>
+    purrr::set_names() |>
+    purrr::map_chr(~ stringr::str_sub(.x, 1, 4)) |>
+    sort() |>
+    names()
+}
+
+
+#' Rename Columns with Year
+#'
+#' This function renames the columns of a data frame by extracting the
+#' first four digits from the column names if they start with a four-digit
+#' year. If a column name does not begin with four digits, it retains
+#' its original name. This is useful for simplifying column names in
+#' data frames that contain year-based columns while keeping other
+#' column names intact.
+#'
+#' @param df A data frame whose column names may include four-digit years
+#'            at the start.
+#' @return A data frame with renamed columns where applicable, with four-digit
+#'         years extracted as the new column names.
+#'
+rename_columns_with_year <- function(df) {
+  # Use `gsub` to extract the first 4 digits if they start the column name
+  new_names <- sapply(names(df), function(col) {
+    if (grepl("^\\d{4}", col)) {
+      # Extract the first 4 digits
+      return(substr(col, start = 1, stop = 4))
+    } else {
+      # Return the original name if it doesn't start with 4 digits
+      return(col)
+    }
+  })
+
+  # Rename columns with the modified names
+  colnames(df) <- new_names
+  df
+}

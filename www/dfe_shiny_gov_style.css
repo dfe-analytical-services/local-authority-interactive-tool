@@ -579,3 +579,37 @@ html {
 .govuk-button--secondary:hover[disabled] {
     background-color: #f3f2f1
 }
+
+/* shinyGovstyle warning button */
+.govuk-button--warning {
+    background-color: #d4351c;
+    box-shadow: 0 2px 0 #55150b
+}
+
+.govuk-button--warning,
+.govuk-button--warning:active,
+.govuk-button--warning:hover,
+.govuk-button--warning:link,
+.govuk-button--warning:visited {
+    color: #fff
+}
+
+.govuk-button--warning:hover {
+    background-color: #aa2a16
+}
+
+.govuk-button--warning:hover[disabled] {
+    background-color: #d4351c
+}
+
+
+/* Gives pickerInput defaultlook */
+.bootstrap-select .dropdown-toggle {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #ced4da; /* matches the default border color of selectInput */
+  border-radius: 4px; /* gives a slight rounded corner */
+  padding: 5px 10px; /* add padding for a similar appearance */
+  box-shadow: none; /* remove any default shadow */
+}
+

@@ -26,6 +26,7 @@ ui <- function(input, output, session) {
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
     tags$head(htmltools::includeScript("www/custom_js.js")),
+    reactable.extras::reactable_extras_dependency(),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -97,7 +98,10 @@ ui <- function(input, output, session) {
       id = "navsetpillslist",
       widths = c(2, 10),
       well = FALSE,
-      # Content for these panels is defined in the R/ui_panels/ folder
+
+      # =======================================================================
+      # LA Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "LA Level",
@@ -122,6 +126,10 @@ ui <- function(input, output, session) {
         # LA Metadata =========================================================
         LA_LevelMetaUI("la_meta")
       ),
+
+      # =======================================================================
+      # Regional Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "Regional Level",
@@ -150,6 +158,10 @@ ui <- function(input, output, session) {
         # Region Metadata =====================================================
         LA_LevelMetaUI("region_meta")
       ),
+
+      # =======================================================================
+      # Statistical Neighbour Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "Statsitical Neighbour Level",
@@ -182,6 +194,10 @@ ui <- function(input, output, session) {
         # Statistical Neighbour Metadata ======================================
         LA_LevelMetaUI("stat_n_meta")
       ),
+
+      # =======================================================================
+      # All LA Level Page
+      # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
         title = "All LA Level",
@@ -199,11 +215,65 @@ ui <- function(input, output, session) {
         # LA Metadata =========================================================
         LA_LevelMetaUI("all_la_meta")
       ),
-      # User guide ============================================================
+
+      # =======================================================================
+      # Create Your Own Page
+      # =======================================================================
+      bslib::nav_panel(
+        shiny::hr(class = "mobile-only-hr"),
+        title = "Create Your Own",
+        value = "Create Your Own",
+
+        # User Inputs =========================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible; padding: 1rem;",
+          bslib::layout_column_wrap(
+            Create_MainInputsUI("create_inputs")["Main choices"],
+          ),
+          bslib::layout_column_wrap(
+            Create_MainInputsUI("create_inputs")["LA grouping"],
+            Create_MainInputsUI("create_inputs")["Other grouping"],
+            YearRangeUI("year_range"),
+            Create_MainInputsUI("create_inputs")["Add selection"]
+          )
+        ),
+
+        # Tables ==============================================================
+        # Staging table -------------------------------------------------------
+        StagingTableUI("staging_table"),
+        # Query table ---------------------------------------------------------
+        QueryTableUI("query_table"),
+        # Create own table ----------------------------------------------------
+        CreateOwnTableUI("create_own_table"),
+        # Charts ==============================================================
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          h3("Output Charts (Charts showing data from saved selections)"),
+          p("Note a maximum of 4 geographies and 3 indicators can be shown."),
+          bslib::navset_tab(
+            # Line chart ------------------------------------------------------
+            CreateOwnLineChartUI("create_own_line"),
+            # Bar chart ------------------------------------------------------
+            CreateOwnBarChartUI("create_own_bar")
+          )
+        )
+      ),
+
+      # =======================================================================
+      # User guide
+      # =======================================================================
       user_guide_panel(),
-      # Accessibility =========================================================
+
+      # =======================================================================
+      # Accessibility
+      # =======================================================================
       a11y_panel(),
-      # Support and feedback ==================================================
+
+      # =======================================================================
+      # Support and feedback
+      # =======================================================================
       bslib::nav_panel(
         value = "support_panel",
         shinyGovstyle::banner(
@@ -228,7 +298,10 @@ ui <- function(input, output, session) {
           form_url = "https://forms.office.com/e/gTNw1EBgsn"
         )
       ),
-      # Cookies info ==========================================================
+
+      # =======================================================================
+      # Cookies info
+      # =======================================================================
       bslib::nav_panel(
         value = "cookies_panel_ui",
         title = "Cookies",

@@ -44,7 +44,7 @@ user_guide_panel <- function() {
               investigate an indicator using the Regional Level page."),
           h2("Guidance sources"),
           p("For example, here we'll add some of the key resources we draw
-                  on to guide styling and vizualisation...")
+                  on to guide styling and visualisation...")
         )
       )
     )

@@ -279,7 +279,7 @@ StatN_FocusBarChartUI <- function(id) {
 #' @param app_inputs A reactive list of application inputs used to filter
 #'   data for the bar chart, including the selected Local Authority.
 #' @param bds_metrics A reactive data frame containing metrics needed for
-#'   analysis and visualization in the chart.
+#'   analysis and visualisation in the chart.
 #' @param stat_n_la A reactive data frame containing Local Authority
 #'   statistical neighbours data used for filtering and comparison.
 #'
@@ -393,7 +393,7 @@ StatN_Chart_InputUI <- function(id) {
   tagList(
     shiny::selectizeInput(
       inputId = ns("chart_line_input"),
-      label = "Select region to compare (max 3)",
+      label = "Select statistical neighbour to compare (max 3)",
       choices = NULL,
       multiple = TRUE,
       options = list(
@@ -404,7 +404,7 @@ StatN_Chart_InputUI <- function(id) {
     ),
     shiny::selectizeInput(
       inputId = ns("chart_bar_input"),
-      label = "Select region to compare (max 3)",
+      label = "Select statistical neighbour to compare (max 3)",
       choices = NULL,
       multiple = TRUE,
       options = list(
@@ -420,7 +420,7 @@ StatN_Chart_InputUI <- function(id) {
 #' Server logic for Chart Input Selection
 #'
 #' This function contains the server logic for managing the selection
-#' of regions to compare in both the line and bar charts. It synchronizes
+#' of regions to compare in both the line and bar charts. It synchronises
 #' the selected inputs and ensures that they remain valid and consistent
 #' across both inputs.
 #'
@@ -660,7 +660,7 @@ StatN_MultiLineChartUI <- function(id) {
 #' @param stat_n_la A reactive data frame containing statistical
 #'   neighbour data for the selected LA.
 #' @param shared_values A reactive list for storing shared input values
-#'   between different chart selections, facilitating synchronization.
+#'   between different chart selections, facilitating synchronisation.
 #'
 #' @return NULL This function does not return any values; it generates
 #'   the multi-line chart and updates the UI based on user selections.
@@ -891,7 +891,7 @@ StatN_MultiBarChartUI <- function(id) {
 #' @param stat_n_la A reactive data frame containing statistical
 #'   neighbour data for the selected LA.
 #' @param shared_values A reactive list for storing shared input values
-#'   between different chart selections, facilitating synchronization.
+#'   between different chart selections, facilitating synchronisation.
 #'
 #' @return NULL This function does not return any values; it generates
 #'   the multi-bar chart and updates the UI based on user selections.

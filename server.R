@@ -101,7 +101,6 @@ server <- function(input, output, session) {
   # ===========================================================================
   # LA Level Page
   # ===========================================================================
-
   # User Inputs ===============================================================
   la_app_inputs <- appInputsServer("la_inputs", shared_values)
 
@@ -328,7 +327,103 @@ server <- function(input, output, session) {
     session
   )
 
-  # Stop app ------------------------------------------------------------------
+
+  # ===========================================================================
+  # Create Your Own Page
+  # ===========================================================================
+  # User Inputs ===============================================================
+  # Create own main inputs ----------------------------------------------------
+  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
+
+  # Year range input ----------------------------------------------------------
+  year_input <- YearRangeServer(
+    "year_range",
+    bds_metrics,
+    create_inputs$indicator
+  )
+
+  # Logic to create own =======================================================
+  # Geog Groupings ------------------------------------------------------------
+  geog_groups <- GroupingInputServer(
+    "geog_groups",
+    create_inputs,
+    la_names_bds,
+    region_names_bds,
+    stat_n_geog,
+    stat_n_la
+  )
+
+  # Staging Table =============================================================
+  # Filtering BDS for staging data --------------------------------------------
+  staging_bds <- StagingBDSServer(
+    "staging_bds",
+    create_inputs,
+    geog_groups,
+    year_input,
+    bds_metrics
+  )
+
+  # Build staging data --------------------------------------------------------
+  staging_data <- StagingDataServer(
+    "staging_data",
+    create_inputs,
+    staging_bds,
+    region_names_bds,
+    la_names_bds,
+    stat_n_la
+  )
+
+  # Output staging table ------------------------------------------------------
+  StagingTableServer(
+    "staging_table",
+    create_inputs,
+    region_names_bds,
+    la_names_bds,
+    stat_n_la,
+    geog_groups,
+    year_input,
+    bds_metrics
+  )
+
+  # Query Table ===============================================================
+  # Building query data -------------------------------------------------------
+  query_data <- QueryDataServer(
+    "query_data",
+    create_inputs,
+    geog_groups,
+    year_input,
+    staging_data
+  )
+
+  # Output query table --------------------------------------------------------
+  query_table <- QueryTableServer(
+    "query_table",
+    query_data
+  )
+
+  # Create Own Table ==========================================================
+  CreateOwnTableServer(
+    "create_own_table",
+    query_table,
+    bds_metrics
+  )
+
+  # Create Own Charts =========================================================
+  # Line chart ----------------------------------------------------------------
+  CreateOwnLineChartServer(
+    "create_own_line",
+    query_table,
+    bds_metrics
+  )
+
+  # Bar chart -----------------------------------------------------------------
+  CreateOwnBarChartServer(
+    "create_own_bar",
+    query_table,
+    bds_metrics
+  )
+
+  # Stop app ==================================================================
   session$onSessionEnded(function() {
     shiny::stopApp()
   })

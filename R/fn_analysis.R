@@ -298,3 +298,121 @@ filter_region_data_all_la <- function(data, la_names) {
     dplyr::mutate(Rank = "") |>
     dplyr::arrange(`LA Number`)
 }
+
+
+#' Filter BDS for Selected Indicators
+#'
+#' This function filters a given BDS dataset to include only the rows that
+#' match the specified indicators. It removes any rows where the year value
+#' is missing (NA). The filtered dataset can be used for further analysis
+#' or visualization of selected indicators.
+#'
+#' @param bds_data A data frame containing BDS data, including a column
+#'                 for indicators (`Measure`) and years (`Years`).
+#' @param selected_indicators A character vector of indicator names that
+#'                            should be retained in the filtered dataset.
+#' @return A data frame containing only the rows from `bds_data` that
+#'         correspond to the specified indicators and have non-missing
+#'         year values.
+
+filter_bds_for_indicators <- function(bds_data, selected_indicators) {
+  bds_data |>
+    dplyr::filter(
+      Measure %in% selected_indicators,
+      !is.na(Years)
+    )
+}
+
+
+#' Get Local Authorities in Selected Regions
+#'
+#' This function filters a dataset of geographical data to return unique
+#' local authority names based on the selected regions. It is useful for
+#' narrowing down local authorities relevant to specific regions.
+#'
+#' @param data_geog A data frame containing geographical data, including
+#'                  local authority names and corresponding region codes.
+#' @param selected_regions A vector of region identifiers to filter the
+#'                         local authorities. Only those local authorities
+#'                         that belong to the selected regions will be
+#'                         returned.
+#' @return A vector of unique local authority names that are part of the
+#'         specified regions.
+#'
+get_las_in_regions <- function(data_geog, selected_regions) {
+  data_geog |>
+    dplyr::filter(GOReg %in% selected_regions) |>
+    pull_uniques("LA Name")
+}
+
+
+#' Get Regions for Selected Local Authorities
+#'
+#' This function filters a dataset of geographical data to return unique
+#' region identifiers associated with selected local authorities. It helps
+#' in identifying the regions relevant to a specified set of local
+#' authorities.
+#'
+#' @param data_geog A data frame containing geographical data, including
+#'                  local authority names and their corresponding region
+#'                  codes.
+#' @param selected_las A vector of local authority names to filter the
+#'                      regions. Only the regions associated with the
+#'                      specified local authorities will be returned.
+#' @return A vector of unique region identifiers that correspond to the
+#'         selected local authorities.
+#'
+get_la_region <- function(data_geog, selected_las) {
+  data_geog |>
+    dplyr::filter(`LA Name` %in% selected_las) |>
+    pull_uniques("GOReg")
+}
+
+
+#' Get Statistical Neighbors for Selected Local Authorities
+#'
+#' This function retrieves the statistical neighbors for a given set of
+#' local authorities from a dataset containing statistical neighbor
+#' information. It filters the dataset to include only the selected local
+#' authorities and returns their associated statistical neighbors.
+#'
+#' @param data_stat_n A data frame containing statistical neighbor data,
+#'                     which includes local authority names and their
+#'                     corresponding statistical neighbor identifiers.
+#' @param selected_las A vector of local authority names for which
+#'                      statistical neighbors should be retrieved. The
+#'                      function will return neighbors associated with
+#'                      these local authorities.
+#' @return A vector of unique statistical neighbor identifiers linked to
+#'         the specified local authorities.
+#'
+get_la_stat_neighbrs <- function(data_stat_n, selected_las) {
+  data_stat_n |>
+    dplyr::filter(`LA Name` %in% selected_las) |>
+    pull_uniques("LA Name_sn")
+}
+
+
+
+#' Get Distinct and Separated Unique Values from a Data Frame Column
+#'
+#' This helper function retrieves distinct values from a specified column
+#' in a data frame, separates them into individual rows if they are
+#' concatenated, and trims any whitespace. This is particularly useful
+#' for extracting and formatting unique entries for dropdowns or filters
+#' in a Shiny application.
+#'
+#' @param data A data frame from which unique values will be extracted.
+#' @param column The name of the column from which to retrieve unique
+#'               values. The column can contain concatenated entries
+#'               that will be separated into individual values.
+#' @return A vector of unique values from the specified column, with any
+#'         whitespace trimmed and values separated into individual entries.
+#'
+get_query_table_values <- function(data, column) {
+  data |>
+    dplyr::distinct({{ column }}) |>
+    tidyr::separate_rows({{ column }}, sep = ",<br>") |>
+    dplyr::mutate({{ column }} := trimws({{ column }})) |>
+    pull_uniques(as.character(substitute(column)))
+}

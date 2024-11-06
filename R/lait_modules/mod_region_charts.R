@@ -201,7 +201,7 @@ Region_FocusLine_chartServer <- function(id,
                                          stat_n_geog,
                                          region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Initialize server logic for download button and modal
+    # Initialise server logic for download button and modal
     DownloadChartBtnServer("download_btn", id, "Line")
 
     # Get data for the region's long format plot
@@ -396,7 +396,7 @@ Region_Multi_chartServer <- function(id,
                                      stat_n_geog,
                                      region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Initialize the download button server for the chart
+    # Initialise the download button server for the chart
     DownloadChartBtnServer("download_btn", id, "Bar")
 
     # Obtain data for plotting by region

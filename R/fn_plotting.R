@@ -9,8 +9,22 @@
 #' }
 #' @export
 get_yaxis_title <- function(data_full) {
-  data_full |>
+  y_axis_title <- data_full |>
     pull_uniques("y_axis_name")
+
+  # If more than one y-axis title then give generic
+  if (length(y_axis_title) == 1) {
+    y_axis_title
+  } else {
+    paste(
+      "Mixed units:\n",
+      paste(
+        paste(y_axis_title[-length(y_axis_title)], collapse = ",\n"),
+        y_axis_title[length(y_axis_title)],
+        sep = " and\n"
+      )
+    )
+  }
 }
 
 
@@ -27,8 +41,23 @@ get_yaxis_title <- function(data_full) {
 #' }
 #' @export
 get_plot_title <- function(data_full) {
-  data_full |>
+  chart_title <- data_full |>
     pull_uniques("Chart_title")
+
+  # If more than one title, format with "," & "and"s
+  if (length(chart_title) == 1) {
+    chart_title
+  } else {
+    paste(
+      "Chart showing -",
+      paste(
+        paste(chart_title[-length(chart_title)], collapse = ",<br>"),
+        chart_title[length(chart_title)],
+        sep = " and<br>"
+      ),
+      sep = "<br>"
+    )
+  }
 }
 
 
@@ -297,6 +326,11 @@ format_axes <- function(data_long) {
   # Get X-axis year labels (these can be non-numeric such as 2019-20)
   year_labels <- get_years(data_long, "character")
 
+  # Check if suffixes consistent
+  if (!check_year_suffix_consistency(data_long)) {
+    year_labels <- num_years
+  }
+
   # Axes formatting
   list(
     ggplot2::scale_y_continuous(
@@ -370,7 +404,7 @@ set_plot_colours <- function(data_long,
 #'
 #' The function uses helper functions to determine appropriate titles for
 #' the axes and the plot, ensuring that the labels are relevant to the data
-#' being visualized.
+#' being visualised.
 #'
 #' @param filtered_bds A data frame or object containing the filtered data
 #'   used for plotting. This should include information necessary to derive
@@ -443,49 +477,107 @@ custom_theme <- function() {
 }
 
 
-#' Create Interactive Vertical Lines for Tooltips
+#' Generate year text for tooltip
 #'
-#' This function generates vertical lines on a ggplot2 plot that display
-#' tooltips when hovered over, using the ggiraph package.
+#' This function creates a text string indicating the year based on the
+#' specified years number and the provided data frame.
 #'
-#' @param x A numeric value representing the x-axis position (year)
-#' for the vertical line.
-#' @param data A data frame containing the data for the plot,
-#' filtered for the relevant year.
+#' @param data A data frame containing year information.
+#' @param years_num A numeric value representing the year.
 #'
-#' @return A `ggiraph::geom_vline_interactive` object representing the
-#' vertical line with attached tooltips.
+#' @return A formatted string with the year information.
+#' @export
+generate_year_text <- function(data, years_num) {
+  glue::glue(
+    "Year: {data |>
+      dplyr::filter(Years_num == years_num) |>
+      get_years(type = 'character')}"
+  )
+}
+
+#' Generate tooltip text when including measures
 #'
-#' @details
-#' The function creates an interactive vertical line at the specified
-#' x-axis position.
-#' The tooltip displays the year and corresponding values for each
-#' `LA and Regions` group present in the data.
-#' The line is dashed and only becomes visible upon hovering,
-#' enhancing the interactivity of the plot.
+#' This function generates a tooltip text string that includes the measures
+#' along with the corresponding LA and region values.
 #'
-tooltip_vlines <- function(x, data, indicator_dp = 1) {
+#' @param data A data frame containing the measures and values.
+#' @param years_num A numeric value representing the year for filtering.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#'
+#' @return A formatted string containing measures and corresponding values.
+#' @export
+tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
+  measure_summary <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+    dplyr::filter(Years_num == years_num) |>
+    dplyr::group_by(Measure) |>
+    dplyr::summarise(
+      tooltip_text = paste(
+        paste0(`LA and Regions`, ": ", values_num),
+        collapse = "\n"
+      ),
+      .groups = "drop"
+    )
+
+  glue::glue_data(
+    measure_summary,
+    "{Measure}:\n  {tooltip_text}",
+    .sep = "\n"
+  ) |>
+    paste(collapse = "\n\n")
+}
+
+#' Generate tooltip text when not including measures
+#'
+#' This function generates a tooltip text string that lists LA and region
+#' values without including measures.
+#'
+#' @param data A data frame containing the values.
+#' @param years_num A numeric value representing the year for filtering.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#'
+#' @return A formatted string containing LA and region values.
+#' @export
+tooltip_text <- function(data, years_num, indicator_dp) {
+  paste0(
+    glue::glue_data(
+      data |>
+        pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+        dplyr::filter(Years_num == years_num) |>
+        dplyr::arrange(dplyr::desc(values_num)),
+      "{`LA and Regions`}: {values_num}"
+    ),
+    collapse = "\n"
+  )
+}
+
+#' Generate interactive vertical line with tooltip
+#'
+#' This function creates a vertical line on a plot with an interactive
+#' tooltip that shows year information and related values, optionally
+#' including measures.
+#'
+#' @param x A numeric value representing the x-intercept for the vertical line.
+#' @param data A data frame containing the relevant data for tooltips.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#' @param include_measure A logical value indicating whether to include
+#' measures in the tooltip.
+#'
+#' @return A `geom_vline_interactive` object for use in a plot.
+#' @export
+tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
+  year_text <- generate_year_text(data, x)
+
+  tooltip_content <- if (include_measure) {
+    tooltip_text_w_indicator(data, x, indicator_dp)
+  } else {
+    tooltip_text(data, x, indicator_dp)
+  }
+
   geom_vline_interactive(
     xintercept = x,
     data_id = x,
-    tooltip = glue::glue(
-      # Get Years (descriptive)
-      "Year: {data |>
-      dplyr::filter(Years_num == x) |>
-      get_years(type = 'character')}",
-      # Get Geog area: Value
-      paste0(
-        "\n",
-        glue::glue_data(
-          data |>
-            pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-            dplyr::filter(Years_num == x) |>
-            dplyr::arrange(dplyr::desc(values_num)),
-          "{`LA and Regions`}: {values_num}"
-        ),
-        collapse = ""
-      )
-    ),
+    tooltip = paste(year_text, tooltip_content, sep = "\n\n"),
     hover_nearest = TRUE,
     linetype = "dashed",
     size = 2.5,
@@ -527,7 +619,7 @@ custom_ggiraph_tooltip <- function() {
 #' Generate Generic ggiraph Options
 #'
 #' This function generates a list of commonly used ggiraph options for
-#' customising tooltips and toolbars in `ggiraph` visualizations.
+#' customising tooltips and toolbars in `ggiraph` visualisations.
 #' It is designed to provide a set of default settings that can be easily
 #' extended or overridden.
 #'
@@ -646,14 +738,15 @@ manual_colour_mapping <- function(chart_groups, type) {
   }
 }
 
-display_no_data_plot <- function() {
+display_no_data_plot <- function(label = "No plot due to no available data.") {
   error_plot <- ggplot() +
     annotate(
       "text",
       x = 0.5,
       y = 0.5, # Position at the center of the plot
       label = paste0(
-        "No plot due to no available data.\n",
+        label,
+        "\n",
         "If you think this is incorrect, ",
         "please report so in the feedback form."
       ),
