@@ -479,6 +479,176 @@ Region_FocusBarChartServer <- function(id,
 
 
 
+
+
+
+
+
+Region_MultiChartInputUI <- function(id) {
+  ns <- NS(id)
+
+  tagList(
+    shiny::selectizeInput(
+      inputId = ns("chart_line_input"),
+      label = "Select Regions to compare (max 3)",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button"),
+        dropdownParent = "body"
+      )
+    ),
+    shiny::selectizeInput(
+      inputId = ns("chart_bar_input"),
+      label = "Select Regions to compare (max 3)",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button"),
+        dropdownParent = "body"
+      )
+    )
+  )
+}
+
+Region_MultiChartInputServer <- function(id,
+                                         app_inputs,
+                                         stat_n_geog,
+                                         bds_metrics,
+                                         region_names_bds,
+                                         shared_values) {
+  moduleServer(id, function(input, output, session) {
+    # Helper function to retain only the valid selections that are in the available choices
+    retain_valid_selections <- function(current_choices,
+                                        previous_selections) {
+      intersect(previous_selections, current_choices)
+    }
+
+    # Clean region names based on selected inputs
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
+
+    # Reactive expression to get the valid Regions (not the selected LA's Region)
+    valid_selections <- reactive({
+      region_names_bds |>
+        setdiff(region_clean())
+    })
+
+    # Observe when the main LA input changes to update both chart inputs (line and bar)
+    observeEvent(app_inputs$la(), {
+      # Get previous selections for both line and bar inputs from shared values
+      prev_line_selections <- shared_values$chart_line_input
+      prev_bar_selections <- shared_values$chart_bar_input
+
+      # Retain only valid selections from the previous inputs
+      valid_line_selections <- retain_valid_selections(valid_selections(), prev_line_selections)
+      valid_bar_selections <- retain_valid_selections(valid_selections(), prev_bar_selections)
+
+      # Update the line chart selectize input with valid selections
+      updateSelectizeInput(
+        session = session,
+        inputId = "chart_line_input",
+        choices = valid_selections(),
+        selected = valid_line_selections
+      )
+
+      # Update the bar chart selectize input with valid selections
+      updateSelectizeInput(
+        session = session,
+        inputId = "chart_bar_input",
+        choices = valid_selections(),
+        selected = valid_bar_selections
+      )
+    })
+
+    # Line chart input --------------------------------------------------------
+    observeEvent(input$chart_line_input,
+      {
+        if (!setequal(input$chart_line_input, shared_values$chart_line_input)) {
+          # Update line chart shared val with user input
+          shared_values$chart_line_input <- input$chart_line_input
+        }
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Keep the bar selected synchronized with shared values
+    observeEvent(shared_values$chart_line_input,
+      {
+        later::later(function() {
+          isolate({
+            if (!setequal(input$chart_bar_input, shared_values$chart_line_input)) {
+              updateSelectizeInput(
+                session = session,
+                inputId = "chart_bar_input",
+                selected = if (is.null(shared_values$chart_line_input)) {
+                  character(0)
+                } else {
+                  shared_values$chart_line_input
+                }
+              )
+            }
+          })
+        }, delay = 0.5)
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Bar chart input ---------------------------------------------------------
+    observeEvent(input$chart_bar_input,
+      {
+        if (!setequal(input$chart_bar_input, shared_values$chart_bar_input)) {
+          # Update bar chart shared val with user input
+          shared_values$chart_bar_input <- input$chart_bar_input
+        }
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Keep the line selected synchronized with shared values
+    observeEvent(shared_values$chart_bar_input,
+      {
+        later::later(function() {
+          isolate({
+            if (!setequal(input$chart_line_input, shared_values$chart_bar_input)) {
+              updateSelectizeInput(
+                session = session,
+                inputId = "chart_line_input",
+                selected = if (is.null(shared_values$chart_bar_input)) {
+                  character(0)
+                } else {
+                  shared_values$chart_bar_input
+                }
+              )
+            }
+          })
+        }, delay = 0.5)
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Return the selected inputs as reactive values for use elsewhere in the app
+    list(
+      line_input = reactive(shared_values$chart_line_input),
+      bar_input = reactive(shared_values$chart_bar_input)
+    )
+  })
+}
+
+
+
+
+
 # Region multi-choice line chart module =======================================
 #' Region Multi-Choice Line Chart UI Module
 #'
@@ -516,8 +686,9 @@ Region_Multi_chartUI <- function(id) {
               position = "left",
               width = "30%",
               open = list(desktop = "open", mobile = "always-above"),
-              # UI for chart input filters
-              Chart_InputUI(ns("chart_input"))
+              Region_MultiChartInputUI(
+                ns("chart_line_input") # Line chart input only
+              )[[1]]
             ),
             # Chart display area
             ggiraph::girafeOutput(ns("output_chart"))
@@ -536,7 +707,6 @@ Region_Multi_chartUI <- function(id) {
     create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
-
 
 #' Region Multi-Choice Line Chart Server Module
 #'
@@ -563,7 +733,8 @@ Region_Multi_chartServer <- function(id,
                                      app_inputs,
                                      bds_metrics,
                                      stat_n_geog,
-                                     region_names_bds) {
+                                     region_names_bds,
+                                     shared_values) {
   moduleServer(id, function(input, output, session) {
     # Obtain data for plotting by region
     region_long_plot <- Region_LongPlotServer(
@@ -588,15 +759,19 @@ Region_Multi_chartServer <- function(id,
     current_year <- Current_YearServer("current_year", region_long_plot)
 
     # Get user-selected choices for the chart
-    chart_input <- Chart_InputServer(
-      "chart_input",
+    chart_input <- Region_MultiChartInputServer(
+      "chart_line_input",
       app_inputs,
-      region_long_plot,
-      region_clean
-    )
+      stat_n_geog,
+      bds_metrics,
+      region_names_bds,
+      shared_values
+    )$line_input
 
     # Create reactive chart data based on selected regions and user choices
     chart_data <- reactive({
+      print(c(region_clean(), chart_input()))
+
       region_long_plot() |>
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |
@@ -604,7 +779,7 @@ Region_Multi_chartServer <- function(id,
         ) |>
         # Reorder regions to layer lines based on selection
         reorder_la_regions(
-          rev(c(region_clean(), chart_input()))
+          rev(unique(c(region_clean(), chart_input())))
         )
     })
 

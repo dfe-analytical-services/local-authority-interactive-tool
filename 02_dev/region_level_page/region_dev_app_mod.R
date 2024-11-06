@@ -50,7 +50,9 @@ server_mod <- function(input, output, session) {
   shared_values <- reactiveValues(
     la = NULL,
     topic = NULL,
-    indicator = NULL
+    indicator = NULL,
+    chart_line_input = NULL,
+    chart_bar_input = NULL
   )
 
   # Extract selected LA, Topic and Indicator
@@ -99,7 +101,8 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_geog,
-    region_names_bds
+    region_names_bds,
+    shared_values
   )
 
   # Region focus bar chart ---------------------------------------------------
