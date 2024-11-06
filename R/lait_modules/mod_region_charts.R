@@ -789,16 +789,6 @@ Region_MultiLineChartServer <- function(id,
       } else {
         chart_data() |>
           ggplot2::ggplot() +
-          # Add interactive points for user engagement
-          ggiraph::geom_point_interactive(
-            ggplot2::aes(
-              x = Years_num,
-              y = values_num,
-              color = `LA and Regions`,
-              data_id = `LA and Regions`
-            ),
-            na.rm = TRUE
-          ) +
           # Add interactive lines for visual representation
           ggiraph::geom_line_interactive(
             ggplot2::aes(

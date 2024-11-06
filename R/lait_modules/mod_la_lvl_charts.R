@@ -92,16 +92,6 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     line_chart <- reactive({
       la_long() |>
         ggplot2::ggplot() +
-        ggiraph::geom_point_interactive(
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`,
-            shape = `LA and Regions`,
-            data_id = `LA and Regions`
-          ),
-          na.rm = TRUE
-        ) +
         ggiraph::geom_line_interactive(
           ggplot2::aes(
             x = Years_num,
