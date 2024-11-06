@@ -12,7 +12,7 @@ get_yaxis_title <- function(data_full) {
   y_axis_title <- data_full |>
     pull_uniques("y_axis_name")
 
-  # If more than one y-axis title then give generic
+  # If more than one y-axis title then combine
   if (length(y_axis_title) == 1) {
     add_line_breaks(y_axis_title)
   } else {
@@ -25,6 +25,19 @@ get_yaxis_title <- function(data_full) {
       )
     )
     add_line_breaks(mixed_title)
+  }
+}
+
+
+get_xaxis_title <- function(data_full) {
+  x_axis_title <- data_full |>
+    pull_uniques("Year_Type")
+
+  # If more than one y-axis title then give generic
+  if (length(x_axis_title) == 1) {
+    add_line_breaks(x_axis_title)
+  } else {
+    "Plain Years"
   }
 }
 
@@ -423,11 +436,12 @@ set_plot_colours <- function(data_long,
 #'   geom_line()
 #'
 set_plot_labs <- function(filtered_bds) {
+  x_title <- get_xaxis_title(filtered_bds)
   y_title <- get_yaxis_title(filtered_bds)
   plot_title <- get_plot_title(filtered_bds)
 
   ggplot2::labs(
-    x = "",
+    x = x_title,
     y = y_title,
     title = plot_title
   )
@@ -462,9 +476,17 @@ custom_theme <- function() {
         hjust = 0.5,
         width = unit(0.9, "npc"),
         halign = 0.5,
-        margin = margin(b = unit(15, "lines"))
+        margin = margin(b = unit(10, "lines"))
       ),
-      axis.title.y = element_text(angle = 0, vjust = 0.5),
+      axis.title.x = element_text(
+        hjust = 0.5,
+        margin = margin(t = 15, r = 0, b = 0, l = 0)
+      ),
+      axis.title.y = element_text(
+        angle = 0,
+        vjust = 0.5,
+        margin = margin(t = 0, r = 10, b = 0, l = 0)
+      ),
       legend.position = "bottom",
       legend.title = element_blank(),
       panel.grid = element_line(colour = "#D9D9D9"),

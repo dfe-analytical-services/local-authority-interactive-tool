@@ -190,7 +190,7 @@ metrics_discontinued <- metrics_raw |>
 bds_metrics <- metrics_clean |>
   dplyr::select(
     Topic, Measure_code, Measure, Measure_short,
-    Polarity, y_axis_name, Chart_title, dps
+    Polarity, y_axis_name, Year_Type, Chart_title, dps
   ) |>
   dplyr::left_join(bds_clean,
     by = c("Measure_short" = "Short Desc"),
