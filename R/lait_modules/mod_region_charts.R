@@ -336,6 +336,149 @@ Region_FocusLine_chartServer <- function(id,
 }
 
 
+
+
+
+Region_FocusBarChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Bar chart - Focus",
+    div(
+      style = "display: flex;
+               justify-content: space-between;
+               align-items: center;
+               background: white;",
+      # Focus line chart
+      create_chart_card_ui(ns("output_chart")),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
+  )
+}
+
+
+
+Region_FocusBarChartServer <- function(id,
+                                       app_inputs,
+                                       bds_metrics,
+                                       stat_n_geog,
+                                       region_names_bds) {
+  moduleServer(id, function(input, output, session) {
+    # Get data for the region's long format plot
+    region_long_plot <- Region_LongPlotServer(
+      "region_long_plot",
+      app_inputs,
+      bds_metrics,
+      region_names_bds
+    )
+
+    # Clean region names based on selected inputs
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
+
+    # Filter data for the selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Prepare the chart data, setting the selected region to appear as first bar
+    chart_data <- reactive({
+      region_long_plot() |>
+        reorder_la_regions(region_clean())
+    })
+
+    static_chart <- reactive({
+      # Check to see if any data - if not display error plot
+      if (all(is.na(chart_data()$values_num))) {
+        display_no_data_plot()
+      } else {
+        chart_data() |>
+          ggplot2::ggplot() +
+          ggiraph::geom_col_interactive(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              fill = `LA and Regions`,
+              tooltip = glue::glue_data(
+                chart_data() |>
+                  pretty_num_table(
+                    include_columns = "values_num",
+                    dp = get_indicator_dps(filtered_bds())
+                  ),
+                "Year: {Years}\n{`LA and Regions`}: {values_num}"
+              ),
+              data_id = `LA and Regions`
+            ),
+            position = "dodge",
+            width = 0.6,
+            na.rm = TRUE,
+            colour = "black"
+          ) +
+          format_axes(chart_data()) +
+          set_plot_colours(chart_data(), "focus-fill", region_clean()) +
+          set_plot_labs(filtered_bds()) +
+          custom_theme() +
+          guides(fill = "none")
+      }
+    })
+
+    interactive_chart <- reactive({
+      # Now pass the full ggplot object to ggiraph::girafe
+      ggiraph::girafe(
+        ggobj = static_chart(),
+        width_svg = 12,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    })
+
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Focus Bar")
+
+    # Set up the download handlers for the chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Bar-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
+    # Return the interactive plot
+    output$output_chart <- ggiraph::renderGirafe({
+      interactive_chart()
+    })
+  })
+}
+
+
+
+
+
+
+
 # Region multi-choice line chart module =======================================
 #' Region Multi-Choice Line Chart UI Module
 #'
