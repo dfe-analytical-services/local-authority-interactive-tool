@@ -541,7 +541,7 @@ Region_MultiChartInputServer <- function(id,
     })
 
     # Observe when the main LA input changes to update both chart inputs (line and bar)
-    observeEvent(app_inputs$la(), {
+    observeEvent(list(app_inputs$la(), app_inputs$indicator()), {
       # Get previous selections for both line and bar inputs from shared values
       prev_line_selections <- shared_values$chart_line_input
       prev_bar_selections <- shared_values$chart_bar_input
@@ -770,8 +770,6 @@ Region_Multi_chartServer <- function(id,
 
     # Create reactive chart data based on selected regions and user choices
     chart_data <- reactive({
-      print(c(region_clean(), chart_input()))
-
       region_long_plot() |>
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |

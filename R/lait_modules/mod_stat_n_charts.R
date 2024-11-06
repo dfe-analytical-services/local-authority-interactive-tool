@@ -451,7 +451,7 @@ StatN_Chart_InputUI <- function(id) {
 #'   and bar chart inputs. This allows other parts of the application to
 #'   access the current selections made by the user.
 #'
-StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
+StatN_Chart_InputServer <- function(id, app_inputs, stat_n_long, shared_values) {
   moduleServer(id, function(input, output, session) {
     # Helper function to retain only the valid selections that are in the available choices
     retain_valid_selections <- function(current_choices, previous_selections) {
@@ -461,13 +461,13 @@ StatN_Chart_InputServer <- function(id, la_input, stat_n_long, shared_values) {
     # Reactive expression to get the valid areas (LAs and Regions) excluding the currently selected LA
     valid_selections <- reactive({
       stat_n_long() |>
-        dplyr::filter(`LA and Regions` != la_input()) |> # Exclude the selected LA from choices
+        dplyr::filter(`LA and Regions` != app_inputs$la()) |> # Exclude the selected LA from choices
         pull_uniques("LA and Regions") |> # Get the unique values of LA and Regions
         as.character()
     })
 
     # Observe when the main LA input changes to update both chart inputs (line and bar)
-    observeEvent(la_input(), {
+    observeEvent(list(app_inputs$la(), app_inputs$indicator()), {
       # Get previous selections for both line and bar inputs from shared values
       prev_line_selections <- shared_values$chart_line_input
       prev_bar_selections <- shared_values$chart_bar_input
@@ -679,15 +679,7 @@ StatN_MultiLineChartServer <- function(id,
     # Pulling specific choices available for selected LA & indicator
     chart_input <- StatN_Chart_InputServer(
       "chart_line_input",
-      app_inputs$la,
-      stat_n_long,
-      shared_values
-    )$line_input
-
-    # Pulling specific choices available for selected LA & indicator
-    chart_input <- StatN_Chart_InputServer(
-      "chart_line_input",
-      app_inputs$la,
+      app_inputs,
       stat_n_long,
       shared_values
     )$line_input
@@ -699,7 +691,6 @@ StatN_MultiLineChartServer <- function(id,
 
       # Filter Statistical Neighbour data for these areas
       stat_n_long() |>
-        # Filter for random areas - simulate user choosing up to 6 areas
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |
             (`LA and Regions` %in% app_inputs$la())
@@ -917,7 +908,7 @@ StatN_MultiBarChartServer <- function(id,
     # Pulling specific choices available for selected LA & indicator
     chart_input <- StatN_Chart_InputServer(
       "chart_bar_input",
-      app_inputs$la,
+      app_inputs,
       stat_n_long,
       shared_values
     )$bar_input
