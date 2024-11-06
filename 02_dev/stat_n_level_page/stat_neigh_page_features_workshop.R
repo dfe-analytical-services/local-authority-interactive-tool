@@ -220,13 +220,7 @@ dfe_reactable(
       ),
       `National Rank` = reactable::colDef(
         cell = function(value) {
-          if (is.na(value)) {
-            "" # Display empty string for NA
-          } else if (value == -1) {
-            "-" # Replace -1 with "-"
-          } else {
-            value
-          }
+          format_national_rank(value)
         }
       ),
       # Just colour the QB cell

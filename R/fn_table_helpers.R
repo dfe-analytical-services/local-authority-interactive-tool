@@ -564,6 +564,32 @@ quartile_banding_col_def <- function(data) {
 }
 
 
+#' Format National Rank Display
+#'
+#' @description Formats the national rank value for display in a table. This
+#' function returns an empty string for NA values, replaces -1 with "-", and
+#' otherwise displays the value as-is.
+#'
+#' @param rank_value Numeric or character. The national rank value to be
+#' formatted.
+#'
+#' @return A character string: "" if NA, "-" if -1, or the original value.
+#'
+#' @examples
+#' format_national_rank(NA) # Returns ""
+#' format_national_rank(-1) # Returns "-"
+#' format_national_rank(42) # Returns "42"
+#'
+#' @export
+format_national_rank <- function(rank_value) {
+  dplyr::case_when(
+    is.na(rank_value) ~ "", # Display empty string for NA
+    rank_value == -1 ~ "-", # Replace -1 with "-"
+    TRUE ~ as.character(rank_value) # Display value as-is
+  )
+}
+
+
 #' Sets a minimum column width for Reactable tables to prevent text wrapping.
 #'
 #' @param min_width A numeric value specifying the minimum width of the column
