@@ -174,8 +174,8 @@ ui <- function(input, output, session) {
       # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
-        title = "Statsitical Neighbour Level",
-        value = "Statsitical Neighbour Level",
+        title = "Statistical Neighbour Level",
+        value = "Statistical Neighbour Level",
 
         # Tab header ==========================================================
         PageHeaderUI("stat_n_header"),
