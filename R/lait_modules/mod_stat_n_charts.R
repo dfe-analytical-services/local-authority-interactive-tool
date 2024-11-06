@@ -297,7 +297,7 @@ StatN_FocusBarChartServer <- function(id,
     static_chart <- reactive({
       # Check to see if any data - if not display error plot
       if (all(is.na(focus_chart_data()$values_num))) {
-        generic_ggiraph_options()
+        display_no_data_plot()
       } else {
         focus_chart_data() |>
           ggplot2::ggplot() +
