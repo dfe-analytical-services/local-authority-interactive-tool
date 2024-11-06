@@ -93,4 +93,14 @@ $(document).ready(function () {
   $("#stat_n_multi_bar-copybtn").on("click", async () => {
     await copyImage("stat_n_multi_bar-copybtn", "stat_n_multi_bar-copy_plot");
   });
+
+    // Event listener for "Regional focus line chart"
+  $("#region_focus_line-copybtn").on("click", async () => {
+    await copyImage("region_focus_line-copybtn", "region_focus_line-copy_plot");
+  });
+
+    // Event listener for "Regional multi line chart"
+  $("#region_multi_line-copybtn").on("click", async () => {
+    await copyImage("region_multi_line-copybtn", "region_multi_line-copy_plot");
+  });
 });

@@ -17,6 +17,7 @@ list.files("R/lait_modules/", full.names = TRUE) |>
 ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+  tags$head(htmltools::includeScript("www/custom_js.js")),
 
   # Tab header ================================================================
   h1("Regional Level"),
