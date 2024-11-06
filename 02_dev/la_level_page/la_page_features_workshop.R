@@ -231,12 +231,11 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
 # Format stats table
 # Use modifyList to merge the lists properly
 dfe_reactable(
-  la_stats_table |> dplyr::select(-Polarity),
+  la_stats_table,
   columns = modifyList(
     # Create the reactable with specific column alignments
     format_num_reactable_cols(
-      la_stats_table |>
-        dplyr::select(-Polarity),
+      la_stats_table,
       get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
       categorical = c(
@@ -258,7 +257,8 @@ dfe_reactable(
         style = function(value) {
           get_trend_colour(value, la_stats_table$Polarity[1])
         }
-      )
+      ),
+      Polarity = reactable::colDef(show = FALSE)
     )
   )
 )

@@ -328,12 +328,12 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_stats <- reactable::renderReactable({
       dfe_reactable(
         la_stats_table() |>
-          dplyr::select(!dplyr::ends_with("including"), -Polarity),
+          dplyr::select(!dplyr::ends_with("including")),
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
             la_stats_table() |>
-              dplyr::select(!dplyr::ends_with("including"), -Polarity),
+              dplyr::select(!dplyr::ends_with("including")),
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
             categorical = c("Trend", "Quartile Banding", "Latest National Rank")
@@ -351,7 +351,8 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
               style = function(value) {
                 get_trend_colour(value, la_stats_table()$Polarity[1])
               }
-            )
+            ),
+            Polarity = reactable::colDef(show = FALSE)
           )
         )
       )

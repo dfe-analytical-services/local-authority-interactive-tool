@@ -313,13 +313,11 @@ server_dev <- function(input, output, session) {
 
   output$la_stats_table <- reactable::renderReactable({
     dfe_reactable(
-      la_stats_table() |>
-        dplyr::select(-Polarity),
+      la_stats_table(),
       columns = modifyList(
         # Create the reactable with specific column alignments
         format_num_reactable_cols(
-          la_stats_table() |>
-            dplyr::select(-Polarity),
+          la_stats_table(),
           get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
           categorical = c(
@@ -341,7 +339,8 @@ server_dev <- function(input, output, session) {
             style = function(value) {
               get_trend_colour(value, la_stats_table()$Polarity[1])
             }
-          )
+          ),
+          Polarity = reactable::colDef(show = FALSE)
         )
       )
     )
