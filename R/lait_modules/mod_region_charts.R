@@ -797,7 +797,8 @@ Region_MultiLineChartServer <- function(id,
               color = `LA and Regions`,
               data_id = `LA and Regions`
             ),
-            na.rm = TRUE
+            na.rm = TRUE,
+            linewidth = 1.5
           ) +
           format_axes(chart_data()) +
           manual_colour_mapping(

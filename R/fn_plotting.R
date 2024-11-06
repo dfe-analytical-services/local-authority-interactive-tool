@@ -178,7 +178,7 @@ create_focus_plot_sizes <- function(data_long, focus_group) {
   names(plot_sizes) <- plot_groups
 
   # Set focus line size
-  plot_sizes[focus_group] <- 1
+  plot_sizes[focus_group] <- 1.5
 
   plot_sizes
 }

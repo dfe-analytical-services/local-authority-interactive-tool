@@ -953,7 +953,8 @@ server <- function(input, output, session) {
           linetype = Measure,
           data_id = `LA and Regions`
         ),
-        na.rm = TRUE
+        na.rm = TRUE,
+        linewidth = 1
       ) +
       ggplot2::geom_point(
         ggplot2::aes(

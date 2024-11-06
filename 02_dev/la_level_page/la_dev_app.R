@@ -363,7 +363,8 @@ server_dev <- function(input, output, session) {
           color = `LA and Regions`,
           data_id = `LA and Regions`
         ),
-        na.rm = TRUE
+        na.rm = TRUE,
+        linewidth = 1
       ) +
       format_axes(la_long()) +
       set_plot_colours(la_long()) +

@@ -283,7 +283,8 @@ la_line_chart <- la_long |>
       color = `LA and Regions`,
       data_id = `LA and Regions`
     ),
-    na.rm = TRUE
+    na.rm = TRUE,
+    linewidth = 1
   ) +
   format_axes(la_long) +
   set_plot_colours(la_long) +
