@@ -90,19 +90,17 @@ server <- function(input, output, session) {
   # ===========================================================================
 
   # reactiveValues object to store shared input values across pages
-  shared_values <- reactiveValues(
+  shared_page_inputs <- reactiveValues(
     la = NULL,
     topic = NULL,
-    indicator = NULL,
-    chart_line_input = NULL,
-    chart_bar_input = NULL
+    indicator = NULL
   )
 
   # ===========================================================================
   # LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  la_app_inputs <- appInputsServer("la_inputs", shared_values)
+  la_app_inputs <- appInputsServer("la_inputs", shared_page_inputs)
 
   # Page header
   PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
@@ -160,7 +158,7 @@ server <- function(input, output, session) {
   # Regional Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  region_app_inputs <- appInputsServer("region_inputs", shared_values)
+  region_app_inputs <- appInputsServer("region_inputs", shared_page_inputs)
 
   # Header
   PageHeaderServer("region_header", region_app_inputs, "Regional View")
@@ -193,8 +191,14 @@ server <- function(input, output, session) {
   )
 
   # Region charts =============================================================
+  # Shared inputs for Region multi-choice charts
+  region_shared_inputs <- reactiveValues(
+    chart_line_input = NULL,
+    chart_bar_input = NULL
+  )
+
   # Region focus line chart ---------------------------------------------------
-  Region_FocusLine_chartServer(
+  Region_FocusLineChartServer(
     "region_focus_line",
     region_app_inputs,
     bds_metrics,
@@ -203,12 +207,32 @@ server <- function(input, output, session) {
   )
 
   # Region multi-choice line chart --------------------------------------------
-  Region_Multi_chartServer(
+  Region_MultiLineChartServer(
     "region_multi_line",
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
+    region_names_bds,
+    region_shared_inputs
+  )
+
+  # Region focus bar chart ---------------------------------------------------
+  Region_FocusBarChartServer(
+    "region_focus_bar",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
     region_names_bds
+  )
+
+  # Region multi-choice bar chart ---------------------------------------------
+  Region_MultiBarChartServer(
+    "region_multi_bar",
+    region_app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    region_names_bds,
+    region_shared_inputs
   )
 
   # Region Metadata ===========================================================
@@ -222,7 +246,7 @@ server <- function(input, output, session) {
   # Statistical Neighbour Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  stat_n_app_inputs <- appInputsServer("stat_n_inputs", shared_values)
+  stat_n_app_inputs <- appInputsServer("stat_n_inputs", shared_page_inputs)
 
   # Header
   PageHeaderServer("stat_n_header", stat_n_app_inputs, "Statistical Neighbour View")
@@ -254,6 +278,12 @@ server <- function(input, output, session) {
   )
 
   # Statistical Neighbour charts ==============================================
+  # Shared inputs for Statistical Neighbour multi-choice charts
+  stat_n_shared_inputs <- reactiveValues(
+    chart_line_input = NULL,
+    chart_bar_input = NULL
+  )
+
   # Focus line chart ----------------------------------------------------------
   StatN_FocusLineChartServer(
     "stat_n_focus_line",
@@ -268,7 +298,7 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    shared_values
+    stat_n_shared_inputs
   )
 
   # Focus bar chart -----------------------------------------------------------
@@ -285,7 +315,7 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    shared_values
+    stat_n_shared_inputs
   )
 
   # Statistical Neighbour Metadata ============================================
@@ -299,7 +329,7 @@ server <- function(input, output, session) {
   # All LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  all_la_app_inputs <- appInputsServer("all_la_inputs", shared_values)
+  all_la_app_inputs <- appInputsServer("all_la_inputs", shared_page_inputs)
 
   # Header
   PageHeaderServer("all_la_header", all_la_app_inputs, "All LA View")

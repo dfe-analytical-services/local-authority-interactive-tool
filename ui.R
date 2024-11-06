@@ -158,8 +158,10 @@ ui <- function(input, output, session) {
           style = "overflow-y: visible;",
           bslib::navset_card_underline(
             id = "region_charts",
-            Region_FocusLine_chartUI("region_focus_line"),
-            Region_Multi_chartUI("region_multi_line")
+            Region_FocusLineChartUI("region_focus_line"),
+            Region_MultiLineChartUI("region_multi_line"),
+            Region_FocusBarChartUI("region_focus_bar"),
+            Region_MultiBarChartUI("region_multi_bar")
           )
         ),
 
