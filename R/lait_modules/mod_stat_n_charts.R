@@ -918,8 +918,8 @@ StatN_MultiBarChartServer <- function(id,
       # Stores all valid regions in data
       valid_regions <- stat_n_long()$`LA and Regions`
 
+      # Filter for user added selections and currently selected LA
       stat_n_long() |>
-        # Filter for random areas - simulate user choosing up to 6 areas
         dplyr::filter(
           (`LA and Regions` %in% chart_input()) |
             (`LA and Regions` %in% app_inputs$la())

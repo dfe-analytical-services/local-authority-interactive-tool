@@ -35,9 +35,10 @@ ui_mod <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::navset_card_underline(
       id = "region_charts",
-      Region_FocusLine_chartUI("region_focus_line"),
-      Region_Multi_chartUI("region_multi_line"),
-      Region_FocusBarChartUI("region_focus_bar")
+      Region_FocusLineChartUI("region_focus_line"),
+      Region_MultiLineChartUI("region_multi_line"),
+      Region_FocusBarChartUI("region_focus_bar"),
+      Region_MultiBarChartUI("region_multi_bar")
     )
   )
 )
@@ -87,7 +88,7 @@ server_mod <- function(input, output, session) {
 
   # Region charts =============================================================
   # Region focus line chart ---------------------------------------------------
-  Region_FocusLine_chartServer(
+  Region_FocusLineChartServer(
     "region_focus_line",
     app_inputs,
     bds_metrics,
@@ -96,7 +97,7 @@ server_mod <- function(input, output, session) {
   )
 
   # Region multi-choice line chart --------------------------------------------
-  Region_Multi_chartServer(
+  Region_MultiLineChartServer(
     "region_multi_line",
     app_inputs,
     bds_metrics,
@@ -112,6 +113,16 @@ server_mod <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds
+  )
+
+  # Region multi-choice bar chart ---------------------------------------------
+  Region_MultiBarChartServer(
+    "region_multi_bar",
+    app_inputs,
+    bds_metrics,
+    stat_n_geog,
+    region_names_bds,
+    shared_values
   )
 }
 
