@@ -641,13 +641,11 @@ StatN_StatsTableServer <- function(id,
       stat_n_stats_output <- stat_n_stats_table()
 
       dfe_reactable(
-        stat_n_stats_output |>
-          dplyr::select(-Polarity),
+        stat_n_stats_output,
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
-            stat_n_stats_output |>
-              dplyr::select(-Polarity),
+            stat_n_stats_output,
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
             categorical = c("Trend", "Quartile Banding", "National Rank")
@@ -656,7 +654,10 @@ StatN_StatsTableServer <- function(id,
           list(
             set_custom_default_col_widths(),
             Trend = reactable::colDef(
-              cell = trend_icon_renderer
+              cell = trend_icon_renderer,
+              style = function(value) {
+                get_trend_colour(value, stat_n_stats_output$Polarity[1])
+              }
             ),
             `National Rank` = reactable::colDef(
               cell = function(value) {
@@ -678,7 +679,8 @@ StatN_StatsTableServer <- function(id,
                 list(background = color)
               },
               na = ""
-            )
+            ),
+            Polarity = reactable::colDef(show = FALSE)
           )
         ),
         rowStyle = function(index) {
