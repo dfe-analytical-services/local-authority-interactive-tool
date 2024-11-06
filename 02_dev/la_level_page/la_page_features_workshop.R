@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Assessed Child Deaths - modifiable factors"
-selected_la <- "Bedford Borough"
+selected_indicator <- "Infant Mortality"
+selected_la <- "Barnet"
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -183,7 +183,7 @@ if (la_indicator_polarity %in% "Low") {
     TRUE ~ "Error"
   )
 } else {
-  la_quartile <- "Not applicable"
+  la_quartile <- "-"
 }
 
 la_stats_table <- build_la_stats_table(
@@ -203,7 +203,7 @@ la_stats_table <- data.frame(
   "LA Number" = la_table |>
     filter_la_regions(selected_la, pull_col = "LA Number"),
   "LA and Regions" = selected_la,
-  "Trend" = -la_trend,
+  "Trend" = la_trend,
   "Change from previous year" = la_change_prev,
   "Latest National Rank" = la_rank,
   "Quartile Banding" = la_quartile,
@@ -218,8 +218,8 @@ la_stats_table <- data.frame(
 if (la_indicator_polarity %notin% c("High", "Low")) {
   la_stats_table <- la_stats_table |>
     dplyr::mutate(
-      "Latest National Rank" = "Not applicable",
-      "Quartile Banding" = "Not applicable",
+      "Latest National Rank" = "-",
+      "Quartile Banding" = "-",
       "(A) Up to and including" = "-",
       "(B) Up to and including" = "-",
       "(C) Up to and including" = "-",
@@ -254,7 +254,10 @@ dfe_reactable(
         }
       ),
       Trend = reactable::colDef(
-        cell = trend_icon_renderer
+        cell = trend_icon_renderer,
+        style = function(value) {
+          get_trend_colour(value, la_stats_table$Polarity[1])
+        }
       )
     )
   )

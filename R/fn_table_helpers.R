@@ -492,6 +492,42 @@ trend_icon_renderer <- function(value) {
 }
 
 
+#' Determine Background and Text Colour Based on Trend Polarity and Value
+#'
+#' This function returns a list with both background and text colours based on
+#' the trend value and its associated polarity. It helps visually indicate
+#' favourable and unfavourable trends, with white text for readability
+#' on coloured backgrounds.
+#'
+#' @param value Numeric, the trend value to evaluate.
+#' @param polarity Character, indicates if higher or lower values are favourable.
+#' Accepts "High" for favourable high values or "Low" for favourable low values.
+#'
+#' @return A list with `background` and `text` elements. The `background` is set
+#' to green (`"#00703c"`) for favourable trends, red (`"#d4351c"`) for
+#' unfavourable trends,
+#' or `"none"` if either `value` or `polarity` is `NA`.
+#' The `color` is `"white"` when the background is coloured,
+#' and `"black"` otherwise.
+#'
+#' @examples
+#' get_trend_style(5, "High") # Returns green background, white text
+#' get_trend_style(-3, "Low") # Returns green background, white text
+#' get_trend_style(3, "Low") # Returns red background, white text
+#'
+get_trend_colour <- function(value, polarity) {
+  if (is.na(polarity) || is.na(value) || polarity == "-") {
+    list(background = "white", color = "black")
+  } else if ((polarity == "Low" && value < 0) ||
+    (polarity == "High" && value > 0)) {
+    list(background = "#00703c", color = "white")
+  } else if ((polarity == "High" && value < 0) ||
+    (polarity == "Low" && value > 0)) {
+    list(background = "#d4351c", color = "white")
+  }
+}
+
+
 #' Define Quartile Banding Column with Background Color
 #'
 #' This function creates a column definition for a reactable table that

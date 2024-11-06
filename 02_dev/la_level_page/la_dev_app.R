@@ -337,7 +337,10 @@ server_dev <- function(input, output, session) {
             }
           ),
           Trend = reactable::colDef(
-            cell = trend_icon_renderer
+            cell = trend_icon_renderer,
+            style = function(value) {
+              get_trend_colour(value, la_stats_table()$Polarity[1])
+            }
           )
         )
       )
