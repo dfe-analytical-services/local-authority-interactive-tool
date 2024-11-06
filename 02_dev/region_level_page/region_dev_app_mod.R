@@ -75,7 +75,7 @@ server_mod <- function(input, output, session) {
 
   # Region stats table --------------------------------------------------------
   Region_StatsTableServer(
-    "stats_table_mod",
+    "region_stats_mod",
     app_inputs,
     bds_metrics,
     stat_n_geog,
