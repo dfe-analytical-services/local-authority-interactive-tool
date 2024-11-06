@@ -182,7 +182,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
 get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
   all_polarities <- c("High", "Low", "-", NA)
   valid_polarities <- c("High", "Low")
-  all_quartiles <- c("A", "B", "C", "D", "Error", "-", NA_character_)
+  all_quartiles <- c("A", "B", "C", "D", "Error", "-", "", NA_character_)
   valid_quartiles <- c("A", "B", "C", "D")
 
   polarity <- data_polarity[1]

@@ -161,7 +161,7 @@ stat_n_rank <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
   dplyr::mutate(
     rank = dplyr::case_when(
-      is.na(values_num) ~ -1,
+      is.na(values_num) ~ NA,
       # Rank in descending order
       stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
       # Rank in ascending order
@@ -193,8 +193,8 @@ stat_n_stats_table <- data.frame(
   "LA and Regions" = stat_n_stats_geog,
   "Trend" = stat_n_trend,
   "Change from previous year" = stat_n_change_prev,
-  "National Rank" = c(stat_n_rank, NA, NA),
-  "Quartile Banding" = c(stat_n_quartile, NA, NA),
+  "National Rank" = c(-1, "", ""),
+  "Quartile Banding" = c(stat_n_quartile, "", ""),
   "Polarity" = stat_n_indicator_polarity,
   check.names = FALSE
 )
@@ -220,11 +220,14 @@ dfe_reactable(
       ),
       `National Rank` = reactable::colDef(
         cell = function(value) {
-          format_national_rank(value)
+          get_na_value_based_on_polarity(value[1], stat_n_stats_table$Polarity[1])
         }
       ),
       # Just colour the QB cell
       `Quartile Banding` = reactable::colDef(
+        cell = function(value) {
+          get_na_value_based_on_polarity(value[1], stat_n_stats_table$Polarity[1])
+        },
         style = function(value, index) {
           quartile_banding_col_def(stat_n_stats_table[index, ])
         },

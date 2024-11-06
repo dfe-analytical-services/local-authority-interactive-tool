@@ -453,6 +453,20 @@ get_indicator_dps <- function(data_full) {
 }
 
 
+# Function to handle NA values based on Polarity
+get_na_value_based_on_polarity <- function(value, polarity) {
+  if (is.na(value)) {
+    if (polarity %in% c("High", "Low")) {
+      return("NA") # Return "NA" if Polarity is "High" or "Low"
+    } else {
+      return("-") # Return "-" for other cases
+    }
+  }
+  return(value) # Return the value as-is if not NA
+}
+
+
+
 #' Render Trend Icons Based on Value
 #'
 #' This function determines and renders a trend icon based on the given
@@ -583,7 +597,7 @@ quartile_banding_col_def <- function(data) {
 #' @export
 format_national_rank <- function(rank_value) {
   dplyr::case_when(
-    is.na(rank_value) ~ "", # Display empty string for NA
+    is.na(rank_value) ~ "-", # Display empty string for NA
     rank_value == -1 ~ "-", # Replace -1 with "-"
     TRUE ~ as.character(rank_value) # Display value as-is
   )

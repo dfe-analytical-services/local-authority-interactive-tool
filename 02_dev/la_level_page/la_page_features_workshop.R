@@ -248,8 +248,17 @@ dfe_reactable(
     list(
       set_custom_default_col_widths(),
       `Quartile Banding` = reactable::colDef(
+        cell = function(value) {
+          # Apply the NA value logic based on Polarity
+          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
+        },
         style = function(value, index) {
           quartile_banding_col_def(la_stats_table[index, ])
+        }
+      ),
+      `Latest National Rank` = reactable::colDef(
+        cell = function(value) {
+          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
         }
       ),
       Trend = reactable::colDef(
