@@ -396,7 +396,13 @@ server_dev <- function(input, output, session) {
           ),
           `National Rank` = reactable::colDef(na = ""),
           `Quartile Banding` = reactable::colDef(
-            style = quartile_banding_col_def(stat_n_stats_output),
+            style = function(value, index) {
+              color <- get_quartile_band_cell_colour(
+                stat_n_stats_output[index, "Polarity"],
+                stat_n_stats_output[index, "Quartile Banding"]
+              )
+              list(background = color)
+            },
             na = ""
           )
         )

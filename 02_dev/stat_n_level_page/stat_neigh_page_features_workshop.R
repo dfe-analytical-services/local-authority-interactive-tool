@@ -13,8 +13,8 @@ list.files("R/", full.names = TRUE) |>
 # - Regional Authorities
 # Set user inputs
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
-selected_la <- "Cumberland"
+selected_indicator <- "Low birth weight"
+selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
@@ -218,8 +218,15 @@ dfe_reactable(
         cell = trend_icon_renderer
       ),
       `National Rank` = reactable::colDef(na = ""),
+      # Just colour the QB cell
       `Quartile Banding` = reactable::colDef(
-        style = quartile_banding_col_def(stat_n_stats_table),
+        style = function(value, index) {
+          color <- get_quartile_band_cell_colour(
+            stat_n_stats_table[index, "Polarity"],
+            stat_n_stats_table[index, "Quartile Banding"]
+          )
+          list(background = color)
+        },
         na = ""
       )
     )
