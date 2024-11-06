@@ -531,3 +531,35 @@ rename_columns_with_year <- function(df) {
   colnames(df) <- new_names
   df
 }
+
+
+#' @title Insert Line Breaks at Full Words
+#' @description Adds line breaks to a string after full words to ensure that
+#' each line stays within a specified maximum length.
+#' @param text A character string to insert line breaks into.
+#' @param max_length Maximum length of each line in characters. Default is 20.
+#' @return A character string with line breaks after full words.
+#' @details The function splits the input string into words, then builds each
+#' line by appending words until the maximum length is reached. If adding a word
+#' would exceed the line length, a line break is added before that word.
+#' @examples
+#' add_line_breaks("This is an example of a long text that needs breaks.", 15)
+#'
+add_line_breaks <- function(text, max_length = 20) {
+  words <- strsplit(text, " ")[[1]]
+  lines <- c()
+  current_line <- ""
+
+  for (word in words) {
+    if (nchar(current_line) + nchar(word) + 1 <= max_length) {
+      current_line <- paste(current_line,
+        word,
+        sep = if (nchar(current_line) > 0) " " else ""
+      )
+    } else {
+      lines <- c(lines, current_line)
+      current_line <- word
+    }
+  }
+  c(lines, current_line) |> paste(collapse = "\n")
+}

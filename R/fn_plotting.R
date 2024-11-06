@@ -14,9 +14,9 @@ get_yaxis_title <- function(data_full) {
 
   # If more than one y-axis title then give generic
   if (length(y_axis_title) == 1) {
-    y_axis_title
+    add_line_breaks(y_axis_title)
   } else {
-    paste(
+    mixed_title <- paste(
       "Mixed units:\n",
       paste(
         paste(y_axis_title[-length(y_axis_title)], collapse = ",\n"),
@@ -24,6 +24,7 @@ get_yaxis_title <- function(data_full) {
         sep = " and\n"
       )
     )
+    add_line_breaks(mixed_title)
   }
 }
 
