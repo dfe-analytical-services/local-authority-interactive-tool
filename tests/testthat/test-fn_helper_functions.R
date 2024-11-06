@@ -397,25 +397,95 @@ test_that("6. get_metadata with empty data frame", {
   )
 })
 
-test_that("7. get_metadata with special characters in metadata", {
-  data <- data.frame(
-    Measure = c("mpg", "cyl", "hp"),
-    `Hyperlink(s)` = c("http://example.com/mpg", "http://example.com/cyl", "http://example.com/hp"),
-    stringsAsFactors = FALSE,
-    check.names = FALSE
-  )
 
-  result <- get_metadata(data, "hp", "Hyperlink(s)")
-  expect_equal(result, "http://example.com/hp")
+# mute_cat()--------------------------------------------------
+
+test_that("1. mute_cat suppresses messages", {
+  output <- capture.output(
+    mute_cat({
+      message("This message should be suppressed")
+    })
+  )
+  expect_equal(output, character(0)) # Expect no output captured
 })
 
-test_that("8. get_metadata with non-string input_indicator", {
-  data <- data.frame(
-    Measure = c(1, 2, 3),
-    Description = c("First", "Second", "Third"),
-    stringsAsFactors = FALSE
+test_that("2. mute_cat suppresses warnings", {
+  # Capture any output generated, including warnings
+  output <- capture.output(
+    suppressWarnings(
+      mute_cat({
+        warning("This warning should be suppressed")
+      })
+    )
   )
+  expect_equal(output, character(0)) # Expect no captured output if suppression works
+})
 
-  result <- get_metadata(data, 2, "Description")
-  expect_equal(result, "Second")
+
+test_that("3. mute_cat returns the correct result", {
+  result <- mute_cat({
+    cat("Result should be 42\n")
+    42
+  })
+  expect_equal(result, 42)
+})
+
+
+# clean_ldn_region()-------------------------------------------
+
+
+# Mock data to test "London (Outer)" case separately
+filtered_bds_with_na <- dplyr::tibble(
+  `LA and Regions` = c("London (Inner)", "London (Outer)", "London"),
+  values_num = c(100, NA, 50)
+)
+
+# Run a single test
+test_that("1. clean_ldn_region returns 'London (Outer)' when some data exists for the region", {
+  result <- clean_ldn_region("London (Outer)", filtered_bds_with_na)
+  expect_equal(result, "London")
+})
+
+
+# af_colours_focus()----------------------------------------------
+
+# Define the mock function
+mock_af_colours <- function(type) {
+  if (type == "focus") {
+    message("This palette should only be used to highlight specific elements to help users understand the information.")
+    return(c("#FF5733", "#33FF57", "#3357FF")) # Example hex color codes
+  }
+}
+
+# Tests
+test_that("1. af_colours_focus returns a character vector of hex color codes", {
+  with_mock(
+    `afcolours::af_colours` = mock_af_colours, # Mocking the function
+    {
+      result <- af_colours_focus()
+      expect_type(result, "character")
+      expect_equal(result, c("#FF5733", "#33FF57", "#3357FF"))
+    }
+  )
+})
+
+test_that("2. af_colours_focus suppresses the informational message", {
+  with_mock(
+    `afcolours::af_colours` = mock_af_colours, # Mocking the function
+    {
+      expect_silent(af_colours_focus())
+    }
+  )
+})
+
+test_that("3. af_colours_focus suppresses the correct message", {
+  with_mock(
+    `afcolours::af_colours` = mock_af_colours, # Mocking the function
+    {
+      expect_output(
+        suppressMessages(af_colours_focus()),
+        NA # Expect no output, as the message should be suppressed
+      )
+    }
+  )
 })

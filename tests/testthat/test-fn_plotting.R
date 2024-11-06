@@ -56,53 +56,101 @@ test_that("4. get_plot_title handles numeric values", {
   expect_equal(result, expected)
 })
 
-
-# create_plot_colours() -------------------------------------------------------
-
+# create_plot_colours()---------------------------------------------------------
 
 
-# calculate_y_range() ---------------------------------------------------------
+# Mock data for testing
+test_data <- dplyr::tibble(
+  `LA and Regions` = c("Region1", "Region2", "Region1", "Region3", "Region2", "Region4")
+)
 
+# Test for create_plot_colours
+test_that("1. create_plot_colours returns a named vector of colors", {
+  result <- create_plot_colours(test_data)
 
+  # Test 1: The output should be a named vector
+  expect_true(is.vector(result))
+  expect_true(!is.null(names(result)))
 
-# get_ylim_low() --------------------------------------------------------------
+  # Test 2: The names of the vector should match unique groups in `LA and Regions`
+  unique_groups <- unique(test_data$`LA and Regions`)
+  expect_equal(sort(names(result)), sort(unique_groups))
 
+  # Test 3: The length of the color vector should match the number of unique groups
+  expect_equal(length(result), length(unique_groups))
 
+  # Test 4: Check for no NA values in the colors
+  expect_false(any(is.na(result)))
+})
 
-# get_ylim_high() -------------------------------------------------------------
+# Additional test for color assignments (if afcolours is deterministic)
+test_that("2. create_plot_colours assigns colors consistently", {
+  result <- create_plot_colours(test_data)
 
+  # Check if specific group has a consistent color
+  color_for_region1 <- result["Region1"]
 
+  # Re-run function and check color consistency
+  result_again <- create_plot_colours(test_data)
+  expect_equal(result_again["Region1"], color_for_region1)
+})
 
-# get_years() -----------------------------------------------------------------
+# create_focus_plot_colours()--------------------------------------------------------------
 
+# Load testthat for testing
+library(testthat)
 
+# Define focus and neutral colors (replace with actual hex codes if available)
+focus_color <- "#FF0000" # Example focus color (replace as needed)
+neutral_color <- "#CCCCCC" # Example neutral color (replace as needed)
 
-# get_num_years() -------------------------------------------------------------
+# Define the tests
+test_that("1. create_focus_plot_colours returns a named vector of colors with correct length", {
+  # Sample data as tibble
+  test_data <- tibble::tibble(
+    `LA and Regions` = c("Region1", "Region2", "Region1", "Region3", "Region4")
+  )
 
+  # Run the function with a focus group
+  focus_group <- "Region2"
+  result_colours <- create_focus_plot_colours(test_data, focus_group)
 
+  # Check if result is a named vector
+  expect_true(is.vector(result_colours))
+  expect_true(!is.null(names(result_colours)))
 
-# format_axes() ---------------------------------------------------------------
+  # Check if all unique groups are in the names of the result
+  unique_groups <- pull_uniques(test_data, "LA and Regions")
+  expect_equal(sort(names(result_colours)), sort(unique_groups))
 
+  # Check the length of the color vector matches the number of unique groups
+  expect_equal(length(result_colours), length(unique_groups))
+})
 
+# create_focus_plot_sizes()-------------------------------------------------------
 
-# set_plot_colours() ----------------------------------------------------------
+# Load testthat for testing
+library(testthat)
 
+# Define the tests
+test_that("1. create_focus_plot_sizes returns a named vector of sizes with correct length", {
+  # Sample data as tibble
+  test_data <- tibble::tibble(
+    `LA and Regions` = c("Region1", "Region2", "Region1", "Region3", "Region4")
+  )
 
+  # Run the function with a focus group
+  focus_group <- "Region2"
+  result_sizes <- create_focus_plot_sizes(test_data, focus_group)
 
-# set_plot_labs() -------------------------------------------------------------
+  # Check if result is a named vector
+  expect_true(is.vector(result_sizes))
+  expect_true(!is.null(names(result_sizes)))
 
+  # Check if all unique groups are in the names of the result
+  unique_groups <- pull_uniques(test_data, "LA and Regions")
+  expect_equal(sort(names(result_sizes)), sort(unique_groups))
 
-
-# custom_theme() --------------------------------------------------------------
-
-
-
-# tooltip_vlines() ------------------------------------------------------------
-
-
-
-# custom_ggiraph_tooltip() ----------------------------------------------------
-
-
-
-# generic_ggiraph_options() ---------------------------------------------------
+  # Check the length of the size vector matches the number of unique groups
+  expect_equal(length(result_sizes), length(unique_groups))
+})

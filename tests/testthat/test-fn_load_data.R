@@ -202,3 +202,50 @@ test_that("5. create_measure_key with all NA columns", {
 
   expect_equal(result, expected)
 })
+
+# generate_download_file() ---------------------------------
+
+# Define tests for the generate_download_file function
+
+# Test 1: CSV output
+test_that("1. CSV file generation", {
+  data <- data.frame(x = 1:5, y = letters[1:5])
+  file_path <- generate_download_file(data, "csv")
+
+  # Check if the file is created and has correct extension
+  expect_true(file.exists(file_path))
+  expect_match(file_path, "\\.csv$")
+
+  # Check content of CSV file
+  saved_data <- read.csv(file_path)
+  expect_equal(saved_data, data)
+})
+
+# Test 2: XLSX output
+test_that("2. XLSX file generation", {
+  data <- data.frame(x = 1:5, y = letters[1:5])
+  file_path <- generate_download_file(data, "xlsx")
+
+  # Check if the file is created and has correct extension
+  expect_true(file.exists(file_path))
+  expect_match(file_path, "\\.xlsx$")
+
+  # Check content of XLSX file (requires openxlsx package)
+  saved_data <- openxlsx::read.xlsx(file_path)
+  expect_equal(saved_data, data)
+})
+
+# Test 3: SVG output
+test_that("3. SVG file generation", {
+  library(ggplot2)
+  plot <- ggplot(data.frame(x = 1:5, y = 1:5), aes(x, y)) +
+    geom_point()
+  file_path <- generate_download_file(plot, "svg")
+
+  # Check if the file is created and has correct extension
+  expect_true(file.exists(file_path))
+  expect_match(file_path, "\\.svg$")
+
+  # Check that the file is non-empty (cannot directly verify SVG content)
+  expect_gt(file.info(file_path)$size, 0)
+})
