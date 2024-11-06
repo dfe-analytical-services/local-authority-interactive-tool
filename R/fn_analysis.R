@@ -155,10 +155,10 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
       TRUE ~ "Error"
     )
   } else {
-    quartile_band <- "Not applicable"
+    quartile_band <- "-"
   }
 
-  if (quartile_band %notin% c("A", "B", "C", "D", "Not applicable", NA_character_)) {
+  if (quartile_band %notin% c("A", "B", "C", "D", "-", NA_character_)) {
     warning("Unexpected Quartile Banding")
   }
 
@@ -182,7 +182,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
 get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
   all_polarities <- c("High", "Low", "-", NA)
   valid_polarities <- c("High", "Low")
-  all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
+  all_quartiles <- c("A", "B", "C", "D", "Error", "-", NA_character_)
   valid_quartiles <- c("A", "B", "C", "D")
 
   polarity <- data_polarity[1]

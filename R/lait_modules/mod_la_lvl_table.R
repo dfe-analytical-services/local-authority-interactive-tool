@@ -356,14 +356,17 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # Quartile banding table
     output$la_quartiles <- reactable::renderReactable({
+      # Get quartile bands only
+      qb_table <- la_stats_table() |>
+        dplyr::select(dplyr::ends_with("including"), -Polarity)
+
       dfe_reactable(
-        la_stats_table() |>
-          dplyr::select(dplyr::ends_with("including"), -Polarity),
-        columns = format_num_reactable_cols(
-          la_stats_table() |>
-            dplyr::select(dplyr::ends_with("including"), -Polarity),
-          get_indicator_dps(filtered_bds())
-        )
+        qb_table,
+        # Format as categorical
+        columns = lapply(names(qb_table), function(col) {
+          format_reactable_cat_col()
+        }) |>
+          setNames(names(qb_table))
       )
     })
   })

@@ -12,7 +12,7 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Under 18 Hospital Admissions (Alcohol related)"
+selected_indicator <- "Assessed Child Deaths - modifiable factors"
 selected_la <- "Bedford Borough"
 
 # Filter stat neighbour for selected LA
@@ -239,7 +239,11 @@ dfe_reactable(
         dplyr::select(-Polarity),
       get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding", "Latest National Rank")
+      categorical = c(
+        "Trend", "Quartile Banding", "Latest National Rank",
+        "(A) Up to and including", "(B) Up to and including",
+        "(C) Up to and including", "(D) Up to and including"
+      )
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
@@ -255,7 +259,6 @@ dfe_reactable(
     )
   )
 )
-
 
 
 

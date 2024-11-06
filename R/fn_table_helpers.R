@@ -187,7 +187,7 @@ dfe_reactable <- function(data, ...) {
 is_numeric_or_na <- function(col_data) {
   contains_numeric <- any(grepl("[0-9]", as.character(col_data)))
   all_na <- all(is.na(col_data))
-  str_na_num_col <- any(grepl("^(-|Not applicable)$", as.character(col_data)))
+  str_na_num_col <- any(grepl("^-$", as.character(col_data)))
   contains_numeric || all_na || str_na_num_col
 }
 
@@ -213,7 +213,7 @@ format_reactable_cat_col <- function() {
     align = "right",
     headerClass = "bar-sort-header",
     html = TRUE,
-    na = "NA",
+    na = "-",
     sortable = TRUE,
     sortNALast = TRUE
   )
@@ -326,8 +326,8 @@ build_la_stats_table <- function(
     )
   } else {
     list(
-      "Latest National Rank" = "Not applicable",
-      "Quartile Banding" = "Not applicable",
+      "Latest National Rank" = "-",
+      "Quartile Banding" = "-",
       "(A) Up to and including" = "-",
       "(B) Up to and including" = "-",
       "(C) Up to and including" = "-",
