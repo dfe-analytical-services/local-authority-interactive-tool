@@ -233,8 +233,12 @@ dfe_reactable(
     list(
       set_custom_default_col_widths(),
       Trend = reactable::colDef(
-        cell = trend_icon_renderer
-      )
+        cell = trend_icon_renderer,
+        style = function(value) {
+          get_trend_colour(value, region_stats_table$Polarity[1])
+        }
+      ),
+      Polarity = reactable::colDef(show = FALSE)
     )
   ),
   rowStyle = function(index) {

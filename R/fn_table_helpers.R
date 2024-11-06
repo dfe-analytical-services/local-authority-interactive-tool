@@ -382,6 +382,7 @@ build_region_stats_table <- function(la_number,
     "LA and Regions" = area_name,
     "Trend" = trend,
     "Change from previous year" = change_since_prev,
+    "Polarity" = pull_uniques(filtered_bds, "Polarity"),
     check.names = FALSE
   ) |>
     pretty_num_table(
