@@ -328,7 +328,9 @@ server_dev <- function(input, output, session) {
         list(
           set_custom_default_col_widths(),
           `Quartile Banding` = reactable::colDef(
-            style = quartile_banding_col_def(la_stats_table())
+            style = function(value, index) {
+              quartile_banding_col_def(la_stats_table()[index, ])
+            }
           ),
           Trend = reactable::colDef(
             cell = trend_icon_renderer

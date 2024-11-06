@@ -519,13 +519,12 @@ trend_icon_renderer <- function(value) {
 #'
 quartile_banding_col_def <- function(data) {
   # Return the colDef object with the background color applied
-  reactablefmtr::cell_style(
-    data = data,
-    background_color = get_quartile_band_cell_colour(
-      data$Polarity,
-      data$`Quartile Banding`
-    )
+  qb_color <- get_quartile_band_cell_colour(
+    data$Polarity,
+    data$`Quartile Banding`
   )
+
+  list(background = qb_color)
 }
 
 

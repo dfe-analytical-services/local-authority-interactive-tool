@@ -221,11 +221,7 @@ dfe_reactable(
       # Just colour the QB cell
       `Quartile Banding` = reactable::colDef(
         style = function(value, index) {
-          color <- get_quartile_band_cell_colour(
-            stat_n_stats_table[index, "Polarity"],
-            stat_n_stats_table[index, "Quartile Banding"]
-          )
-          list(background = color)
+          quartile_banding_col_def(stat_n_stats_table[index, ])
         },
         na = ""
       )
