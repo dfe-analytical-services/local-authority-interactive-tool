@@ -187,8 +187,7 @@ dfe_reactable <- function(data, ...) {
 is_numeric_or_na <- function(col_data) {
   contains_numeric <- any(grepl("[0-9]", as.character(col_data)))
   all_na <- all(is.na(col_data))
-  str_na_num_col <- any(grepl("^-$", as.character(col_data)))
-  contains_numeric || all_na || str_na_num_col
+  contains_numeric || all_na
 }
 
 

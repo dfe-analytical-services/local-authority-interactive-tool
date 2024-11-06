@@ -322,7 +322,11 @@ server_dev <- function(input, output, session) {
             dplyr::select(-Polarity),
           get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding", "Latest National Rank")
+          categorical = c(
+            "Trend", "Quartile Banding", "Latest National Rank",
+            "(A) Up to and including", "(B) Up to and including",
+            "(C) Up to and including", "(D) Up to and including"
+          )
         ),
         # Style Quartile Banding column with colour
         list(
