@@ -170,31 +170,28 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
     local <- reactiveValues(export_file = NULL, data = NULL, plot_width = NULL, file_type = NULL, file_name = NULL)
 
     # Observe changes in file type or data and generate export file
-    observeEvent(list(file_type_input(), data_for_download(), download_name()),
-      {
-        # Ensure inputs are not NULL
-        req(file_type_input(), data_for_download(), download_name())
+    observeEvent(list(file_type_input(), data_for_download(), download_name()), {
+      # Ensure inputs are not NULL
+      req(file_type_input(), data_for_download(), download_name())
 
-        # Setting parameters
-        local$file_type <- file_type_input()
-        local$file_name <- download_name()
+      # Setting parameters
+      local$file_type <- file_type_input()
+      local$file_name <- download_name()
 
-        # For charts we need to pull the relevant object from the reactive list
-        if (grepl("svg", local$file_type, ignore.case = TRUE)) {
-          local$data <- data_for_download()$"svg"
-          # Getting plot width from ggiraph obj ratio
-          local$plot_width <- data_for_download()$"html"$x$ratio * 5
-        } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
-          local$data <- data_for_download()$"html"
-        } else {
-          local$data <- data_for_download()
-        }
+      # For charts we need to pull the relevant object from the reactive list
+      if (grepl("svg", local$file_type, ignore.case = TRUE)) {
+        local$data <- data_for_download()$"svg"
+        # Getting plot width from ggiraph obj ratio
+        local$plot_width <- data_for_download()$"html"$x$ratio * 5
+      } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
+        local$data <- data_for_download()$"html"
+      } else {
+        local$data <- data_for_download()
+      }
 
-        # Generate the file based on the selected file type
-        local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
-      },
-      ignoreInit = TRUE
-    )
+      # Generate the file based on the selected file type
+      local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
+    })
 
     # Download handler
     output$download <- create_download_handler(
