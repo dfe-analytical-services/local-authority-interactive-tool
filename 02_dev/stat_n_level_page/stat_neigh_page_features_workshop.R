@@ -161,7 +161,7 @@ stat_n_rank <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
   dplyr::mutate(
     rank = dplyr::case_when(
-      is.na(values_num) ~ NA,
+      is.na(values_num) ~ -1,
       # Rank in descending order
       stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
       # Rank in ascending order
@@ -217,7 +217,17 @@ dfe_reactable(
       Trend = reactable::colDef(
         cell = trend_icon_renderer
       ),
-      `National Rank` = reactable::colDef(na = ""),
+      `National Rank` = reactable::colDef(
+        cell = function(value) {
+          if (is.na(value)) {
+            "" # Display empty string for NA
+          } else if (value == -1) {
+            "-" # Replace -1 with "-"
+          } else {
+            value
+          }
+        }
+      ),
       # Just colour the QB cell
       `Quartile Banding` = reactable::colDef(
         style = function(value, index) {
