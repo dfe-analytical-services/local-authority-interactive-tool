@@ -152,10 +152,27 @@ stat_n_geog <- stat_n |>
 # Metrics
 # Remove whitesapce from key & filter out discontinued metrics
 # Set any NA decimal place column values to 1
+# Convert Last and Next updated to Format Month Year
 metrics_clean <- metrics_raw |>
   dplyr::mutate(
     Measure_short = trimws(Measure_short),
-    dps = ifelse(is.na(dps), 1, dps)
+    dps = ifelse(is.na(dps), 1, dps),
+    `Last Update` = dplyr::case_when(
+      inherits(as.Date(`Last Update`), "Date") ~ as.Date(`Last Update`) |>
+        format("%B %Y") |>
+        as.character(),
+      TRUE ~ as.character(`Last Update`)
+    ),
+    # Have to supress warnings due to mixed datatypes
+    `Next Update` = dplyr::case_when(
+      grepl("^[0-9]+$", `Next Update`) ~ suppressWarnings(
+        as.numeric(`Next Update`) |>
+          as.Date(origin = "1899-12-30") |>
+          format("%B %Y") |>
+          as.character()
+      ),
+      TRUE ~ as.character(`Next Update`)
+    )
   ) |>
   dplyr::filter(!grepl("DISCONTINUE", Table_status))
 

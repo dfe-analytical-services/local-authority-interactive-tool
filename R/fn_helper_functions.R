@@ -292,15 +292,7 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output <- "No matching metadata"
   }
 
-  if (grepl("^[0-9]+$", metadata_output)) {
-    metadata_output |>
-      as.numeric() |>
-      as.Date(origin = "1899-12-30") |>
-      format("%B %Y") |>
-      as.character()
-  } else {
-    metadata_output
-  }
+  metadata_output
 }
 
 
