@@ -115,7 +115,8 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         get_years(la_long()),
         tooltip_vlines,
         la_long(),
-        get_indicator_dps(filtered_bds())
+        get_indicator_dps(filtered_bds()),
+        app_inputs$la()
       )
 
       # Plotting interactive graph
@@ -259,13 +260,10 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = glue::glue_data(
-              la_long() |>
-                pretty_num_table(
-                  include_columns = "values_num",
-                  dp = get_indicator_dps(filtered_bds())
-                ),
-              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            tooltip = tooltip_bar(
+              la_long(),
+              get_indicator_dps(filtered_bds()),
+              app_inputs$la()
             ),
             data_id = `LA and Regions`
           ),

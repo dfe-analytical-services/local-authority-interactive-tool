@@ -383,7 +383,8 @@ server_dev <- function(input, output, session) {
       get_years(la_long()),
       tooltip_vlines,
       la_long(),
-      indicator_dps()
+      indicator_dps(),
+      input$la_input
     )
 
     # Plotting interactive graph
@@ -414,11 +415,7 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            la_long() |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
-          ),
+          tooltip = tooltip_bar(la_long(), indicator_dps(), input$la_input),
           data_id = `LA and Regions`
         ),
         position = "dodge",

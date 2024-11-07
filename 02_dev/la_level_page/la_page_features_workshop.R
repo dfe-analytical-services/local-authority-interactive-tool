@@ -308,7 +308,8 @@ vertical_hover <- lapply(
   get_years(la_long),
   tooltip_vlines,
   la_long,
-  indicator_dps
+  indicator_dps,
+  selected_la
 )
 
 # Plotting interactive graph
@@ -343,11 +344,7 @@ la_bar_chart <- la_long |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        la_long |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
-      ),
+      tooltip = tooltip_bar(la_long, indicator_dps, selected_la),
       data_id = `LA and Regions`
     ),
     position = "dodge",

@@ -577,18 +577,41 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
 #'
 #' @return A formatted string containing LA and region values.
 #' @export
-tooltip_text <- function(data, years_num, indicator_dp) {
-  paste0(
-    glue::glue_data(
-      data |>
-        pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-        dplyr::filter(Years_num == years_num) |>
-        dplyr::arrange(dplyr::desc(values_num)),
-      "{`LA and Regions`}: {values_num}"
-    ),
-    collapse = "\n"
-  )
+tooltip_text <- function(data, years_num, indicator_dp, highlight_geography = NULL) {
+  data_clean <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+    dplyr::filter(Years_num == years_num) |>
+    dplyr::arrange(dplyr::desc(values_num))
+
+  # Create formatted tooltip text
+  tooltip_lines <- sapply(1:nrow(data_clean), function(i) {
+    row <- data_clean[i, ]
+    geography <- row$`LA and Regions`
+    value <- row$values_num
+
+    # Apply styling for highlighted geography
+    if (!is.null(highlight_geography) && geography == highlight_geography) {
+      paste0(
+        "<span style='color:", get_la_focus_colour(), "; font-weight: bold;'>",
+        geography, ": ", value,
+        "</span>"
+      )
+      # Apply specific styling for "England" if present
+    } else if (geography == "England") {
+      paste0(
+        "<span style='color:", get_england_colour(), "; font-weight: bold;'>",
+        geography, ": ", value,
+        "</span>"
+      )
+    } else {
+      paste0(geography, ": ", value)
+    }
+  })
+
+  paste(tooltip_lines, collapse = "\n")
 }
+
+
 
 #' Generate interactive vertical line with tooltip
 #'
@@ -604,13 +627,13 @@ tooltip_text <- function(data, years_num, indicator_dp) {
 #'
 #' @return A `geom_vline_interactive` object for use in a plot.
 #' @export
-tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
+tooltip_vlines <- function(x, data, indicator_dp = 1, focus_group = NULL, include_measure = FALSE) {
   year_text <- generate_year_text(data, x)
 
   tooltip_content <- if (include_measure) {
     tooltip_text_w_indicator(data, x, indicator_dp)
   } else {
-    tooltip_text(data, x, indicator_dp)
+    tooltip_text(data, x, indicator_dp, focus_group)
   }
 
   geom_vline_interactive(
@@ -623,6 +646,35 @@ tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
     color = "transparent"
   )
 }
+
+
+tooltip_bar <- function(data, indicator_dps, focus_group = NULL) {
+  # Generate tooltip text for each row of data
+  sapply(1:nrow(data), function(i) {
+    row <- data[i, ]
+    geography <- row$`LA and Regions`
+    value <- row$values_num
+    year <- row$Years
+
+    # Create formatted tooltip text with colour formatting for "England" and focus_group
+    tooltip_text <- paste0(
+      "Year: ", year, "\n",
+      ifelse(
+        geography == "England",
+        paste0("<span style='color:", get_england_colour(), "; font-weight: bold;'>", geography, ": ", value, "</span>"),
+        ifelse(
+          !is.null(focus_group) && geography == focus_group,
+          paste0("<span style='color:", get_la_focus_colour(), "; font-weight: bold;'>", geography, ": ", value, "</span>"),
+          paste0(geography, ": ", value)
+        )
+      )
+    )
+
+    return(tooltip_text)
+  })
+}
+
+
 
 
 #' Custom ggiraph Tooltip CSS
