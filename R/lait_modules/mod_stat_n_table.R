@@ -594,15 +594,7 @@ StatN_StatsTableServer <- function(id,
       # Get latest rank, ties are set to min & NA vals to NA rank
       stat_n_rank <- filtered_bds() |>
         filter_la_regions(la_names_bds, latest = TRUE) |>
-        dplyr::mutate(
-          rank = dplyr::case_when(
-            is.na(values_num) ~ NA,
-            # Rank in descending order
-            stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-            # Rank in ascending order
-            stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-          )
-        ) |>
+        calculate_rank(stat_n_indicator_polarity) |>
         filter_la_regions(app_inputs$la(), pull_col = "rank")
 
 
@@ -623,16 +615,14 @@ StatN_StatsTableServer <- function(id,
       )
 
       # SN stats table
-      data.frame(
-        "LA Number" = stat_n_diff() |>
-          filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
-        "LA and Regions" = stat_n_stats_geog,
-        "Trend" = stat_n_trend,
-        "Change from previous year" = stat_n_change_prev,
-        "National Rank" = c(stat_n_rank, "", ""),
-        "Quartile Banding" = c(stat_n_quartile, "", ""),
-        "Polarity" = stat_n_indicator_polarity,
-        check.names = FALSE
+      stat_n_stats_table <- build_sn_stats_table(
+        stat_n_diff(),
+        stat_n_stats_geog,
+        stat_n_trend,
+        stat_n_change_prev,
+        stat_n_rank,
+        stat_n_quartile,
+        stat_n_indicator_polarity
       )
     })
 
@@ -659,23 +649,14 @@ StatN_StatsTableServer <- function(id,
                 get_trend_colour(value, stat_n_stats_output$Polarity[1])
               }
             ),
-            `National Rank` = reactable::colDef(
-              cell = function(value) {
-                get_na_value_based_on_polarity(value, stat_n_stats_output$Polarity[1])
-              }
-            ),
             `Quartile Banding` = reactable::colDef(
-              cell = function(value) {
-                get_na_value_based_on_polarity(value, stat_n_stats_output$Polarity[1])
-              },
               style = function(value, index) {
                 color <- get_quartile_band_cell_colour(
                   stat_n_stats_output[index, "Polarity"],
                   stat_n_stats_output[index, "Quartile Banding"]
                 )
                 list(background = color)
-              },
-              na = ""
+              }
             ),
             Polarity = reactable::colDef(show = FALSE)
           )

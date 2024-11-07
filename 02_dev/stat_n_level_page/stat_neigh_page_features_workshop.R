@@ -14,7 +14,7 @@ list.files("R/", full.names = TRUE) |>
 # Set user inputs
 selected_topic <- "Health and Wellbeing"
 selected_indicator <- "Low birth weight"
-selected_la <- "Barking and Dagenham"
+selected_la <- "Cumberland"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
@@ -159,15 +159,7 @@ stat_n_trend <- as.numeric(stat_n_change_prev)
 # Get latest rank, ties are set to min & NA vals to NA rank
 stat_n_rank <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
-  dplyr::mutate(
-    rank = dplyr::case_when(
-      is.na(values_num) ~ NA,
-      # Rank in descending order
-      stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-      # Rank in ascending order
-      stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-    )
-  ) |>
+  calculate_rank(stat_n_indicator_polarity) |>
   filter_la_regions(selected_la, pull_col = "rank")
 
 # Calculate quartile bands for indicator
@@ -187,16 +179,14 @@ stat_n_quartile <- calculate_quartile_band(
 )
 
 # SN stats table
-stat_n_stats_table <- data.frame(
-  "LA Number" = stat_n_diff |>
-    filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
-  "LA and Regions" = stat_n_stats_geog,
-  "Trend" = stat_n_trend,
-  "Change from previous year" = stat_n_change_prev,
-  "National Rank" = c(-1, "", ""),
-  "Quartile Banding" = c(stat_n_quartile, "", ""),
-  "Polarity" = stat_n_indicator_polarity,
-  check.names = FALSE
+stat_n_stats_table <- build_sn_stats_table(
+  stat_n_diff,
+  stat_n_stats_geog,
+  stat_n_trend,
+  stat_n_change_prev,
+  stat_n_rank,
+  stat_n_quartile,
+  stat_n_indicator_polarity
 )
 
 # Output stats table
@@ -218,20 +208,11 @@ dfe_reactable(
           get_trend_colour(value, stat_n_stats_table$Polarity[1])
         }
       ),
-      `National Rank` = reactable::colDef(
-        cell = function(value) {
-          get_na_value_based_on_polarity(value[1], stat_n_stats_table$Polarity[1])
-        }
-      ),
       # Just colour the QB cell
       `Quartile Banding` = reactable::colDef(
-        cell = function(value) {
-          get_na_value_based_on_polarity(value[1], stat_n_stats_table$Polarity[1])
-        },
         style = function(value, index) {
           quartile_banding_col_def(stat_n_stats_table[index, ])
-        },
-        na = ""
+        }
       ),
       Polarity = reactable::colDef(show = FALSE)
     )

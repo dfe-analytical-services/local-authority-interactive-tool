@@ -225,11 +225,12 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
   filtered_data |>
     dplyr::mutate(
       rank = dplyr::case_when(
-        is.na(values_num) ~ NA,
+        indicator_polarity %notin% c("High", "Low") ~ "-",
+        indicator_polarity %in% c("High", "Low") & is.na(values_num) ~ NA,
         # Rank in descending order
-        indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+        indicator_polarity == "High" ~ as.character(rank(-values_num, ties.method = "min", na.last = TRUE)),
         # Rank in ascending order
-        indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+        indicator_polarity == "Low" ~ as.character(rank(values_num, ties.method = "min", na.last = TRUE))
       )
     )
 }

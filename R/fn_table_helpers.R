@@ -392,6 +392,42 @@ build_region_stats_table <- function(la_number,
 }
 
 
+#' Create a Stats Table for Statistical Neighbour page
+#'
+#' @param stat_n_diff Statistical Neighbour dataframe inc change since prev year.
+#' @param la_and_regions A vector for LA and region names.
+#' @param trend A vector representing the trend.
+#' @param change_prev A vector representing the change from previous year.
+#' @param national_rank A vector for national ranking (with space padding).
+#' @param quartile_band A vector for quartile banding (with space padding).
+#' @param polarity A vector representing the polarity.
+#' @param pull_col The name of the column to pull in filtering "LA Number".
+#'
+#' @return A data frame containing stats table for LA with national statistics.
+#' @export
+build_sn_stats_table <- function(
+    stat_n_diff,
+    la_and_regions,
+    trend,
+    change_prev,
+    national_rank,
+    quartile_band,
+    polarity,
+    pull_col = "LA Number") {
+  data.frame(
+    "LA Number" = stat_n_diff |>
+      filter_la_regions(la_and_regions, pull_col = pull_col),
+    "LA and Regions" = la_and_regions,
+    "Trend" = trend,
+    "Change from previous year" = change_prev,
+    "National Rank" = c(national_rank, "", ""),
+    "Quartile Banding" = c(quartile_band, "", ""),
+    "Polarity" = polarity,
+    check.names = FALSE
+  )
+}
+
+
 #' Highlight a selected row in a reactable
 #'
 #' This function applies a specific style to a row if the value in the

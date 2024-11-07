@@ -135,15 +135,7 @@ la_trend <- la_diff |>
 # Get latest rank, ties are set to min & NA vals to NA rank
 la_rank <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
-  dplyr::mutate(
-    rank = dplyr::case_when(
-      is.na(values_num) ~ NA,
-      # Rank in descending order
-      la_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-      # Rank in ascending order
-      la_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-    )
-  ) |>
+  calculate_rank(la_indicator_polarity) |>
   filter_la_regions(selected_la, pull_col = "rank")
 
 # Calculate quartile bands for indicator
