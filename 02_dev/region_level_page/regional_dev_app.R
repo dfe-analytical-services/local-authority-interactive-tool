@@ -520,7 +520,9 @@ server_dev <- function(input, output, session) {
       get_years(region_focus_line_data),
       tooltip_vlines,
       region_focus_line_data,
-      indicator_dps()
+      indicator_dps(),
+      region_la_ldn_clean(),
+      "#12436D"
     )
 
     # Plotting interactive graph
@@ -593,7 +595,8 @@ server_dev <- function(input, output, session) {
       get_years(region_multi_choice_data),
       tooltip_vlines,
       region_multi_choice_data,
-      indicator_dps()
+      indicator_dps(),
+      region_la_ldn_clean()
     )
 
     # Plotting interactive graph
@@ -626,10 +629,11 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            region_focus_bar_data |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+          tooltip = tooltip_bar(
+            region_focus_bar_data,
+            indicator_dps(),
+            region_la_ldn_clean(),
+            "#12436D"
           ),
           data_id = `LA and Regions`
         ),
@@ -675,10 +679,10 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            region_multi_choice_data |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
+          tooltip = tooltip_bar(
+            region_multi_choice_data,
+            indicator_dps(),
+            region_la_ldn_clean()
           ),
           data_id = `LA and Regions`
         ),
@@ -689,10 +693,6 @@ server_dev <- function(input, output, session) {
       ) +
       format_axes(region_multi_choice_data) +
       set_plot_colours(region_multi_choice_data, "fill", region_la_ldn_clean()) +
-      # manual_colour_mapping(
-      #   c(region_la_ldn_clean(), input$chart_bar_input),
-      #   type = "bar"
-      # ) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 

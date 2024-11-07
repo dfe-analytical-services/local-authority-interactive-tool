@@ -297,10 +297,6 @@ region_line_chart <- region_line_chart_data |>
   ) +
   format_axes(region_line_chart_data) +
   set_plot_colours(region_line_chart_data, "colour", region_clean) +
-  # manual_colour_mapping(
-  #   c(region_clean, region_random_selection),
-  #   type = "line"
-  # ) +
   set_plot_labs(filtered_bds) +
   custom_theme() +
   # Revert order of the legend so goes from right to left
@@ -312,7 +308,8 @@ vertical_hover <- lapply(
   get_years(region_line_chart_data),
   tooltip_vlines,
   region_line_chart_data,
-  indicator_dps
+  indicator_dps,
+  region_clean
 )
 
 # Plotting interactive graph
@@ -375,7 +372,9 @@ vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
   focus_line_data,
-  indicator_dps
+  indicator_dps,
+  region_clean,
+  "#12436D"
 )
 
 # Plotting interactive graph
@@ -403,10 +402,11 @@ la_bar_chart <- focus_bar_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        focus_bar_data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      tooltip = tooltip_bar(
+        focus_bar_data,
+        indicator_dps,
+        region_clean,
+        "#12436D"
       ),
       data_id = `LA and Regions`
     ),
