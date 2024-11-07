@@ -102,7 +102,7 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
     )
 
     reactive({
-      req(filtered_bds(), la_input(), stat_n_sns(), stat_n_region())
+      req(filtered_bds(), la_input(), stat_n_region())
       # Calculate SN average
       stat_n_sn_avg <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
