@@ -574,9 +574,13 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE
       ) +
       format_axes(region_multi_choice_data) +
-      manual_colour_mapping(
-        c(region_la_ldn_clean(), input$chart_line_input),
-        type = "line"
+      set_plot_colours(
+        data.frame(
+          `LA and Regions` = c(region_la_ldn_clean(), input$chart_line_input),
+          check.names = FALSE
+        ),
+        "colour",
+        region_la_ldn_clean()
       ) +
       set_plot_labs(filtered_bds$data) +
       custom_theme() +
@@ -684,10 +688,11 @@ server_dev <- function(input, output, session) {
         colour = "black"
       ) +
       format_axes(region_multi_choice_data) +
-      manual_colour_mapping(
-        c(region_la_ldn_clean(), input$chart_bar_input),
-        type = "bar"
-      ) +
+      set_plot_colours(region_multi_choice_data, "fill", region_la_ldn_clean()) +
+      # manual_colour_mapping(
+      #   c(region_la_ldn_clean(), input$chart_bar_input),
+      #   type = "bar"
+      # ) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 

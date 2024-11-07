@@ -296,10 +296,11 @@ region_line_chart <- region_line_chart_data |>
     na.rm = TRUE
   ) +
   format_axes(region_line_chart_data) +
-  manual_colour_mapping(
-    c(region_clean, region_random_selection),
-    type = "line"
-  ) +
+  set_plot_colours(region_line_chart_data, "colour", region_clean) +
+  # manual_colour_mapping(
+  #   c(region_clean, region_random_selection),
+  #   type = "line"
+  # ) +
   set_plot_labs(filtered_bds) +
   custom_theme() +
   # Revert order of the legend so goes from right to left

@@ -801,9 +801,13 @@ Region_MultiLineChartServer <- function(id,
             linewidth = 1.5
           ) +
           format_axes(chart_data()) +
-          manual_colour_mapping(
-            unique(c(region_clean(), chart_input())),
-            type = "line"
+          set_plot_colours(
+            data.frame(
+              `LA and Regions` = c(region_clean(), chart_input()),
+              check.names = FALSE
+            ),
+            "colour",
+            region_clean()
           ) +
           set_plot_labs(filtered_bds()) +
           custom_theme() +
@@ -993,10 +997,7 @@ Region_MultiBarChartServer <- function(id,
             colour = "black"
           ) +
           format_axes(multi_chart_data()) +
-          manual_colour_mapping(
-            c(region_clean(), chart_input()),
-            type = "bar"
-          ) +
+          set_plot_colours(multi_chart_data(), "fill", region_clean()) +
           set_plot_labs(filtered_bds()) +
           custom_theme()
       }
