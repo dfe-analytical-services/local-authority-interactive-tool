@@ -524,13 +524,32 @@ build_sn_stats_table <- function(
 #'   }
 #' )
 #' }
-highlight_selected_row <- function(index, data, selected_area) {
-  if (data[index, "LA and Regions"] == selected_area) {
-    list(
-      color = "#6BACE6",
-      fontWeight = "bold"
-    )
+highlight_selected_row <- function(index, data, selected_area = NULL) {
+  la_region <- data[index, "LA and Regions"]
+
+  # Handle missing values first
+  if (is.na(la_region)) {
+    return(list()) # Default styling for rows with missing "LA and Regions" value
   }
+
+  # Check if the row matches the selected area
+  if (!is.null(selected_area) && la_region == selected_area) {
+    return(list(
+      color = get_la_focus_colour(),
+      fontWeight = "bold"
+    ))
+  }
+
+  # Check if the row is for "England"
+  if (la_region == "England") {
+    return(list(
+      color = get_england_colour(),
+      fontWeight = "bold"
+    ))
+  }
+
+  # Default styling for all other rows
+  list()
 }
 
 

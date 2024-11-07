@@ -305,6 +305,9 @@ server_dev <- function(input, output, session) {
         ),
         set_custom_default_col_widths()
       ),
+      rowStyle = function(index) {
+        highlight_selected_row(index, stat_n_comp_table)
+      },
       pagination = FALSE
     )
   })

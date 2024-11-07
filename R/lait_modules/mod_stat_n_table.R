@@ -483,6 +483,9 @@ StatN_GeogCompTableServer <- function(id,
           ),
           set_custom_default_col_widths()
         ),
+        rowStyle = function(index) {
+          highlight_selected_row(index, stat_n_geog_table())
+        },
         pagination = FALSE
       )
     })

@@ -184,6 +184,35 @@ la_quartile <- calculate_quartile_band(
   la_indicator_polarity
 )
 
+# Build stats table - code logic
+data.frame(
+  "LA Number" = la_table |>
+    filter_la_regions(selected_la, pull_col = "LA Number"),
+  "LA and Regions" = selected_la,
+  "Trend" = la_trend,
+  "Change from previous year" = la_change_prev,
+  "Latest National Rank" = la_rank,
+  "Quartile Banding" = la_quartile,
+  "(A) Up to and including" = la_quartile_bands[["25%"]],
+  "(B) Up to and including" = la_quartile_bands[["50%"]],
+  "(C) Up to and including" = la_quartile_bands[["75%"]],
+  "(D) Up to and including" = la_quartile_bands[["100%"]],
+  "Polarity" = la_indicator_polarity,
+  check.names = FALSE
+)
+
+if (la_indicator_polarity %notin% c("High", "Low")) {
+  la_stats_table |>
+    dplyr::mutate(
+      "Latest National Rank" = "-",
+      "Quartile Banding" = "-",
+      "(A) Up to and including" = "-",
+      "(B) Up to and including" = "-",
+      "(C) Up to and including" = "-",
+      "(D) Up to and including" = "-"
+    )
+}
+
 la_stats_table <- build_la_stats_table(
   la_table,
   selected_la,
@@ -194,36 +223,6 @@ la_stats_table <- build_la_stats_table(
   la_quartile_bands,
   la_indicator_polarity
 )
-
-
-# # Build stats table
-# la_stats_table <- data.frame(
-#   "LA Number" = la_table |>
-#     filter_la_regions(selected_la, pull_col = "LA Number"),
-#   "LA and Regions" = selected_la,
-#   "Trend" = la_trend,
-#   "Change from previous year" = la_change_prev,
-#   "Latest National Rank" = la_rank,
-#   "Quartile Banding" = la_quartile,
-#   "(A) Up to and including" = la_quartile_bands[["25%"]],
-#   "(B) Up to and including" = la_quartile_bands[["50%"]],
-#   "(C) Up to and including" = la_quartile_bands[["75%"]],
-#   "(D) Up to and including" = la_quartile_bands[["100%"]],
-#   "Polarity" = la_indicator_polarity,
-#   check.names = FALSE
-# )
-#
-# if (la_indicator_polarity %notin% c("High", "Low")) {
-#   la_stats_table <- la_stats_table |>
-#     dplyr::mutate(
-#       "Latest National Rank" = "-",
-#       "Quartile Banding" = "-",
-#       "(A) Up to and including" = "-",
-#       "(B) Up to and including" = "-",
-#       "(C) Up to and including" = "-",
-#       "(D) Up to and including" = "-"
-#     )
-# }
 
 # Format stats table
 # Use modifyList to merge the lists properly

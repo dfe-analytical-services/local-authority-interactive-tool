@@ -364,6 +364,69 @@ clean_ldn_region <- function(region, filtered_bds) {
   }
 }
 
+"#801650"
+"#A285D1"
+
+#' Retrieve AF Colours Without Warning Message
+#'
+#' Retrieves AF colours while suppressing a specific warning message about
+#' limiting categories when using the categorical palette.
+#'
+#' @return A vector of colours from the `afcolours` package.
+#'
+#' @details This function retrieves the colour palette from `afcolours::af_colours`
+#' while silencing the message advising to limit categories to four. The
+#' message is suppressed using `withCallingHandlers` to improve usability
+#' without affecting the palette content.
+#'
+#' @examples
+#' colours <- get_af_colours()
+#'
+get_af_colours <- function() {
+  withCallingHandlers(
+    afcolours::af_colours(),
+    message = function(m) {
+      if (grepl(
+        paste0(
+          "It is best practice to limit to four categories when using the ",
+          "categorical palette so the chart does not become too cluttered."
+        ),
+        m$message
+      )) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+}
+
+
+#' Get Colour for Local Authority Focus
+#'
+#' Returns a hex colour for highlighting the selected local authority in
+#' tables or plots.
+#'
+#' @return A character string with the hex colour code for LA focus.
+#' @examples
+#' get_la_focus_colour()
+#' @export
+get_la_focus_colour <- function() {
+  "#5694ca"
+}
+
+
+#' Get Colour for England Highlight
+#'
+#' Retrieves a colour from the afcolours package palette for highlighting
+#' "England" rows in tables or plots.
+#'
+#' @return A character string with the hex colour code for England highlight.
+#' @examples
+#' get_england_colour()
+#' @export
+get_england_colour <- function() {
+  get_af_colours()[3]
+}
+
 
 #' Retrieve AF Colours without Warning Message
 #'
