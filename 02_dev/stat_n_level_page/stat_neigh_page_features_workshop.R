@@ -14,7 +14,7 @@ list.files("R/", full.names = TRUE) |>
 # Set user inputs
 selected_topic <- "Health and Wellbeing"
 selected_indicator <- "Low birth weight"
-selected_la <- "Cumberland"
+selected_la <- "Barnet"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
@@ -330,10 +330,13 @@ region_line_chart <- stat_n_line_chart_data |>
     ),
     na.rm = TRUE
   ) +
-  format_axes(stat_n_line_chart_data) +
-  manual_colour_mapping(
-    c(selected_la, stat_n_random_selection),
-    type = "line"
+  set_plot_colours(
+    data.frame(
+      `LA and Regions` = c(selected_la, stat_n_random_selection),
+      check.names = FALSE
+    ),
+    "colour",
+    selected_la
   ) +
   set_plot_labs(filtered_bds) +
   custom_theme() +
@@ -424,10 +427,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
     colour = "black"
   ) +
   format_axes(stat_n_bar_multi_data) +
-  manual_colour_mapping(
-    c(selected_la, stat_n_random_selection),
-    type = "bar"
-  ) +
+  set_plot_colours(stat_n_bar_multi_data, "fill", selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 

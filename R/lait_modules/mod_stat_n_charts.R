@@ -722,9 +722,13 @@ StatN_MultiLineChartServer <- function(id,
             linewidth = 1.5
           ) +
           format_axes(chart_data()) +
-          manual_colour_mapping(
-            c(app_inputs$la(), chart_input()),
-            type = "line"
+          set_plot_colours(
+            data.frame(
+              `LA and Regions` = c(app_inputs$la(), chart_input()),
+              check.names = FALSE
+            ),
+            "colour",
+            app_inputs$la()
           ) +
           set_plot_labs(filtered_bds()) +
           custom_theme() +
@@ -951,10 +955,7 @@ StatN_MultiBarChartServer <- function(id,
             colour = "black"
           ) +
           format_axes(multi_chart_data()) +
-          manual_colour_mapping(
-            c(app_inputs$la(), chart_input()),
-            type = "bar"
-          ) +
+          set_plot_colours(multi_chart_data(), "fill", app_inputs$la()) +
           set_plot_labs(filtered_bds()) +
           custom_theme()
       }

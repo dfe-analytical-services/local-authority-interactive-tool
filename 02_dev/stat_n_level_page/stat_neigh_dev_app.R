@@ -646,9 +646,13 @@ server_dev <- function(input, output, session) {
           na.rm = TRUE
         ) +
         format_axes(stat_n_line_chart_data) +
-        manual_colour_mapping(
-          c(input$la_input, input$chart_line_input),
-          type = "line"
+        set_plot_colours(
+          data.frame(
+            `LA and Regions` = c(input$la_input, input$chart_line_input),
+            check.names = FALSE
+          ),
+          "colour",
+          input$la_input
         ) +
         set_plot_labs(filtered_bds$data) +
         custom_theme() +
@@ -773,10 +777,7 @@ server_dev <- function(input, output, session) {
           colour = "black"
         ) +
         format_axes(stat_n_bar_multi_data) +
-        manual_colour_mapping(
-          c(input$la_input, input$chart_bar_input),
-          type = "bar"
-        ) +
+        set_plot_colours(stat_n_bar_multi_data, "fill", input$la_input) +
         set_plot_labs(filtered_bds$data) +
         custom_theme()
 
