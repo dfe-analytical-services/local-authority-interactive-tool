@@ -648,17 +648,28 @@ tooltip_vlines <- function(x, data, indicator_dp = 1, focus_group = NULL, focus_
 }
 
 
-tooltip_bar <- function(data, indicator_dps, focus_group = NULL, text_colour = get_la_focus_colour()) {
+tooltip_bar <- function(data, indicator_dps, focus_group = NULL, text_colour = get_la_focus_colour(), include_measure = FALSE) {
+  # Prepare data with specified decimal points
+  data_clean <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dps)
+
   # Generate tooltip text for each row of data
-  sapply(1:nrow(data), function(i) {
-    row <- data[i, ]
+  sapply(1:nrow(data_clean), function(i) {
+    row <- data_clean[i, ]
     geography <- row$`LA and Regions`
     value <- row$values_num
     year <- row$Years
+    measure_text <- ""
+
+    # Conditionally add Measure to the tooltip if include_measure is TRUE
+    if (include_measure && "Measure" %in% names(row)) {
+      measure_text <- paste0("Measure: ", row$Measure, "\n")
+    }
 
     # Create formatted tooltip text with colour formatting for "England" and focus_group
     tooltip_text <- paste0(
-      "Year: ", year, "\n",
+      measure_text,
+      "Year: ", year, "\n\n",
       ifelse(
         geography == "England",
         paste0("<span style='color:", get_england_colour(), "; font-weight: bold;'>", geography, ": ", value, "</span>"),
@@ -670,9 +681,10 @@ tooltip_bar <- function(data, indicator_dps, focus_group = NULL, text_colour = g
       )
     )
 
-    return(tooltip_text)
+    tooltip_text
   })
 }
+
 
 
 #' Custom ggiraph Tooltip CSS

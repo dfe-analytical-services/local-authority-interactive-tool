@@ -1006,7 +1006,7 @@ server <- function(input, output, session) {
       tooltip_vlines,
       chart_plotting_data(),
       get_indicator_dps(final_filtered_bds()),
-      TRUE
+      include_measure = TRUE
     )
 
     # Plotting interactive graph
@@ -1131,13 +1131,10 @@ server <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            chart_plotting_data() |>
-              pretty_num_table(
-                include_columns = "values_num",
-                dp = get_indicator_dps(final_filtered_bds())
-              ),
-            "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
+          tooltip = tooltip_bar(
+            chart_plotting_data(),
+            get_indicator_dps(final_filtered_bds()),
+            include_measure = TRUE
           )
         ),
         position = position_dodge(width = 0.6),

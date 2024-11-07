@@ -253,7 +253,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         tooltip_vlines,
         chart_info$data(),
         get_indicator_dps(create_own_bds()),
-        TRUE
+        include_measure = TRUE
       )
 
       # Plotting interactive graph
@@ -456,13 +456,10 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = glue::glue_data(
-              chart_info$data() |>
-                pretty_num_table(
-                  include_columns = "values_num",
-                  dp = get_indicator_dps(create_own_bds())
-                ),
-              "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
+            tooltip = tooltip_bar(
+              chart_info$data(),
+              get_indicator_dps(create_own_bds()),
+              include_measure = TRUE
             )
           ),
           position = position_dodge(width = 0.6),
