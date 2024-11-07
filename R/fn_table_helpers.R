@@ -191,7 +191,23 @@ is_numeric_or_na <- function(col_data) {
 }
 
 
-# Helper function to format numeric columns
+#' Format Numeric Column for Reactable
+#'
+#' A helper function to format numeric columns in a `reactable` table with
+#' custom alignment, headers, NA handling, and sorting.
+#'
+#' @param col The column to format.
+#' @param indicator_dps Integer. The number of decimal places for formatting.
+#'
+#' @return A `reactable::colDef` object with customised numeric formatting.
+#'
+#' @details Formats numeric columns to align right, sets NA as "NA", and applies
+#'   custom decimal precision based on `indicator_dps`. Values are sorted with
+#'   NAs appearing last.
+#'
+#' @examples
+#' format_reactable_num_col(my_column, indicator_dps = 2)
+#'
 format_reactable_num_col <- function(col, indicator_dps) {
   reactable::colDef(
     align = "right",
@@ -206,7 +222,20 @@ format_reactable_num_col <- function(col, indicator_dps) {
   )
 }
 
-# Helper function to format categorical columns
+
+#' Format Categorical Column for Reactable
+#'
+#' A helper function to format categorical columns in a `reactable` table with
+#' custom alignment, headers, and NA handling.
+#'
+#' @return A `reactable::colDef` object with customised categorical formatting.
+#'
+#' @details Formats categorical columns to align right, sets NA as "NA", and
+#'   sorts values with NAs appearing last.
+#'
+#' @examples
+#' format_reactable_cat_col()
+#'
 format_reactable_cat_col <- function() {
   reactable::colDef(
     align = "right",
@@ -218,7 +247,22 @@ format_reactable_cat_col <- function() {
   )
 }
 
-# Helper function to set minimum column widths
+
+#' Set Minimum Column Widths for Reactable Columns
+#'
+#' A helper function to set minimum column widths for specified columns in a
+#' `reactable` table.
+#'
+#' @param ... Additional column width settings passed as a list.
+#' @return A list of column definitions with minimum width settings applied.
+#'
+#' @details This function applies minimum widths to specific columns to ensure
+#'   consistent table layout. Additional column definitions can be specified
+#'   via `...`.
+#'
+#' @examples
+#' set_custom_default_col_widths()
+#'
 set_custom_default_col_widths <- function(...) {
   list(
     `LA Number` = set_min_col_width(80),
@@ -229,11 +273,41 @@ set_custom_default_col_widths <- function(...) {
 }
 
 
-# Main function to format numeric and categorical columns
-format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, categorical = NULL) {
+#' Format Numeric and Categorical Columns for Reactable
+#'
+#' A main function to apply specific formatting to numeric and categorical
+#' columns within a `reactable` table.
+#'
+#' @param data A dataframe containing the data to be displayed in the table.
+#' @param indicator_dps Integer specifying the decimal places for numeric
+#'   formatting.
+#' @param num_exclude Optional; character vector of column names to exclude
+#'   from numeric formatting.
+#' @param categorical Optional; character vector of column names to format
+#'   as categorical columns.
+#' @return A named list of column definitions with the appropriate formatting
+#'   applied for each column in the table.
+#'
+#' @details This function applies specific formatting to numeric and
+#'   categorical columns in a `reactable` table based on the data type and
+#'   column names. Numeric columns not in `num_exclude` or `categorical` are
+#'   formatted using `format_reactable_num_col`, while categorical columns are
+#'   formatted with `format_reactable_cat_col`.
+#'
+#' @examples
+#' format_num_reactable_cols(data,
+#'   indicator_dps = 2, num_exclude = "ID",
+#'   categorical = c("Category")
+#' )
+#'
+format_num_reactable_cols <- function(data,
+                                      indicator_dps,
+                                      num_exclude = NULL,
+                                      categorical = NULL) {
   formatted_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
-    if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
+    if (is_numeric_or_na(col_data) &&
+      (col %notin% c(num_exclude, categorical))) {
       # Format numeric columns
       format_reactable_num_col(col, indicator_dps)
     } else if (col %in% categorical) {
@@ -245,7 +319,6 @@ format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, c
 
   formatted_cols
 }
-
 
 
 #' Create a Statistics Table
