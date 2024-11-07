@@ -162,6 +162,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
     warning("Unexpected Quartile Banding")
   }
 
+  # Clean NA values based on polarity
   quartile_band
 }
 

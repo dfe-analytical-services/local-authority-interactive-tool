@@ -212,7 +212,7 @@ format_reactable_cat_col <- function() {
     align = "right",
     headerClass = "bar-sort-header",
     html = TRUE,
-    na = "-",
+    na = "NA",
     sortable = TRUE,
     sortNALast = TRUE
   )
