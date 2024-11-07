@@ -146,7 +146,9 @@ StatN_FocusLineChartServer <- function(id,
           get_years(focus_chart_data()),
           tooltip_vlines,
           focus_chart_data(),
-          get_indicator_dps(filtered_bds())
+          get_indicator_dps(filtered_bds()),
+          app_inputs$la(),
+          "#12436D"
         )
 
         # Combine static chart and vertical hover into one ggplot object
@@ -306,13 +308,11 @@ StatN_FocusBarChartServer <- function(id,
               x = Years_num,
               y = values_num,
               fill = `LA and Regions`,
-              tooltip = glue::glue_data(
-                focus_chart_data() |>
-                  pretty_num_table(
-                    include_columns = "values_num",
-                    dp = get_indicator_dps(filtered_bds())
-                  ),
-                "Year: {Years}\n{`LA and Regions`}: {values_num}"
+              tooltip = tooltip_bar(
+                focus_chart_data(),
+                get_indicator_dps(filtered_bds()),
+                app_inputs$la(),
+                "#12436D"
               ),
               data_id = `LA and Regions`
             ),
@@ -746,7 +746,8 @@ StatN_MultiLineChartServer <- function(id,
           get_years(chart_data()),
           tooltip_vlines,
           chart_data(),
-          get_indicator_dps(filtered_bds())
+          get_indicator_dps(filtered_bds()),
+          app_inputs$la()
         )
 
         # Combine static chart and vertical hover into one ggplot object
@@ -939,13 +940,10 @@ StatN_MultiBarChartServer <- function(id,
               x = Years_num,
               y = values_num,
               fill = `LA and Regions`,
-              tooltip = glue::glue_data(
-                multi_chart_data() |>
-                  pretty_num_table(
-                    include_columns = "values_num",
-                    dp = get_indicator_dps(filtered_bds())
-                  ),
-                "Year: {Years}\n{`LA and Regions`}: {values_num}"
+              tooltip = tooltip_bar(
+                multi_chart_data(),
+                get_indicator_dps(filtered_bds()),
+                app_inputs$la()
               ),
               data_id = `LA and Regions`
             ),

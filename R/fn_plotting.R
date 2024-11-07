@@ -577,7 +577,7 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
 #'
 #' @return A formatted string containing LA and region values.
 #' @export
-tooltip_text <- function(data, years_num, indicator_dp, highlight_geography = NULL) {
+tooltip_text <- function(data, years_num, indicator_dp, highlight_geography = NULL, focus_colour) {
   data_clean <- data |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
     dplyr::filter(Years_num == years_num) |>
@@ -592,7 +592,7 @@ tooltip_text <- function(data, years_num, indicator_dp, highlight_geography = NU
     # Apply styling for highlighted geography
     if (!is.null(highlight_geography) && geography == highlight_geography) {
       paste0(
-        "<span style='color:", get_la_focus_colour(), "; font-weight: bold;'>",
+        "<span style='color:", focus_colour, "; font-weight: bold;'>",
         geography, ": ", value,
         "</span>"
       )
@@ -627,13 +627,13 @@ tooltip_text <- function(data, years_num, indicator_dp, highlight_geography = NU
 #'
 #' @return A `geom_vline_interactive` object for use in a plot.
 #' @export
-tooltip_vlines <- function(x, data, indicator_dp = 1, focus_group = NULL, include_measure = FALSE) {
+tooltip_vlines <- function(x, data, indicator_dp = 1, focus_group = NULL, focus_colour = get_la_focus_colour(), include_measure = FALSE) {
   year_text <- generate_year_text(data, x)
 
   tooltip_content <- if (include_measure) {
     tooltip_text_w_indicator(data, x, indicator_dp)
   } else {
-    tooltip_text(data, x, indicator_dp, focus_group)
+    tooltip_text(data, x, indicator_dp, focus_group, focus_colour)
   }
 
   geom_vline_interactive(
@@ -648,7 +648,7 @@ tooltip_vlines <- function(x, data, indicator_dp = 1, focus_group = NULL, includ
 }
 
 
-tooltip_bar <- function(data, indicator_dps, focus_group = NULL) {
+tooltip_bar <- function(data, indicator_dps, focus_group = NULL, text_colour = get_la_focus_colour()) {
   # Generate tooltip text for each row of data
   sapply(1:nrow(data), function(i) {
     row <- data[i, ]
@@ -664,7 +664,7 @@ tooltip_bar <- function(data, indicator_dps, focus_group = NULL) {
         paste0("<span style='color:", get_england_colour(), "; font-weight: bold;'>", geography, ": ", value, "</span>"),
         ifelse(
           !is.null(focus_group) && geography == focus_group,
-          paste0("<span style='color:", get_la_focus_colour(), "; font-weight: bold;'>", geography, ": ", value, "</span>"),
+          paste0("<span style='color:", text_colour, "; font-weight: bold;'>", geography, ": ", value, "</span>"),
           paste0(geography, ": ", value)
         )
       )
@@ -673,8 +673,6 @@ tooltip_bar <- function(data, indicator_dps, focus_group = NULL) {
     return(tooltip_text)
   })
 }
-
-
 
 
 #' Custom ggiraph Tooltip CSS

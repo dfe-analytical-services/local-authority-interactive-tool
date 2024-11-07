@@ -275,7 +275,9 @@ vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
   focus_line_data,
-  indicator_dps
+  indicator_dps,
+  selected_la,
+  "#12436D"
 )
 
 # Plotting interactive graph
@@ -349,7 +351,8 @@ vertical_hover <- lapply(
   get_years(stat_n_line_chart_data),
   tooltip_vlines,
   stat_n_line_chart_data,
-  indicator_dps
+  indicator_dps,
+  selected_la
 )
 
 # Plotting interactive graph
@@ -376,10 +379,11 @@ stat_n_focus_bar_chart <- focus_bar_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        focus_bar_data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      tooltip = tooltip_bar(
+        focus_bar_data,
+        stat_n_indicator_polarity,
+        selected_la,
+        "#12436D"
       ),
       data_id = `LA and Regions`
     ),
@@ -414,11 +418,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        stat_n_bar_multi_data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
-      ),
+      tooltip = tooltip_bar(stat_n_bar_multi_data, stat_n_indicator_polarity, selected_la),
       data_id = `LA and Regions`
     ),
     position = "dodge",
