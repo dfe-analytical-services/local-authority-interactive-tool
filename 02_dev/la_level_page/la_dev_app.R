@@ -373,7 +373,7 @@ server_dev <- function(input, output, session) {
         linewidth = 1
       ) +
       format_axes(la_long()) +
-      set_plot_colours(la_long()) +
+      set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 
@@ -427,7 +427,7 @@ server_dev <- function(input, output, session) {
         colour = "black"
       ) +
       format_axes(la_long()) +
-      set_plot_colours(la_long(), "fill") +
+      set_plot_colours(la_long(), "fill", input$la_input) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 

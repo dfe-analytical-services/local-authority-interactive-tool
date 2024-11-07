@@ -103,7 +103,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           linewidth = 1
         ) +
         format_axes(la_long()) +
-        set_plot_colours(la_long()) +
+        set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
         custom_theme()
     })
@@ -275,7 +275,7 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           colour = "black"
         ) +
         format_axes(la_long()) +
-        set_plot_colours(la_long(), "fill") +
+        set_plot_colours(la_long(), "fill", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
         custom_theme()
     })

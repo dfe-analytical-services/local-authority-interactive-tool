@@ -95,19 +95,36 @@ get_plot_title <- function(data_full) {
 #' The output is a named vector where the names correspond to the groups,
 #' and the values are the respective colors.
 #'
-create_plot_colours <- function(data_long) {
-  # Colours
+create_plot_colours <- function(data_long, focus_group = NULL) {
+  # Extract unique groups for plotting
   plot_groups <- data_long |>
     pull_uniques("LA and Regions")
 
-  plot_colours <- afcolours::af_colours(
-    type = "categorical",
-    n = length(plot_groups)
-  )
-  names(plot_colours) <- plot_groups
+  # Initialise plot colours
+  plot_colours <- c()
+
+  # Assign specific colour for focus group if provided & remove from plot groups
+  if (!is.null(focus_group) && focus_group %in% plot_groups) {
+    plot_colours[focus_group] <- get_la_focus_colour()
+    plot_groups <- setdiff(plot_groups, focus_group)
+  }
+
+  # Assign specific colour for "England" if present & remove from plot groups
+  if ("England" %in% plot_groups) {
+    plot_colours["England"] <- get_england_colour()
+    plot_groups <- setdiff(plot_groups, "England")
+  }
+
+  # Assign colours for remaining groups
+  remaining_colours <- get_clean_af_colours()[1:length(plot_groups)]
+  names(remaining_colours) <- plot_groups
+
+  # Combine all colours
+  plot_colours <- c(plot_colours, remaining_colours)
 
   plot_colours
 }
+
 
 
 #' Create Plot Colours with Focus Group Highlight
@@ -395,9 +412,9 @@ set_plot_colours <- function(data_long,
                              colour_type = "colour",
                              focus_group = NULL) {
   if (colour_type == "colour") {
-    ggplot2::scale_colour_manual(values = create_plot_colours(data_long))
+    ggplot2::scale_colour_manual(values = create_plot_colours(data_long, focus_group))
   } else if (colour_type == "fill") {
-    ggplot2::scale_fill_manual(values = create_plot_colours(data_long))
+    ggplot2::scale_fill_manual(values = create_plot_colours(data_long, focus_group))
   } else if (colour_type == "focus") {
     list(
       ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group)),

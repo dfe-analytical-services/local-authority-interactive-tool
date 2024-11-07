@@ -13,7 +13,7 @@ list.files("R/", full.names = TRUE) |>
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
 selected_indicator <- "Infant Mortality" # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
-selected_la <- "Cumberland" # "Barnet" # Cumberland
+selected_la <- "Barnet" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -298,7 +298,7 @@ la_line_chart <- la_long |>
     linewidth = 1
   ) +
   format_axes(la_long) +
-  set_plot_colours(la_long) +
+  set_plot_colours(la_long, focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 
@@ -356,7 +356,7 @@ la_bar_chart <- la_long |>
     colour = "black"
   ) +
   format_axes(la_long) +
-  set_plot_colours(la_long, "fill") +
+  set_plot_colours(la_long, "fill", selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 
