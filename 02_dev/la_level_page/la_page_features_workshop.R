@@ -12,8 +12,9 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Under 18 Hospital Admissions (Alcohol related)"
-selected_la <- "Bedford Borough"
+selected_indicator <- "Children killed or seriously injured in road traffic accidents"
+# "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
+selected_la <- "Barnet" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -31,8 +32,7 @@ la_region <- filtered_sn |>
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic == selected_topic,
-    Measure == selected_indicator,
-    !is.na(Years)
+    Measure == selected_indicator
   )
 
 # Decimal point setting
@@ -52,7 +52,7 @@ la_filtered_bds <- filtered_bds |>
 sn_avg <- la_filtered_bds |>
   dplyr::filter(`LA and Regions` %in% la_sns) |>
   dplyr::summarise(
-    values_num = mean(values_num, na.rm = TRUE),
+    values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
     .by = c("Years", "Years_num")
   ) |>
   dplyr::mutate(
@@ -135,15 +135,7 @@ la_trend <- la_diff |>
 # Get latest rank, ties are set to min & NA vals to NA rank
 la_rank <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
-  dplyr::mutate(
-    rank = dplyr::case_when(
-      is.na(values_num) ~ NA,
-      # Rank in descending order
-      la_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-      # Rank in ascending order
-      la_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-    )
-  ) |>
+  calculate_rank(la_indicator_polarity) |>
   filter_la_regions(selected_la, pull_col = "rank")
 
 # Calculate quartile bands for indicator
@@ -183,7 +175,42 @@ if (la_indicator_polarity %in% "Low") {
     TRUE ~ "Error"
   )
 } else {
-  la_quartile <- "Not applicable"
+  la_quartile <- "-"
+}
+
+la_quartile <- calculate_quartile_band(
+  la_indicator_val,
+  la_quartile_bands,
+  la_indicator_polarity
+)
+
+# Build stats table - code logic
+data.frame(
+  "LA Number" = la_table |>
+    filter_la_regions(selected_la, pull_col = "LA Number"),
+  "LA and Regions" = selected_la,
+  "Trend" = la_trend,
+  "Change from previous year" = la_change_prev,
+  "Latest National Rank" = la_rank,
+  "Quartile Banding" = la_quartile,
+  "(A) Up to and including" = la_quartile_bands[["25%"]],
+  "(B) Up to and including" = la_quartile_bands[["50%"]],
+  "(C) Up to and including" = la_quartile_bands[["75%"]],
+  "(D) Up to and including" = la_quartile_bands[["100%"]],
+  "Polarity" = la_indicator_polarity,
+  check.names = FALSE
+)
+
+if (la_indicator_polarity %notin% c("High", "Low")) {
+  la_stats_table |>
+    dplyr::mutate(
+      "Latest National Rank" = "-",
+      "Quartile Banding" = "-",
+      "(A) Up to and including" = "-",
+      "(B) Up to and including" = "-",
+      "(C) Up to and including" = "-",
+      "(D) Up to and including" = "-"
+    )
 }
 
 la_stats_table <- build_la_stats_table(
@@ -197,59 +224,46 @@ la_stats_table <- build_la_stats_table(
   la_indicator_polarity
 )
 
-
-# Build stats table
-la_stats_table <- data.frame(
-  "LA Number" = la_table |>
-    filter_la_regions(selected_la, pull_col = "LA Number"),
-  "LA and Regions" = selected_la,
-  "Trend" = -la_trend,
-  "Change from previous year" = la_change_prev,
-  "Latest National Rank" = la_rank,
-  "Quartile Banding" = la_quartile,
-  "(A) Up to and including" = la_quartile_bands[["25%"]],
-  "(B) Up to and including" = la_quartile_bands[["50%"]],
-  "(C) Up to and including" = la_quartile_bands[["75%"]],
-  "(D) Up to and including" = la_quartile_bands[["100%"]],
-  "Polarity" = la_indicator_polarity,
-  check.names = FALSE
-)
-
-if (la_indicator_polarity %notin% c("High", "Low")) {
-  la_stats_table <- la_stats_table |>
-    dplyr::mutate(
-      "Latest National Rank" = "Not applicable",
-      "Quartile Banding" = "Not applicable",
-      "(A) Up to and including" = "-",
-      "(B) Up to and including" = "-",
-      "(C) Up to and including" = "-",
-      "(D) Up to and including" = "-"
-    )
-}
-
-
 # Format stats table
 # Use modifyList to merge the lists properly
 dfe_reactable(
-  la_stats_table |> dplyr::select(-Polarity),
+  la_stats_table,
   columns = modifyList(
     # Create the reactable with specific column alignments
     format_num_reactable_cols(
-      la_stats_table |>
-        dplyr::select(-Polarity),
+      la_stats_table,
       get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding", "Latest National Rank")
+      categorical = c(
+        "Trend", "Quartile Banding", "Latest National Rank",
+        "(A) Up to and including", "(B) Up to and including",
+        "(C) Up to and including", "(D) Up to and including"
+      )
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
       set_custom_default_col_widths(),
       `Quartile Banding` = reactable::colDef(
-        style = quartile_banding_col_def(la_stats_table)
+        cell = function(value) {
+          # Apply the NA value logic based on Polarity
+          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
+        },
+        style = function(value, index) {
+          quartile_banding_col_def(la_stats_table[index, ])
+        }
+      ),
+      `Latest National Rank` = reactable::colDef(
+        cell = function(value) {
+          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
+        }
       ),
       Trend = reactable::colDef(
-        cell = trend_icon_renderer
-      )
+        cell = trend_icon_renderer,
+        style = function(value) {
+          get_trend_colour(value, la_stats_table$Polarity[1])
+        }
+      ),
+      Polarity = reactable::colDef(show = FALSE)
     )
   )
 )
@@ -257,21 +271,20 @@ dfe_reactable(
 
 
 
-
 # LA line chart plot ----------------------------------------------------------
 # Plot
 la_line_chart <- la_long |>
-  # Filter out NAs to stop warning
-  # "Failed setting attribute 'data-id', mismatched lengths of ids and values"
-  # dplyr::filter(!is.na(values_num)) |>
   ggplot2::ggplot() +
-  ggiraph::geom_point_interactive(
+  # Only show point data where line won't appear (NAs)
+  ggplot2::geom_point(
+    data = subset(create_show_point(la_long), show_point),
     ggplot2::aes(
       x = Years_num,
       y = values_num,
-      color = `LA and Regions`,
-      data_id = `LA and Regions`
+      color = `LA and Regions`
     ),
+    shape = 15,
+    size = 1,
     na.rm = TRUE
   ) +
   ggiraph::geom_line_interactive(
@@ -281,10 +294,11 @@ la_line_chart <- la_long |>
       color = `LA and Regions`,
       data_id = `LA and Regions`
     ),
-    na.rm = TRUE
+    na.rm = TRUE,
+    linewidth = 1
   ) +
   format_axes(la_long) +
-  set_plot_colours(la_long) +
+  set_plot_colours(la_long, focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 
@@ -294,7 +308,8 @@ vertical_hover <- lapply(
   get_years(la_long),
   tooltip_vlines,
   la_long,
-  indicator_dps
+  indicator_dps,
+  selected_la
 )
 
 # Plotting interactive graph
@@ -329,11 +344,7 @@ la_bar_chart <- la_long |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        la_long |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
-      ),
+      tooltip = tooltip_bar(la_long, indicator_dps, selected_la),
       data_id = `LA and Regions`
     ),
     position = "dodge",
@@ -342,7 +353,7 @@ la_bar_chart <- la_long |>
     colour = "black"
   ) +
   format_axes(la_long) +
-  set_plot_colours(la_long, "fill") +
+  set_plot_colours(la_long, "fill", selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 

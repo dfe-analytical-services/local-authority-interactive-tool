@@ -29,6 +29,11 @@ StagingBDSServer <- function(id,
                              year_input,
                              bds_metrics) {
   moduleServer(id, function(input, output, session) {
+    # Forcing module to react to change in year input (not best practice)
+    observeEvent(year_input$range(), {
+      year_input$range()
+    })
+
     # Filter BDS for topic-indicator pairs in the selected_values reactive
     topic_indicator_bds <- reactive({
       req(nrow(create_inputs$selected_indicators()) > 0)
@@ -49,8 +54,7 @@ StagingBDSServer <- function(id,
       # Filter by full geography inputs
       filtered_bds <- topic_indicator_bds() |>
         dplyr::filter(
-          `LA and Regions` %in% geog_groups(),
-          !is.na(Years)
+          `LA and Regions` %in% geog_groups()
         )
 
       # Cleaning Years
@@ -235,7 +239,7 @@ StagingTableServer <- function(id,
     # Staging table reactable ouput
     output$staging_table <- reactable::renderReactable({
       # Display messages if there are incorrect selections
-      if (length(create_inputs$indicator()) == 0 && is.null(create_inputs$geog())) {
+      if (length(create_inputs$indicator()) == 0 && is.null(geog_groups())) {
         return(reactable::reactable(
           data.frame(
             `Message from tool` = "Please add selections (above).",
@@ -249,7 +253,7 @@ StagingTableServer <- function(id,
             check.names = FALSE
           )
         ))
-      } else if (is.null(create_inputs$geog())) {
+      } else if (is.null(geog_groups())) {
         return(reactable::reactable(
           data.frame(
             `Message from tool` = "Please add a geography selection (above).",
@@ -416,24 +420,46 @@ QueryDataServer <- function(id,
         # Appending the data of the new query to the output table
         # Adding new query ID to staging data
         # (so remove button also removes relevant data from output table)
+        query_output <- query$output
         staging_to_append <- staging_data()
         staging_to_append$.query_id <- new_q_id
         consistent_staging_final_yrs <- data.frame(
           Years = c(
-            colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
+            colnames(query_output)[grepl("^\\d{4}", colnames(query_output))],
             colnames(staging_to_append)[grepl("^\\d{4}", colnames(staging_to_append))]
           )
         ) |> check_year_suffix_consistency()
 
         # If not consistent suffixes then clean both dfs year cols
-        # Otherwise add the suffix years
-        if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
-          query$output <- query$output |>
-            rename_columns_with_year() |>
-            dplyr::bind_rows(rename_columns_with_year(staging_to_append))
-        } else {
-          query$output <- query$output |> dplyr::bind_rows(staging_to_append)
+        if (!consistent_staging_final_yrs && nrow(query_output) > 0) {
+          query_output <- rename_columns_with_year(query_output)
+          staging_to_append <- rename_columns_with_year(staging_to_append)
         }
+
+        # Get all years across both dfs
+        all_year_columns <- union(
+          grep("^\\d{4}", names(query_output), value = TRUE),
+          grep("^\\d{4}", names(staging_to_append), value = TRUE)
+        )
+
+        # Add the new (missing) years onto the existing dfs with values as NaN
+        # This is so that they can be coded as "-" in the table
+        # Saved queries
+        if (nrow(query_output) > 0) {
+          for (col in setdiff(all_year_columns, names(query_output))) {
+            query_output[[col]] <- NaN
+          }
+        }
+
+        # New query
+        if (nrow(staging_to_append) > 0) {
+          for (col in setdiff(all_year_columns, names(staging_to_append))) {
+            staging_to_append[[col]] <- NaN
+          }
+        }
+
+        # Combine query tables for final table output
+        query$output <- rbind(query_output, staging_to_append)
       },
       ignoreInit = TRUE
     )
@@ -609,49 +635,45 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
         )
       }
 
+      # Remove columns that contain only NaN values
+      # (aka user removed query that was including these years so no need to display them now)
+      query_output_clean <- query$output[, !sapply(query$output, function(x) all(is.nan(x)))]
+
       # Logic to reset the year cols to have year suffixes if they match
       # (As they may have been cleaned from the code logic at end of the new query chunk)
-      # Get output indicators
-      output_indicators <- query$output |>
-        pull_uniques("Measure")
-
-      # Boolean for if the output indicators share suffixes
+      # Determine if output indicators share year suffix consistency
+      output_indicators <- query_output_clean |> pull_uniques("Measure")
       share_year_suffix <- bds_metrics |>
-        dplyr::filter(
-          Measure %in% output_indicators,
-          !is.na(Years)
-        ) |>
+        dplyr::filter(Measure %in% output_indicators) |>
         check_year_suffix_consistency()
 
-      # If suffixes are shared then reapply the years with suffix to col names
+      # Reapply year suffixes to columns if needed
       if (share_year_suffix) {
-        # Get the years with suffixes
         years_dict <- bds_metrics |>
-          dplyr::filter(
-            Measure %in% output_indicators,
-            !is.na(Years)
-          ) |>
+          dplyr::filter(Measure %in% output_indicators) |>
           dplyr::distinct(Years, Years_num)
 
-        # Replace the matching year col names with respective year suffix
-        new_col_names <- colnames(query$output) |>
-          (\(cols) ifelse(cols %in% years_dict$Years_num,
-            years_dict$Years[match(cols, years_dict$Years_num)],
-            cols
-          ))()
+        # Replace numeric year columns with the corresponding suffix
+        new_col_names <- colnames(query_output_clean) |>
+          vapply(function(col) {
+            if (col %in% years_dict$Years_num) {
+              return(years_dict$Years[match(col, years_dict$Years_num)])
+            } else {
+              return(col)
+            }
+          }, character(1))
 
-        # Apply the new year suffix names to query$output
-        colnames(query$output) <- new_col_names
+        colnames(query_output_clean) <- new_col_names
       }
 
       # Final query output table with ordered columns (SN parent if selected)
       # and sorted year columns
-      query$output |>
+      query_output_clean |>
         dplyr::select(
           `LA Number`, `LA and Regions`,
           Region, Topic, Measure,
           tidyselect::any_of("Statistical Neighbour Group"),
-          dplyr::all_of(sort_year_columns(query$output))
+          dplyr::all_of(sort_year_columns(query_output_clean))
         )
     })
 
@@ -775,7 +797,7 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
           format_num_reactable_cols(
             create_own_data(),
             get_indicator_dps(create_own_bds()),
-            num_exclude = c("LA Number", "Measure")
+            num_exclude = c("LA Number", "Topic", "Measure")
           ),
           list(
             set_custom_default_col_widths(),

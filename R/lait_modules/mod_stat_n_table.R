@@ -102,12 +102,12 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
     )
 
     reactive({
-      req(filtered_bds(), la_input(), stat_n_sns(), stat_n_region())
+      req(filtered_bds(), la_input(), stat_n_region())
       # Calculate SN average
       stat_n_sn_avg <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
         dplyr::summarise(
-          values_num = mean(values_num, na.rm = TRUE),
+          values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
           .by = c("Years", "Years_num")
         ) |>
         dplyr::mutate(
@@ -483,6 +483,9 @@ StatN_GeogCompTableServer <- function(id,
           ),
           set_custom_default_col_widths()
         ),
+        rowStyle = function(index) {
+          highlight_selected_row(index, stat_n_geog_table())
+        },
         pagination = FALSE
       )
     })
@@ -594,15 +597,7 @@ StatN_StatsTableServer <- function(id,
       # Get latest rank, ties are set to min & NA vals to NA rank
       stat_n_rank <- filtered_bds() |>
         filter_la_regions(la_names_bds, latest = TRUE) |>
-        dplyr::mutate(
-          rank = dplyr::case_when(
-            is.na(values_num) ~ NA,
-            # Rank in descending order
-            stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-            # Rank in ascending order
-            stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-          )
-        ) |>
+        calculate_rank(stat_n_indicator_polarity) |>
         filter_la_regions(app_inputs$la(), pull_col = "rank")
 
 
@@ -623,16 +618,14 @@ StatN_StatsTableServer <- function(id,
       )
 
       # SN stats table
-      data.frame(
-        "LA Number" = stat_n_diff() |>
-          filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
-        "LA and Regions" = stat_n_stats_geog,
-        "Trend" = stat_n_trend,
-        "Change from previous year" = stat_n_change_prev,
-        "National Rank" = c(stat_n_rank, NA, NA),
-        "Quartile Banding" = c(stat_n_quartile, NA, NA),
-        "Polarity" = stat_n_indicator_polarity,
-        check.names = FALSE
+      stat_n_stats_table <- build_sn_stats_table(
+        stat_n_diff(),
+        stat_n_stats_geog,
+        stat_n_trend,
+        stat_n_change_prev,
+        stat_n_rank,
+        stat_n_quartile,
+        stat_n_indicator_polarity
       )
     })
 
@@ -641,13 +634,11 @@ StatN_StatsTableServer <- function(id,
       stat_n_stats_output <- stat_n_stats_table()
 
       dfe_reactable(
-        stat_n_stats_output |>
-          dplyr::select(-Polarity),
+        stat_n_stats_output,
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
-            stat_n_stats_output |>
-              dplyr::select(-Polarity),
+            stat_n_stats_output,
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
             categorical = c("Trend", "Quartile Banding", "National Rank")
@@ -656,13 +647,21 @@ StatN_StatsTableServer <- function(id,
           list(
             set_custom_default_col_widths(),
             Trend = reactable::colDef(
-              cell = trend_icon_renderer
+              cell = trend_icon_renderer,
+              style = function(value) {
+                get_trend_colour(value, stat_n_stats_output$Polarity[1])
+              }
             ),
-            `National Rank` = reactable::colDef(na = ""),
             `Quartile Banding` = reactable::colDef(
-              style = quartile_banding_col_def(stat_n_stats_output),
-              na = ""
-            )
+              style = function(value, index) {
+                color <- get_quartile_band_cell_colour(
+                  stat_n_stats_output[index, "Polarity"],
+                  stat_n_stats_output[index, "Quartile Banding"]
+                )
+                list(background = color)
+              }
+            ),
+            Polarity = reactable::colDef(show = FALSE)
           )
         ),
         rowStyle = function(index) {

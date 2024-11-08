@@ -25,8 +25,6 @@ ui <- function(input, output, session) {
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
-    tags$head(htmltools::includeScript("www/custom_js.js")),
-    reactable.extras::reactable_extras_dependency(),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -55,6 +53,9 @@ ui <- function(input, output, session) {
     # Load javascript dependencies --------------------------------------------
     shinyWidgets::useShinydashboard(),
     shinyjs::useShinyjs(),
+    tags$head(htmltools::includeScript("www/custom_js.js")),
+    reactable.extras::reactable_extras_dependency(),
+    shinyToastify::useShinyToastify(),
 
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
@@ -121,7 +122,15 @@ ui <- function(input, output, session) {
         LA_StatsTableUI("la_stats"),
 
         # LA Charts ===========================================================
-        LA_ChartUI("la_chart"),
+        div(
+          class = "well",
+          style = "overflow-y: visible;",
+          bslib::navset_card_underline(
+            id = "la_charts",
+            LA_LineChartUI("la_line_chart"),
+            LA_BarChartUI("la_bar_chart")
+          )
+        ),
 
         # LA Metadata =========================================================
         LA_LevelMetaUI("la_meta")
@@ -150,8 +159,10 @@ ui <- function(input, output, session) {
           style = "overflow-y: visible;",
           bslib::navset_card_underline(
             id = "region_charts",
-            Region_FocusLine_chartUI("region_focus_line"),
-            Region_Multi_chartUI("region_multi_line")
+            Region_FocusLineChartUI("region_focus_line"),
+            Region_MultiLineChartUI("region_multi_line"),
+            Region_FocusBarChartUI("region_focus_bar"),
+            Region_MultiBarChartUI("region_multi_bar")
           )
         ),
 
@@ -164,8 +175,8 @@ ui <- function(input, output, session) {
       # =======================================================================
       bslib::nav_panel(
         shiny::hr(class = "mobile-only-hr"),
-        title = "Statsitical Neighbour Level",
-        value = "Statsitical Neighbour Level",
+        title = "Statistical Neighbour Level",
+        value = "Statistical Neighbour Level",
 
         # Tab header ==========================================================
         PageHeaderUI("stat_n_header"),

@@ -1,22 +1,40 @@
-#' @title Extract the Unique Y-Axis Title from a Dataset
-#' @description This function extracts the unique y-axis title from a
-#' given dataset.
-#' @param data_full A dataframe containing the full dataset.
-#' @return A character vector containing the unique y-axis title(s).
+#' Get Y-Axis Title for Plot
+#'
+#' This function retrieves the title for the Y-axis based on the `y_axis_name`
+#' column of the provided dataset. If there is only one unique value for
+#' `y_axis_name`, the title will be formatted with line breaks. If there are
+#' multiple unique values, the function returns a combined title indicating
+#' mixed units, with the individual units separated by commas and "and" before
+#' the last unit.
+#'
+#' @param data_full A data frame containing the `y_axis_name` column, which will
+#'   be used to determine the Y-axis title.
+#'
+#' @return A character string representing the Y-axis title. This can either
+#'   be the formatted title with line breaks or a combined string indicating
+#'   mixed units.
+#'
+#' @details The function uses `pull_uniques` to extract unique values from
+#'   the `y_axis_name` column. If a single unique value is found, it formats
+#'   it with line breaks via `add_line_breaks`. If multiple unique values are
+#'   found, the function combines them with commas and "and" before the last unit.
+#'
 #' @examples
-#' \dontrun{
-#' get_yaxis_title(data_full = my_data)
-#' }
-#' @export
+#' # If there is a single y-axis title
+#' get_yaxis_title(data_full = data_frame(y_axis_name = c("Units")))
+#'
+#' # If there are multiple y-axis titles
+#' get_yaxis_title(data_full = data_frame(y_axis_name = c("Units", "Indicator")))
+#'
 get_yaxis_title <- function(data_full) {
   y_axis_title <- data_full |>
     pull_uniques("y_axis_name")
 
-  # If more than one y-axis title then give generic
+  # If more than one y-axis title then combine
   if (length(y_axis_title) == 1) {
-    y_axis_title
+    add_line_breaks(y_axis_title)
   } else {
-    paste(
+    mixed_title <- paste(
       "Mixed units:\n",
       paste(
         paste(y_axis_title[-length(y_axis_title)], collapse = ",\n"),
@@ -24,6 +42,44 @@ get_yaxis_title <- function(data_full) {
         sep = " and\n"
       )
     )
+  }
+}
+
+
+#' Get X-Axis Title for Plot
+#'
+#' This function retrieves the title for the X-axis based on the `Year_Type`
+#' column of the provided dataset. If there is only one unique value for
+#' `Year_Type`, the title will be formatted with line breaks. If there are
+#' multiple unique values, a generic "Plain Years" label is used.
+#'
+#' @param data_full A data frame containing the `Year_Type` column, which will
+#'   be used to determine the X-axis title.
+#'
+#' @return A character string representing the X-axis title. This can either
+#'   be the value of `Year_Type` formatted with line breaks or the string
+#'   "Plain Years" if there are multiple unique values.
+#'
+#' @details The function uses `pull_uniques` to extract unique values from
+#'   the `Year_Type` column. If a single unique value is found, it formats
+#'   it with line breaks via `add_line_breaks`. If multiple unique values
+#'   are found, the title will be "Plain Years".
+#'
+#' @examples
+#' # If there is a single year type
+#' get_xaxis_title(data_full = data_frame(Year_Type = c("Fiscal", "Fiscal", "Fiscal")))
+#'
+#' # If there are multiple year types
+#' get_xaxis_title(data_full = data_frame(Year_Type = c("Fiscal", "Calendar")))
+get_xaxis_title <- function(data_full) {
+  x_axis_title <- data_full |>
+    pull_uniques("Year_Type")
+
+  # If more than one y-axis title then give generic
+  if (length(x_axis_title) == 1) {
+    add_line_breaks(x_axis_title)
+  } else {
+    "Plain Years"
   }
 }
 
@@ -82,16 +138,32 @@ get_plot_title <- function(data_full) {
 #' The output is a named vector where the names correspond to the groups,
 #' and the values are the respective colors.
 #'
-create_plot_colours <- function(data_long) {
-  # Colours
+create_plot_colours <- function(data_long, focus_group = NULL) {
+  # Extract unique groups for plotting
   plot_groups <- data_long |>
     pull_uniques("LA and Regions")
 
-  plot_colours <- afcolours::af_colours(
-    type = "categorical",
-    n = length(plot_groups)
-  )
-  names(plot_colours) <- plot_groups
+  # Initialise plot colours
+  plot_colours <- c()
+
+  # Assign specific colour for focus group if provided & remove from plot groups
+  if (!is.null(focus_group) && focus_group %in% plot_groups) {
+    plot_colours[focus_group] <- get_la_focus_colour()
+    plot_groups <- setdiff(plot_groups, focus_group)
+  }
+
+  # Assign specific colour for "England" if present & remove from plot groups
+  if ("England" %in% plot_groups) {
+    plot_colours["England"] <- get_england_colour()
+    plot_groups <- setdiff(plot_groups, "England")
+  }
+
+  # Assign colours for remaining groups
+  remaining_colours <- get_clean_af_colours()[seq_along(plot_groups)]
+  names(remaining_colours) <- plot_groups
+
+  # Combine all colours
+  plot_colours <- c(plot_colours, remaining_colours)
 
   plot_colours
 }
@@ -165,7 +237,7 @@ create_focus_plot_sizes <- function(data_long, focus_group) {
   names(plot_sizes) <- plot_groups
 
   # Set focus line size
-  plot_sizes[focus_group] <- 1
+  plot_sizes[focus_group] <- 1.5
 
   plot_sizes
 }
@@ -248,7 +320,6 @@ pretty_y_gridlines <- function(data_long) {
 }
 
 
-
 #' Extract unique years from a dataset
 #'
 #' This function retrieves unique years from a long-form dataset, allowing
@@ -288,7 +359,6 @@ get_years <- function(data_long, type = "numeric") {
   data_ordered |>
     pull_uniques(year_column)
 }
-
 
 
 #' Format Axes for Plotting
@@ -382,9 +452,9 @@ set_plot_colours <- function(data_long,
                              colour_type = "colour",
                              focus_group = NULL) {
   if (colour_type == "colour") {
-    ggplot2::scale_colour_manual(values = create_plot_colours(data_long))
+    ggplot2::scale_colour_manual(values = create_plot_colours(data_long, focus_group))
   } else if (colour_type == "fill") {
-    ggplot2::scale_fill_manual(values = create_plot_colours(data_long))
+    ggplot2::scale_fill_manual(values = create_plot_colours(data_long, focus_group))
   } else if (colour_type == "focus") {
     list(
       ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group)),
@@ -422,11 +492,12 @@ set_plot_colours <- function(data_long,
 #'   geom_line()
 #'
 set_plot_labs <- function(filtered_bds) {
+  x_title <- get_xaxis_title(filtered_bds)
   y_title <- get_yaxis_title(filtered_bds)
   plot_title <- get_plot_title(filtered_bds)
 
   ggplot2::labs(
-    x = "",
+    x = x_title,
     y = y_title,
     title = plot_title
   )
@@ -461,9 +532,17 @@ custom_theme <- function() {
         hjust = 0.5,
         width = unit(0.9, "npc"),
         halign = 0.5,
-        margin = margin(b = unit(15, "lines"))
+        margin = margin(b = unit(10, "lines"))
       ),
-      axis.title.y = element_text(angle = 0, vjust = 0.5),
+      axis.title.x = element_text(
+        hjust = 0.5,
+        margin = margin(t = 15, r = 0, b = 0, l = 0)
+      ),
+      axis.title.y = element_text(
+        angle = 0,
+        vjust = 0.5,
+        margin = margin(t = 0, r = 10, b = 0, l = 0)
+      ),
       legend.position = "bottom",
       legend.title = element_blank(),
       panel.grid = element_line(colour = "#D9D9D9"),
@@ -494,6 +573,7 @@ generate_year_text <- function(data, years_num) {
       get_years(type = 'character')}"
   )
 }
+
 
 #' Generate tooltip text when including measures
 #'
@@ -527,51 +607,127 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
     paste(collapse = "\n\n")
 }
 
-#' Generate tooltip text when not including measures
+
+#' Generate Tooltip Text with Conditional Formatting
 #'
-#' This function generates a tooltip text string that lists LA and region
-#' values without including measures.
+#' This function generates formatted tooltip text for a given dataset, including
+#' optional styling for a specified geography (focus group), with special styling
+#' for "England". The tooltip can be customized to display values and other details
+#' for each geographical region in the dataset.
 #'
-#' @param data A data frame containing the values.
-#' @param years_num A numeric value representing the year for filtering.
-#' @param indicator_dp A numeric value for decimal places to format the values.
+#' @param data A data frame containing the dataset with values to be displayed
+#'   in the tooltip.
+#' @param years_num Numeric. The year to filter the data by.
+#' @param indicator_dp Numeric. The number of decimal places for formatting the
+#'   values.
+#' @param highlight_geography Character or NULL. The geography to be highlighted
+#'   in the tooltip. If NULL, no specific geography is highlighted.
+#' @param focus_colour Character. The colour to use for highlighting the specified
+#'   geography (highlight_geography). Defaults to a color retrieved by
+#'   `get_la_focus_colour()`.
 #'
-#' @return A formatted string containing LA and region values.
-#' @export
-tooltip_text <- function(data, years_num, indicator_dp) {
-  paste0(
-    glue::glue_data(
-      data |>
-        pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-        dplyr::filter(Years_num == years_num) |>
-        dplyr::arrange(dplyr::desc(values_num)),
-      "{`LA and Regions`}: {values_num}"
-    ),
-    collapse = "\n"
-  )
+#' @return A character string representing the formatted tooltip text for each
+#'   region. Includes the value for each region, with conditional styling for
+#'   "England" and the specified highlight geography.
+#'
+#' @details The function formats the tooltip for each region, and applies bold
+#'   styling and colours for the specified `highlight_geography` and "England".
+#'   The tooltip text includes the region name and the corresponding value, with
+#'   specific styling applied based on the geography.
+#'
+#' @examples
+#' # Generate tooltip text for a dataset with focus on "Barnet" and bold red for "England"
+#' tooltip_text(
+#'   data = my_data, years_num = 2022, indicator_dp = 2,
+#'   highlight_geography = "Barnet", focus_colour = "red"
+#' )
+#'
+#' # Generate tooltip text without any highlighted geography
+#' tooltip_text(data = my_data, years_num = 2022, indicator_dp = 2)
+#'
+tooltip_text <- function(data,
+                         years_num,
+                         indicator_dp,
+                         highlight_geography = NULL,
+                         focus_colour) {
+  data_clean <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+    dplyr::filter(Years_num == years_num) |>
+    dplyr::arrange(dplyr::desc(values_num))
+
+  # Create formatted tooltip text
+  tooltip_lines <- sapply(seq_len(nrow(data_clean)), function(i) {
+    row <- data_clean[i, ]
+    geography <- row$`LA and Regions`
+    value <- row$values_num
+
+    # Apply styling for highlighted geography
+    if (!is.null(highlight_geography) && geography == highlight_geography) {
+      paste0(
+        "<span style='color:", focus_colour, "; font-weight: bold;'>",
+        geography, ": ", value, "</span>"
+      )
+      # Apply specific styling for "England" if present
+    } else if (geography == "England") {
+      paste0(
+        "<span style='color:", get_england_colour(), "; font-weight: bold;'>",
+        geography, ": ", value, "</span>"
+      )
+    } else {
+      paste0(geography, ": ", value)
+    }
+  })
+
+  paste(tooltip_lines, collapse = "\n")
 }
 
-#' Generate interactive vertical line with tooltip
+
+#' Add an Interactive Vertical Line with Tooltips
 #'
-#' This function creates a vertical line on a plot with an interactive
-#' tooltip that shows year information and related values, optionally
-#' including measures.
+#' Creates an interactive vertical line at a specified `x` position in the plot,
+#' with tooltip content that includes the year and optionally the measure value.
+#' The line can highlight a specified focus group with a custom color.
 #'
-#' @param x A numeric value representing the x-intercept for the vertical line.
-#' @param data A data frame containing the relevant data for tooltips.
-#' @param indicator_dp A numeric value for decimal places to format the values.
-#' @param include_measure A logical value indicating whether to include
-#' measures in the tooltip.
+#' @param x Numeric. The x-coordinate for the vertical line, e.g., a specific year.
+#' @param data Data frame. The dataset used for plotting, containing columns
+#'   relevant for generating tooltip content.
+#' @param indicator_dp Integer, default = 1. Number of decimal places to display
+#'   in tooltip values.
+#' @param focus_group Character, optional. Name of the group to highlight in the
+#'   tooltip, if present in the data.
+#' @param focus_colour Character, default = `get_la_focus_colour()`. The color
+#'   to apply to `focus_group` if it appears in tooltips.
+#' @param include_measure Logical, default = FALSE. If TRUE, adds the measure
+#'   value to the tooltip text.
 #'
-#' @return A `geom_vline_interactive` object for use in a plot.
+#' @details Applies conditional styling to highlight `focus_group` using
+#'   `focus_colour` if specified. The tooltip displays the year and group value,
+#'   optionally including the measure name. If no matching data is found for `x`,
+#'   the function gracefully handles missing information.
+#'
+#' @return A `geom_vline_interactive` object, with custom tooltips and
+#'   interactive hover effects.
 #' @export
-tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
+#'
+#' @examples
+#' tooltip_vlines(
+#'   x = 2021, data = my_data, indicator_dp = 1,
+#'   focus_group = "England", focus_colour = "blue",
+#'   include_measure = TRUE
+#' )
+#'
+tooltip_vlines <- function(x,
+                           data,
+                           indicator_dp = 1,
+                           focus_group = NULL,
+                           focus_colour = get_la_focus_colour(),
+                           include_measure = FALSE) {
   year_text <- generate_year_text(data, x)
 
   tooltip_content <- if (include_measure) {
     tooltip_text_w_indicator(data, x, indicator_dp)
   } else {
-    tooltip_text(data, x, indicator_dp)
+    tooltip_text(data, x, indicator_dp, focus_group, focus_colour)
   }
 
   geom_vline_interactive(
@@ -583,6 +739,100 @@ tooltip_vlines <- function(x, data, indicator_dp = 1, include_measure = FALSE) {
     size = 2.5,
     color = "transparent"
   )
+}
+
+
+#' Generate Custom Tooltip Text for Bar Chart with Conditional Formatting
+#'
+#' This function generates tooltip text for each row of data to display in
+#' an interactive bar chart, with conditional color formatting for specific
+#' geographic groups such as "England" or a specified `focus_group`.
+#'
+#' @param data Data frame. The dataset used for plotting, containing columns
+#'   relevant for tooltip content such as `LA and Regions`, `values_num`, and
+#'   `Years`.
+#' @param indicator_dps Integer. Number of decimal places to display in
+#'   the `values_num` column.
+#' @param focus_group Character, optional. Name of a specific group to highlight
+#'   in the tooltip if present.
+#' @param text_colour Character, default = `get_la_focus_colour()`. Color to
+#'   apply to `focus_group` if it appears in tooltips.
+#' @param include_measure Logical, default = FALSE. If TRUE, includes the
+#'   measure name in the tooltip if the `Measure` column exists in `data`.
+#'
+#' @details This function processes each row of data to create tooltip text.
+#'   The tooltip text includes the year and values, with optional inclusion
+#'   of the measure name. Conditional styling is applied to `focus_group`
+#'   and the "England" group, using the provided color or `get_england_colour()`
+#'   for "England". The `indicator_dps` parameter controls the decimal precision
+#'   of `values_num` in the tooltip.
+#'
+#' @return A character vector of tooltip text for each row in `data`.
+#' @export
+#'
+#' @examples
+#' tooltip_bar(
+#'   data = my_data, indicator_dps = 1, focus_group = "England",
+#'   text_colour = "blue", include_measure = TRUE
+#' )
+#'
+tooltip_bar <- function(data,
+                        indicator_dps,
+                        focus_group = NULL,
+                        text_colour = get_la_focus_colour(),
+                        include_measure = FALSE) {
+  # Prepare data with specified decimal points
+  data_clean <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dps)
+
+  # Generate tooltip text for each row of data
+  sapply(seq_len(nrow(data_clean)), function(i) {
+    row <- data_clean[i, ]
+    geography <- row$`LA and Regions`
+    value <- row$values_num
+    year <- row$Years
+    measure_text <- ""
+
+    # Conditionally add Measure to the tooltip if include_measure is TRUE
+    if (include_measure && "Measure" %in% names(row)) {
+      measure_text <- paste0("Measure: ", row$Measure, "\n")
+    }
+
+    # Create formatted tooltip text with colour formatting for "England" and focus_group
+    tooltip_text <- paste0(
+      measure_text,
+      "Year: ",
+      year,
+      "\n\n",
+      ifelse(
+        geography == "England",
+        paste0(
+          "<span style='color:",
+          get_england_colour(),
+          "; font-weight: bold;'>",
+          geography,
+          ": ",
+          value,
+          "</span>"
+        ),
+        ifelse(
+          !is.null(focus_group) && geography == focus_group,
+          paste0(
+            "<span style='color:",
+            text_colour,
+            "; font-weight: bold;'>",
+            geography,
+            ": ",
+            value,
+            "</span>"
+          ),
+          paste0(geography, ": ", value)
+        )
+      )
+    )
+
+    tooltip_text
+  })
 }
 
 
@@ -738,12 +988,41 @@ manual_colour_mapping <- function(chart_groups, type) {
   }
 }
 
+
+#' Display a "No Data" Plot with Custom Message
+#'
+#' This function generates a placeholder plot displaying a custom message when
+#' no data is available for plotting. The message is centered within a blank
+#' plot to inform the user that data is missing, with a prompt to report any
+#' discrepancies.
+#'
+#' @param label Character. A custom message to display on the plot. Defaults to
+#'   "No plot due to no available data." Additional instructions are included
+#'   in the message to prompt user feedback if they believe data should be
+#'   present.
+#'
+#' @details The function creates an empty plot using `ggplot2`, removing any
+#'   axis lines, gridlines, or other plot elements to focus solely on the
+#'   message text. The plot includes padding for better readability and centers
+#'   the text both horizontally and vertically.
+#'
+#' @return A ggplot object with the custom "no data" message displayed.
+#' @export
+#'
+#' @examples
+#' # Display a plot with the default "no data" message
+#' display_no_data_plot()
+#'
+#' # Display a plot with a custom message
+#' display_no_data_plot(label = "No data available for this indicator.")
+#'
 display_no_data_plot <- function(label = "No plot due to no available data.") {
   error_plot <- ggplot() +
     annotate(
       "text",
       x = 0.5,
-      y = 0.5, # Position at the center of the plot
+      y = 0.5,
+      # Position at the center of the plot
       label = paste0(
         label,
         "\n",
@@ -760,4 +1039,70 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
     coord_cartesian(clip = "off")
 
   error_plot
+}
+
+
+#' Identify Data Points Surrounded by NAs
+#'
+#' Adds a `show_point` column to indicate if a data point in `values_num` is
+#' surrounded by `NA` values or is the first/last point in a group where the
+#' adjacent point is `NA`. Groups are based on `LA and Regions`.
+#'
+#' @param data A dataframe containing `values_num` and `LA and Regions` columns.
+#'
+#' @return A dataframe with an additional logical column `show_point`, set to
+#' `TRUE` if the point meets conditions to be highlighted, `FALSE` otherwise.
+#'
+#' @details The `show_point` column is `TRUE` if the `values_num` entry is:
+#' - Surrounded by `NA` values on both sides.
+#' - The first or last non-NA value within its group with an adjacent `NA`.
+#'
+#' @examples
+#' df <- create_show_point(data)
+#'
+#' @export
+create_show_point <- function(data) {
+  data |>
+    dplyr::group_by(`LA and Regions`) |>
+    dplyr::mutate(
+      show_point = dplyr::if_else(
+        (is.na(dplyr::lag(values_num)) & is.na(dplyr::lead(values_num))) |
+          (dplyr::row_number() == 1 & is.na(dplyr::lead(values_num))) |
+          (dplyr::row_number() == dplyr::n() & is.na(dplyr::lag(values_num))),
+        TRUE,
+        FALSE
+      )
+    ) |>
+    dplyr::ungroup()
+}
+
+
+#' Calculate padded range for a specified variable
+#'
+#' This function calculates the minimum and maximum values of a specified
+#' variable in the data, and then adds padding to the range for use in plotting.
+#' It is useful when adjusting axis limits for visual clarity in plots.
+#'
+#' @param data A data frame containing the variable to be analyzed.
+#' @param var The variable for which the range is calculated. Should be
+#'   specified in the form of an unquoted variable name (e.g., `var = x`).
+#' @param padding A numeric value specifying the amount of padding to be added
+#'   to the min and max values. Default is 0.2.
+#'
+#' @return A numeric vector of length 2, representing the padded range
+#'   of the specified variable.
+#' @examples
+#' # Example usage:
+#' thin_bar(my_data, var = my_var, padding = 0.5)
+#' @export
+thin_bar <- function(data, var, padding = 0.2) {
+  # Pull the variable data
+  var_data <- dplyr::pull(data, {{ var }})
+
+  # Calculate min and max values
+  x_min <- min(var_data, na.rm = TRUE)
+  x_max <- max(var_data, na.rm = TRUE)
+
+  # Return the range with padding as a two-element vector
+  c(x_min - padding, x_max + padding)
 }

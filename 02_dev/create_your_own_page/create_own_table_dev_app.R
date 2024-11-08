@@ -234,7 +234,7 @@ server <- function(input, output, session) {
   years_choices <- reactive({
     # Get distinct years
     years_dict <- bds_metrics |>
-      dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
+      dplyr::filter(Measure %in% input$indicator) |>
       dplyr::distinct(Years, Years_num)
 
     # Boolean for matching years' suffixes
@@ -435,8 +435,7 @@ server <- function(input, output, session) {
         )
       ) |>
       dplyr::filter(
-        `LA and Regions` %in% geog_inputs(),
-        !is.na(Years)
+        `LA and Regions` %in% geog_inputs()
       )
 
     # Cleaning Years
@@ -791,8 +790,7 @@ server <- function(input, output, session) {
     # Boolean for if the output indicators share suffixes
     share_year_suffix <- bds_metrics |>
       dplyr::filter(
-        Measure %in% output_indicators,
-        !is.na(Years)
+        Measure %in% output_indicators
       ) |>
       check_year_suffix_consistency()
 
@@ -801,8 +799,7 @@ server <- function(input, output, session) {
       # Get the years with suffixes
       years_dict <- bds_metrics |>
         dplyr::filter(
-          Measure %in% output_indicators,
-          !is.na(Years)
+          Measure %in% output_indicators
         ) |>
         dplyr::distinct(Years, Years_num)
 
@@ -936,12 +933,6 @@ server <- function(input, output, session) {
       number_of_geogs() <= 4
     )
 
-    # Count year cols - used to determine if to show geom_point
-    # (If only one year then no line will show so point needed)
-    num_year_cols <- chart_plotting_data() |>
-      dplyr::distinct(Years) |>
-      nrow()
-
     # Plot data - colour represents Geographies & linetype represents Indicator
     chart_plotting_data() |>
       ggplot2::ggplot() +
@@ -953,18 +944,19 @@ server <- function(input, output, session) {
           linetype = Measure,
           data_id = `LA and Regions`
         ),
-        na.rm = TRUE
+        na.rm = TRUE,
+        linewidth = 1
       ) +
+      # Only show point data where line won't appear (NAs)
       ggplot2::geom_point(
+        data = subset(create_show_point(chart_plotting_data()), show_point),
         ggplot2::aes(
           x = Years_num,
           y = values_num,
           color = `LA and Regions`
         ),
-        na.rm = TRUE,
-        # Show points if only one year data selected
-        size = ifelse(num_year_cols == 1, 3, 0),
-        shape = 16
+        shape = 15,
+        na.rm = TRUE
       ) +
       format_axes(chart_plotting_data()) +
       set_plot_colours(chart_plotting_data()) +
@@ -1005,7 +997,7 @@ server <- function(input, output, session) {
       tooltip_vlines,
       chart_plotting_data(),
       get_indicator_dps(final_filtered_bds()),
-      TRUE
+      include_measure = TRUE
     )
 
     # Plotting interactive graph
@@ -1130,13 +1122,10 @@ server <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            chart_plotting_data() |>
-              pretty_num_table(
-                include_columns = "values_num",
-                dp = get_indicator_dps(final_filtered_bds())
-              ),
-            "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
+          tooltip = tooltip_bar(
+            chart_plotting_data(),
+            get_indicator_dps(final_filtered_bds()),
+            include_measure = TRUE
           )
         ),
         position = position_dodge(width = 0.6),
