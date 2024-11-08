@@ -12,7 +12,7 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality" # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
+selected_indicator <- "Children killed or seriously injured in road traffic accidents" # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
 selected_la <- "Barnet" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA
@@ -273,17 +273,17 @@ dfe_reactable(
 # LA line chart plot ----------------------------------------------------------
 # Plot
 la_line_chart <- la_long |>
-  # Filter out NAs to stop warning
-  # "Failed setting attribute 'data-id', mismatched lengths of ids and values"
-  # dplyr::filter(!is.na(values_num)) |>
   ggplot2::ggplot() +
-  ggiraph::geom_point_interactive(
+  # Only show point data where line won't appear (NAs)
+  ggplot2::geom_point(
+    data = subset(create_show_point(la_long), show_point),
     ggplot2::aes(
       x = Years_num,
       y = values_num,
-      color = `LA and Regions`,
-      data_id = `LA and Regions`
+      color = `LA and Regions`
     ),
+    shape = 15,
+    size = 1,
     na.rm = TRUE
   ) +
   ggiraph::geom_line_interactive(

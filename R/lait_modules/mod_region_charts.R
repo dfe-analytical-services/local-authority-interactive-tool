@@ -244,6 +244,18 @@ Region_FocusLineChartServer <- function(id,
             ),
             na.rm = TRUE
           ) +
+          # Only show point data where line won't appear (NAs)
+          ggplot2::geom_point(
+            data = subset(create_show_point(chart_data()), show_point),
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`,
+              size = `LA and Regions`
+            ),
+            shape = 15,
+            na.rm = TRUE
+          ) +
           format_axes(chart_data()) +
           set_plot_colours(
             chart_data(),
@@ -799,6 +811,18 @@ Region_MultiLineChartServer <- function(id,
             ),
             na.rm = TRUE,
             linewidth = 1.5
+          ) +
+          # Only show point data where line won't appear (NAs)
+          ggplot2::geom_point(
+            data = subset(create_show_point(chart_data()), show_point),
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`
+            ),
+            shape = 15,
+            na.rm = TRUE,
+            size = 1.5
           ) +
           format_axes(chart_data()) +
           set_plot_colours(

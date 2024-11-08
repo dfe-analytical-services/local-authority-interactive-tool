@@ -351,16 +351,6 @@ server_dev <- function(input, output, session) {
     # Build plot
     la_line_chart <- la_long() |>
       ggplot2::ggplot() +
-      ggiraph::geom_point_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          shape = `LA and Regions`,
-          data_id = `LA and Regions`
-        ),
-        na.rm = TRUE
-      ) +
       ggiraph::geom_line_interactive(
         ggplot2::aes(
           x = Years_num,
@@ -370,6 +360,18 @@ server_dev <- function(input, output, session) {
         ),
         na.rm = TRUE,
         linewidth = 1
+      ) +
+      # Only show point data where line won't appear (NAs)
+      ggplot2::geom_point(
+        data = subset(create_show_point(la_long()), show_point),
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`
+        ),
+        shape = 15,
+        size = 1,
+        na.rm = TRUE
       ) +
       format_axes(la_long()) +
       set_plot_colours(la_long(), focus_group = input$la_input) +

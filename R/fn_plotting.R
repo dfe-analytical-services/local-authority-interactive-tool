@@ -1051,3 +1051,38 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
 
   error_plot
 }
+
+
+#' Identify Data Points Surrounded by NAs
+#'
+#' Adds a `show_point` column to indicate if a data point in `values_num` is
+#' surrounded by `NA` values or is the first/last point in a group where the
+#' adjacent point is `NA`. Groups are based on `LA and Regions`.
+#'
+#' @param data A dataframe containing `values_num` and `LA and Regions` columns.
+#'
+#' @return A dataframe with an additional logical column `show_point`, set to
+#' `TRUE` if the point meets conditions to be highlighted, `FALSE` otherwise.
+#'
+#' @details The `show_point` column is `TRUE` if the `values_num` entry is:
+#' - Surrounded by `NA` values on both sides.
+#' - The first or last non-NA value within its group with an adjacent `NA`.
+#'
+#' @examples
+#' df <- create_show_point(data)
+#'
+#' @export
+create_show_point <- function(data) {
+  data |>
+    dplyr::group_by(`LA and Regions`) |>
+    dplyr::mutate(
+      show_point = dplyr::if_else(
+        (is.na(dplyr::lag(values_num)) & is.na(dplyr::lead(values_num))) |
+          (dplyr::row_number() == 1 & is.na(dplyr::lead(values_num))) |
+          (dplyr::row_number() == dplyr::n() & is.na(dplyr::lag(values_num))),
+        TRUE,
+        FALSE
+      )
+    ) |>
+    dplyr::ungroup()
+}

@@ -102,6 +102,18 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           na.rm = TRUE,
           linewidth = 1
         ) +
+        # Only show point data where line won't appear (NAs)
+        ggplot2::geom_point(
+          data = subset(create_show_point(la_long()), show_point),
+          ggplot2::aes(
+            x = Years_num,
+            y = values_num,
+            color = `LA and Regions`
+          ),
+          shape = 15,
+          size = 1,
+          na.rm = TRUE
+        ) +
         format_axes(la_long()) +
         set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +

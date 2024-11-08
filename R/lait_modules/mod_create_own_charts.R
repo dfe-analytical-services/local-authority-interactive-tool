@@ -183,12 +183,6 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         chart_info$no_geogs() <= 4
       )
 
-      # Count year cols - used to determine if to show geom_point
-      # (If only one year then no line will show so point needed)
-      num_year_cols <- chart_info$data() |>
-        dplyr::distinct(Years) |>
-        nrow()
-
       # Plot data - colour represents Geographies & linetype represents Indicator
       chart_info$data() |>
         ggplot2::ggplot() +
@@ -203,16 +197,16 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
           na.rm = TRUE,
           linewidth = 1
         ) +
+        # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
+          data = subset(create_show_point(chart_info$data()), show_point),
           ggplot2::aes(
             x = Years_num,
             y = values_num,
             color = `LA and Regions`
           ),
-          na.rm = TRUE,
-          # Show points if only one year data selected
-          size = ifelse(num_year_cols == 1, 3, 0),
-          shape = 16
+          shape = 15,
+          na.rm = TRUE
         ) +
         format_axes(chart_info$data()) +
         set_plot_colours(chart_info$data()) +
