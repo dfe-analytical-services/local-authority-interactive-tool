@@ -634,7 +634,7 @@ trend_icon_renderer <- function(value) {
   if (is.na(trend_icon)) {
     NA
   } else {
-    shiny::icon(trend_icon)
+    shiny::icon(trend_icon, style = "font-size: xxx-large;")
   }
 }
 
@@ -664,13 +664,13 @@ trend_icon_renderer <- function(value) {
 #'
 get_trend_colour <- function(value, polarity) {
   if (is.na(polarity) || is.na(value) || polarity == "-") {
-    list(background = "white", color = "black")
+    list(color = "white")
   } else if ((polarity == "Low" && value < 0) ||
     (polarity == "High" && value > 0)) {
-    list(background = "#00703c", color = "white")
+    list(color = "#00703c")
   } else if ((polarity == "High" && value < 0) ||
     (polarity == "Low" && value > 0)) {
-    list(background = "#d4351c", color = "white")
+    list(color = "#d4351c")
   }
 }
 
