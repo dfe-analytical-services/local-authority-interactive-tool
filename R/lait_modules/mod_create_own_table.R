@@ -420,33 +420,46 @@ QueryDataServer <- function(id,
         # Appending the data of the new query to the output table
         # Adding new query ID to staging data
         # (so remove button also removes relevant data from output table)
+        query_output <- query$output
         staging_to_append <- staging_data()
         staging_to_append$.query_id <- new_q_id
         consistent_staging_final_yrs <- data.frame(
           Years = c(
-            colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
+            colnames(query_output)[grepl("^\\d{4}", colnames(query_output))],
             colnames(staging_to_append)[grepl("^\\d{4}", colnames(staging_to_append))]
           )
         ) |> check_year_suffix_consistency()
 
         # If not consistent suffixes then clean both dfs year cols
-        # Otherwise add the suffix years
-        if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
-          combined_data <- query$output |>
-            rename_columns_with_year() |>
-            dplyr::bind_rows(rename_columns_with_year(staging_to_append))
-        } else {
-          combined_data <- query$output |> dplyr::bind_rows(staging_to_append)
+        if (!consistent_staging_final_yrs && nrow(query_output) > 0) {
+          query_output <- rename_columns_with_year(query_output)
+          staging_to_append <- rename_columns_with_year(staging_to_append)
         }
 
-        # Identify new columns added in the second data frame
-        # Columns unique to each dataset can be detected based on the source_id value
-        new_columns <- setdiff(names(staging_to_append), names(query$output))
-        new_cols_exist <- intersect(names(combined_data), names(new_columns))
+        # Get all years across both dfs
+        all_year_columns <- union(
+          grep("^\\d{4}", names(query_output), value = TRUE),
+          grep("^\\d{4}", names(staging_to_append), value = TRUE)
+        )
 
-        # Replace NA with Inf only in these new columns
-        query$output <- combined_data |>
-          dplyr::mutate(across(all_of(new_cols_exist), ~ ifelse(is.na(.), NaN, .)))
+        # Add the new (missing) years onto the existing dfs with values as NaN
+        # This is so that they can be coded as "-" in the table
+        # Saved queries
+        if (nrow(query_output) > 0) {
+          for (col in setdiff(all_year_columns, names(query_output))) {
+            query_output[[col]] <- NaN
+          }
+        }
+
+        # New query
+        if (nrow(staging_to_append) > 0) {
+          for (col in setdiff(all_year_columns, names(staging_to_append))) {
+            staging_to_append[[col]] <- NaN
+          }
+        }
+
+        # Combine query tables for final table output
+        query$output <- rbind(query_output, staging_to_append)
       },
       ignoreInit = TRUE
     )
@@ -622,53 +635,9 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
         )
       }
 
-      # Extract distinct combinations of geographical and topic-based identifiers
-      query_keys <- query$output |> dplyr::distinct(`LA and Regions`, Topic, Measure)
-
-      # Identify year columns based on a naming convention
-      year_columns <- grep("^2", names(rename_columns_with_year(query$output)), value = TRUE)
-
-      # Prepare a comparison dataframe with metrics for the relevant geographical and topic combinations
-      true_full_query <- bds_metrics |>
-        dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure, Years, Years_num, values_num) |>
-        dplyr::semi_join(query_keys, by = c("LA and Regions", "Topic", "Measure")) |>
-        tidyr::pivot_wider(
-          id_cols = c("LA Number", "LA and Regions", "Region", "Topic", "Measure"),
-          names_from = Years_num,
-          values_from = values_num
-        )
-
-      # Create a mutable copy of the query output for modification
-      query_output_copy <- query$output
-
-      # Iterate over year columns and replace NA values in query output with NaN based on comparison data
-      # Ensure both query_output_copy and true_full_query are aligned by the keys
-      for (year_column in year_columns) {
-        # Perform a left join to align both dataframes based on the keys: LA and Regions, Topic, and Measure
-        aligned_data <- dplyr::left_join(
-          rename_columns_with_year(query_output_copy),
-          true_full_query,
-          by = c("LA and Regions", "Topic", "Measure"),
-          suffix = c(".query", ".compare") # Add suffixes to differentiate columns
-        )
-
-        # Perform the comparison only if the columns exist in both datasets
-        aligned_data[[paste0(year_column, ".query")]] <- mapply(
-          function(query_val, compare_val) {
-            if (is.na(query_val) && !is.na(compare_val)) {
-              return(NaN) # Replace NA in query with NaN if compare has a value
-            }
-            return(query_val) # Otherwise keep the original value
-          },
-          aligned_data[[paste0(year_column, ".query")]],
-          aligned_data[[paste0(year_column, ".compare")]]
-        )
-        # Replace the original column in query_output_copy with the updated column from aligned_data
-        query_output_copy[[grep(year_column, colnames(query_output_copy), value = TRUE)]] <- aligned_data[[paste0(year_column, ".query")]]
-      }
-
       # Remove columns that contain only NaN values
-      query_output_clean <- query_output_copy[, !sapply(query_output_copy, function(x) all(is.nan(x)))]
+      # (aka user removed query that was including these years so no need to display them now)
+      query_output_clean <- query$output[, !sapply(query$output, function(x) all(is.nan(x)))]
 
       # Logic to reset the year cols to have year suffixes if they match
       # (As they may have been cleaned from the code logic at end of the new query chunk)
