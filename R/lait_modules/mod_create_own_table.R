@@ -442,10 +442,11 @@ QueryDataServer <- function(id,
         # Identify new columns added in the second data frame
         # Columns unique to each dataset can be detected based on the source_id value
         new_columns <- setdiff(names(staging_to_append), names(query$output))
+        new_cols_exist <- intersect(names(combined_data), names(new_columns))
 
         # Replace NA with Inf only in these new columns
         query$output <- combined_data |>
-          dplyr::mutate(across(all_of(new_columns), ~ ifelse(is.na(.), NaN, .)))
+          dplyr::mutate(across(all_of(new_cols_exist), ~ ifelse(is.na(.), NaN, .)))
       },
       ignoreInit = TRUE
     )
@@ -641,19 +642,29 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
       query_output_copy <- query$output
 
       # Iterate over year columns and replace NA values in query output with NaN based on comparison data
+      # Ensure both query_output_copy and true_full_query are aligned by the keys
       for (year_column in year_columns) {
-        if (year_column %in% names(query_output_copy) && year_column %in% names(true_full_query)) {
-          query_output_copy[[year_column]] <- mapply(
-            function(query_val, compare_val) {
-              if (is.na(query_val) && !is.na(compare_val)) {
-                return(NaN)
-              }
-              return(query_val)
-            },
-            query_output_copy[[year_column]],
-            true_full_query[[year_column]]
-          )
-        }
+        # Perform a left join to align both dataframes based on the keys: LA and Regions, Topic, and Measure
+        aligned_data <- dplyr::left_join(
+          rename_columns_with_year(query_output_copy),
+          true_full_query,
+          by = c("LA and Regions", "Topic", "Measure"),
+          suffix = c(".query", ".compare") # Add suffixes to differentiate columns
+        )
+
+        # Perform the comparison only if the columns exist in both datasets
+        aligned_data[[paste0(year_column, ".query")]] <- mapply(
+          function(query_val, compare_val) {
+            if (is.na(query_val) && !is.na(compare_val)) {
+              return(NaN) # Replace NA in query with NaN if compare has a value
+            }
+            return(query_val) # Otherwise keep the original value
+          },
+          aligned_data[[paste0(year_column, ".query")]],
+          aligned_data[[paste0(year_column, ".compare")]]
+        )
+        # Replace the original column in query_output_copy with the updated column from aligned_data
+        query_output_copy[[grep(year_column, colnames(query_output_copy), value = TRUE)]] <- aligned_data[[paste0(year_column, ".query")]]
       }
 
       # Remove columns that contain only NaN values
@@ -685,9 +696,6 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
 
         colnames(query_output_clean) <- new_col_names
       }
-
-
-
 
       # Final query output table with ordered columns (SN parent if selected)
       # and sorted year columns
@@ -820,7 +828,7 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
           format_num_reactable_cols(
             create_own_data(),
             get_indicator_dps(create_own_bds()),
-            num_exclude = c("LA Number", "Measure")
+            num_exclude = c("LA Number", "Topic", "Measure")
           ),
           list(
             set_custom_default_col_widths(),
