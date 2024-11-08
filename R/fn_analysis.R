@@ -222,6 +222,13 @@ get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
 #' @return A data frame with an additional column for the calculated rank.
 #'
 calculate_rank <- function(filtered_data, indicator_polarity) {
+  # Check if filtered_data is empty and emit a warning
+  if (nrow(filtered_data) == 0) {
+    warning("The filtered data frame is empty; returning an empty result.")
+    return(filtered_data |> dplyr::mutate(rank = numeric(0)))
+  }
+
+  # Proceed with ranking if data is not empty
   filtered_data |>
     dplyr::mutate(
       rank = dplyr::case_when(
@@ -234,6 +241,7 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
       )
     )
 }
+
 
 
 #' Filter All LA Data Based on Local Authorities
