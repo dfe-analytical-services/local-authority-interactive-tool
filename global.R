@@ -116,7 +116,8 @@ metrics_raw <- readxl::read_xlsx(
 
 # Cleaning data ===============================================================
 # BDS
-# Convert values to numeric - suppress warnings?
+# Convert values to numeric - doing the most to stop a coerce to NA warning
+# Remove any rows where years are NA
 bds_clean <- bds |>
   dplyr::mutate(
     values_clean = dplyr::case_when(
@@ -126,7 +127,9 @@ bds_clean <- bds |>
       TRUE ~ Values
     ),
     values_num = as.numeric(values_clean)
-  )
+  ) |>
+  dplyr::filter(!is.na(Years))
+
 
 # Statistical neighbours
 # Clean dataframe - remove cols with all NA,

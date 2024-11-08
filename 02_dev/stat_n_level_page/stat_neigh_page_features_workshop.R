@@ -20,8 +20,7 @@ selected_la <- "Barnet"
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic == selected_topic,
-    Measure == selected_indicator,
-    !is.na(Years)
+    Measure == selected_indicator
   )
 
 # Decimal point setting

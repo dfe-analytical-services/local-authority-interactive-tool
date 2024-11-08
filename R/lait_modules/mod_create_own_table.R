@@ -49,8 +49,7 @@ StagingBDSServer <- function(id,
       # Filter by full geography inputs
       filtered_bds <- topic_indicator_bds() |>
         dplyr::filter(
-          `LA and Regions` %in% geog_groups(),
-          !is.na(Years)
+          `LA and Regions` %in% geog_groups()
         )
 
       # Cleaning Years
@@ -619,7 +618,6 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
       share_year_suffix <- bds_metrics |>
         dplyr::filter(
           Measure %in% output_indicators,
-          !is.na(Years)
         ) |>
         check_year_suffix_consistency()
 
@@ -628,8 +626,7 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
         # Get the years with suffixes
         years_dict <- bds_metrics |>
           dplyr::filter(
-            Measure %in% output_indicators,
-            !is.na(Years)
+            Measure %in% output_indicators
           ) |>
           dplyr::distinct(Years, Years_num)
 

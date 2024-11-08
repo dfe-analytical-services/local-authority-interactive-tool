@@ -152,8 +152,7 @@ server_dev <- function(input, output, session) {
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
         Topic == input$topic_input,
-        Measure == input$indicator,
-        !is.na(Years)
+        Measure == input$indicator
       )
   })
 

@@ -327,8 +327,7 @@ filter_region_data_all_la <- function(data, la_names) {
 filter_bds_for_indicators <- function(bds_data, selected_indicators) {
   bds_data |>
     dplyr::filter(
-      Measure %in% selected_indicators,
-      !is.na(Years)
+      Measure %in% selected_indicators
     )
 }
 

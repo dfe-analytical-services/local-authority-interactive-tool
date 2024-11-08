@@ -234,7 +234,7 @@ server <- function(input, output, session) {
   years_choices <- reactive({
     # Get distinct years
     years_dict <- bds_metrics |>
-      dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
+      dplyr::filter(Measure %in% input$indicator) |>
       dplyr::distinct(Years, Years_num)
 
     # Boolean for matching years' suffixes
@@ -435,8 +435,7 @@ server <- function(input, output, session) {
         )
       ) |>
       dplyr::filter(
-        `LA and Regions` %in% geog_inputs(),
-        !is.na(Years)
+        `LA and Regions` %in% geog_inputs()
       )
 
     # Cleaning Years
@@ -791,8 +790,7 @@ server <- function(input, output, session) {
     # Boolean for if the output indicators share suffixes
     share_year_suffix <- bds_metrics |>
       dplyr::filter(
-        Measure %in% output_indicators,
-        !is.na(Years)
+        Measure %in% output_indicators
       ) |>
       check_year_suffix_consistency()
 
@@ -801,8 +799,7 @@ server <- function(input, output, session) {
       # Get the years with suffixes
       years_dict <- bds_metrics |>
         dplyr::filter(
-          Measure %in% output_indicators,
-          !is.na(Years)
+          Measure %in% output_indicators
         ) |>
         dplyr::distinct(Years, Years_num)
 
