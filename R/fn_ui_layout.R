@@ -45,7 +45,21 @@ create_download_options_ui <- function(download_id, copy_clipboard_id) {
 }
 
 
-
+#' Create a Hidden Clipboard Plot
+#'
+#' This function generates a hidden static plot element that can be used
+#' for copying the plot to the clipboard. The plot is rendered but not
+#' visible in the UI, using the `content-visibility: hidden` CSS property.
+#'
+#' @param clipboard_plot_id A unique identifier for the plot output to be
+#'                           rendered.
+#' @return A `div` containing a hidden `plotOutput` element with the
+#'         specified ID.
+#' @details The plot is intended for copying to the clipboard, without
+#'          being displayed to the user directly on the screen. It can
+#'          be used in conjunction with functionality that allows users
+#'          to copy or export plots.
+#'
 create_hidden_clipboard_plot <- function(clipboard_plot_id) {
   # Hidden static plot for copy-to-clipboard
   div(
