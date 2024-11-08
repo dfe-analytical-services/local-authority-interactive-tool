@@ -18,6 +18,7 @@ ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
   tags$head(htmltools::includeScript("www/custom_js.js")),
+  shinyToastify::useShinyToastify(),
 
   # Tab header ================================================================
   h1("Local Authority View"),
@@ -102,6 +103,45 @@ server_mod <- function(input, output, session) {
     app_inputs$indicator,
     metrics_clean
   )
+
+
+  observeEvent(input[["success"]], {
+    shinyToastify::showToast(
+      session,
+      input,
+      text = tags$span(
+        style = "color: white; font-size: 20px;", "Image copied!"
+      ),
+      type = "success",
+      position = "top-center",
+      autoClose = 3000,
+      pauseOnFocusLoss = FALSE,
+      draggable = FALSE,
+      style = list(
+        border = "4px solid crimson",
+        boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+      )
+    )
+  })
+
+  observeEvent(input[["failure"]], {
+    shinyToastify::showToast(
+      session,
+      input,
+      text = tags$span(
+        style = "color: white; font-size: 20px;", "Failed to copy image!"
+      ),
+      type = "error",
+      position = "top-center",
+      autoClose = 3000,
+      pauseOnFocusLoss = FALSE,
+      draggable = FALSE,
+      style = list(
+        border = "4px solid crimson",
+        boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+      )
+    )
+  })
 }
 
 

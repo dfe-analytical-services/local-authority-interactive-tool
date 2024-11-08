@@ -1999,6 +1999,20 @@
       ],
       "Hash": "a593ce187f4a7830392e0843041e3ea8"
     },
+    "shinyToastify": {
+      "Package": "shinyToastify",
+      "Version": "2.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "fontawesome",
+        "htmltools",
+        "reactR",
+        "shiny",
+        "utils"
+      ],
+      "Hash": "e27e07344a206a2a033994b0fe4412f8"
+    },
     "shinyWidgets": {
       "Package": "shinyWidgets",
       "Version": "0.8.6",
