@@ -377,8 +377,6 @@ clean_ldn_region <- function(region, filtered_bds) {
   }
 }
 
-"#801650"
-"#A285D1"
 
 #' Retrieve AF Colours Without Warning Message
 #'

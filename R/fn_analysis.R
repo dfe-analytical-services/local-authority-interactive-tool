@@ -243,7 +243,6 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
 }
 
 
-
 #' Filter All LA Data Based on Local Authorities
 #'
 #' This function filters the All LA data to retain only the rows where the
