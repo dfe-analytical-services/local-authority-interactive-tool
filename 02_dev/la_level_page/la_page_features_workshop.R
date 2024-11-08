@@ -12,7 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Children killed or seriously injured in road traffic accidents" # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
+selected_indicator <- "Children killed or seriously injured in road traffic accidents"
+# "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
 selected_la <- "Barnet" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA

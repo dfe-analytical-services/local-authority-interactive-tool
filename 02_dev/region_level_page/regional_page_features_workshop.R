@@ -71,19 +71,6 @@ current_year <- region_la_long |>
   dplyr::filter(Years_num == max(Years_num)) |>
   pull_uniques("Years")
 
-# order <- region_la_long |>
-#   dplyr::bind_rows(region_la_diff) |>
-#   tidyr::pivot_wider(
-#     id_cols = c("LA Number", "LA and Regions"),
-#     names_from = Years,
-#     values_from = values_num
-#   ) |>
-#   pretty_num_table(
-#     dp = indicator_dps,
-#     exclude_columns = "LA Number"
-#   ) |>
-#   unique()
-
 # Join difference and pivot wider to recreate Regional LA table
 region_la_table <- region_la_long |>
   dplyr::bind_rows(region_la_diff) |>

@@ -310,8 +310,7 @@ format_num_reactable_cols <- function(data,
                                       categorical = NULL) {
   formatted_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
-    if (is_numeric_or_na(col_data) &&
-      (col %notin% c(num_exclude, categorical))) {
+    if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
       # Format numeric columns
       format_reactable_num_col(col, indicator_dps)
     } else if (col %in% categorical) {
@@ -664,14 +663,23 @@ trend_icon_renderer <- function(value) {
 #'
 get_trend_colour <- function(value, polarity) {
   if (is.na(polarity) || is.na(value) || polarity == "-") {
-    list(color = "white")
-  } else if ((polarity == "Low" && value < 0) ||
-    (polarity == "High" && value > 0)) {
-    list(color = "#00703c")
-  } else if ((polarity == "High" && value < 0) ||
-    (polarity == "Low" && value > 0)) {
-    list(color = "#d4351c")
+    return(list(color = "black"))
   }
+
+  # Define the logic for low and high polarity
+  low_colour <- "#d4351c"
+  high_colour <- "#00703c"
+
+  # Check conditions for trend colour
+  trend_colour <- ifelse(polarity == "Low",
+    ifelse(value < 0, high_colour, low_colour),
+    ifelse(polarity == "High",
+      ifelse(value > 0, high_colour, low_colour),
+      "black"
+    )
+  )
+
+  return(list(color = trend_colour))
 }
 
 

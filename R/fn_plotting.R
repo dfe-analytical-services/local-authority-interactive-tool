@@ -159,7 +159,7 @@ create_plot_colours <- function(data_long, focus_group = NULL) {
   }
 
   # Assign colours for remaining groups
-  remaining_colours <- get_clean_af_colours()[1:length(plot_groups)]
+  remaining_colours <- get_clean_af_colours()[seq_along(plot_groups)]
   names(remaining_colours) <- plot_groups
 
   # Combine all colours
@@ -656,33 +656,22 @@ tooltip_text <- function(data,
     dplyr::arrange(dplyr::desc(values_num))
 
   # Create formatted tooltip text
-  tooltip_lines <- sapply(1:nrow(data_clean), function(i) {
+  tooltip_lines <- sapply(seq_len(nrow(data_clean)), function(i) {
     row <- data_clean[i, ]
     geography <- row$`LA and Regions`
     value <- row$values_num
 
     # Apply styling for highlighted geography
-    if (!is.null(highlight_geography) &&
-      geography == highlight_geography) {
+    if (!is.null(highlight_geography) && geography == highlight_geography) {
       paste0(
-        "<span style='color:",
-        focus_colour,
-        "; font-weight: bold;'>",
-        geography,
-        ": ",
-        value,
-        "</span>"
+        "<span style='color:", focus_colour, "; font-weight: bold;'>",
+        geography, ": ", value, "</span>"
       )
       # Apply specific styling for "England" if present
     } else if (geography == "England") {
       paste0(
-        "<span style='color:",
-        get_england_colour(),
-        "; font-weight: bold;'>",
-        geography,
-        ": ",
-        value,
-        "</span>"
+        "<span style='color:", get_england_colour(), "; font-weight: bold;'>",
+        geography, ": ", value, "</span>"
       )
     } else {
       paste0(geography, ": ", value)
@@ -797,7 +786,7 @@ tooltip_bar <- function(data,
     pretty_num_table(include_columns = "values_num", dp = indicator_dps)
 
   # Generate tooltip text for each row of data
-  sapply(1:nrow(data_clean), function(i) {
+  sapply(seq_len(nrow(data_clean)), function(i) {
     row <- data_clean[i, ]
     geography <- row$`LA and Regions`
     value <- row$values_num
