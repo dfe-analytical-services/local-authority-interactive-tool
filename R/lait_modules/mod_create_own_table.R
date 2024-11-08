@@ -427,12 +427,20 @@ QueryDataServer <- function(id,
         # If not consistent suffixes then clean both dfs year cols
         # Otherwise add the suffix years
         if (!consistent_staging_final_yrs && nrow(query$output) > 0) {
-          query$output <- query$output |>
+          combined_data <- query$output |>
             rename_columns_with_year() |>
             dplyr::bind_rows(rename_columns_with_year(staging_to_append))
         } else {
-          query$output <- query$output |> dplyr::bind_rows(staging_to_append)
+          combined_data <- query$output |> dplyr::bind_rows(staging_to_append)
         }
+
+        # Identify new columns added in the second data frame
+        # Columns unique to each dataset can be detected based on the source_id value
+        new_columns <- setdiff(names(staging_to_append), names(query$output))
+
+        # Replace NA with Inf only in these new columns
+        query$output <- combined_data |>
+          dplyr::mutate(across(all_of(new_columns), ~ ifelse(is.na(.), NaN, .)))
       },
       ignoreInit = TRUE
     )

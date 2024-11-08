@@ -1086,3 +1086,34 @@ create_show_point <- function(data) {
     ) |>
     dplyr::ungroup()
 }
+
+
+#' Calculate padded range for a specified variable
+#'
+#' This function calculates the minimum and maximum values of a specified
+#' variable in the data, and then adds padding to the range for use in plotting.
+#' It is useful when adjusting axis limits for visual clarity in plots.
+#'
+#' @param data A data frame containing the variable to be analyzed.
+#' @param var The variable for which the range is calculated. Should be
+#'   specified in the form of an unquoted variable name (e.g., `var = x`).
+#' @param padding A numeric value specifying the amount of padding to be added
+#'   to the min and max values. Default is 0.2.
+#'
+#' @return A numeric vector of length 2, representing the padded range
+#'   of the specified variable.
+#' @examples
+#' # Example usage:
+#' thin_bar(my_data, var = my_var, padding = 0.5)
+#' @export
+thin_bar <- function(data, var, padding = 0.2) {
+  # Pull the variable data
+  var_data <- dplyr::pull(data, {{ var }})
+
+  # Calculate min and max values
+  x_min <- min(var_data, na.rm = TRUE)
+  x_max <- max(var_data, na.rm = TRUE)
+
+  # Return the range with padding as a two-element vector
+  c(x_min - padding, x_max + padding)
+}

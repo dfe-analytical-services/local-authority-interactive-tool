@@ -217,7 +217,11 @@ format_reactable_num_col <- function(col, indicator_dps) {
     sortable = TRUE,
     sortNALast = TRUE,
     cell = function(value) {
-      dfeR::pretty_num(value, dp = indicator_dps)
+      ifelse(
+        is.nan(value),
+        "-",
+        dfeR::pretty_num(value, dp = indicator_dps)
+      )
     }
   )
 }

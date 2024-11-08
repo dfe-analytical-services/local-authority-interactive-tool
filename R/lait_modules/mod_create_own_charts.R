@@ -49,7 +49,6 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
       # Coerce final output table to long data (for plotting)
       # Recreate Years_num & values_num, also factor `LA and Regions` & Measure
       create_own_table() |>
-        dplyr::distinct() |>
         tidyr::pivot_longer(
           cols = dplyr::starts_with("20"),
           names_to = "Years",
@@ -60,7 +59,13 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
           values_num = Values,
           `LA and Regions` = factor(`LA and Regions`, levels = geog_chart_order),
           Measure = factor(Measure, levels = indicator_chart_order)
-        )
+        ) |>
+        # Replace NAs caused by combining datasets with actual value
+        dplyr::group_by(`LA and Regions`, Measure, Years_num) |>
+        tidyr::fill(c("Values", "values_num"), .direction = "downup", ) |>
+        dplyr::ungroup() |>
+        # Remove duplicates
+        dplyr::distinct(`LA and Regions`, Measure, Years_num, values_num, .keep_all = TRUE)
     })
 
     # Output number of selected indicators & geogs (for selection error messages)
@@ -442,6 +447,14 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         chart_names_wrapped$Measure
       )
 
+      # Set x axis limits if one bar so its not super wide
+      n_chart_rows <- nrow(chart_info$data()) == 1
+      thin_bar_xlim <- if (n_chart_rows) {
+        thin_bar(chart_info$data(), Years_num)
+      } else {
+        NULL
+      }
+
       # Plot chart - split by indicators, colours represent Geographies
       chart_info$data() |>
         ggplot2::ggplot() +
@@ -456,8 +469,8 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
               include_measure = TRUE
             )
           ),
-          position = position_dodge(width = 0.6),
-          width = 0.6,
+          position = "dodge",
+          width = ifelse(n_chart_rows, 0.1, 0.6),
           na.rm = TRUE,
           color = "black"
         ) +
@@ -482,7 +495,8 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         theme(
           panel.spacing.x = unit(15, "mm"),
           plot.margin = ggplot2::margin(r = 30)
-        )
+        ) +
+        ggplot2::coord_cartesian(xlim = thin_bar_xlim)
     })
 
     # Build interactive line chart
