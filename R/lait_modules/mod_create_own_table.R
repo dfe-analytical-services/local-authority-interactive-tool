@@ -29,6 +29,11 @@ StagingBDSServer <- function(id,
                              year_input,
                              bds_metrics) {
   moduleServer(id, function(input, output, session) {
+    # Forcing module to react to change in year input (not best practice)
+    observeEvent(year_input$range(), {
+      year_input$range()
+    })
+
     # Filter BDS for topic-indicator pairs in the selected_values reactive
     topic_indicator_bds <- reactive({
       req(nrow(create_inputs$selected_indicators()) > 0)
@@ -45,7 +50,7 @@ StagingBDSServer <- function(id,
     # Now filter BDS for geographies and year range
     # Split from above so if indicator doesn't change then don't recompute
     staging_bds <- reactive({
-      # req(geog_groups(), topic_indicator_bds())
+      req(geog_groups(), topic_indicator_bds())
       # Filter by full geography inputs
       filtered_bds <- topic_indicator_bds() |>
         dplyr::filter(
