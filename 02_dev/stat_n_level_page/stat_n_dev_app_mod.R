@@ -18,6 +18,7 @@ ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
   tags$head(htmltools::includeScript("www/custom_js.js")),
+  shinyToastify::useShinyToastify(),
 
   # Tab header ================================================================
   h1("Statistical Neighbour Level"),
@@ -117,6 +118,8 @@ server_mod <- function(input, output, session) {
     stat_n_la,
     shared_values
   )
+
+  CopyToClipboardPopUpServer("copy-to-clipboard")
 }
 
 

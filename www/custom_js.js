@@ -39,7 +39,7 @@ $(document).ready(function () {
 
   // Event listener for all copy buttons
   const namespaces = [
-    "stat_n_focus_line", "stat_n_multi_line", "copybtn_line", "copybtn_bar",
+    "copybtn_line", "copybtn_bar", // Create own table dev app ids
     "create_own_line", "create_own_bar", "la_line_chart", "la_bar_chart",
     "stat_n_focus_line", "stat_n_multi_line", "stat_n_focus_bar", "stat_n_multi_bar",
     "region_focus_line", "region_multi_line", "region_focus_bar", "region_multi_bar"
