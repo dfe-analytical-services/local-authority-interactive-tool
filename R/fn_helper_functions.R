@@ -292,6 +292,19 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output <- "No matching metadata"
   }
 
+  # Warning if any entry in metadata_output appears to be a 5-digit number
+  if (any(grepl("^\\d{5}$", metadata_output))) {
+    warning("Detected a 5-digit numeric entry in metadata_output,
+            which may represent a misformatted date (e.g., Excel numeric).")
+
+    # Convert 5-digit number to Date if it matches the Excel date format
+    metadata_output <- metadata_output |>
+      as.numeric() |>
+      as.Date(origin = "1899-12-30") |>
+      format("%B %Y") |>
+      as.character()
+  }
+
   metadata_output
 }
 
