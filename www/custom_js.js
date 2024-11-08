@@ -30,10 +30,10 @@ $(document).ready(function () {
           [blob.type]: blob
         })
       ]);
-      Shiny.setInputValue("success", true, {priority: "event"});
+      Shiny.setInputValue("copy-to-clipboard-success", true, {priority: "event"});
     } catch (err) {
       console.error(err.name, err.message);
-      Shiny.setInputValue("failure", true, {priority: "event"});
+      Shiny.setInputValue("copy-to-clipboard-failure", true, {priority: "event"});
     }
   }
 

@@ -25,8 +25,6 @@ ui <- function(input, output, session) {
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
-    tags$head(htmltools::includeScript("www/custom_js.js")),
-    reactable.extras::reactable_extras_dependency(),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),
     # Add meta description for search engines
@@ -55,6 +53,9 @@ ui <- function(input, output, session) {
     # Load javascript dependencies --------------------------------------------
     shinyWidgets::useShinydashboard(),
     shinyjs::useShinyjs(),
+    tags$head(htmltools::includeScript("www/custom_js.js")),
+    reactable.extras::reactable_extras_dependency(),
+    shinyToastify::useShinyToastify(),
 
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:

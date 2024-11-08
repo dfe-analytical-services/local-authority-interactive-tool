@@ -104,44 +104,8 @@ server_mod <- function(input, output, session) {
     metrics_clean
   )
 
-
-  observeEvent(input[["success"]], {
-    shinyToastify::showToast(
-      session,
-      input,
-      text = tags$span(
-        style = "color: white; font-size: 20px;", "Image copied!"
-      ),
-      type = "success",
-      position = "top-center",
-      autoClose = 3000,
-      pauseOnFocusLoss = FALSE,
-      draggable = FALSE,
-      style = list(
-        border = "4px solid crimson",
-        boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
-      )
-    )
-  })
-
-  observeEvent(input[["failure"]], {
-    shinyToastify::showToast(
-      session,
-      input,
-      text = tags$span(
-        style = "color: white; font-size: 20px;", "Failed to copy image!"
-      ),
-      type = "error",
-      position = "top-center",
-      autoClose = 3000,
-      pauseOnFocusLoss = FALSE,
-      draggable = FALSE,
-      style = list(
-        border = "4px solid crimson",
-        boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
-      )
-    )
-  })
+  # Copy-to-clipboard pop-up notification
+  CopyToClipboardPopUpServer("copy-to-clipboard")
 }
 
 

@@ -285,4 +285,60 @@ DownloadChartBtnServer <- function(id, parent_id, chart_type) {
   })
 }
 
+
+#' Handle success and failure events for copying charts to clipboard
+#'
+#' This module listens for success or failure events triggered during
+#' copying a chart to the clipboard. It then displays a toast message
+#' indicating whether the chart was copied successfully or if the copy
+#' operation failed.
+#'
+#' @param id A unique ID for the module server function. This is used to
+#' identify the module when calling it from the UI or server function.
+#'
+#' @return No return value. The function will display a toast message
+#' based on the outcome of the copy operation.
+#'
+CopyToClipboardPopUpServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(input[["success"]], {
+      shinyToastify::showToast(
+        session,
+        input,
+        text = tags$span(
+          style = "color: white; font-size: 20px;", "Chart copied!"
+        ),
+        type = "success",
+        position = "top-center",
+        autoClose = 1500,
+        pauseOnFocusLoss = FALSE,
+        draggable = FALSE,
+        style = list(
+          border = "2px solid black",
+          boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+        )
+      )
+    })
+
+    observeEvent(input[["failure"]], {
+      shinyToastify::showToast(
+        session,
+        input,
+        text = tags$span(
+          style = "color: white; font-size: 20px;", "Failed to copy chart!"
+        ),
+        type = "error",
+        position = "top-center",
+        autoClose = 1500,
+        pauseOnFocusLoss = FALSE,
+        draggable = FALSE,
+        style = list(
+          border = "2px solid black",
+          boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+        )
+      )
+    })
+  })
+}
+
 # nolint end
