@@ -65,7 +65,7 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
         tidyr::fill(c("Values", "values_num"), .direction = "downup", ) |>
         dplyr::ungroup() |>
         # Remove duplicates
-        dplyr::distinct(`LA and Regions`, Measure, Years_num, values_num, .keep_all = TRUE)
+        dplyr::distinct(`LA and Regions`, Topic, Measure, Years_num, values_num, .keep_all = TRUE)
     })
 
     # Output number of selected indicators & geogs (for selection error messages)

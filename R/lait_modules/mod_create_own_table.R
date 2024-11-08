@@ -621,47 +621,82 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
         )
       }
 
+      # Extract distinct combinations of geographical and topic-based identifiers
+      query_keys <- query$output |> dplyr::distinct(`LA and Regions`, Topic, Measure)
+
+      # Identify year columns based on a naming convention
+      year_columns <- grep("^2", names(rename_columns_with_year(query$output)), value = TRUE)
+
+      # Prepare a comparison dataframe with metrics for the relevant geographical and topic combinations
+      true_full_query <- bds_metrics |>
+        dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure, Years, Years_num, values_num) |>
+        dplyr::semi_join(query_keys, by = c("LA and Regions", "Topic", "Measure")) |>
+        tidyr::pivot_wider(
+          id_cols = c("LA Number", "LA and Regions", "Region", "Topic", "Measure"),
+          names_from = Years_num,
+          values_from = values_num
+        )
+
+      # Create a mutable copy of the query output for modification
+      query_output_copy <- query$output
+
+      # Iterate over year columns and replace NA values in query output with NaN based on comparison data
+      for (year_column in year_columns) {
+        if (year_column %in% names(query_output_copy) && year_column %in% names(true_full_query)) {
+          query_output_copy[[year_column]] <- mapply(
+            function(query_val, compare_val) {
+              if (is.na(query_val) && !is.na(compare_val)) {
+                return(NaN)
+              }
+              return(query_val)
+            },
+            query_output_copy[[year_column]],
+            true_full_query[[year_column]]
+          )
+        }
+      }
+
+      # Remove columns that contain only NaN values
+      query_output_clean <- query_output_copy[, !sapply(query_output_copy, function(x) all(is.nan(x)))]
+
       # Logic to reset the year cols to have year suffixes if they match
       # (As they may have been cleaned from the code logic at end of the new query chunk)
-      # Get output indicators
-      output_indicators <- query$output |>
-        pull_uniques("Measure")
-
-      # Boolean for if the output indicators share suffixes
+      # Determine if output indicators share year suffix consistency
+      output_indicators <- query_output_clean |> pull_uniques("Measure")
       share_year_suffix <- bds_metrics |>
-        dplyr::filter(
-          Measure %in% output_indicators,
-        ) |>
+        dplyr::filter(Measure %in% output_indicators) |>
         check_year_suffix_consistency()
 
-      # If suffixes are shared then reapply the years with suffix to col names
+      # Reapply year suffixes to columns if needed
       if (share_year_suffix) {
-        # Get the years with suffixes
         years_dict <- bds_metrics |>
-          dplyr::filter(
-            Measure %in% output_indicators
-          ) |>
+          dplyr::filter(Measure %in% output_indicators) |>
           dplyr::distinct(Years, Years_num)
 
-        # Replace the matching year col names with respective year suffix
-        new_col_names <- colnames(query$output) |>
-          (\(cols) ifelse(cols %in% years_dict$Years_num,
-            years_dict$Years[match(cols, years_dict$Years_num)],
-            cols
-          ))()
+        # Replace numeric year columns with the corresponding suffix
+        new_col_names <- colnames(query_output_clean) |>
+          vapply(function(col) {
+            if (col %in% years_dict$Years_num) {
+              return(years_dict$Years[match(col, years_dict$Years_num)])
+            } else {
+              return(col)
+            }
+          }, character(1))
 
-        # Apply the new year suffix names to query$output
-        colnames(query$output) <- new_col_names
+        colnames(query_output_clean) <- new_col_names
       }
+
+
+
 
       # Final query output table with ordered columns (SN parent if selected)
       # and sorted year columns
-      query$output |>
+      query_output_clean |>
         dplyr::select(
           `LA Number`, `LA and Regions`,
           Region, Topic, Measure,
           tidyselect::any_of("Statistical Neighbour Group"),
-          dplyr::all_of(sort_year_columns(query$output))
+          dplyr::all_of(sort_year_columns(query_output_clean))
         )
     })
 
