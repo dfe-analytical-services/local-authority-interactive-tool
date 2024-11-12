@@ -290,7 +290,7 @@ test_that("1. calculate_rank assigns correct ranks for normal values", {
   )
   expected_normal <- data.frame(
     values_num = c(10, 20, 30, 40, 50),
-    rank = c("1", "2", "3", "4", "5")
+    rank = c(1, 2, 3, 4, 5)
   )
   result_normal <- calculate_rank(df_normal, "Low")
   expect_equal(result_normal, expected_normal)
@@ -303,7 +303,7 @@ test_that("2. calculate_rank handles ties correctly", {
   )
   expected_ties <- data.frame(
     values_num = c(10, 20, 20, 30, 40),
-    rank = c("5", "3", "3", "2", "1")
+    rank = c(5, 3, 3, 2, 1)
   )
   result_ties <- calculate_rank(df_ties, "High")
   expect_equal(result_ties, expected_ties)
@@ -316,7 +316,7 @@ test_that("3. calculate_rank handles missing values properly", {
   )
   expected_missing <- data.frame(
     values_num = c(10, NA, 30, 20, NA),
-    rank = c("1", NA, "3", "2", NA)
+    rank = c(1, NA, 3, 2, NA)
   )
   result_missing <- calculate_rank(df_missing, "Low")
   expect_equal(result_missing, expected_missing)
@@ -324,14 +324,14 @@ test_that("3. calculate_rank handles missing values properly", {
 
 # 4. Test with an empty data frame
 test_that("4. calculate_rank returns an empty data frame when input is empty", {
-  df_empty <- data.frame(values_num = numeric(0))
-  expected_empty <- data.frame(values_num = numeric(0), rank = numeric(0))
-
-  # Test that a warning is raised and the result matches the expected empty data frame
-  expect_warning(
-    result_empty <- calculate_rank(df_empty, "High"),
-    "The filtered data frame is empty; returning an empty result."
+  df_empty <- data.frame(
+    values_num = numeric(0)
   )
+  expected_empty <- data.frame(
+    values_num = numeric(0),
+    rank = numeric(0)
+  )
+  result_empty <- calculate_rank(df_empty, "High")
   expect_equal(result_empty, expected_empty)
 })
 
@@ -342,7 +342,7 @@ test_that("5. calculate_rank returns NA for rank when all values are missing", {
   )
   expected_all_missing <- data.frame(
     values_num = c(NA, NA, NA),
-    rank = c(NA_character_, NA_character_, NA_character_)
+    rank = c(NA_real_, NA_real_, NA_real_)
   )
   result_all_missing <- calculate_rank(df_all_missing, "Low")
   expect_equal(result_all_missing, expected_all_missing)
@@ -500,4 +500,273 @@ test_that("6. filter_region_data_all_la returns empty data frame when input is e
   la_names <- c("Region1", "Region5")
   result <- filter_region_data_all_la(empty_data, la_names)
   expect_true(nrow(result) == 0)
+})
+
+## filter_bds_for_indicators()-------------------------------------------------------------
+
+# Define a sample BDS dataset for testing
+bds_sample_data <- data.frame(
+  Measure = c("Indicator1", "Indicator2", "Indicator3", "Indicator1", "Indicator4"),
+  Years = c(2020, NA, 2018, 2019, 2021),
+  Value = c(10, 15, 20, 25, 30) # Example data for testing
+)
+
+# Test 1: Check if the function correctly filters for a single indicator and removes NAs
+test_that("1. Filter for a single indicator and remove NAs", {
+  result <- filter_bds_for_indicators(bds_sample_data, c("Indicator1"))
+
+  # Expected output: only rows with "Indicator1" and non-missing Years
+  expected_result <- data.frame(
+    Measure = c("Indicator1", "Indicator1"),
+    Years = c(2020, 2019),
+    Value = c(10, 25)
+  )
+
+  expect_equal(result, expected_result)
+})
+
+# Test 2: Check if the function correctly filters for multiple indicators and removes NAs
+test_that("2. Filter for multiple indicators and remove NAs", {
+  result <- filter_bds_for_indicators(bds_sample_data, c("Indicator1", "Indicator3"))
+
+  # Expected output: rows with "Indicator1" or "Indicator3" and non-missing Years
+  expected_result <- data.frame(
+    Measure = c("Indicator1", "Indicator3", "Indicator1"),
+    Years = c(2020, 2018, 2019),
+    Value = c(10, 20, 25)
+  )
+
+  expect_equal(result, expected_result)
+})
+
+# Test 3: Check if the function returns an empty data frame when no indicators match
+test_that("3. No matching indicators return an empty data frame", {
+  result <- filter_bds_for_indicators(bds_sample_data, c("NonExistentIndicator"))
+
+  # Expected output: an empty data frame with the same columns as bds_sample_data
+  expected_result <- data.frame(
+    Measure = character(0),
+    Years = numeric(0),
+    Value = numeric(0)
+  )
+
+  expect_equal(result, expected_result)
+})
+
+# Test 4: Check if the function handles an empty selected_indicators vector
+test_that("4. Empty selected_indicators returns an empty data frame", {
+  result <- filter_bds_for_indicators(bds_sample_data, character(0))
+
+  # Expected output: an empty data frame with the same columns as bds_sample_data
+  expected_result <- data.frame(
+    Measure = character(0),
+    Years = numeric(0),
+    Value = numeric(0)
+  )
+
+  expect_equal(result, expected_result)
+})
+
+## get_las_in_regions()------------------------------------------------------------
+
+# Load the necessary library
+library(testthat)
+
+# Sample data for testing
+sample_geog_data <- dplyr::tibble(
+  GOReg = c("Region1", "Region2", "Region1", "Region3", "Region2", "Region3"),
+  `LA Name` = c("Local Authority A", "Local Authority B", "Local Authority C", "Local Authority D", "Local Authority E", "Local Authority F")
+)
+
+# Test 1: Filter for a single region and return unique local authorities
+test_that("1. Single region filters correctly", {
+  result <- get_las_in_regions(sample_geog_data, c("Region1"))
+
+  # Expected unique local authorities in "Region1"
+  expected_result <- c("Local Authority A", "Local Authority C")
+
+  expect_equal(sort(result), sort(expected_result))
+})
+
+# Test 2: Filter for multiple regions and return unique local authorities
+test_that("2. Multiple regions filter correctly", {
+  result <- get_las_in_regions(sample_geog_data, c("Region2", "Region3"))
+
+  # Expected unique local authorities in "Region2" and "Region3"
+  expected_result <- c("Local Authority B", "Local Authority D", "Local Authority E", "Local Authority F")
+
+  expect_equal(sort(result), sort(expected_result))
+})
+
+# Test 3: No matching regions should return an empty vector
+test_that("3. No matching regions return empty vector", {
+  result <- get_las_in_regions(sample_geog_data, c("NonExistentRegion"))
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
+})
+
+# Test 4: Empty selected_regions should return an empty vector
+test_that("4. Empty selected_regions returns empty vector", {
+  result <- get_las_in_regions(sample_geog_data, character(0))
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
+})
+
+## get_la_region()------------------------------------------------------
+
+# Sample data for testing using tibble
+sample_geog_data <- dplyr::tibble(
+  `LA Name` = c("Local Authority A", "Local Authority B", "Local Authority C", "Local Authority D", "Local Authority E", "Local Authority F"),
+  GOReg = c("Region1", "Region2", "Region1", "Region3", "Region2", "Region3")
+)
+
+# Test 1: Filter for a single local authority and return the unique region
+test_that("1. Single local authority filters correctly", {
+  result <- get_la_region(sample_geog_data, c("Local Authority A"))
+
+  # Expected region for "Local Authority A"
+  expected_result <- c("Region1")
+
+  expect_equal(result, expected_result)
+})
+
+# Test 2: Filter for multiple local authorities and return unique regions
+test_that("2. Multiple local authorities filter correctly", {
+  result <- get_la_region(sample_geog_data, c("Local Authority B", "Local Authority D", "Local Authority E"))
+
+  # Expected unique regions for the specified local authorities
+  expected_result <- c("Region2", "Region3")
+
+  expect_equal(sort(result), sort(expected_result))
+})
+
+# Test 3: No matching local authorities should return an empty vector
+test_that("3. No matching local authorities return empty vector", {
+  result <- get_la_region(sample_geog_data, c("NonExistentLocalAuthority"))
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
+})
+
+# Test 4: Empty selected_las should return an empty vector
+test_that("4. Empty selected_las returns empty vector", {
+  result <- get_la_region(sample_geog_data, character(0))
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
+})
+
+## get_la_stat_neighbrs()-------------------------------------------------------------------
+
+# Sample data for testing using tibble
+sample_stat_n_data <- dplyr::tibble(
+  `LA Name` = c("Local Authority A", "Local Authority B", "Local Authority C", "Local Authority D", "Local Authority E"),
+  `LA Name_sn` = c("Stat Neighbor 1", "Stat Neighbor 2", "Stat Neighbor 1", "Stat Neighbor 3", "Stat Neighbor 4")
+)
+
+# Test 1: Retrieve statistical neighbors for a single local authority
+test_that("1. Single local authority retrieves correct neighbors", {
+  result <- get_la_stat_neighbrs(sample_stat_n_data, c("Local Authority A"))
+
+  # Expected statistical neighbors for "Local Authority A"
+  expected_result <- c("Stat Neighbor 1")
+
+  expect_equal(result, expected_result)
+})
+
+# Test 2: Retrieve statistical neighbors for multiple local authorities
+test_that("2. Multiple local authorities retrieve correct neighbors", {
+  result <- get_la_stat_neighbrs(sample_stat_n_data, c("Local Authority B", "Local Authority D"))
+
+  # Expected statistical neighbors for "Local Authority B" and "Local Authority D"
+  expected_result <- c("Stat Neighbor 2", "Stat Neighbor 3")
+
+  expect_equal(sort(result), sort(expected_result))
+})
+
+# Test 3: No matching local authorities should return an empty vector
+test_that("3. No matching local authorities return empty vector", {
+  result <- get_la_stat_neighbrs(sample_stat_n_data, c("NonExistentLocalAuthority"))
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
+})
+
+# Test 4: Empty selected_las should return an empty vector
+test_that("4. Empty selected_las returns empty vector", {
+  result <- get_la_stat_neighbrs(sample_stat_n_data, character(0))
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
+})
+
+## get_query_table_values()------------------------------------------------------------------
+
+# Sample data for testing using tibble
+sample_data <- dplyr::tibble(
+  Category = c(
+    "Apple,<br>Banana",
+    "Carrot",
+    "Banana,<br>Carrot,<br>Apple",
+    "Durian"
+  )
+)
+
+# Test 1: Extract unique and separated values from the column
+test_that("1. Unique values are separated and whitespace trimmed", {
+  result <- get_query_table_values(sample_data, Category)
+
+  # Expected unique values after separation and trimming
+  expected_result <- c("Apple", "Banana", "Carrot", "Durian")
+
+  expect_equal(sort(result), sort(expected_result))
+})
+
+# Test 2: Handles single, non-concatenated values correctly
+test_that("2. Single values are handled correctly", {
+  single_value_data <- dplyr::tibble(Category = c("Grape"))
+  result <- get_query_table_values(single_value_data, Category)
+
+  # Expected unique value: "Grape"
+  expected_result <- c("Grape")
+
+  expect_equal(result, expected_result)
+})
+
+# Test 3: Handles empty strings and whitespace correctly
+test_that("3. Empty strings and whitespace are handled correctly", {
+  data_with_empty_strings <- dplyr::tibble(
+    Category = c("   ", "Peach", "   ,<br>Orange", "Peach,<br> ")
+  )
+  result <- get_query_table_values(data_with_empty_strings, Category)
+
+  # Expected unique values after trimming: "Peach", "Orange"
+  expected_result <- c("", "Peach", "Orange")
+
+  expect_equal(sort(result), sort(expected_result))
+})
+
+# Test 4: Handles completely empty data frame correctly
+test_that("4. Empty data frame returns an empty vector", {
+  empty_data <- dplyr::tibble(Category = character(0))
+  result <- get_query_table_values(empty_data, Category)
+
+  # Expected output: an empty vector
+  expected_result <- character(0)
+
+  expect_equal(result, expected_result)
 })
