@@ -884,3 +884,50 @@ truncate_cell_with_hover <- function(text, tooltip) {
     tippy::tippy(text = text, tooltip = tooltip)
   )
 }
+
+
+#' Add Tooltip to Reactable Column
+#'
+#' Creates a tooltip with an embedded Font Awesome icon for a specified value
+#' in a reactable column. The tooltip is styled and positioned for better
+#' usability and appearance, including options for color, interactivity,
+#' and cursor following.
+#'
+#' @param value Character string. The main content to display in the cell.
+#' @param tooltip Character string or HTML content. The tooltip text or HTML
+#'   to display when hovering over the icon.
+#' @param ... Additional arguments passed to `tippy::tippy` for further
+#'   customization.
+#'
+#' @return A div element containing the `value` and an embedded Font Awesome
+#'   icon with an interactive tooltip.
+#'
+#' @examples
+#' # Basic usage in a reactable column
+#' add_tooltip_to_reactcol("Sample Text", "This is a tooltip example")
+#'
+#' @importFrom htmltools div htmlDependency tags
+#' @importFrom tippy tippy
+add_tooltip_to_reactcol <- function(value, tooltip, ...) {
+  div(
+    style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
+    value,
+    tippy::tippy(
+      htmltools::tags$span(
+        htmltools::tags$i(
+          class = "fas fa-question-circle",
+          style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
+        )
+      ),
+      tooltip = div(tooltip),
+      theme = "gov",
+      placement = "top",
+      followCursor = TRUE,
+      interactive = TRUE,
+      interactiveBorder = 10,
+      arrow = TRUE,
+      inertia = TRUE,
+      ...
+    )
+  )
+}

@@ -679,6 +679,10 @@ Region_StatsTableServer <- function(id,
           list(
             set_custom_default_col_widths(),
             Trend = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Trend",
+                "Based on change from previous year"
+              ),
               cell = trend_icon_renderer,
               style = function(value) {
                 get_trend_colour(value, region_stats_table()$Polarity[1])

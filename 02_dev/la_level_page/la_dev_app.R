@@ -334,7 +334,10 @@ server_dev <- function(input, output, session) {
             }
           ),
           Trend = reactable::colDef(
-            header = with_tooltip("Trend", "Based on change from previous year"),
+            header = add_tooltip_to_reactcol(
+              "Trend",
+              "Based on change from previous year"
+            ),
             cell = trend_icon_renderer,
             style = function(value) {
               get_trend_colour(value, la_stats_table()$Polarity[1])
