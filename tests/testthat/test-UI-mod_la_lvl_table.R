@@ -161,7 +161,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check visual of line chart
   app$expect_screenshot(
-    selector = "#la_chart-line_chart",
+    selector = "#la_line_chart-line_chart",
     name = "la_line_chart"
   )
 
@@ -211,7 +211,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check visual of bar chart
   app$expect_screenshot(
-    selector = "#la_chart-bar_chart",
+    selector = "#la_bar_chart-bar_chart",
     name = "la_bar_chart"
   )
 

@@ -34,9 +34,10 @@ filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
     warning("Dataframe seems empty")
   }
 
-  # Filter LA & Regions
+  # Filter LA & Regions (order by filter_col order)
   result <- data |>
-    dplyr::filter(`LA and Regions` %in% filter_col)
+    dplyr::filter(`LA and Regions` %in% filter_col) |>
+    dplyr::arrange(factor(`LA and Regions`, levels = filter_col))
 
   if (nrow(result) < 1) {
     warning("Filter value doesn't exist in LA and Regions")
@@ -186,12 +187,27 @@ dfe_reactable <- function(data, ...) {
 is_numeric_or_na <- function(col_data) {
   contains_numeric <- any(grepl("[0-9]", as.character(col_data)))
   all_na <- all(is.na(col_data))
-  str_na_num_col <- any(grepl("^(-|Not applicable)$", as.character(col_data)))
-  contains_numeric || all_na || str_na_num_col
+  contains_numeric || all_na
 }
 
 
-# Helper function to format numeric columns
+#' Format Numeric Column for Reactable
+#'
+#' A helper function to format numeric columns in a `reactable` table with
+#' custom alignment, headers, NA handling, and sorting.
+#'
+#' @param col The column to format.
+#' @param indicator_dps Integer. The number of decimal places for formatting.
+#'
+#' @return A `reactable::colDef` object with customised numeric formatting.
+#'
+#' @details Formats numeric columns to align right, sets NA as "NA", and applies
+#'   custom decimal precision based on `indicator_dps`. Values are sorted with
+#'   NAs appearing last.
+#'
+#' @examples
+#' format_reactable_num_col(my_column, indicator_dps = 2)
+#'
 format_reactable_num_col <- function(col, indicator_dps) {
   reactable::colDef(
     align = "right",
@@ -201,12 +217,29 @@ format_reactable_num_col <- function(col, indicator_dps) {
     sortable = TRUE,
     sortNALast = TRUE,
     cell = function(value) {
-      dfeR::pretty_num(value, dp = indicator_dps)
+      ifelse(
+        is.nan(value),
+        "-",
+        dfeR::pretty_num(value, dp = indicator_dps)
+      )
     }
   )
 }
 
-# Helper function to format categorical columns
+
+#' Format Categorical Column for Reactable
+#'
+#' A helper function to format categorical columns in a `reactable` table with
+#' custom alignment, headers, and NA handling.
+#'
+#' @return A `reactable::colDef` object with customised categorical formatting.
+#'
+#' @details Formats categorical columns to align right, sets NA as "NA", and
+#'   sorts values with NAs appearing last.
+#'
+#' @examples
+#' format_reactable_cat_col()
+#'
 format_reactable_cat_col <- function() {
   reactable::colDef(
     align = "right",
@@ -218,7 +251,22 @@ format_reactable_cat_col <- function() {
   )
 }
 
-# Helper function to set minimum column widths
+
+#' Set Minimum Column Widths for Reactable Columns
+#'
+#' A helper function to set minimum column widths for specified columns in a
+#' `reactable` table.
+#'
+#' @param ... Additional column width settings passed as a list.
+#' @return A list of column definitions with minimum width settings applied.
+#'
+#' @details This function applies minimum widths to specific columns to ensure
+#'   consistent table layout. Additional column definitions can be specified
+#'   via `...`.
+#'
+#' @examples
+#' set_custom_default_col_widths()
+#'
 set_custom_default_col_widths <- function(...) {
   list(
     `LA Number` = set_min_col_width(80),
@@ -229,8 +277,37 @@ set_custom_default_col_widths <- function(...) {
 }
 
 
-# Main function to format numeric and categorical columns
-format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, categorical = NULL) {
+#' Format Numeric and Categorical Columns for Reactable
+#'
+#' A main function to apply specific formatting to numeric and categorical
+#' columns within a `reactable` table.
+#'
+#' @param data A dataframe containing the data to be displayed in the table.
+#' @param indicator_dps Integer specifying the decimal places for numeric
+#'   formatting.
+#' @param num_exclude Optional; character vector of column names to exclude
+#'   from numeric formatting.
+#' @param categorical Optional; character vector of column names to format
+#'   as categorical columns.
+#' @return A named list of column definitions with the appropriate formatting
+#'   applied for each column in the table.
+#'
+#' @details This function applies specific formatting to numeric and
+#'   categorical columns in a `reactable` table based on the data type and
+#'   column names. Numeric columns not in `num_exclude` or `categorical` are
+#'   formatted using `format_reactable_num_col`, while categorical columns are
+#'   formatted with `format_reactable_cat_col`.
+#'
+#' @examples
+#' format_num_reactable_cols(data,
+#'   indicator_dps = 2, num_exclude = "ID",
+#'   categorical = c("Category")
+#' )
+#'
+format_num_reactable_cols <- function(data,
+                                      indicator_dps,
+                                      num_exclude = NULL,
+                                      categorical = NULL) {
   formatted_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
     if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
@@ -245,7 +322,6 @@ format_num_reactable_cols <- function(data, indicator_dps, num_exclude = NULL, c
 
   formatted_cols
 }
-
 
 
 #' Create a Statistics Table
@@ -325,8 +401,8 @@ build_la_stats_table <- function(
     )
   } else {
     list(
-      "Latest National Rank" = "Not applicable",
-      "Quartile Banding" = "Not applicable",
+      "Latest National Rank" = "-",
+      "Quartile Banding" = "-",
       "(A) Up to and including" = "-",
       "(B) Up to and including" = "-",
       "(C) Up to and including" = "-",
@@ -382,12 +458,49 @@ build_region_stats_table <- function(la_number,
     "LA and Regions" = area_name,
     "Trend" = trend,
     "Change from previous year" = change_since_prev,
+    "Polarity" = pull_uniques(filtered_bds, "Polarity"),
     check.names = FALSE
   ) |>
     pretty_num_table(
       dp = get_indicator_dps(filtered_bds),
       exclude_columns = c("LA Number", "Trend")
     )
+}
+
+
+#' Create a Stats Table for Statistical Neighbour page
+#'
+#' @param stat_n_diff Statistical Neighbour dataframe inc change since prev year.
+#' @param la_and_regions A vector for LA and region names.
+#' @param trend A vector representing the trend.
+#' @param change_prev A vector representing the change from previous year.
+#' @param national_rank A vector for national ranking (with space padding).
+#' @param quartile_band A vector for quartile banding (with space padding).
+#' @param polarity A vector representing the polarity.
+#' @param pull_col The name of the column to pull in filtering "LA Number".
+#'
+#' @return A data frame containing stats table for LA with national statistics.
+#' @export
+build_sn_stats_table <- function(
+    stat_n_diff,
+    la_and_regions,
+    trend,
+    change_prev,
+    national_rank,
+    quartile_band,
+    polarity,
+    pull_col = "LA Number") {
+  data.frame(
+    "LA Number" = stat_n_diff |>
+      filter_la_regions(la_and_regions, pull_col = pull_col),
+    "LA and Regions" = la_and_regions,
+    "Trend" = trend,
+    "Change from previous year" = change_prev,
+    "National Rank" = c(national_rank, "", ""),
+    "Quartile Banding" = c(quartile_band, "", ""),
+    "Polarity" = polarity,
+    check.names = FALSE
+  )
 }
 
 
@@ -414,13 +527,32 @@ build_region_stats_table <- function(la_number,
 #'   }
 #' )
 #' }
-highlight_selected_row <- function(index, data, selected_area) {
-  if (data[index, "LA and Regions"] == selected_area) {
-    list(
-      color = "#6BACE6",
-      fontWeight = "bold"
-    )
+highlight_selected_row <- function(index, data, selected_area = NULL) {
+  la_region <- data[index, "LA and Regions"]
+
+  # Handle missing values first
+  if (is.na(la_region)) {
+    return(list()) # Default styling for rows with missing "LA and Regions" value
   }
+
+  # Check if the row matches the selected area
+  if (!is.null(selected_area) && la_region == selected_area) {
+    return(list(
+      color = get_la_focus_colour(),
+      fontWeight = "bold"
+    ))
+  }
+
+  # Check if the row is for "England"
+  if (la_region == "England") {
+    return(list(
+      color = get_england_colour(),
+      fontWeight = "bold"
+    ))
+  }
+
+  # Default styling for all other rows
+  list()
 }
 
 
@@ -450,6 +582,20 @@ get_indicator_dps <- function(data_full) {
     as.numeric() |>
     max()
 }
+
+
+# Function to handle NA values based on Polarity
+get_na_value_based_on_polarity <- function(value, polarity) {
+  if (is.na(value)) {
+    if (polarity %in% c("High", "Low")) {
+      return("NA") # Return "NA" if Polarity is "High" or "Low"
+    } else {
+      return("-") # Return "-" for other cases
+    }
+  }
+  return(value) # Return the value as-is if not NA
+}
+
 
 
 #' Render Trend Icons Based on Value
@@ -487,8 +633,53 @@ trend_icon_renderer <- function(value) {
   if (is.na(trend_icon)) {
     NA
   } else {
-    shiny::icon(trend_icon)
+    shiny::icon(trend_icon, style = "font-size: xxx-large;")
   }
+}
+
+
+#' Determine Background and Text Colour Based on Trend Polarity and Value
+#'
+#' This function returns a list with both background and text colours based on
+#' the trend value and its associated polarity. It helps visually indicate
+#' favourable and unfavourable trends, with white text for readability
+#' on coloured backgrounds.
+#'
+#' @param value Numeric, the trend value to evaluate.
+#' @param polarity Character, indicates if higher or lower values are favourable.
+#' Accepts "High" for favourable high values or "Low" for favourable low values.
+#'
+#' @return A list with `background` and `text` elements. The `background` is set
+#' to green (`"#00703c"`) for favourable trends, red (`"#d4351c"`) for
+#' unfavourable trends,
+#' or `"none"` if either `value` or `polarity` is `NA`.
+#' The `color` is `"white"` when the background is coloured,
+#' and `"black"` otherwise.
+#'
+#' @examples
+#' get_trend_style(5, "High") # Returns green background, white text
+#' get_trend_style(-3, "Low") # Returns green background, white text
+#' get_trend_style(3, "Low") # Returns red background, white text
+#'
+get_trend_colour <- function(value, polarity) {
+  if (is.na(polarity) || is.na(value) || polarity == "-") {
+    return(list(color = "black"))
+  }
+
+  # Define the logic for low and high polarity
+  low_colour <- "#d4351c"
+  high_colour <- "#00703c"
+
+  # Check conditions for trend colour
+  trend_colour <- ifelse(polarity == "Low",
+    ifelse(value < 0, high_colour, low_colour),
+    ifelse(polarity == "High",
+      ifelse(value > 0, high_colour, low_colour),
+      "black"
+    )
+  )
+
+  return(list(color = trend_colour))
 }
 
 
@@ -518,12 +709,37 @@ trend_icon_renderer <- function(value) {
 #'
 quartile_banding_col_def <- function(data) {
   # Return the colDef object with the background color applied
-  reactablefmtr::cell_style(
-    data = data,
-    background_color = get_quartile_band_cell_colour(
-      data$Polarity,
-      data$`Quartile Banding`
-    )
+  qb_color <- get_quartile_band_cell_colour(
+    data$Polarity,
+    data$`Quartile Banding`
+  )
+
+  list(background = qb_color)
+}
+
+
+#' Format National Rank Display
+#'
+#' @description Formats the national rank value for display in a table. This
+#' function returns an empty string for NA values, replaces -1 with "-", and
+#' otherwise displays the value as-is.
+#'
+#' @param rank_value Numeric or character. The national rank value to be
+#' formatted.
+#'
+#' @return A character string: "" if NA, "-" if -1, or the original value.
+#'
+#' @examples
+#' format_national_rank(NA) # Returns ""
+#' format_national_rank(-1) # Returns "-"
+#' format_national_rank(42) # Returns "42"
+#'
+#' @export
+format_national_rank <- function(rank_value) {
+  dplyr::case_when(
+    is.na(rank_value) ~ "-", # Display empty string for NA
+    rank_value == -1 ~ "-", # Replace -1 with "-"
+    TRUE ~ as.character(rank_value) # Display value as-is
   )
 }
 

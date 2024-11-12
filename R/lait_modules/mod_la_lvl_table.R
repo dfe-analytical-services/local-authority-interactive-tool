@@ -25,8 +25,7 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
       filtered_bds$data <- bds_metrics |>
         dplyr::filter(
           Topic == app_inputs$topic(),
-          Measure == app_inputs$indicator(),
-          !is.na(Years)
+          Measure == app_inputs$indicator()
         )
     })
 
@@ -82,7 +81,7 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       sn_avg <- la_filtered_bds |>
         dplyr::filter(`LA and Regions` %in% la_sns) |>
         dplyr::summarise(
-          values_num = mean(values_num, na.rm = TRUE),
+          values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
           .by = c("Years", "Years_num")
         ) |>
         dplyr::mutate(
@@ -328,12 +327,12 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_stats <- reactable::renderReactable({
       dfe_reactable(
         la_stats_table() |>
-          dplyr::select(!dplyr::ends_with("including"), -Polarity),
+          dplyr::select(!dplyr::ends_with("including")),
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
             la_stats_table() |>
-              dplyr::select(!dplyr::ends_with("including"), -Polarity),
+              dplyr::select(!dplyr::ends_with("including")),
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
             categorical = c("Trend", "Quartile Banding", "Latest National Rank")
@@ -342,11 +341,17 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           list(
             set_custom_default_col_widths(),
             `Quartile Banding` = reactable::colDef(
-              style = quartile_banding_col_def(la_stats_table())
+              style = function(value, index) {
+                quartile_banding_col_def(la_stats_table()[index, ])
+              }
             ),
             Trend = reactable::colDef(
-              cell = trend_icon_renderer
-            )
+              cell = trend_icon_renderer,
+              style = function(value) {
+                get_trend_colour(value, la_stats_table()$Polarity[1])
+              }
+            ),
+            Polarity = reactable::colDef(show = FALSE)
           )
         )
       )
@@ -354,14 +359,17 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # Quartile banding table
     output$la_quartiles <- reactable::renderReactable({
+      # Get quartile bands only
+      qb_table <- la_stats_table() |>
+        dplyr::select(dplyr::ends_with("including"), -Polarity)
+
       dfe_reactable(
-        la_stats_table() |>
-          dplyr::select(dplyr::ends_with("including"), -Polarity),
-        columns = format_num_reactable_cols(
-          la_stats_table() |>
-            dplyr::select(dplyr::ends_with("including"), -Polarity),
-          get_indicator_dps(filtered_bds())
-        )
+        qb_table,
+        # Format as categorical
+        columns = lapply(names(qb_table), function(col) {
+          format_reactable_cat_col()
+        }) |>
+          setNames(names(qb_table))
       )
     })
   })

@@ -116,7 +116,8 @@ metrics_raw <- readxl::read_xlsx(
 
 # Cleaning data ===============================================================
 # BDS
-# Convert values to numeric - suppress warnings?
+# Convert values to numeric - doing the most to stop a coerce to NA warning
+# Remove any rows where years are NA
 bds_clean <- bds |>
   dplyr::mutate(
     values_clean = dplyr::case_when(
@@ -126,7 +127,9 @@ bds_clean <- bds |>
       TRUE ~ Values
     ),
     values_num = as.numeric(values_clean)
-  )
+  ) |>
+  dplyr::filter(!is.na(Years))
+
 
 # Statistical neighbours
 # Clean dataframe - remove cols with all NA,
@@ -152,10 +155,27 @@ stat_n_geog <- stat_n |>
 # Metrics
 # Remove whitesapce from key & filter out discontinued metrics
 # Set any NA decimal place column values to 1
+# Convert Last and Next updated to Format Month Year
 metrics_clean <- metrics_raw |>
   dplyr::mutate(
     Measure_short = trimws(Measure_short),
-    dps = ifelse(is.na(dps), 1, dps)
+    dps = ifelse(is.na(dps), 1, dps),
+    `Last Update` = dplyr::case_when(
+      inherits(as.Date(`Last Update`), "Date") ~ as.Date(`Last Update`) |>
+        format("%B %Y") |>
+        as.character(),
+      TRUE ~ as.character(`Last Update`)
+    ),
+    # Have to supress warnings due to mixed datatypes
+    `Next Update` = dplyr::case_when(
+      grepl("^[0-9]+$", `Next Update`) ~ suppressWarnings(
+        as.numeric(`Next Update`) |>
+          as.Date(origin = "1899-12-30") |>
+          format("%B %Y") |>
+          as.character()
+      ),
+      TRUE ~ as.character(`Next Update`)
+    )
   ) |>
   dplyr::filter(!grepl("DISCONTINUE", Table_status))
 
@@ -173,7 +193,7 @@ metrics_discontinued <- metrics_raw |>
 bds_metrics <- metrics_clean |>
   dplyr::select(
     Topic, Measure_code, Measure, Measure_short,
-    Polarity, y_axis_name, Chart_title, dps
+    Polarity, y_axis_name, Year_Type, Chart_title, dps
   ) |>
   dplyr::left_join(bds_clean,
     by = c("Measure_short" = "Short Desc"),

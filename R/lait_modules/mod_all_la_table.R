@@ -147,25 +147,28 @@ AllLA_TableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_card_tab(
+    bslib::navset_tab(
       id = "all_la_table_tabs",
       bslib::nav_panel(
         "Tables",
-        bslib::card_header(
-          Get_AllLATableNameUI(ns("table_name")),
-          style = "text-align: center;"
-        ),
-        bslib::card_header("Local Authorities"),
-        reactable::reactableOutput(ns("la_table")),
-        div(
-          style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
-          bslib::card_header("Regions"),
-          reactable::reactableOutput(ns("region_table"))
+        bslib::card(
+          bslib::card_header(
+            Get_AllLATableNameUI(ns("table_name")),
+            style = "text-align: center;"
+          ),
+          bslib::card_header("Local Authorities"),
+          reactable::reactableOutput(ns("la_table")),
+          div(
+            style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+            bslib::card_header("Regions"),
+            reactable::reactableOutput(ns("region_table"))
+          )
         )
       ),
       bslib::nav_panel(
         "Download data",
         file_type_input_btn(ns("file_type")),
+        Download_DataUI(ns("all_download"), "All Geographies Table"),
         Download_DataUI(ns("la_download"), "LA Table"),
         Download_DataUI(ns("region_download"), "Region Table")
       )
@@ -219,6 +222,13 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       la_names_bds
     )
 
+    # All geographies table download ------------------------------------------
+    Download_DataServer(
+      "all_download",
+      reactive(input$file_type),
+      reactive(all_la_table()),
+      reactive(c(app_inputs$indicator(), "All-Geographies"))
+    )
 
     # All LA Level LA table ---------------------------------------------------
     output$la_table <- reactable::renderReactable({

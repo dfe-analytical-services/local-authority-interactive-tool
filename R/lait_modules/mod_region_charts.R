@@ -146,30 +146,27 @@ Chart_InputServer <- function(id, app_inputs, region_long_plot, region_clean) {
 #' @examples
 #' Region_FocusLine_chartUI("focus_line_chart_module")
 #'
-Region_FocusLine_chartUI <- function(id) {
+Region_FocusLineChartUI <- function(id) {
   ns <- NS(id)
 
   # Define the UI panel for the focus line chart
   bslib::nav_panel(
     title = "Line chart - Focus",
-
-    # Main UI layout: chart on the left, download button on the right
     div(
-      style = "display: flex; justify-content: space-between; align-items: center;",
-
-      # Line chart display with horizontal padding
-      bslib::card(
-        bslib::card_body(
-          ggiraph::girafeOutput(ns("region_focus_line_chart")),
-          style = "padding: 0 15px;" # Horizontal padding for chart
-        ),
-        full_screen = TRUE,
-        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
-      ),
-
-      # Download button to trigger chart download modal
-      DownloadChartBtnUI(ns("download_btn"))
-    )
+      style = "display: flex;
+               justify-content: space-between;
+               align-items: center;
+               background: white;",
+      # Focus line chart
+      create_chart_card_ui(ns("output_chart")),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
 
@@ -195,15 +192,12 @@ Region_FocusLine_chartUI <- function(id) {
 #'   bds_metrics, stat_n_geog, region_names_bds
 #' )
 #'
-Region_FocusLine_chartServer <- function(id,
-                                         app_inputs,
-                                         bds_metrics,
-                                         stat_n_geog,
-                                         region_names_bds) {
+Region_FocusLineChartServer <- function(id,
+                                        app_inputs,
+                                        bds_metrics,
+                                        stat_n_geog,
+                                        region_names_bds) {
   moduleServer(id, function(input, output, session) {
-    # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Line")
-
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
@@ -234,61 +228,88 @@ Region_FocusLine_chartServer <- function(id,
 
     # Build the static version of the focus line chart
     static_chart <- reactive({
-      region_line_chart <- chart_data() |>
-        ggplot2::ggplot() +
-        ggiraph::geom_line_interactive(
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`,
-            size = `LA and Regions`,
-            data_id = `LA and Regions`
-          ),
-          na.rm = TRUE
-        ) +
-        format_axes(chart_data()) +
-        set_plot_colours(
-          chart_data(),
-          colour_type = "focus",
-          focus_group = region_clean()
-        ) +
-        set_plot_labs(filtered_bds()) +
-        ggrepel::geom_label_repel(
-          data = subset(chart_data(), Years == current_year()),
-          aes(
-            x = Years_num,
-            y = values_num,
-            label = `LA and Regions`
-          ),
-          color = "black",
-          segment.colour = NA,
-          label.size = NA,
-          max.overlaps = Inf,
-          nudge_x = 2,
-          direction = "y",
-          vjust = .5,
-          hjust = 1,
-          show.legend = FALSE,
-          na.rm = TRUE
-        ) +
-        custom_theme() +
-        coord_cartesian(clip = "off") +
-        theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
-        guides(colour = "none", size = "none")
+      # Check to see if any data - if not display error plot
+      if (all(is.na(chart_data()$values_num))) {
+        display_no_data_plot()
+      } else {
+        chart_data() |>
+          ggplot2::ggplot() +
+          ggiraph::geom_line_interactive(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`,
+              size = `LA and Regions`,
+              data_id = `LA and Regions`
+            ),
+            na.rm = TRUE
+          ) +
+          # Only show point data where line won't appear (NAs)
+          ggplot2::geom_point(
+            data = subset(create_show_point(chart_data()), show_point),
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`,
+              size = `LA and Regions`
+            ),
+            shape = 15,
+            na.rm = TRUE
+          ) +
+          format_axes(chart_data()) +
+          set_plot_colours(
+            chart_data(),
+            colour_type = "focus",
+            focus_group = region_clean()
+          ) +
+          set_plot_labs(filtered_bds()) +
+          ggrepel::geom_label_repel(
+            data = subset(chart_data(), Years == current_year()),
+            aes(
+              x = Years_num,
+              y = values_num,
+              label = `LA and Regions`
+            ),
+            color = "black",
+            segment.colour = NA,
+            label.size = NA,
+            max.overlaps = Inf,
+            nudge_x = 2,
+            direction = "y",
+            vjust = .5,
+            hjust = 1,
+            show.legend = FALSE,
+            na.rm = TRUE
+          ) +
+          custom_theme() +
+          coord_cartesian(clip = "off") +
+          theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+          guides(colour = "none", size = "none")
+      }
     })
 
     # Create the interactive version of the focus line chart
     interactive_chart <- reactive({
-      vertical_hover <- lapply(
-        get_years(chart_data()),
-        tooltip_vlines,
-        chart_data(),
-        get_indicator_dps(filtered_bds())
-      )
+      output_chart <- if (all(is.na(chart_data()$values_num))) {
+        static_chart()
+      } else {
+        # Creating vertical geoms to make vertical hover tooltip
+        vertical_hover <- lapply(
+          get_years(chart_data()),
+          tooltip_vlines,
+          chart_data(),
+          get_indicator_dps(filtered_bds()),
+          region_clean(),
+          "#12436D"
+        )
 
-      # Return an interactive chart with vertical hover tooltip lines
+        # Combine static chart and vertical hover into one ggplot object
+        full_plot <- static_chart() + vertical_hover
+      }
+
+      # Now pass the full ggplot object to ggiraph::girafe
       ggiraph::girafe(
-        ggobj = (static_chart() + vertical_hover),
+        ggobj = output_chart,
         width_svg = 12,
         options = generic_ggiraph_options(
           opts_hover(
@@ -299,7 +320,11 @@ Region_FocusLine_chartServer <- function(id,
       )
     })
 
-    # Set up the download functionality for both static and interactive charts
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Focus Line")
+
+    # Set up the download handlers for the chart
     Download_DataServer(
       "chart_download",
       reactive(input$file_type),
@@ -307,12 +332,333 @@ Region_FocusLine_chartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Line-Chart"))
     )
 
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
     # Render the interactive line chart in the UI
-    output$region_focus_line_chart <- ggiraph::renderGirafe({
+    output$output_chart <- ggiraph::renderGirafe({
       interactive_chart()
     })
   })
 }
+
+
+
+
+
+Region_FocusBarChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Bar chart - Focus",
+    div(
+      style = "display: flex;
+               justify-content: space-between;
+               align-items: center;
+               background: white;",
+      # Focus line chart
+      create_chart_card_ui(ns("output_chart")),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
+  )
+}
+
+
+
+Region_FocusBarChartServer <- function(id,
+                                       app_inputs,
+                                       bds_metrics,
+                                       stat_n_geog,
+                                       region_names_bds) {
+  moduleServer(id, function(input, output, session) {
+    # Get data for the region's long format plot
+    region_long_plot <- Region_LongPlotServer(
+      "region_long_plot",
+      app_inputs,
+      bds_metrics,
+      region_names_bds
+    )
+
+    # Clean region names based on selected inputs
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
+
+    # Filter data for the selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Prepare the chart data, setting the selected region to appear as first bar
+    chart_data <- reactive({
+      region_long_plot() |>
+        reorder_la_regions(region_clean())
+    })
+
+    static_chart <- reactive({
+      # Check to see if any data - if not display error plot
+      if (all(is.na(chart_data()$values_num))) {
+        display_no_data_plot()
+      } else {
+        chart_data() |>
+          ggplot2::ggplot() +
+          ggiraph::geom_col_interactive(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              fill = `LA and Regions`,
+              tooltip = tooltip_bar(
+                chart_data(),
+                get_indicator_dps(filtered_bds()),
+                region_clean(),
+                "#12436D"
+              ),
+              data_id = `LA and Regions`
+            ),
+            position = "dodge",
+            width = 0.6,
+            na.rm = TRUE,
+            colour = "black"
+          ) +
+          format_axes(chart_data()) +
+          set_plot_colours(chart_data(), "focus-fill", region_clean()) +
+          set_plot_labs(filtered_bds()) +
+          custom_theme() +
+          guides(fill = "none")
+      }
+    })
+
+    interactive_chart <- reactive({
+      # Now pass the full ggplot object to ggiraph::girafe
+      ggiraph::girafe(
+        ggobj = static_chart(),
+        width_svg = 12,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    })
+
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Focus Bar")
+
+    # Set up the download handlers for the chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Bar-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
+    # Return the interactive plot
+    output$output_chart <- ggiraph::renderGirafe({
+      interactive_chart()
+    })
+  })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+Region_MultiChartInputUI <- function(id) {
+  ns <- NS(id)
+
+  tagList(
+    shiny::selectizeInput(
+      inputId = ns("chart_line_input"),
+      label = "Select Regions to compare (max 3)",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button"),
+        dropdownParent = "body"
+      )
+    ),
+    shiny::selectizeInput(
+      inputId = ns("chart_bar_input"),
+      label = "Select Regions to compare (max 3)",
+      choices = NULL,
+      multiple = TRUE,
+      options = list(
+        maxItems = 3,
+        plugins = list("remove_button"),
+        dropdownParent = "body"
+      )
+    )
+  )
+}
+
+Region_MultiChartInputServer <- function(id,
+                                         app_inputs,
+                                         stat_n_geog,
+                                         bds_metrics,
+                                         region_names_bds,
+                                         shared_values) {
+  moduleServer(id, function(input, output, session) {
+    # Helper function to retain only the valid selections that are in the available choices
+    retain_valid_selections <- function(current_choices,
+                                        previous_selections) {
+      intersect(previous_selections, current_choices)
+    }
+
+    # Clean region names based on selected inputs
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
+
+    # Reactive expression to get the valid Regions (not the selected LA's Region)
+    valid_selections <- reactive({
+      region_names_bds |>
+        setdiff(region_clean())
+    })
+
+    # Observe when the main LA input changes to update both chart inputs (line and bar)
+    observeEvent(list(app_inputs$la(), app_inputs$indicator()), {
+      # Get previous selections for both line and bar inputs from shared values
+      prev_line_selections <- shared_values$chart_line_input
+      prev_bar_selections <- shared_values$chart_bar_input
+
+      # Retain only valid selections from the previous inputs
+      valid_line_selections <- retain_valid_selections(valid_selections(), prev_line_selections)
+      valid_bar_selections <- retain_valid_selections(valid_selections(), prev_bar_selections)
+
+      # Update the line chart selectize input with valid selections
+      updateSelectizeInput(
+        session = session,
+        inputId = "chart_line_input",
+        choices = valid_selections(),
+        selected = valid_line_selections
+      )
+
+      # Update the bar chart selectize input with valid selections
+      updateSelectizeInput(
+        session = session,
+        inputId = "chart_bar_input",
+        choices = valid_selections(),
+        selected = valid_bar_selections
+      )
+    })
+
+    # Line chart input --------------------------------------------------------
+    observeEvent(input$chart_line_input,
+      {
+        if (!setequal(input$chart_line_input, shared_values$chart_line_input)) {
+          # Update line chart shared val with user input
+          shared_values$chart_line_input <- input$chart_line_input
+        }
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Keep the bar selected synchronized with shared values
+    observeEvent(shared_values$chart_line_input,
+      {
+        later::later(function() {
+          isolate({
+            if (!setequal(input$chart_bar_input, shared_values$chart_line_input)) {
+              updateSelectizeInput(
+                session = session,
+                inputId = "chart_bar_input",
+                selected = if (is.null(shared_values$chart_line_input)) {
+                  character(0)
+                } else {
+                  shared_values$chart_line_input
+                }
+              )
+            }
+          })
+        }, delay = 0.5)
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Bar chart input ---------------------------------------------------------
+    observeEvent(input$chart_bar_input,
+      {
+        if (!setequal(input$chart_bar_input, shared_values$chart_bar_input)) {
+          # Update bar chart shared val with user input
+          shared_values$chart_bar_input <- input$chart_bar_input
+        }
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Keep the line selected synchronized with shared values
+    observeEvent(shared_values$chart_bar_input,
+      {
+        later::later(function() {
+          isolate({
+            if (!setequal(input$chart_line_input, shared_values$chart_bar_input)) {
+              updateSelectizeInput(
+                session = session,
+                inputId = "chart_line_input",
+                selected = if (is.null(shared_values$chart_bar_input)) {
+                  character(0)
+                } else {
+                  shared_values$chart_bar_input
+                }
+              )
+            }
+          })
+        }, delay = 0.5)
+      },
+      ignoreNULL = FALSE,
+      ignoreInit = TRUE
+    )
+
+    # Return the selected inputs as reactive values for use elsewhere in the app
+    list(
+      line_input = reactive(shared_values$chart_line_input),
+      bar_input = reactive(shared_values$chart_bar_input)
+    )
+  })
+}
+
+
+
 
 
 # Region multi-choice line chart module =======================================
@@ -329,17 +675,18 @@ Region_FocusLine_chartServer <- function(id,
 #' @examples
 #' Region_Multi_chartUI("multi_chart_module")
 #'
-Region_Multi_chartUI <- function(id) {
+Region_MultiLineChartUI <- function(id) {
   ns <- NS(id)
 
   # Create a navigation panel for the multi-line chart
   bslib::nav_panel(
     title = "Line chart - user selection",
-
     # Main UI layout with chart and modal trigger button
     div(
-      style = "display: flex; justify-content: space-between; align-items: center;",
-
+      style = "display: flex;
+               justify-content: space-between;
+               align-items: center;
+               background: white;",
       # Card for the chart and filter inputs
       bslib::card(
         id = "region_multi_line",
@@ -351,23 +698,27 @@ Region_Multi_chartUI <- function(id) {
               position = "left",
               width = "30%",
               open = list(desktop = "open", mobile = "always-above"),
-              # UI for chart input filters
-              Chart_InputUI(ns("chart_input"))
+              Region_MultiChartInputUI(
+                ns("chart_line_input") # Line chart input only
+              )[[1]]
             ),
             # Chart display area
-            ggiraph::girafeOutput(ns("region_multi_line_chart"))
+            ggiraph::girafeOutput(ns("output_chart"))
           )
         ),
         full_screen = TRUE,
         style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
       ),
-
-      # Modal trigger button for chart download on the right
-      DownloadChartBtnUI(ns("download_btn"))
-    )
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
-
 
 #' Region Multi-Choice Line Chart Server Module
 #'
@@ -390,15 +741,13 @@ Region_Multi_chartUI <- function(id) {
 #'   bds_metrics, stat_n_geog, region_names_bds
 #' )
 #'
-Region_Multi_chartServer <- function(id,
-                                     app_inputs,
-                                     bds_metrics,
-                                     stat_n_geog,
-                                     region_names_bds) {
+Region_MultiLineChartServer <- function(id,
+                                        app_inputs,
+                                        bds_metrics,
+                                        stat_n_geog,
+                                        region_names_bds,
+                                        shared_values) {
   moduleServer(id, function(input, output, session) {
-    # Initialise the download button server for the chart
-    DownloadChartBtnServer("download_btn", id, "Bar")
-
     # Obtain data for plotting by region
     region_long_plot <- Region_LongPlotServer(
       "region_long_plot",
@@ -422,12 +771,14 @@ Region_Multi_chartServer <- function(id,
     current_year <- Current_YearServer("current_year", region_long_plot)
 
     # Get user-selected choices for the chart
-    chart_input <- Chart_InputServer(
-      "chart_input",
+    chart_input <- Region_MultiChartInputServer(
+      "chart_line_input",
       app_inputs,
-      region_long_plot,
-      region_clean
-    )
+      stat_n_geog,
+      bds_metrics,
+      region_names_bds,
+      shared_values
+    )$line_input
 
     # Create reactive chart data based on selected regions and user choices
     chart_data <- reactive({
@@ -438,59 +789,79 @@ Region_Multi_chartServer <- function(id,
         ) |>
         # Reorder regions to layer lines based on selection
         reorder_la_regions(
-          rev(c(region_clean(), chart_input()))
+          rev(unique(c(region_clean(), chart_input())))
         )
     })
 
     # Build a static multi-choice chart
     static_chart <- reactive({
-      region_multi_line <- chart_data() |>
-        ggplot2::ggplot() +
-        # Add interactive points for user engagement
-        ggiraph::geom_point_interactive(
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`,
-            data_id = `LA and Regions`
-          ),
-          na.rm = TRUE
-        ) +
-        # Add interactive lines for visual representation
-        ggiraph::geom_line_interactive(
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`,
-            data_id = `LA and Regions`
-          ),
-          na.rm = TRUE
-        ) +
-        format_axes(chart_data()) +
-        manual_colour_mapping(
-          unique(c(region_clean(), chart_input())),
-          type = "line"
-        ) +
-        set_plot_labs(filtered_bds()) +
-        custom_theme() +
-        # Reverse legend order for better readability
-        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+      # Check to see if any data - if not display error plot
+      if (all(is.na(chart_data()$values_num))) {
+        display_no_data_plot()
+      } else {
+        chart_data() |>
+          ggplot2::ggplot() +
+          # Add interactive lines for visual representation
+          ggiraph::geom_line_interactive(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`,
+              data_id = `LA and Regions`
+            ),
+            na.rm = TRUE,
+            linewidth = 1.5
+          ) +
+          # Only show point data where line won't appear (NAs)
+          ggplot2::geom_point(
+            data = subset(create_show_point(chart_data()), show_point),
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`
+            ),
+            shape = 15,
+            na.rm = TRUE,
+            size = 1.5
+          ) +
+          format_axes(chart_data()) +
+          set_plot_colours(
+            data.frame(
+              `LA and Regions` = c(region_clean(), chart_input()),
+              check.names = FALSE
+            ),
+            "colour",
+            region_clean()
+          ) +
+          set_plot_labs(filtered_bds()) +
+          custom_theme() +
+          # Reverse legend order for better readability
+          ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+      }
     })
 
-    # Create an interactive version of the multi-choice line chart
+    # Create the interactive version of the multi-choice line chart
     interactive_chart <- reactive({
-      # Generate vertical lines for hover tooltips
-      vertical_hover <- lapply(
-        get_years(chart_data()),
-        tooltip_vlines,
-        chart_data(),
-        get_indicator_dps(filtered_bds())
-      )
+      output_chart <- if (all(is.na(chart_data()$values_num))) {
+        static_chart()
+      } else {
+        # Creating vertical geoms to make vertical hover tooltip
+        vertical_hover <- lapply(
+          get_years(chart_data()),
+          tooltip_vlines,
+          chart_data(),
+          get_indicator_dps(filtered_bds()),
+          region_clean()
+        )
 
-      # Create and return the interactive chart
+        # Combine static chart and vertical hover into one ggplot object
+        full_plot <- static_chart() + vertical_hover
+      }
+
+      # Now pass the full ggplot object to ggiraph::girafe
       ggiraph::girafe(
-        ggobj = static_chart() + vertical_hover,
-        width_svg = 8.5,
+        ggobj = output_chart,
+        width_svg = 12,
         options = generic_ggiraph_options(
           opts_hover(
             css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
@@ -500,7 +871,11 @@ Region_Multi_chartServer <- function(id,
       )
     })
 
-    # Set up the download handler for the chart
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Multi Line")
+
+    # Set up the download handlers for the chart
     Download_DataServer(
       "chart_download",
       reactive(input$file_type),
@@ -508,8 +883,186 @@ Region_Multi_chartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Line-Chart"))
     )
 
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
     # Render the interactive plot output
-    output$region_multi_line_chart <- ggiraph::renderGirafe({
+    output$output_chart <- ggiraph::renderGirafe({
+      interactive_chart()
+    })
+  })
+}
+
+
+
+Region_MultiBarChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Bar chart - user selection",
+    div(
+      style = "display: flex;
+             justify-content: space-between;
+             align-items: center;
+             background: white;",
+      bslib::card(
+        id = "region_multi_line",
+        title = "Line chart - user selection",
+        bslib::card_body(
+          bslib::layout_sidebar(
+            sidebar = bslib::sidebar(
+              title = "Filter options",
+              position = "left",
+              width = "30%",
+              open = list(desktop = "open", mobile = "always-above"),
+              Region_MultiChartInputUI(
+                ns("chart_bar_input") # Line chart input only
+              )[[2]]
+            ),
+            ggiraph::girafeOutput(ns("output_chart"))
+          )
+        ),
+        full_screen = TRUE,
+        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
+      ),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
+  )
+}
+
+
+
+Region_MultiBarChartServer <- function(id,
+                                       app_inputs,
+                                       bds_metrics,
+                                       stat_n_geog,
+                                       region_names_bds,
+                                       shared_values) {
+  moduleServer(id, function(input, output, session) {
+    # Get data for the region's long format plot
+    region_long_plot <- Region_LongPlotServer(
+      "region_long_plot",
+      app_inputs,
+      bds_metrics,
+      region_names_bds
+    )
+
+    # Clean region names based on selected inputs
+    region_clean <- Clean_RegionServer(
+      "region_clean",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics
+    )
+
+    # Filter data for the selected topic and indicator
+    filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
+
+    # Get user-selected choices for the chart
+    chart_input <- Region_MultiChartInputServer(
+      "chart_bar_input",
+      app_inputs,
+      stat_n_geog,
+      bds_metrics,
+      region_names_bds,
+      shared_values
+    )$bar_input
+
+    # Regional multi-choice bar plot -------------------------------------------
+    # Filter data for selections
+    multi_chart_data <- reactive({
+      region_long_plot() |>
+        dplyr::filter(
+          (`LA and Regions` %in% chart_input()) |
+            (`LA and Regions` %in% region_clean())
+        ) |>
+        # Set area orders so selection is first bar
+        reorder_la_regions(region_clean())
+    })
+
+    # Build static plot
+    static_chart <- reactive({
+      # Check to see if any data - if not display error plot
+      if (all(is.na(multi_chart_data()$values_num))) {
+        display_no_data_plot()
+      } else {
+        multi_chart_data() |>
+          ggplot2::ggplot() +
+          ggiraph::geom_col_interactive(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              fill = `LA and Regions`,
+              tooltip = tooltip_bar(
+                multi_chart_data(),
+                get_indicator_dps(filtered_bds()),
+                region_clean()
+              ),
+              data_id = `LA and Regions`
+            ),
+            position = "dodge",
+            width = 0.6,
+            na.rm = TRUE,
+            colour = "black"
+          ) +
+          format_axes(multi_chart_data()) +
+          set_plot_colours(multi_chart_data(), "fill", region_clean()) +
+          set_plot_labs(filtered_bds()) +
+          custom_theme()
+      }
+    })
+
+    interactive_chart <- reactive({
+      # Now pass the full ggplot object to ggiraph::girafe
+      ggiraph::girafe(
+        ggobj = static_chart(),
+        width_svg = 12,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
+        fonts = list(sans = "Arial")
+      )
+    })
+
+    # Chart download -----------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Multi Bar")
+
+    # Set up the download handlers for the chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = static_chart(), "html" = interactive_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Bar-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        static_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
+    # Return the interactive plot
+    output$output_chart <- ggiraph::renderGirafe({
       interactive_chart()
     })
   })

@@ -292,15 +292,20 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output <- "No matching metadata"
   }
 
-  if (grepl("^[0-9]+$", metadata_output)) {
-    metadata_output |>
+  # Warning if any entry in metadata_output appears to be a 5-digit number
+  if (any(grepl("^\\d{5}$", metadata_output))) {
+    warning("Detected a 5-digit numeric entry in metadata_output,
+            which may represent a misformatted date (e.g., Excel numeric).")
+
+    # Convert 5-digit number to Date if it matches the Excel date format
+    metadata_output <- metadata_output |>
       as.numeric() |>
       as.Date(origin = "1899-12-30") |>
       format("%B %Y") |>
       as.character()
-  } else {
-    metadata_output
   }
+
+  metadata_output
 }
 
 
@@ -370,6 +375,91 @@ clean_ldn_region <- function(region, filtered_bds) {
   } else {
     return(region)
   }
+}
+
+
+#' Retrieve AF Colours Without Warning Message
+#'
+#' Retrieves AF colours while suppressing a specific warning message about
+#' limiting categories when using the categorical palette.
+#'
+#' @return A vector of colours from the `afcolours` package.
+#'
+#' @details This function retrieves the colour palette from `afcolours::af_colours`
+#' while silencing the message advising to limit categories to four. The
+#' message is suppressed using `withCallingHandlers` to improve usability
+#' without affecting the palette content.
+#'
+#' @examples
+#' colours <- get_af_colours()
+#'
+get_af_colours <- function() {
+  withCallingHandlers(
+    afcolours::af_colours(),
+    message = function(m) {
+      if (grepl(
+        paste0(
+          "It is best practice to limit to four categories when using the ",
+          "categorical palette so the chart does not become too cluttered."
+        ),
+        m$message
+      )) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+}
+
+
+#' Get Colour for Local Authority Focus
+#'
+#' Returns a hex colour for highlighting the selected local authority in
+#' tables or plots.
+#'
+#' @return A character string with the hex colour code for LA focus.
+#' @examples
+#' get_la_focus_colour()
+#' @export
+get_la_focus_colour <- function() {
+  get_af_colours()[4] # "#5694ca"
+}
+
+
+#' Get Colour for England Highlight
+#'
+#' Retrieves a colour from the afcolours package palette for highlighting
+#' "England" rows in tables or plots.
+#'
+#' @return A character string with the hex colour code for England highlight.
+#' @examples
+#' get_england_colour()
+#' @export
+get_england_colour <- function() {
+  get_af_colours()[3]
+}
+
+
+#' Retrieve Available Colours for Plotting
+#'
+#' This function provides a filtered set of colours from the AF colours palette,
+#' excluding the specific colours reserved for the focus group and "England."
+#'
+#' @return A vector of hex colour codes from the AF colours palette, with
+#'   colours reserved for the focus group and "England" removed.
+#' @seealso [get_af_colours()] for the original AF colour palette,
+#'   [get_la_focus_colour()] for the focus group colour, and
+#'   [get_england_colour()] for the "England" colour.
+#' @examples
+#' clean_colours <- get_clean_af_colours()
+#'
+#' # Use clean_colours for general plotting, excluding reserved colours
+#'
+get_clean_af_colours <- function() {
+  setdiff(get_af_colours(), c(
+    get_la_focus_colour(),
+    get_england_colour(),
+    "#3D3D3D"
+  ))
 }
 
 
@@ -538,4 +628,36 @@ rename_columns_with_year <- function(df) {
   # Rename columns with the modified names
   colnames(df) <- new_names
   df
+}
+
+
+#' @title Insert Line Breaks at Full Words
+#' @description Adds line breaks to a string after full words to ensure that
+#' each line stays within a specified maximum length.
+#' @param text A character string to insert line breaks into.
+#' @param max_length Maximum length of each line in characters. Default is 20.
+#' @return A character string with line breaks after full words.
+#' @details The function splits the input string into words, then builds each
+#' line by appending words until the maximum length is reached. If adding a word
+#' would exceed the line length, a line break is added before that word.
+#' @examples
+#' add_line_breaks("This is an example of a long text that needs breaks.", 15)
+#'
+add_line_breaks <- function(text, max_length = 20) {
+  words <- strsplit(text, " ")[[1]]
+  lines <- c()
+  current_line <- ""
+
+  for (word in words) {
+    if (nchar(current_line) + nchar(word) + 1 <= max_length) {
+      current_line <- paste(current_line,
+        word,
+        sep = if (nchar(current_line) > 0) " " else ""
+      )
+    } else {
+      lines <- c(lines, current_line)
+      current_line <- word
+    }
+  }
+  c(lines, current_line) |> paste(collapse = "\n")
 }

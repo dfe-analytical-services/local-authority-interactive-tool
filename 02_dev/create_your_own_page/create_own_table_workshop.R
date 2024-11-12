@@ -34,7 +34,7 @@ input$indicator <- selected_indicator
 
 # Filter the dataset for selected indicators and get distinct years
 years_dict <- bds_metrics |>
-  dplyr::filter(Measure %in% input$indicator, !is.na(Years)) |>
+  dplyr::filter(Measure %in% input$indicator) |>
   dplyr::distinct(Years, Years_num)
 
 # Boolean to check for consistent year suffixes
@@ -112,8 +112,7 @@ filtered_bds <- dplyr::semi_join(
   by = c("Topic" = "Topic", "Measure" = "Measure")
 ) |>
   dplyr::filter(
-    `LA and Regions` %in% geog_inputs,
-    !is.na(Years)
+    `LA and Regions` %in% geog_inputs
   )
 
 # Step 2: Check if year suffixes are consistent
@@ -302,8 +301,7 @@ output_indicators <- query$output |>
 # Boolean for if the output indicators share suffixes
 share_year_suffix <- bds_metrics |>
   dplyr::filter(
-    Measure %in% output_indicators,
-    !is.na(Years)
+    Measure %in% output_indicators
   ) |>
   check_year_suffix_consistency()
 
@@ -312,8 +310,7 @@ if (share_year_suffix) {
   # Get the years with suffixes
   years_dict <- bds_metrics |>
     dplyr::filter(
-      Measure %in% output_indicators,
-      !is.na(Years)
+      Measure %in% output_indicators
     ) |>
     dplyr::distinct(Years, Years_num)
 
@@ -405,7 +402,8 @@ line_chart <- chart_plotting_data |>
       linetype = Measure,
       data_id = `LA and Regions`
     ),
-    na.rm = TRUE
+    na.rm = TRUE,
+    linewidth = 1
   ) +
   ggplot2::geom_point(
     ggplot2::aes(

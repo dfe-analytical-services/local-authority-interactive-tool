@@ -170,31 +170,28 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
     local <- reactiveValues(export_file = NULL, data = NULL, plot_width = NULL, file_type = NULL, file_name = NULL)
 
     # Observe changes in file type or data and generate export file
-    observeEvent(list(file_type_input(), data_for_download(), download_name()),
-      {
-        # Ensure inputs are not NULL
-        req(file_type_input(), data_for_download(), download_name())
+    observeEvent(list(file_type_input(), data_for_download(), download_name()), {
+      # Ensure inputs are not NULL
+      req(file_type_input(), data_for_download(), download_name())
 
-        # Setting parameters
-        local$file_type <- file_type_input()
-        local$file_name <- download_name()
+      # Setting parameters
+      local$file_type <- file_type_input()
+      local$file_name <- download_name()
 
-        # For charts we need to pull the relevant object from the reactive list
-        if (grepl("svg", local$file_type, ignore.case = TRUE)) {
-          local$data <- data_for_download()$"svg"
-          # Getting plot width from ggiraph obj ratio
-          local$plot_width <- data_for_download()$"html"$x$ratio * 5
-        } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
-          local$data <- data_for_download()$"html"
-        } else {
-          local$data <- data_for_download()
-        }
+      # For charts we need to pull the relevant object from the reactive list
+      if (grepl("svg", local$file_type, ignore.case = TRUE)) {
+        local$data <- data_for_download()$"svg"
+        # Getting plot width from ggiraph obj ratio
+        local$plot_width <- data_for_download()$"html"$x$ratio * 5
+      } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
+        local$data <- data_for_download()$"html"
+      } else {
+        local$data <- data_for_download()
+      }
 
-        # Generate the file based on the selected file type
-        local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
-      },
-      ignoreInit = TRUE
-    )
+      # Generate the file based on the selected file type
+      local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
+    })
 
     # Download handler
     output$download <- create_download_handler(
@@ -284,6 +281,62 @@ DownloadChartBtnServer <- function(id, parent_id, chart_type) {
   moduleServer(id, function(input, output, session) {
     observeEvent(input$open_modal, {
       shiny::showModal(DownloadChartModalUI(parent_id, chart_type))
+    })
+  })
+}
+
+
+#' Handle success and failure events for copying charts to clipboard
+#'
+#' This module listens for success or failure events triggered during
+#' copying a chart to the clipboard. It then displays a toast message
+#' indicating whether the chart was copied successfully or if the copy
+#' operation failed.
+#'
+#' @param id A unique ID for the module server function. This is used to
+#' identify the module when calling it from the UI or server function.
+#'
+#' @return No return value. The function will display a toast message
+#' based on the outcome of the copy operation.
+#'
+CopyToClipboardPopUpServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(input[["success"]], {
+      shinyToastify::showToast(
+        session,
+        input,
+        text = tags$span(
+          style = "color: white; font-size: 20px;", "Chart copied!"
+        ),
+        type = "success",
+        position = "top-center",
+        autoClose = 1500,
+        pauseOnFocusLoss = FALSE,
+        draggable = FALSE,
+        style = list(
+          border = "2px solid black",
+          boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+        )
+      )
+    })
+
+    observeEvent(input[["failure"]], {
+      shinyToastify::showToast(
+        session,
+        input,
+        text = tags$span(
+          style = "color: white; font-size: 20px;", "Failed to copy chart!"
+        ),
+        type = "error",
+        position = "top-center",
+        autoClose = 1500,
+        pauseOnFocusLoss = FALSE,
+        draggable = FALSE,
+        style = list(
+          border = "2px solid black",
+          boxShadow = "rgba(0, 0, 0, 0.56) 0px 22px 30px 4px"
+        )
+      )
     })
   })
 }

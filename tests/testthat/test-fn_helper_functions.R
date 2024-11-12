@@ -345,8 +345,10 @@ test_that("2. get_metadata with numeric metadata (date conversion)", {
     check.names = FALSE
   )
 
-  result <- get_metadata(data, "mpg", "Last Update")
-  expect_equal(result, "December 2021")
+  expect_warning(
+    expect_equal(get_metadata(data, "mpg", "Last Update"), "December 2021"),
+    "Detected a 5-digit numeric entry in metadata_output"
+  )
 })
 
 test_that("3. get_metadata with metadata that shouldn't be converted to a date", {

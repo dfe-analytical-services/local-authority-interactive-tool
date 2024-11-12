@@ -152,8 +152,7 @@ server_dev <- function(input, output, session) {
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
         Topic == input$topic_input,
-        Measure == input$indicator,
-        !is.na(Years)
+        Measure == input$indicator
       )
   })
 
@@ -193,7 +192,7 @@ server_dev <- function(input, output, session) {
     sn_avg <- la_filtered_bds |>
       dplyr::filter(`LA and Regions` %in% la_sns) |>
       dplyr::summarise(
-        values_num = mean(values_num, na.rm = TRUE),
+        values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
         .by = c("Years", "Years_num")
       ) |>
       dplyr::mutate(
@@ -313,26 +312,34 @@ server_dev <- function(input, output, session) {
 
   output$la_stats_table <- reactable::renderReactable({
     dfe_reactable(
-      la_stats_table() |>
-        dplyr::select(-Polarity),
+      la_stats_table(),
       columns = modifyList(
         # Create the reactable with specific column alignments
         format_num_reactable_cols(
-          la_stats_table() |>
-            dplyr::select(-Polarity),
+          la_stats_table(),
           get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding", "Latest National Rank")
+          categorical = c(
+            "Trend", "Quartile Banding", "Latest National Rank",
+            "(A) Up to and including", "(B) Up to and including",
+            "(C) Up to and including", "(D) Up to and including"
+          )
         ),
         # Style Quartile Banding column with colour
         list(
           set_custom_default_col_widths(),
           `Quartile Banding` = reactable::colDef(
-            style = quartile_banding_col_def(la_stats_table())
+            style = function(value, index) {
+              quartile_banding_col_def(la_stats_table()[index, ])
+            }
           ),
           Trend = reactable::colDef(
-            cell = trend_icon_renderer
-          )
+            cell = trend_icon_renderer,
+            style = function(value) {
+              get_trend_colour(value, la_stats_table()$Polarity[1])
+            }
+          ),
+          Polarity = reactable::colDef(show = FALSE)
         )
       )
     )
@@ -344,16 +351,6 @@ server_dev <- function(input, output, session) {
     # Build plot
     la_line_chart <- la_long() |>
       ggplot2::ggplot() +
-      ggiraph::geom_point_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          shape = `LA and Regions`,
-          data_id = `LA and Regions`
-        ),
-        na.rm = TRUE
-      ) +
       ggiraph::geom_line_interactive(
         ggplot2::aes(
           x = Years_num,
@@ -361,10 +358,23 @@ server_dev <- function(input, output, session) {
           color = `LA and Regions`,
           data_id = `LA and Regions`
         ),
+        na.rm = TRUE,
+        linewidth = 1
+      ) +
+      # Only show point data where line won't appear (NAs)
+      ggplot2::geom_point(
+        data = subset(create_show_point(la_long()), show_point),
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`
+        ),
+        shape = 15,
+        size = 1,
         na.rm = TRUE
       ) +
       format_axes(la_long()) +
-      set_plot_colours(la_long()) +
+      set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 
@@ -374,7 +384,8 @@ server_dev <- function(input, output, session) {
       get_years(la_long()),
       tooltip_vlines,
       la_long(),
-      indicator_dps()
+      indicator_dps(),
+      input$la_input
     )
 
     # Plotting interactive graph
@@ -405,11 +416,7 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            la_long() |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
-          ),
+          tooltip = tooltip_bar(la_long(), indicator_dps(), input$la_input),
           data_id = `LA and Regions`
         ),
         position = "dodge",
@@ -418,7 +425,7 @@ server_dev <- function(input, output, session) {
         colour = "black"
       ) +
       format_axes(la_long()) +
-      set_plot_colours(la_long(), "fill") +
+      set_plot_colours(la_long(), "fill", input$la_input) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 

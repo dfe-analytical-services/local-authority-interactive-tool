@@ -49,7 +49,6 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
       # Coerce final output table to long data (for plotting)
       # Recreate Years_num & values_num, also factor `LA and Regions` & Measure
       create_own_table() |>
-        dplyr::distinct() |>
         tidyr::pivot_longer(
           cols = dplyr::starts_with("20"),
           names_to = "Years",
@@ -60,7 +59,13 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
           values_num = Values,
           `LA and Regions` = factor(`LA and Regions`, levels = geog_chart_order),
           Measure = factor(Measure, levels = indicator_chart_order)
-        )
+        ) |>
+        # Replace NAs caused by combining datasets with actual value
+        dplyr::group_by(`LA and Regions`, Measure, Years_num) |>
+        tidyr::fill(c("Values", "values_num"), .direction = "downup", ) |>
+        dplyr::ungroup() |>
+        # Remove duplicates
+        dplyr::distinct(`LA and Regions`, Topic, Measure, Years_num, values_num, .keep_all = TRUE)
     })
 
     # Output number of selected indicators & geogs (for selection error messages)
@@ -183,12 +188,6 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         chart_info$no_geogs() <= 4
       )
 
-      # Count year cols - used to determine if to show geom_point
-      # (If only one year then no line will show so point needed)
-      num_year_cols <- chart_info$data() |>
-        dplyr::distinct(Years) |>
-        nrow()
-
       # Plot data - colour represents Geographies & linetype represents Indicator
       chart_info$data() |>
         ggplot2::ggplot() +
@@ -200,18 +199,19 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
             linetype = Measure,
             data_id = `LA and Regions`
           ),
-          na.rm = TRUE
+          na.rm = TRUE,
+          linewidth = 1
         ) +
+        # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
+          data = subset(create_show_point(chart_info$data()), show_point),
           ggplot2::aes(
             x = Years_num,
             y = values_num,
             color = `LA and Regions`
           ),
-          na.rm = TRUE,
-          # Show points if only one year data selected
-          size = ifelse(num_year_cols == 1, 3, 0),
-          shape = 16
+          shape = 15,
+          na.rm = TRUE
         ) +
         format_axes(chart_info$data()) +
         set_plot_colours(chart_info$data()) +
@@ -252,7 +252,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         tooltip_vlines,
         chart_info$data(),
         get_indicator_dps(create_own_bds()),
-        TRUE
+        include_measure = TRUE
       )
 
       # Plotting interactive graph
@@ -447,6 +447,14 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         chart_names_wrapped$Measure
       )
 
+      # Set x axis limits if one bar so its not super wide
+      n_chart_rows <- nrow(chart_info$data()) == 1
+      thin_bar_xlim <- if (n_chart_rows) {
+        thin_bar(chart_info$data(), Years_num)
+      } else {
+        NULL
+      }
+
       # Plot chart - split by indicators, colours represent Geographies
       chart_info$data() |>
         ggplot2::ggplot() +
@@ -455,17 +463,14 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = glue::glue_data(
-              chart_info$data() |>
-                pretty_num_table(
-                  include_columns = "values_num",
-                  dp = get_indicator_dps(create_own_bds())
-                ),
-              "Measure: {Measure}\nYear: {Years}\n\n{`LA and Regions`}: {values_num}"
+            tooltip = tooltip_bar(
+              chart_info$data(),
+              get_indicator_dps(create_own_bds()),
+              include_measure = TRUE
             )
           ),
-          position = position_dodge(width = 0.6),
-          width = 0.6,
+          position = "dodge",
+          width = ifelse(n_chart_rows, 0.1, 0.6),
           na.rm = TRUE,
           color = "black"
         ) +
@@ -490,7 +495,8 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         theme(
           panel.spacing.x = unit(15, "mm"),
           plot.margin = ggplot2::margin(r = 30)
-        )
+        ) +
+        ggplot2::coord_cartesian(xlim = thin_bar_xlim)
     })
 
     # Build interactive line chart

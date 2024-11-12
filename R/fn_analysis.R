@@ -155,13 +155,14 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
       TRUE ~ "Error"
     )
   } else {
-    quartile_band <- "Not applicable"
+    quartile_band <- "-"
   }
 
-  if (quartile_band %notin% c("A", "B", "C", "D", "Not applicable", NA_character_)) {
+  if (quartile_band %notin% c("A", "B", "C", "D", "-", NA_character_)) {
     warning("Unexpected Quartile Banding")
   }
 
+  # Clean NA values based on polarity
   quartile_band
 }
 
@@ -182,7 +183,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
 get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
   all_polarities <- c("High", "Low", "-", NA)
   valid_polarities <- c("High", "Low")
-  all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
+  all_quartiles <- c("A", "B", "C", "D", "Error", "-", "", NA_character_)
   valid_quartiles <- c("A", "B", "C", "D")
 
   polarity <- data_polarity[1]
@@ -221,14 +222,22 @@ get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
 #' @return A data frame with an additional column for the calculated rank.
 #'
 calculate_rank <- function(filtered_data, indicator_polarity) {
+  # Check if filtered_data is empty and emit a warning
+  if (nrow(filtered_data) == 0) {
+    warning("The filtered data frame is empty; returning an empty result.")
+    return(filtered_data |> dplyr::mutate(rank = numeric(0)))
+  }
+
+  # Proceed with ranking if data is not empty
   filtered_data |>
     dplyr::mutate(
       rank = dplyr::case_when(
-        is.na(values_num) ~ NA,
+        indicator_polarity %notin% c("High", "Low") ~ "-",
+        indicator_polarity %in% c("High", "Low") & is.na(values_num) ~ NA,
         # Rank in descending order
-        indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+        indicator_polarity == "High" ~ as.character(rank(-values_num, ties.method = "min", na.last = TRUE)),
         # Rank in ascending order
-        indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+        indicator_polarity == "Low" ~ as.character(rank(values_num, ties.method = "min", na.last = TRUE))
       )
     )
 }
@@ -318,8 +327,7 @@ filter_region_data_all_la <- function(data, la_names) {
 filter_bds_for_indicators <- function(bds_data, selected_indicators) {
   bds_data |>
     dplyr::filter(
-      Measure %in% selected_indicators,
-      !is.na(Years)
+      Measure %in% selected_indicators
     )
 }
 

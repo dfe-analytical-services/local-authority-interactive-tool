@@ -29,7 +29,8 @@ Create_MainInputsUI <- function(id) {
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select a LA, Region or England"
+            "placeholder" = "Select a LA, Region or England",
+            plugins = list("remove_button")
           )
         )
       ),
@@ -51,7 +52,8 @@ Create_MainInputsUI <- function(id) {
           choices = metric_names,
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select an indicator"
+            "placeholder" = "Select an indicator",
+            plugins = list("remove_button")
           )
         )
       )
@@ -226,7 +228,7 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
     # Compute years choices available based on selected indicator
     years_choices <- reactive({
       years_dict <- bds_metrics |>
-        dplyr::filter(Measure %in% indicator_input(), !is.na(Years)) |>
+        dplyr::filter(Measure %in% indicator_input()) |>
         dplyr::distinct(Years, Years_num)
 
       # Boolean to check for matching years' suffixes

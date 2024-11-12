@@ -59,7 +59,7 @@
       "Package": "Matrix",
       "Version": "1.7-0",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R",
         "grDevices",
@@ -70,7 +70,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "5122bb14d8736372411f955e1b16bc8a"
+      "Hash": "1920b2f11133b12350024297d8a4ff4a"
     },
     "PKI": {
       "Package": "PKI",
@@ -1717,30 +1717,6 @@
       ],
       "Hash": "e8b10b074b0ef3d393d195115e8e249b"
     },
-    "reactablefmtr": {
-      "Package": "reactablefmtr",
-      "Version": "2.0.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "dplyr",
-        "grDevices",
-        "htmltools",
-        "htmlwidgets",
-        "magrittr",
-        "purrr",
-        "reactable",
-        "sass",
-        "shiny",
-        "stats",
-        "stringr",
-        "tippy",
-        "tools",
-        "webshot"
-      ],
-      "Hash": "03265b5334226d0ad25e1fc170ed6c27"
-    },
     "readxl": {
       "Package": "readxl",
       "Version": "1.4.3",
@@ -2022,6 +1998,20 @@
         "shinyjs"
       ],
       "Hash": "a593ce187f4a7830392e0843041e3ea8"
+    },
+    "shinyToastify": {
+      "Package": "shinyToastify",
+      "Version": "2.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "fontawesome",
+        "htmltools",
+        "reactR",
+        "shiny",
+        "utils"
+      ],
+      "Hash": "e27e07344a206a2a033994b0fe4412f8"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
@@ -2453,19 +2443,6 @@
         "tibble"
       ],
       "Hash": "c7d3fd6d29ab077cbac8f0e2751449e6"
-    },
-    "webshot": {
-      "Package": "webshot",
-      "Version": "0.5.5",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "callr",
-        "jsonlite",
-        "magrittr"
-      ],
-      "Hash": "16858ee1aba97f902d24049d4a44ef16"
     },
     "websocket": {
       "Package": "websocket",

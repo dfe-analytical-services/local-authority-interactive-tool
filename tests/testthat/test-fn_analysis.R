@@ -290,7 +290,7 @@ test_that("1. calculate_rank assigns correct ranks for normal values", {
   )
   expected_normal <- data.frame(
     values_num = c(10, 20, 30, 40, 50),
-    rank = c(1, 2, 3, 4, 5)
+    rank = c("1", "2", "3", "4", "5")
   )
   result_normal <- calculate_rank(df_normal, "Low")
   expect_equal(result_normal, expected_normal)
@@ -303,7 +303,7 @@ test_that("2. calculate_rank handles ties correctly", {
   )
   expected_ties <- data.frame(
     values_num = c(10, 20, 20, 30, 40),
-    rank = c(5, 3, 3, 2, 1)
+    rank = c("5", "3", "3", "2", "1")
   )
   result_ties <- calculate_rank(df_ties, "High")
   expect_equal(result_ties, expected_ties)
@@ -316,7 +316,7 @@ test_that("3. calculate_rank handles missing values properly", {
   )
   expected_missing <- data.frame(
     values_num = c(10, NA, 30, 20, NA),
-    rank = c(1, NA, 3, 2, NA)
+    rank = c("1", NA, "3", "2", NA)
   )
   result_missing <- calculate_rank(df_missing, "Low")
   expect_equal(result_missing, expected_missing)
@@ -324,14 +324,14 @@ test_that("3. calculate_rank handles missing values properly", {
 
 # 4. Test with an empty data frame
 test_that("4. calculate_rank returns an empty data frame when input is empty", {
-  df_empty <- data.frame(
-    values_num = numeric(0)
+  df_empty <- data.frame(values_num = numeric(0))
+  expected_empty <- data.frame(values_num = numeric(0), rank = numeric(0))
+
+  # Test that a warning is raised and the result matches the expected empty data frame
+  expect_warning(
+    result_empty <- calculate_rank(df_empty, "High"),
+    "The filtered data frame is empty; returning an empty result."
   )
-  expected_empty <- data.frame(
-    values_num = numeric(0),
-    rank = numeric(0)
-  )
-  result_empty <- calculate_rank(df_empty, "High")
   expect_equal(result_empty, expected_empty)
 })
 
@@ -342,7 +342,7 @@ test_that("5. calculate_rank returns NA for rank when all values are missing", {
   )
   expected_all_missing <- data.frame(
     values_num = c(NA, NA, NA),
-    rank = c(NA_real_, NA_real_, NA_real_)
+    rank = c(NA_character_, NA_character_, NA_character_)
   )
   result_all_missing <- calculate_rank(df_all_missing, "Low")
   expect_equal(result_all_missing, expected_all_missing)
