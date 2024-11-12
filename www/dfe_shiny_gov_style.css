@@ -613,3 +613,9 @@ html {
   box-shadow: none; /* remove any default shadow */
 }
 
+
+.tippy-tooltip.gov-theme {
+  background-color: #5694ca;
+  color: white;
+  max-width: 100px;
+}

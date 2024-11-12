@@ -224,6 +224,41 @@ la_stats_table <- build_la_stats_table(
   la_indicator_polarity
 )
 
+
+# Define function to create a tooltip with an embedded Font Awesome icon
+with_tooltip <- function(value, tooltip, ...) {
+  div(
+    style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
+    htmltools::htmlDependency(
+      name = "font-awesome",
+      version = "6.2.0",
+      src = c(href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0"),
+      stylesheet = "css/all.min.css"
+    ),
+    value,
+    tippy::tippy(
+      htmltools::tags$span(
+        htmltools::tags$i(
+          class = "fas fa-question-circle",
+          style = "color: #5694ca;padding-right: 7px; cursor: help; font-size: 1.2em;"
+        )
+      ),
+      tooltip = div(
+        tooltip
+      ),
+      theme = "gov",
+      placement = "top",
+      followCursor = TRUE,
+      interactive = TRUE,
+      interactiveBorder = 10,
+      arrow = TRUE,
+      inertia = TRUE,
+      ...
+    )
+  )
+}
+
+
 # Format stats table
 # Use modifyList to merge the lists properly
 dfe_reactable(
@@ -258,6 +293,7 @@ dfe_reactable(
         }
       ),
       Trend = reactable::colDef(
+        header = with_tooltip("Trend", "Based on change from previous year"),
         cell = trend_icon_renderer,
         style = function(value) {
           get_trend_colour(value, la_stats_table$Polarity[1])
@@ -267,7 +303,6 @@ dfe_reactable(
     )
   )
 )
-
 
 
 
