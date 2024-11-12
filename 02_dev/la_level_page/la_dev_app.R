@@ -304,6 +304,7 @@ server_dev <- function(input, output, session) {
       la_rank,
       la_quartile,
       la_quartile_bands,
+      get_indicator_dps(filtered_bds$data),
       la_indicator_polarity
     )
 
@@ -321,8 +322,8 @@ server_dev <- function(input, output, session) {
           num_exclude = "LA Number",
           categorical = c(
             "Trend", "Quartile Banding", "Latest National Rank",
-            "(A) Up to and including", "(B) Up to and including",
-            "(C) Up to and including", "(D) Up to and including"
+            "A", "B",
+            "C", "D"
           )
         ),
         # Style Quartile Banding column with colour

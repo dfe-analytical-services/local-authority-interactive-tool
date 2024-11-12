@@ -221,6 +221,7 @@ la_stats_table <- build_la_stats_table(
   la_rank,
   la_quartile,
   la_quartile_bands,
+  indicator_dps,
   la_indicator_polarity
 )
 

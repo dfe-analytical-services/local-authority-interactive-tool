@@ -372,6 +372,7 @@ build_la_stats_table <- function(
     rank,
     quartile,
     quartile_bands,
+    indicator_dps,
     indicator_polarity) {
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
@@ -380,33 +381,36 @@ build_la_stats_table <- function(
     warning("Suprise NA value in stats table")
   }
 
+  round_qbs <- round(quartile_bands, indicator_dps)
+  qb_adj <- 10**-(indicator_dps)
+
   # Create the ranking and Quartile Banding based on polarity
   rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "(A) Up to and including" = quartile_bands[["25%"]],
-      "(B) Up to and including" = quartile_bands[["50%"]],
-      "(C) Up to and including" = quartile_bands[["75%"]],
-      "(D) Up to and including" = quartile_bands[["100%"]]
+      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
     )
   } else if (indicator_polarity %in% "High") {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "(D) Up to and including" = quartile_bands[["25%"]],
-      "(C) Up to and including" = quartile_bands[["50%"]],
-      "(B) Up to and including" = quartile_bands[["75%"]],
-      "(A) Up to and including" = quartile_bands[["100%"]]
+      "D" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+      "C" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+      "B" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+      "A" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
     )
   } else {
     list(
       "Latest National Rank" = "-",
       "Quartile Banding" = "-",
-      "(A) Up to and including" = "-",
-      "(B) Up to and including" = "-",
-      "(C) Up to and including" = "-",
-      "(D) Up to and including" = "-"
+      "A" = "-",
+      "B" = "-",
+      "C" = "-",
+      "D" = "-"
     )
   }
 
