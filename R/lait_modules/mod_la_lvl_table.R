@@ -337,11 +337,6 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           # Style Quartile Banding column with colour
           list(
             set_custom_default_col_widths(),
-            `Quartile Banding` = reactable::colDef(
-              style = function(value, index) {
-                quartile_banding_col_def(la_stats_table()[index, ])
-              }
-            ),
             Trend = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Trend",
@@ -351,6 +346,17 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
               style = function(value) {
                 get_trend_colour(value, la_stats_table()$Polarity[1])
               }
+            ),
+            `Quartile Banding` = reactable::colDef(
+              style = function(value, index) {
+                quartile_banding_col_def(la_stats_table()[index, ])
+              }
+            ),
+            `Latest National Rank` = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Latest National Rank",
+                "Rank 1 is always the best performer"
+              )
             ),
             Polarity = reactable::colDef(show = FALSE)
           )
