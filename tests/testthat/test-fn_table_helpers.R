@@ -407,7 +407,7 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
   change_since_prev <- NA
   rank <- NA
   quartile <- NA
-  quartile_bands <- c("0%" =0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
   indicator_dps <- 1
   indicator_polarity <- NA
 
