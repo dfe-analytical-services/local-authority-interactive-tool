@@ -500,7 +500,7 @@ build_sn_stats_table <- function(
     "LA and Regions" = la_and_regions,
     "Trend" = trend,
     "Change from previous year" = change_prev,
-    "National Rank" = c(national_rank, "", ""),
+    "Latest National Rank" = c(national_rank, "", ""),
     "Quartile Banding" = c(quartile_band, "", ""),
     "Polarity" = polarity,
     check.names = FALSE

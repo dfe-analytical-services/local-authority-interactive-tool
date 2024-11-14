@@ -641,7 +641,7 @@ StatN_StatsTableServer <- function(id,
             stat_n_stats_output,
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding", "National Rank")
+            categorical = c("Trend", "Quartile Banding", "Latest National Rank")
           ),
           # Define specific formatting for the Trend and Quartile Banding columns
           list(
@@ -664,6 +664,12 @@ StatN_StatsTableServer <- function(id,
                 )
                 list(background = color)
               }
+            ),
+            `Latest National Rank` = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Latest National Rank",
+                "Rank 1 is always the best performer"
+              )
             ),
             Polarity = reactable::colDef(show = FALSE)
           )
