@@ -398,10 +398,10 @@ build_la_stats_table <- function(
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "D" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-      "C" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-      "B" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-      "A" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
+      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
+      "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
+      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
     )
   } else {
     list(

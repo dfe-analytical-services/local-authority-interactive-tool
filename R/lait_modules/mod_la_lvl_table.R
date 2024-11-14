@@ -313,12 +313,9 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_rank,
         la_quartile,
         la_quartile_bands,
+        get_indicator_dps(filtered_bds()),
         la_indicator_polarity
-      ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = c("LA Number", "Trend", "Latest National Rank")
-        )
+      )
 
       la_stats_table
     })
@@ -327,7 +324,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_stats <- reactable::renderReactable({
       dfe_reactable(
         la_stats_table() |>
-          dplyr::select(!dplyr::ends_with("including")),
+          dplyr::select(-c("A", "B", "C", "D")),
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
@@ -365,7 +362,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_quartiles <- reactable::renderReactable({
       # Get quartile bands only
       qb_table <- la_stats_table() |>
-        dplyr::select(dplyr::ends_with("including"), -Polarity)
+        dplyr::select(c("A", "B", "C", "D"))
 
       dfe_reactable(
         qb_table,
