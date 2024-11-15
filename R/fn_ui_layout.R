@@ -8,7 +8,9 @@
 create_chart_card_ui <- function(output_id) {
   bslib::card(
     bslib::card_body(
-      ggiraph::girafeOutput(output_id)
+      with_gov_spinner(
+        ggiraph::girafeOutput(output_id)
+      )
     ),
     full_screen = TRUE,
     style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"

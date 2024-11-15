@@ -127,10 +127,8 @@ LA_LevelTableUI <- function(id) {
       bslib::nav_panel(
         "Table",
         bslib::card_header("Local Authority, Region and England"),
-        shinycssloaders::withSpinner(
-          reactable::reactableOutput(ns("la_table")),
-          type = 6, # Choose spinner type (1 to 8)
-          color = "#1d70b8" # Optional: Add a GOV.UK style color
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table"))
         )
       ),
       bslib::nav_panel(
@@ -231,11 +229,17 @@ LA_StatsTableUI <- function(id) {
         ),
         div(
           bslib::card_header("General Statistics", style = "color: #0000;"),
-          reactable::reactableOutput(ns("la_stats"))
+          with_gov_spinner(
+            reactable::reactableOutput(ns("la_stats")),
+            size = 0.4
+          )
         ),
         div(
           bslib::card_header("Quartile bands"),
-          reactable::reactableOutput(ns("la_quartiles"))
+          with_gov_spinner(
+            reactable::reactableOutput(ns("la_quartiles")),
+            size = 0.4
+          )
         )
       )
     )
