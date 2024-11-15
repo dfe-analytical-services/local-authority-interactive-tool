@@ -820,7 +820,7 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
     Download_DataServer(
       "table_download",
       reactive(input$file_type),
-      reactive(create_own_data()),
+      reactive(replace_nan_with_empty(create_own_data())),
       reactive("LAIT-create-your-own-table")
     )
   })

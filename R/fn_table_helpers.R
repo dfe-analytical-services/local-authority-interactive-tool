@@ -219,7 +219,7 @@ format_reactable_num_col <- function(col, indicator_dps) {
     cell = function(value) {
       ifelse(
         is.nan(value),
-        "-",
+        "",
         dfeR::pretty_num(value, dp = indicator_dps)
       )
     }
@@ -934,4 +934,35 @@ add_tooltip_to_reactcol <- function(value, tooltip, ...) {
       ...
     )
   )
+}
+
+
+#' Replace "NaN" values with empty strings in columns starting with "2"
+#'
+#' This function takes a data frame and performs the following actions:
+#' 1. Converts all columns starting with "2" to character type.
+#' 2. Replaces any "NaN" string values with an empty string ("").
+#'
+#' @param data A data frame to be processed.
+#'
+#' @return A data frame with columns starting with "2" converted to character
+#' type, and any "NaN" values replaced with empty strings.
+#'
+#' @examples
+#' # Assuming `df` is a data frame with columns starting with "2"
+#' result <- replace_nan_with_empty(df)
+#'
+replace_nan_with_empty <- function(data) {
+  data |>
+    dplyr::mutate(
+      dplyr::across(
+        .cols = dplyr::starts_with("2"),
+        .fns = ~ as.character(.x),
+        .names = "{.col}"
+      ),
+      dplyr::across(
+        .cols = dplyr::starts_with("2"),
+        .fns = ~ ifelse(.x == "NaN", "", .x)
+      )
+    )
 }
