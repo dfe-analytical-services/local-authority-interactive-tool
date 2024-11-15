@@ -38,12 +38,8 @@ ui_dev <- bslib::page_fillable(
         choices = metric_names
       )
     ),
-    # Conditionally Render the Banner
-    shinycssloaders::withSpinner(
-      shiny::uiOutput("banner_output"),
-      type = 6,
-      color = "#1d70b8"
-    )
+    # Conditional State-funded school banner
+    shiny::uiOutput("state_funded_banner")
   ),
   div(
     class = "well",
@@ -67,7 +63,9 @@ ui_dev <- bslib::page_fillable(
         shinycssloaders::withSpinner(
           reactable::reactableOutput("la_stats_table"),
           type = 6,
-          color = "#1d70b8"
+          color = "#1d70b8",
+          size = 0.5,
+          proxy.height = "100px"
         )
       )
     )
@@ -286,11 +284,14 @@ server_dev <- function(input, output, session) {
   })
 
 
-  output$banner_output <- renderUI({
+  # Stet funded school banner (appears for certain indicators)
+  output$state_funded_banner <- renderUI({
+    # Get whether state-funded idnicator
     state_funded <- filtered_bds$data |>
       pull_uniques("state_funded_flag") |>
       (\(x) !is.na(x))()
 
+    # Render banner if state-funded
     if (state_funded) {
       tagList(
         br(),
