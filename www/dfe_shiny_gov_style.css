@@ -628,7 +628,7 @@ html {
   font-weight: 400;
   font-size: 1rem;
   line-height: 1.25;
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
   border: 5px solid #1d70b8;
   background-color: #1d70b8
 }
@@ -717,7 +717,7 @@ html {
 
 .govuk-notification-banner__content>* {
   box-sizing: border-box;
-  max-width: 605px
+  max-width: none;
 }
 
 .govuk-notification-banner__content>:last-child {

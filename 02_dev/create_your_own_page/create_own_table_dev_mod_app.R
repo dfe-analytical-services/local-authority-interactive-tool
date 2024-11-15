@@ -24,6 +24,8 @@ ui <- bslib::page_fillable(
 
   # Main selections ============================================================
   h1("Create your own"),
+  # Full dataset notification banner
+  full_data_on_github_noti(),
   div(
     class = "well",
     style = "overflow-y: visible; padding: 1rem;",
