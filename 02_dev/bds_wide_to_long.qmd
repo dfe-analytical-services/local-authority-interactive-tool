@@ -26,7 +26,7 @@ source(here::here("R/fn_load_data.R"))
 # Load raw BDS wide from shared folder
 bds_wide_raw_sf <- readxl::read_xlsx(
   path = paste0(shared_folder, "/../Information for App Development/BDS - 2024 (JAKE).xlsx"),
-  sheet = "BDS for new LAIT",
+  sheet = "BDS New",
   col_names = TRUE,
   skip = 1,
   # Replace multi-space with single-space
@@ -92,19 +92,8 @@ bds_long <- bds_wide |>
 
 
 ```{r bds-clean}
-# Vector to store columns to delete
-columns_to_delete <- c(
-  "Quartile 1 (A)",
-  "Quartile 2 (B)",
-  "Quartile 3 (C )",
-  "Quartile 4 (D)",
-  "line",
-  "Data item"
-)
-
 # Delete lines in vector from column, remove '.'s and underscores/number
 bds_long_clean <- bds_long |>
-  dplyr::select(!dplyr::all_of(columns_to_delete)) |>
   dplyr::mutate(
     "LA and Regions" = stringr::str_replace_all(`LA and Regions`, "\\.", " "),
     "LA and Regions" = stringr::str_replace_all(`LA and Regions`, "  ", "\\. "),
@@ -156,5 +145,12 @@ arrow::write_dataset(
   here::here("01_data/02_prod/"),
   format = "parquet",
   basename_template = "bds_long_{i}.parquet"
+)
+
+# Write .csv version (for public use)
+write.csv(
+  bds_long_public,
+  here::here("01_data/02_prod/bds_long.csv"),
+  row.names = FALSE
 )
 ```
