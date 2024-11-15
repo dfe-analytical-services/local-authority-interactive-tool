@@ -39,7 +39,11 @@ ui_dev <- bslib::page_fillable(
       )
     ),
     # Conditionally Render the Banner
-    shiny::uiOutput("banner_output")
+    shinycssloaders::withSpinner(
+      shiny::uiOutput("banner_output"),
+      type = 6,
+      color = "#1d70b8"
+    )
   ),
   div(
     class = "well",
@@ -47,7 +51,11 @@ ui_dev <- bslib::page_fillable(
     bslib::card(
       bslib::card_header("Local Authority, Region and England"),
       bslib::card_body(
-        reactable::reactableOutput("la_table")
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput("la_table"),
+          type = 6,
+          color = "#1d70b8"
+        )
       )
     )
   ),
@@ -56,7 +64,11 @@ ui_dev <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
-        reactable::reactableOutput("la_stats_table")
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput("la_stats_table"),
+          type = 6,
+          color = "#1d70b8"
+        )
       )
     )
   ),
@@ -69,7 +81,11 @@ ui_dev <- bslib::page_fillable(
         title = "Line chart",
         bslib::card(
           bslib::card_body(
-            ggiraph::girafeOutput("la_line_chart")
+            shinycssloaders::withSpinner(
+              ggiraph::girafeOutput("la_line_chart"),
+              type = 6,
+              color = "#1d70b8"
+            )
           ),
           full_screen = TRUE
         ),
@@ -79,7 +95,11 @@ ui_dev <- bslib::page_fillable(
         bslib::card(
           id = "la_bar_body",
           bslib::card_body(
-            ggiraph::girafeOutput("la_bar_chart")
+            shinycssloaders::withSpinner(
+              ggiraph::girafeOutput("la_bar_chart"),
+              type = 6,
+              color = "#1d70b8"
+            )
           ),
           full_screen = TRUE
         )
@@ -92,35 +112,56 @@ ui_dev <- bslib::page_fillable(
     bslib::card(
       bslib::card_body(
         h3("Description:"),
-        textOutput("description"),
+        shinycssloaders::withSpinner(
+          textOutput("description"),
+          type = 6,
+          color = "#1d70b8"
+        ),
         h3("Methodology:"),
-        uiOutput("methodology"),
+        shinycssloaders::withSpinner(
+          uiOutput("methodology"),
+          type = 6,
+          color = "#1d70b8"
+        ),
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
           h3("Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          textOutput("last_update")
+          shinycssloaders::withSpinner(
+            textOutput("last_update"),
+            type = 6,
+            color = "#1d70b8"
+          )
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          uiOutput("next_update")
+          shinycssloaders::withSpinner(
+            uiOutput("next_update"),
+            type = 6,
+            color = "#1d70b8"
+          )
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Source:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          uiOutput("source")
+          shinycssloaders::withSpinner(
+            uiOutput("source"),
+            type = 6,
+            color = "#1d70b8"
+          )
         )
       )
     )
   )
 )
+
 
 # Server
 server_dev <- function(input, output, session) {

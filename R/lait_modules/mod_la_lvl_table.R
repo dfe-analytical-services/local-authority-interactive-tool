@@ -127,7 +127,11 @@ LA_LevelTableUI <- function(id) {
       bslib::nav_panel(
         "Table",
         bslib::card_header("Local Authority, Region and England"),
-        reactable::reactableOutput(ns("la_table"))
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput(ns("la_table")),
+          type = 6, # Choose spinner type (1 to 8)
+          color = "#1d70b8" # Optional: Add a GOV.UK style color
+        )
       ),
       bslib::nav_panel(
         "Download data",
