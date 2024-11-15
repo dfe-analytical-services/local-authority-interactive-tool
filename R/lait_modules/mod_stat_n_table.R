@@ -635,6 +635,9 @@ StatN_StatsTableServer <- function(id,
 
       dfe_reactable(
         stat_n_stats_output,
+        rowStyle = function(index) {
+          highlight_selected_row(index, stat_n_stats_output, app_inputs$la())
+        },
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
@@ -658,11 +661,9 @@ StatN_StatsTableServer <- function(id,
             ),
             `Quartile Banding` = reactable::colDef(
               style = function(value, index) {
-                color <- get_quartile_band_cell_colour(
-                  stat_n_stats_output[index, "Polarity"],
-                  stat_n_stats_output[index, "Quartile Banding"]
+                quartile_banding_col_def(
+                  stat_n_stats_output[index, ]
                 )
-                list(background = color)
               }
             ),
             `Latest National Rank` = reactable::colDef(
@@ -673,10 +674,7 @@ StatN_StatsTableServer <- function(id,
             ),
             Polarity = reactable::colDef(show = FALSE)
           )
-        ),
-        rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_stats_output, app_inputs$la())
-        }
+        )
       )
     })
   })

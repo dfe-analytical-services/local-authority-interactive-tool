@@ -238,27 +238,13 @@ dfe_reactable(
       num_exclude = "LA Number",
       categorical = c(
         "Trend", "Quartile Banding", "Latest National Rank",
-        "(A) Up to and including", "(B) Up to and including",
-        "(C) Up to and including", "(D) Up to and including"
+        "A", "B",
+        "C", "D"
       )
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
       set_custom_default_col_widths(),
-      `Quartile Banding` = reactable::colDef(
-        cell = function(value) {
-          # Apply the NA value logic based on Polarity
-          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
-        },
-        style = function(value, index) {
-          quartile_banding_col_def(la_stats_table[index, ])
-        }
-      ),
-      `Latest National Rank` = reactable::colDef(
-        cell = function(value) {
-          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
-        }
-      ),
       Trend = reactable::colDef(
         header = add_tooltip_to_reactcol(
           "Trend",
@@ -268,6 +254,17 @@ dfe_reactable(
         style = function(value) {
           get_trend_colour(value, la_stats_table$Polarity[1])
         }
+      ),
+      `Quartile Banding` = reactable::colDef(
+        style = function(value, index) {
+          quartile_banding_col_def(la_stats_table[index, ])
+        }
+      ),
+      `Latest National Rank` = reactable::colDef(
+        header = add_tooltip_to_reactcol(
+          "Latest National Rank",
+          "Rank 1 is always the best performer"
+        )
       ),
       Polarity = reactable::colDef(show = FALSE)
     )

@@ -588,20 +588,6 @@ get_indicator_dps <- function(data_full) {
 }
 
 
-# Function to handle NA values based on Polarity
-get_na_value_based_on_polarity <- function(value, polarity) {
-  if (is.na(value)) {
-    if (polarity %in% c("High", "Low")) {
-      return("NA") # Return "NA" if Polarity is "High" or "Low"
-    } else {
-      return("-") # Return "-" for other cases
-    }
-  }
-  return(value) # Return the value as-is if not NA
-}
-
-
-
 #' Render Trend Icons Based on Value
 #'
 #' This function determines and renders a trend icon based on the given
@@ -718,7 +704,18 @@ quartile_banding_col_def <- function(data) {
     data$`Quartile Banding`
   )
 
-  list(background = qb_color)
+  # Setting text colour based on whether cell background has colour
+  if (qb_color != "none") {
+    text_colour <- "white"
+  } else {
+    text_colour <- NA
+  }
+
+  list(
+    background = qb_color,
+    textAlign = "center",
+    color = text_colour
+  )
 }
 
 

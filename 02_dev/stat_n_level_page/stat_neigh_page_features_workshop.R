@@ -194,6 +194,9 @@ stat_n_stats_table <- build_sn_stats_table(
 # Output stats table
 dfe_reactable(
   stat_n_stats_table,
+  rowStyle = function(index) {
+    highlight_selected_row(index, stat_n_stats_table, selected_la)
+  },
   columns = modifyList(
     format_num_reactable_cols(
       stat_n_stats_table,
@@ -218,10 +221,7 @@ dfe_reactable(
       ),
       Polarity = reactable::colDef(show = FALSE)
     )
-  ),
-  rowStyle = function(index) {
-    highlight_selected_row(index, stat_n_stats_table, selected_la)
-  }
+  )
 )
 
 

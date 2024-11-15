@@ -370,6 +370,9 @@ server_dev <- function(input, output, session) {
 
     dfe_reactable(
       stat_n_stats_output,
+      rowStyle = function(index) {
+        highlight_selected_row(index, stat_n_stats_output, input$la_input)
+      },
       columns = modifyList(
         # Create the reactable with specific column alignments
         format_num_reactable_cols(
@@ -404,10 +407,7 @@ server_dev <- function(input, output, session) {
           ),
           Polarity = reactable::colDef(show = FALSE)
         )
-      ),
-      rowStyle = function(index) {
-        highlight_selected_row(index, stat_n_stats_output, input$la_input)
-      }
+      )
     )
   })
 
