@@ -137,7 +137,7 @@ test_that("1. create_focus_plot_sizes returns a named vector of sizes with corre
   expect_equal(length(result_sizes), length(unique_groups))
 })
 
-##calculate_y_range()--------------------------------------------
+## calculate_y_range()--------------------------------------------
 
 # Create some sample data for testing
 sample_data <- tibble::tibble(
@@ -185,7 +185,7 @@ test_that("4. calculate_y_range returns correct range for negative and positive 
   expect_equal(result, c(-10, 10))
 })
 
-##pretty_y_gridlines{}------------------------------------------------------------------
+## pretty_y_gridlines{}------------------------------------------------------------------
 
 
 # Create sample data for testing
@@ -220,13 +220,13 @@ test_that("1. pretty_y_gridlines generates breaks beyond data range", {
 test_that("2. pretty_y_gridlines handles negative values correctly", {
   result <- pretty_y_gridlines(negative_data)
   expect_true(min(result) <= -20)
-  expect_true(max(result) >= 0)  # Ensure it includes zero
+  expect_true(max(result) >= 0) # Ensure it includes zero
 })
 
 # Test that pretty_y_gridlines includes zero for all-positive data
 test_that("3. pretty_y_gridlines includes zero for all-positive data", {
   result <- pretty_y_gridlines(positive_data)
-  expect_true(min(result) <= 0)  # Ensure it includes zero
+  expect_true(min(result) <= 0) # Ensure it includes zero
   expect_true(max(result) >= 15)
 })
 
@@ -237,7 +237,7 @@ test_that("4. pretty_y_gridlines handles mixed positive and negative values", {
   expect_true(max(result) >= 20)
 })
 
-##get_years()--------------------------------------------------------------------------
+## get_years()--------------------------------------------------------------------------
 
 # Create sample data for testing
 sample_data <- tibble::tibble(
@@ -257,4 +257,4 @@ test_that("2. get_years returns unique character years in ascending order", {
   expect_equal(result, c("2015", "2016", "2017", "2018", NA))
 })
 
-##format_axes()--------------------------------------------------------------
+## format_axes()--------------------------------------------------------------
