@@ -94,6 +94,7 @@ bds_long <- bds_wide |>
 ```{r bds-clean}
 # Delete lines in vector from column, remove '.'s and underscores/number
 bds_long_clean <- bds_long |>
+  dplyr::select(-line) |>
   dplyr::mutate(
     "LA and Regions" = stringr::str_replace_all(`LA and Regions`, "\\.", " "),
     "LA and Regions" = stringr::str_replace_all(`LA and Regions`, "  ", "\\. "),
@@ -114,9 +115,7 @@ la_codes <- readxl::read_xlsx(
 # Join to bds and create combined codes var
 bds_long_la <- bds_long_clean |>
   dplyr::left_join(la_codes, by = c("LA and Regions" = "LA Name")) |>
-  dplyr::mutate(combined_code = paste(`LA Number`, `Short Desc`, Years,
-    sep = "_"
-  ))
+  dplyr::select(-Type)
 ```
 
 
