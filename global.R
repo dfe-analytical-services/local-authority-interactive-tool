@@ -123,6 +123,7 @@ bds_clean <- bds |>
     values_clean = dplyr::case_when(
       Values == "-" ~ NA,
       Values == "c" ~ NA,
+      Values == ".." ~ NA,
       is.na(Values) ~ NA,
       TRUE ~ Values
     ),
