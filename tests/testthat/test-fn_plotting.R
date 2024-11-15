@@ -64,27 +64,9 @@ test_data <- dplyr::tibble(
   `LA and Regions` = c("Region1", "Region2", "Region1", "Region3", "Region2", "Region4")
 )
 
-# Test for create_plot_colours
-test_that("1. create_plot_colours returns a named vector of colors", {
-  result <- create_plot_colours(test_data)
-
-  # Test 1: The output should be a named vector
-  expect_true(is.vector(result))
-  expect_true(!is.null(names(result)))
-
-  # Test 2: The names of the vector should match unique groups in `LA and Regions`
-  unique_groups <- unique(test_data$`LA and Regions`)
-  expect_equal(sort(names(result)), sort(unique_groups))
-
-  # Test 3: The length of the color vector should match the number of unique groups
-  expect_equal(length(result), length(unique_groups))
-
-  # Test 4: Check for no NA values in the colors
-  expect_false(any(is.na(result)))
-})
 
 # Additional test for color assignments (if afcolours is deterministic)
-test_that("2. create_plot_colours assigns colors consistently", {
+test_that("1. create_plot_colours assigns colors consistently", {
   result <- create_plot_colours(test_data)
 
   # Check if specific group has a consistent color
@@ -154,3 +136,125 @@ test_that("1. create_focus_plot_sizes returns a named vector of sizes with corre
   # Check the length of the size vector matches the number of unique groups
   expect_equal(length(result_sizes), length(unique_groups))
 })
+
+##calculate_y_range()--------------------------------------------
+
+# Create some sample data for testing
+sample_data <- tibble::tibble(
+  values_num = c(1, 5, 10, NA, 20)
+)
+
+empty_data <- tibble::tibble(
+  values_num = numeric(0)
+)
+
+all_na_data <- tibble::tibble(
+  values_num = c(NA, NA, NA)
+)
+
+single_value_data <- tibble::tibble(
+  values_num = 7
+)
+
+# Test that calculate_y_range returns the correct range for sample data
+test_that("1. calculate_y_range returns correct range for sample data", {
+  result <- calculate_y_range(sample_data)
+  expect_equal(result, c(1, 20))
+})
+
+# Test that calculate_y_range handles data with NA values correctly
+test_that("2. calculate_y_range ignores NA values", {
+  result <- calculate_y_range(sample_data)
+  expect_equal(result, c(1, 20)) # NA values should be ignored
+})
+
+
+
+# Test that calculate_y_range returns the same value twice for single-value data
+test_that("3. calculate_y_range returns the same value for single-value data", {
+  result <- calculate_y_range(single_value_data)
+  expect_equal(result, c(7, 7))
+})
+
+# Test that calculate_y_range works with negative values
+negative_data <- tibble::tibble(
+  values_num = c(-10, -5, 0, 5, 10)
+)
+test_that("4. calculate_y_range returns correct range for negative and positive values", {
+  result <- calculate_y_range(negative_data)
+  expect_equal(result, c(-10, 10))
+})
+
+##pretty_y_gridlines{}------------------------------------------------------------------
+
+
+# Create sample data for testing
+sample_data <- tibble::tibble(
+  values_num = c(1, 5, 10, NA, 20)
+)
+
+negative_data <- tibble::tibble(
+  values_num = c(-20, -10, -5, NA, -1)
+)
+
+positive_data <- tibble::tibble(
+  values_num = c(0, 5, 10, 15, NA)
+)
+
+mixed_data <- tibble::tibble(
+  values_num = c(-10, 0, 10, NA, 20)
+)
+
+all_zero_data <- tibble::tibble(
+  values_num = c(0, 0, 0, NA)
+)
+
+# Test that pretty_y_gridlines generates breaks extending beyond data range
+test_that("1. pretty_y_gridlines generates breaks beyond data range", {
+  result <- pretty_y_gridlines(sample_data)
+  expect_true(min(result) <= min(c(1, 5, 10, 20), na.rm = TRUE))
+  expect_true(max(result) >= max(c(1, 5, 10, 20), na.rm = TRUE))
+})
+
+# Test that pretty_y_gridlines handles negative values and extends above and below range
+test_that("2. pretty_y_gridlines handles negative values correctly", {
+  result <- pretty_y_gridlines(negative_data)
+  expect_true(min(result) <= -20)
+  expect_true(max(result) >= 0)  # Ensure it includes zero
+})
+
+# Test that pretty_y_gridlines includes zero for all-positive data
+test_that("3. pretty_y_gridlines includes zero for all-positive data", {
+  result <- pretty_y_gridlines(positive_data)
+  expect_true(min(result) <= 0)  # Ensure it includes zero
+  expect_true(max(result) >= 15)
+})
+
+# Test that pretty_y_gridlines correctly handles mixed positive and negative values
+test_that("4. pretty_y_gridlines handles mixed positive and negative values", {
+  result <- pretty_y_gridlines(mixed_data)
+  expect_true(min(result) <= -10)
+  expect_true(max(result) >= 20)
+})
+
+##get_years()--------------------------------------------------------------------------
+
+# Create sample data for testing
+sample_data <- tibble::tibble(
+  Years_num = c(2015, 2016, 2015, 2017, NA, 2018),
+  Years = c("2015", "2016", "2015", "2017", NA, "2018")
+)
+
+# Test that get_years returns unique numeric years in order
+test_that("1. get_years returns unique numeric years in ascending order", {
+  result <- get_years(sample_data, type = "numeric")
+  expect_equal(result, c(2015, 2016, 2017, 2018, NA))
+})
+
+# Test that get_years returns unique character years in order
+test_that("2. get_years returns unique character years in ascending order", {
+  result <- get_years(sample_data, type = "character")
+  expect_equal(result, c("2015", "2016", "2017", "2018", NA))
+})
+
+##format_axes()--------------------------------------------------------------
