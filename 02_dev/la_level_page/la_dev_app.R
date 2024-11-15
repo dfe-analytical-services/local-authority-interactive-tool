@@ -37,7 +37,9 @@ ui_dev <- bslib::page_fillable(
         label = NULL,
         choices = metric_names
       )
-    )
+    ),
+    # Conditionally Render the Banner
+    shiny::uiOutput("banner_output")
   ),
   div(
     class = "well",
@@ -240,6 +242,24 @@ server_dev <- function(input, output, session) {
         values_from = values_num
       ) |>
       dplyr::arrange(`LA and Regions`)
+  })
+
+
+  output$banner_output <- renderUI({
+    state_funded <- filtered_bds$data |>
+      pull_uniques("state_funded_flag") |>
+      (\(x) !is.na(x))()
+
+    if (state_funded) {
+      tagList(
+        br(),
+        shinyGovstyle::noti_banner(
+          inputId = "notId",
+          title_txt = "Note",
+          body_txt = "Data includes only State-funded Schools."
+        )
+      )
+    }
   })
 
   output$la_table <- reactable::renderReactable({

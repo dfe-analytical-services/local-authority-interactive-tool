@@ -192,7 +192,7 @@ metrics_discontinued <- metrics_raw |>
 # Some creation and cleaning of important cols
 bds_metrics <- metrics_clean |>
   dplyr::select(
-    Topic, Measure_code, Measure, Measure_short,
+    Topic, Measure_code, Measure, Measure_short, state_funded_flag,
     Polarity, y_axis_name, Year_Type, Chart_title, dps
   ) |>
   dplyr::left_join(bds_clean,
