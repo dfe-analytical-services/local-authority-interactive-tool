@@ -12,8 +12,18 @@
 #' PageHeaderUI("header1")
 #'
 PageHeaderUI <- function(id) {
-  ns <- shiny::NS(id) # Create a namespace function
-  shiny::uiOutput(ns("page_header")) # Use uiOutput to render the header
+  ns <- shiny::NS(id)
+
+  div(
+    id = "page_header_spinner",
+    shinycssloaders::withSpinner(
+      shiny::uiOutput(ns("page_header")),
+      type = 7,
+      color = "#1d70b8",
+      size = 1,
+      proxy.height = paste0(250 * 0.25, "px")
+    )
+  )
 }
 
 

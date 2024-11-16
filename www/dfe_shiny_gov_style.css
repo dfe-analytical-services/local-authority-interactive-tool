@@ -791,3 +791,15 @@ html {
 .govuk-notification-banner__link:focus {
   color: #0b0c0c
 }
+
+/* Aligning page header spinner to left top and nice size */
+#page_header_spinner .load-container {
+  transform: translateX(-40%) !important;
+  top: 0 !important;
+}
+
+#page_header_spinner .shiny-spinner-placeholder {
+  min-height: 62.5px !important;
+  height: fit-content !important;
+}
+
