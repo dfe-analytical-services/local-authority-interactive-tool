@@ -409,7 +409,10 @@ server_dev <- function(input, output, session) {
           `Latest National Rank` = reactable::colDef(
             header = add_tooltip_to_reactcol(
               "Latest National Rank",
-              "Rank 1 is always the best performer"
+              paste0(
+                "Rank 1 corresponds to the best value based on the ",
+                "indicator's direction."
+              )
             )
           ),
           Polarity = reactable::colDef(show = FALSE)
