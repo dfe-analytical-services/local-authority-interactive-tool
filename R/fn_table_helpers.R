@@ -656,17 +656,17 @@ get_trend_colour <- function(value, polarity) {
     return(list(color = "black"))
   }
 
-  # Define the logic for low and high polarity
-  low_colour <- "#d4351c"
-  high_colour <- "#00703c"
+  # Colours to set trend arrow
+  red_colour <- "#d4351c"
+  green_colour <- "#00703c"
 
-  # Check conditions for trend colour
-  trend_colour <- ifelse(polarity == "Low",
-    ifelse(value < 0, high_colour, low_colour),
-    ifelse(polarity == "High",
-      ifelse(value > 0, high_colour, low_colour),
-      "black"
-    )
+  # Apply colour dependent on polarity and vlaue
+  trend_colour <- dplyr::case_when(
+    polarity == "Low" & value < 0 ~ green_colour,
+    polarity == "Low" & value > 0 ~ red_colour,
+    polarity == "High" & value > 0 ~ green_colour,
+    polarity == "High" & value > 0 ~ red_colour,
+    TRUE ~ "black"
   )
 
   return(list(color = trend_colour))
