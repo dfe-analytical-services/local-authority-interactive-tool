@@ -276,7 +276,7 @@ dfe_reactable(
 # Check if measure affected by COVID
 covid_affected <- selected_indicator %in% covid_affected_indicators
 
-# Generate the covid plotting elements if covid_affected is TRUE
+# Generate the covid plot data if add_covid_plot is TRUE
 covid_plot_line <- calculate_covid_plot(la_long, covid_affected, "line")
 
 # Plot
@@ -347,7 +347,7 @@ ggsave(
 htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
-# Generate the covid plotting elementsfor bar chart if covid_affected is TRUE
+# Generate the covid plot data if add_covid_plot is TRUE (for bar chart)
 covid_plot_bar <- calculate_covid_plot(la_long, covid_affected, "bar")
 
 # Plot

@@ -427,11 +427,8 @@ server_dev <- function(input, output, session) {
     # Check if measure affected by COVID
     covid_affected <- input$indicator %in% covid_affected_indicators
 
-    # Generate the shading region if add_covid_plot is TRUE
-    covid_plot <- calculate_covid_plot(
-      la_long(),
-      covid_affected
-    )
+    # Generate the covid plot data if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(la_long(), covid_affected, "line")
 
     # Build plot
     la_line_chart <- la_long() |>
@@ -495,6 +492,12 @@ server_dev <- function(input, output, session) {
 
   # LA Level bar plot ----------------------------------
   la_bar_chart <- reactive({
+    # Check if measure affected by COVID
+    covid_affected <- input$indicator %in% covid_affected_indicators
+
+    # Generate the covid plot data if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(la_long(), covid_affected, "bar")
+
     # Build plot
     la_bar_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -511,6 +514,8 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE,
         colour = "black"
       ) +
+      # Add COVID plot if indicator affected
+      add_covid_elements(covid_plot) +
       format_axes(la_long()) +
       set_plot_colours(la_long(), "fill", input$la_input) +
       set_plot_labs(filtered_bds$data) +

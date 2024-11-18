@@ -1161,7 +1161,7 @@ add_covid_elements <- function(covid_plot_data) {
           y = Inf, # Positioned relative to the data's range
           label = "No data\ndue to COVID"
         ),
-        vjust = 2,
+        vjust = 1.25,
         color = "black",
         size = 4,
         fontface = "italic",
