@@ -1152,7 +1152,6 @@ calculate_covid_plot <- function(data, covid_affected, chart_type) {
       xmin = shared_period$start_year,
       xmax = shared_period$end_year,
       label_x = (shared_period$start_year + shared_period$end_year) / 2,
-      label_y = max(data$values_num, na.rm = TRUE) * 1, # Use max value for label height
       vertical_lines = c(shared_period$start_year, shared_period$end_year),
       label = label_text
     )
@@ -1160,6 +1159,37 @@ calculate_covid_plot <- function(data, covid_affected, chart_type) {
     NULL
   }
 }
+
+
+calculate_covid_plot_bar <- function(data, covid_affected, chart_type) {
+  if (any(covid_affected)) {
+    # Filter rows with NA values in `values_num` between 2019 and 2021
+    na_rows <- data |>
+      dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num)) |>
+      dplyr::arrange(Years_num)
+
+    # Whether to offset vline to last non-NA point (for line chart)
+    yr_offset <- ifelse(chart_type == "line", 1, 0)
+
+    na_periods <- na_rows |>
+      dplyr::group_by(Measure) |>
+      dplyr::summarise(
+        # Find missing periods by indicator
+        start_year = min(Years_num) - yr_offset,
+        end_year = max(Years_num) + yr_offset,
+        # Add labels
+        label_x = (start_year + end_year) / 2,
+        label = "No data\ndue to COVID",
+        .groups = "drop"
+      )
+
+    # Return the COVID-affected periods
+    na_periods
+  } else {
+    NULL
+  }
+}
+
 
 
 

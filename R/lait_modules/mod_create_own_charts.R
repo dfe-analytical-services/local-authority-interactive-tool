@@ -438,6 +438,10 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         chart_info$no_geogs() <= 4
       )
 
+      # Prepare data by removing NaN values
+      clean_plot_data <- chart_info$data() |>
+        dplyr::filter(!is.nan(values_num))
+
       # Giving facet_wrap charts the correct chart names
       # Get chart names for each indicator
       chart_names <- create_own_bds() |>
@@ -458,9 +462,9 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
       )
 
       # Set x axis limits if one bar so its not super wide
-      n_chart_rows <- nrow(chart_info$data()) == 1
+      n_chart_rows <- nrow(clean_plot_data) == 1
       thin_bar_xlim <- if (n_chart_rows) {
-        thin_bar(chart_info$data(), Years_num)
+        thin_bar(clean_plot_data, Years_num)
       } else {
         NULL
       }
@@ -470,10 +474,11 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         pull_uniques("Measure") %in% covid_affected_indicators
 
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(chart_info$data(), covid_affected, "bar")
+      covid_plot <- calculate_covid_plot_bar(clean_plot_data, covid_affected, "bar")
 
       # Plot chart - split by indicators, colours represent Geographies
-      chart_info$data() |>
+      clean_plot_data |>
+        dplyr::filter(!is.nan(values_num)) |>
         ggplot2::ggplot() +
         ggiraph::geom_col_interactive(
           ggplot2::aes(
@@ -481,7 +486,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
             y = values_num,
             fill = `LA and Regions`,
             tooltip = tooltip_bar(
-              chart_info$data(),
+              clean_plot_data,
               get_indicator_dps(create_own_bds()),
               include_measure = TRUE
             )
@@ -494,16 +499,26 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         {
           if (!is.null(covid_plot)) {
             list(
-              if (grepl("No data", covid_plot$label[1])) {
-                ggplot2::geom_vline(
-                  data = covid_plot,
-                  ggplot2::aes(xintercept = vertical_lines),
-                  linetype = "dashed",
-                  color = "grey50",
-                  alpha = 0.5,
-                  linewidth = 0.3
-                )
-              },
+              ggplot2::geom_vline(
+                data = covid_plot,
+                ggplot2::aes(
+                  xintercept = start_year
+                ),
+                linetype = "dashed",
+                color = "grey50",
+                alpha = 0.5,
+                linewidth = 0.3
+              ),
+              ggplot2::geom_vline(
+                data = covid_plot,
+                ggplot2::aes(
+                  xintercept = end_year
+                ),
+                linetype = "dashed",
+                color = "grey50",
+                alpha = 0.5,
+                linewidth = 0.3
+              ),
               ggplot2::geom_text(
                 data = covid_plot,
                 ggplot2::aes(
@@ -520,8 +535,8 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
             )
           }
         } +
-        format_axes(chart_info$data()) +
-        set_plot_colours(chart_info$data(), "fill") +
+        format_axes(clean_plot_data) +
+        set_plot_colours(clean_plot_data, "fill") +
         set_plot_labs(create_own_bds()) +
         custom_theme() +
         ggplot2::theme(
@@ -543,6 +558,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         ggplot2::facet_wrap(
           ~Measure,
           labeller = labeller(Measure = as_labeller(custom_titles)),
+          scales = "free_x"
         ) +
         # Setting x limits for one value bar charts (to keep narrow)
         ggplot2::coord_cartesian(
