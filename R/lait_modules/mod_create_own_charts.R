@@ -156,7 +156,7 @@ CreateOwnLineChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnLineChartServer <- function(id, query, bds_metrics) {
+CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -406,7 +406,7 @@ CreateOwnBarChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnBarChartServer <- function(id, query, bds_metrics) {
+CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(

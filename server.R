@@ -128,7 +128,8 @@ server <- function(input, output, session) {
     "la_line_chart",
     la_app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_indicators
   )
 
   # LA bar chart
@@ -136,7 +137,8 @@ server <- function(input, output, session) {
     "la_bar_chart",
     la_app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_indicators
   )
 
   # LA Metadata ===============================================================
@@ -203,7 +205,8 @@ server <- function(input, output, session) {
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
-    region_names_bds
+    region_names_bds,
+    covid_affected_indicators
   )
 
   # Region multi-choice line chart --------------------------------------------
@@ -213,7 +216,8 @@ server <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    region_shared_inputs
+    region_shared_inputs,
+    covid_affected_indicators
   )
 
   # Region focus bar chart ---------------------------------------------------
@@ -222,7 +226,8 @@ server <- function(input, output, session) {
     region_app_inputs,
     bds_metrics,
     stat_n_geog,
-    region_names_bds
+    region_names_bds,
+    covid_affected_indicators
   )
 
   # Region multi-choice bar chart ---------------------------------------------
@@ -232,7 +237,8 @@ server <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    region_shared_inputs
+    region_shared_inputs,
+    covid_affected_indicators
   )
 
   # Region Metadata ===========================================================
@@ -289,7 +295,8 @@ server <- function(input, output, session) {
     "stat_n_focus_line",
     stat_n_app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_indicators
   )
 
   # Multi-choice line chart ---------------------------------------------------
@@ -298,7 +305,8 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    stat_n_shared_inputs
+    stat_n_shared_inputs,
+    covid_affected_indicators
   )
 
   # Focus bar chart -----------------------------------------------------------
@@ -306,7 +314,8 @@ server <- function(input, output, session) {
     "stat_n_focus_bar",
     stat_n_app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_indicators
   )
 
   # Multi-choice bar chart ----------------------------------------------------
@@ -315,7 +324,8 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    stat_n_shared_inputs
+    stat_n_shared_inputs,
+    covid_affected_indicators
   )
 
   # Statistical Neighbour Metadata ============================================
@@ -443,14 +453,16 @@ server <- function(input, output, session) {
   CreateOwnLineChartServer(
     "create_own_line",
     query_table,
-    bds_metrics
+    bds_metrics,
+    covid_affected_indicators
   )
 
   # Bar chart -----------------------------------------------------------------
   CreateOwnBarChartServer(
     "create_own_bar",
     query_table,
-    bds_metrics
+    bds_metrics,
+    covid_affected_indicators
   )
 
   # Extras ====================================================================
