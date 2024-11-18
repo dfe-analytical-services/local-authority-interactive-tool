@@ -464,6 +464,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
       } else {
         NULL
       }
+
       # Check if measure affected by COVID
       covid_affected <- create_own_bds() |>
         pull_uniques("Measure") %in% covid_affected_indicators
@@ -492,18 +493,30 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         ) +
         {
           if (!is.null(covid_plot)) {
-            ggplot2::geom_text(
-              data = covid_plot,
-              ggplot2::aes(
-                x = label_x,
-                y = Inf,
-                label = "Some indicators have\nmissing data due to COVID"
-              ),
-              vjust = 0.5,
-              color = "black",
-              size = 3,
-              fontface = "italic",
-              inherit.aes = FALSE
+            list(
+              if (grepl("No data", covid_plot$label[1])) {
+                ggplot2::geom_vline(
+                  data = covid_plot,
+                  ggplot2::aes(xintercept = vertical_lines),
+                  linetype = "dashed",
+                  color = "grey50",
+                  alpha = 0.5,
+                  linewidth = 0.3
+                )
+              },
+              ggplot2::geom_text(
+                data = covid_plot,
+                ggplot2::aes(
+                  x = label_x,
+                  y = Inf,
+                  label = label
+                ),
+                vjust = 0.5,
+                color = "black",
+                size = 3,
+                fontface = "italic",
+                inherit.aes = FALSE
+              )
             )
           }
         } +
