@@ -459,37 +459,7 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE
       ) +
       # Add COVID plot if indicator affected
-      {
-        if (!is.null(covid_plot)) {
-          list(
-            # Add vertical lines where COVID breaks timeseries
-            ggplot2::geom_vline(
-              data = covid_plot,
-              ggplot2::aes(xintercept = vertical_lines),
-              linetype = "dashed",
-              color = "grey50",
-              alpha = 0.5,
-              linewidth = 0.3
-            ),
-            # Add a label to explain COVID causes missing data
-            ggplot2::geom_text(
-              data = covid_plot,
-              ggplot2::aes(
-                x = label_x,
-                y = Inf,
-                label = "No data\ndue to COVID"
-              ),
-              vjust = 2,
-              color = "black",
-              size = 4,
-              fontface = "italic",
-              inherit.aes = FALSE
-            )
-          )
-        } else {
-          NULL
-        }
-      } +
+      add_covid_elements(covid_plot) +
       format_axes(la_long()) +
       set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
