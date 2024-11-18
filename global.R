@@ -361,6 +361,14 @@ metric_topics <- pull_uniques(metrics_clean, "Topic")
 # Metric names
 metric_names <- pull_uniques(metrics_clean, "Measure")
 
+# Indicators that are impacted by COVID
+# (aka missing data across all LAs for a whole year between 2091-2022)
+covid_affected_indicators <- bds_metrics |>
+  dplyr::filter(Years_num >= 2019, Years_num <= 2022) |>
+  dplyr::group_by(Topic, Measure, Years_num) |>
+  dplyr::summarise(all_na = all(is.na(values_num)), .groups = "keep") |>
+  dplyr::filter(all_na) |>
+  pull_uniques("Measure")
 
 # Successful load of global.R message
 cat(crayon::green("global.R successfully loaded!"))

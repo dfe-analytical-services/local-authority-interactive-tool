@@ -12,7 +12,7 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
+selected_indicator <- "Children killed or seriously injured in road traffic accidents"
 # "Children killed or seriously injured in road traffic accidents"
 # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
 selected_la <- "Bedford Borough" # "Barnet" # Cumberland
@@ -272,16 +272,22 @@ dfe_reactable(
   )
 )
 
-
-
 # LA line chart plot ----------------------------------------------------------
+# Check if measure affected by COVID
+covid_affected <- selected_indicator %in% covid_affected_indicators
+
+# Generate the shading region if covid_affected is TRUE
+covid_plot <- calculate_covid_plot(la_long, covid_affected)
+
 # Plot
 la_line_chart <- la_long |>
   ggplot2::ggplot() +
   # Only show point data where line won't appear (NAs)
   ggplot2::geom_point(
-    data = subset(create_show_point(la_long), show_point),
-    ggplot2::aes(
+    data = subset(
+      create_show_point(la_long, covid_affected),
+      show_point
+    ), ggplot2::aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`
@@ -300,6 +306,46 @@ la_line_chart <- la_long |>
     na.rm = TRUE,
     linewidth = 1
   ) +
+  # Add COVID plot if indicator affected
+  {
+    if (!is.null(covid_plot)) {
+      list(
+        # Add vertical lines where COVID breaks timeseries
+        ggplot2::geom_vline(
+          data = covid_plot,
+          ggplot2::aes(xintercept = vertical_lines),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        ),
+        # Add a shaded box to show COVID impact
+        ggplot2::geom_rect(
+          data = covid_plot,
+          ggplot2::aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+          fill = "grey",
+          alpha = 0.1,
+          inherit.aes = FALSE
+        ),
+        # Add a label to explain COVID causes missing data
+        ggplot2::geom_text(
+          data = covid_plot,
+          ggplot2::aes(
+            x = label_x, # Centered horizontally in the shaded region
+            y = Inf, # Positioned relative to the data's range
+            label = "No data\ndue to COVID"
+          ),
+          vjust = 2,
+          color = "black",
+          size = 4,
+          fontface = "italic",
+          inherit.aes = FALSE
+        )
+      )
+    } else {
+      NULL
+    }
+  } +
   format_axes(la_long) +
   set_plot_colours(la_long, focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
@@ -355,6 +401,35 @@ la_bar_chart <- la_long |>
     na.rm = TRUE,
     colour = "black"
   ) +
+  {
+    if (!is.null(na_regions)) {
+      list(
+        ggplot2::geom_rect(
+          data = na_regions,
+          ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+          fill = "grey",
+          alpha = 0.2,
+          inherit.aes = FALSE
+        ),
+        # Add a label inside the shaded region
+        ggplot2::geom_text(
+          data = na_regions,
+          ggplot2::aes(
+            x = label_x, # Centered horizontally in the shaded region
+            y = Inf, # Positioned relative to the data's range
+            label = "COVID - No data"
+          ),
+          vjust = 2,
+          color = "black",
+          size = 4,
+          fontface = "italic",
+          inherit.aes = FALSE
+        )
+      )
+    } else {
+      NULL
+    }
+  } +
   format_axes(la_long) +
   set_plot_colours(la_long, "fill", selected_la) +
   set_plot_labs(filtered_bds) +

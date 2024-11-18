@@ -1061,19 +1061,72 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
 #' df <- create_show_point(data)
 #'
 #' @export
-create_show_point <- function(data) {
+create_show_point <- function(data, covid_affected) {
   data |>
     dplyr::group_by(`LA and Regions`) |>
+    dplyr::arrange(`LA and Regions`, Years_num) |>
     dplyr::mutate(
+      # Helper: Is the current value NA
+      is_na = is.na(values_num),
+
+      # First COVID affected year (First NA within 2019–2021)
+      is_first_covid_na = (Years_num >= 2019 & Years_num <= 2021) &
+        is_na & dplyr::lag(!is_na, default = FALSE),
+
+      # Last COVID affected year (Last NA within 2019–2021)
+      is_last_covid_na = (Years_num >= 2019 & Years_num <= 2021) &
+        is_na & dplyr::lead(!is_na, default = FALSE),
+
+      # Finds the last non-NA before first COVID (show point)
+      is_prev_covid = dplyr::lead(is_first_covid_na, default = FALSE),
+      # Finds the first non-NA after last COVID (show point)
+      is_post_covid = dplyr::lag(is_last_covid_na, default = FALSE),
+
+      # General NA show point conditions to show isolated points
       show_point = dplyr::if_else(
-        (is.na(dplyr::lag(values_num)) & is.na(dplyr::lead(values_num))) |
-          (dplyr::row_number() == 1 & is.na(dplyr::lead(values_num))) |
-          (dplyr::row_number() == dplyr::n() & is.na(dplyr::lag(values_num))),
+        # Isolated in middle of plot
+        (dplyr::lag(is_na) & dplyr::lead(is_na)) |
+          # Isolated at start of plot
+          (dplyr::row_number() == 1 & dplyr::lead(is_na)) |
+          # Isolated at end of plot
+          (dplyr::row_number() == dplyr::n() & dplyr::lag(is_na)) |
+          # Covid start and end points
+          (covid_affected & is_prev_covid) |
+          (covid_affected & is_post_covid),
         TRUE,
         FALSE
       )
     ) |>
-    dplyr::ungroup()
+    dplyr::ungroup() |>
+    # Clean up - remove uneeded cols
+    dplyr::select(-dplyr::starts_with("is_"))
+}
+
+
+
+# Update calculate_na_regions to include a long format for vertical lines
+calculate_covid_plot <- function(data, covid_affected) {
+  if (covid_affected) {
+    # Filter rows with NA values in `values_num` between 2019 and 2021
+    na_rows <- data |>
+      dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num)) |>
+      dplyr::arrange(Years_num)
+
+    # Identify the start (year before first NA) and end (year after last NA)
+    start_year <- max(na_rows$Years_num[1] - 1, min(data$Years_num)) # Ensure within bounds
+    end_year <- min(na_rows$Years_num[nrow(na_rows)] + 1, max(data$Years_num))
+
+    # Create a tibble with shading coordinates
+    tibble::tibble(
+      xmin = start_year,
+      xmax = end_year,
+      label_x = (start_year + end_year) / 2, # Midpoint for label placement
+      label_y = max(data$values_num, na.rm = TRUE) * 1, # Use max value for label height
+      vertical_lines = c(start_year, end_year) # Coordinates for vlines
+    )
+  } else {
+    NULL
+  }
 }
 
 

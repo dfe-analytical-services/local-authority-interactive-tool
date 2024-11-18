@@ -424,6 +424,15 @@ server_dev <- function(input, output, session) {
 
   # LA Level line chart plot ----------------------------------
   la_line_chart <- reactive({
+    # Check if measure affected by COVID
+    covid_affected <- input$indicator %in% covid_affected_indicators
+
+    # Generate the shading region if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(
+      la_long(),
+      covid_affected
+    )
+
     # Build plot
     la_line_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -439,7 +448,7 @@ server_dev <- function(input, output, session) {
       ) +
       # Only show point data where line won't appear (NAs)
       ggplot2::geom_point(
-        data = subset(create_show_point(la_long()), show_point),
+        data = subset(create_show_point(la_long(), covid_affected), show_point),
         ggplot2::aes(
           x = Years_num,
           y = values_num,
@@ -449,6 +458,38 @@ server_dev <- function(input, output, session) {
         size = 1,
         na.rm = TRUE
       ) +
+      # Add COVID plot if indicator affected
+      {
+        if (!is.null(covid_plot)) {
+          list(
+            # Add vertical lines where COVID breaks timeseries
+            ggplot2::geom_vline(
+              data = covid_plot,
+              ggplot2::aes(xintercept = vertical_lines),
+              linetype = "dashed",
+              color = "grey50",
+              alpha = 0.5,
+              linewidth = 0.3
+            ),
+            # Add a label to explain COVID causes missing data
+            ggplot2::geom_text(
+              data = covid_plot,
+              ggplot2::aes(
+                x = label_x,
+                y = Inf,
+                label = "No data\ndue to COVID"
+              ),
+              vjust = 2,
+              color = "black",
+              size = 4,
+              fontface = "italic",
+              inherit.aes = FALSE
+            )
+          )
+        } else {
+          NULL
+        }
+      } +
       format_axes(la_long()) +
       set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
