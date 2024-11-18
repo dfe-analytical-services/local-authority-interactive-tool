@@ -77,7 +77,11 @@ LA_LineChartUI <- function(id) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
+LA_LineChartServer <- function(id,
+                               app_inputs,
+                               bds_metrics,
+                               stat_n_la,
+                               covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -90,6 +94,13 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # Build main static plot
     line_chart <- reactive({
+      # Check if measure affected by COVID
+      covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(la_long(), covid_affected, "line")
+
+      # Build plot
       la_long() |>
         ggplot2::ggplot() +
         ggiraph::geom_line_interactive(
@@ -104,7 +115,7 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         ) +
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
-          data = subset(create_show_point(la_long()), show_point),
+          data = subset(create_show_point(la_long(), covid_affected), show_point),
           ggplot2::aes(
             x = Years_num,
             y = values_num,
@@ -114,6 +125,8 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           size = 1,
           na.rm = TRUE
         ) +
+        # Add COVID plot if indicator affected
+        add_covid_elements(covid_plot) +
         format_axes(la_long()) +
         set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
@@ -264,6 +277,12 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # Build main static plot
     bar_chart <- reactive({
+      # Check if measure affected by COVID
+      covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(la_long(), covid_affected, "bar")
+
       # Build plot
       la_long() |>
         ggplot2::ggplot() +
@@ -284,6 +303,8 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           na.rm = TRUE,
           colour = "black"
         ) +
+        # Add COVID plot if indicator affected
+        add_covid_elements(covid_plot) +
         format_axes(la_long()) +
         set_plot_colours(la_long(), "fill", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
