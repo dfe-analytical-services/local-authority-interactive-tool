@@ -464,6 +464,12 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
       } else {
         NULL
       }
+      # Check if measure affected by COVID
+      covid_affected <- create_own_bds() |>
+        pull_uniques("Measure") %in% covid_affected_indicators
+
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(chart_info$data(), covid_affected, "bar")
 
       # Plot chart - split by indicators, colours represent Geographies
       chart_info$data() |>
@@ -484,13 +490,37 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
           na.rm = TRUE,
           color = "black"
         ) +
+        {
+          if (!is.null(covid_plot)) {
+            ggplot2::geom_text(
+              data = covid_plot,
+              ggplot2::aes(
+                x = label_x,
+                y = Inf,
+                label = "Some indicators have\nmissing data due to COVID"
+              ),
+              vjust = 0.5,
+              color = "black",
+              size = 3,
+              fontface = "italic",
+              inherit.aes = FALSE
+            )
+          }
+        } +
         format_axes(chart_info$data()) +
         set_plot_colours(chart_info$data(), "fill") +
         set_plot_labs(create_own_bds()) +
         custom_theme() +
         ggplot2::theme(
-          legend.title = ggplot2::element_text(),
-          legend.title.position = "top"
+          legend.title.position = "top",
+          # Set heigh & size of mini chart titles
+          strip.text = ggplot2::element_text(
+            size = 11,
+            margin = ggplot2::margin(b = 30)
+          ),
+          # Gives space between the charts so x-axis labels don't overlap
+          plot.margin = ggplot2::margin(t = 10, r = 30, b = 10, l = 10),
+          panel.spacing.x = unit(15, "mm")
         ) +
         guides(
           fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
@@ -501,12 +531,11 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
           ~Measure,
           labeller = labeller(Measure = as_labeller(custom_titles)),
         ) +
-        # Gives space between the charts so x-axis labels don't overlap
-        theme(
-          panel.spacing.x = unit(15, "mm"),
-          plot.margin = ggplot2::margin(r = 30)
-        ) +
-        ggplot2::coord_cartesian(xlim = thin_bar_xlim)
+        # Setting x limits for one value bar charts (to keep narrow)
+        ggplot2::coord_cartesian(
+          xlim = thin_bar_xlim,
+          clip = "off"
+        )
     })
 
     # Build interactive line chart
