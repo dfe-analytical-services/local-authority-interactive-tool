@@ -196,7 +196,8 @@ Region_FocusLineChartServer <- function(id,
                                         app_inputs,
                                         bds_metrics,
                                         stat_n_geog,
-                                        region_names_bds) {
+                                        region_names_bds,
+                                        covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
@@ -232,6 +233,13 @@ Region_FocusLineChartServer <- function(id,
       if (all(is.na(chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(chart_data(), covid_affected, "line")
+
+        # Build plot
         chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_line_interactive(
@@ -246,7 +254,7 @@ Region_FocusLineChartServer <- function(id,
           ) +
           # Only show point data where line won't appear (NAs)
           ggplot2::geom_point(
-            data = subset(create_show_point(chart_data()), show_point),
+            data = subset(create_show_point(chart_data(), covid_affected), show_point),
             ggplot2::aes(
               x = Years_num,
               y = values_num,
@@ -256,6 +264,7 @@ Region_FocusLineChartServer <- function(id,
             shape = 15,
             na.rm = TRUE
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(chart_data()) +
           set_plot_colours(
             chart_data(),
@@ -382,7 +391,8 @@ Region_FocusBarChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
                                        stat_n_geog,
-                                       region_names_bds) {
+                                       region_names_bds,
+                                       covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
@@ -414,6 +424,13 @@ Region_FocusBarChartServer <- function(id,
       if (all(is.na(chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(chart_data(), covid_affected, "bar")
+
+        # Build plot
         chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_col_interactive(
@@ -434,6 +451,7 @@ Region_FocusBarChartServer <- function(id,
             na.rm = TRUE,
             colour = "black"
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(chart_data()) +
           set_plot_colours(chart_data(), "focus-fill", region_clean()) +
           set_plot_labs(filtered_bds()) +
@@ -746,7 +764,8 @@ Region_MultiLineChartServer <- function(id,
                                         bds_metrics,
                                         stat_n_geog,
                                         region_names_bds,
-                                        shared_values) {
+                                        shared_values,
+                                        covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Obtain data for plotting by region
     region_long_plot <- Region_LongPlotServer(
@@ -799,6 +818,13 @@ Region_MultiLineChartServer <- function(id,
       if (all(is.na(chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(chart_data(), covid_affected, "line")
+
+        # Built plot
         chart_data() |>
           ggplot2::ggplot() +
           # Add interactive lines for visual representation
@@ -814,7 +840,7 @@ Region_MultiLineChartServer <- function(id,
           ) +
           # Only show point data where line won't appear (NAs)
           ggplot2::geom_point(
-            data = subset(create_show_point(chart_data()), show_point),
+            data = subset(create_show_point(chart_data(), covid_affected), show_point),
             ggplot2::aes(
               x = Years_num,
               y = values_num,
@@ -824,6 +850,7 @@ Region_MultiLineChartServer <- function(id,
             na.rm = TRUE,
             size = 1.5
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(chart_data()) +
           set_plot_colours(
             data.frame(
@@ -950,7 +977,8 @@ Region_MultiBarChartServer <- function(id,
                                        bds_metrics,
                                        stat_n_geog,
                                        region_names_bds,
-                                       shared_values) {
+                                       shared_values,
+                                       covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
@@ -999,6 +1027,13 @@ Region_MultiBarChartServer <- function(id,
       if (all(is.na(multi_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(multi_chart_data(), covid_affected, "bar")
+
+        # Build plot
         multi_chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_col_interactive(
@@ -1018,6 +1053,7 @@ Region_MultiBarChartServer <- function(id,
             na.rm = TRUE,
             colour = "black"
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(multi_chart_data()) +
           set_plot_colours(multi_chart_data(), "fill", region_clean()) +
           set_plot_labs(filtered_bds()) +
