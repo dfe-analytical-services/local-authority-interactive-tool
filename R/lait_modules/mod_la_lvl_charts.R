@@ -264,7 +264,11 @@ LA_BarChartUI <- function(id) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
+LA_BarChartServer <- function(id,
+                              app_inputs,
+                              bds_metrics,
+                              stat_n_la,
+                              covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)

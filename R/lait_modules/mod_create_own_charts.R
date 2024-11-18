@@ -187,6 +187,12 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
+      # Check if measure affected by COVID
+      covid_affected <- create_own_bds() |>
+        pull_uniques("Measure") %in% covid_affected_indicators
+
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(chart_info$data(), covid_affected, "line")
 
       # Plot data - colour represents Geographies & linetype represents Indicator
       chart_info$data() |>
@@ -204,7 +210,10 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         ) +
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
-          data = subset(create_show_point(chart_info$data()), show_point),
+          data = subset(
+            create_show_point(chart_info$data(), covid_affected),
+            show_point
+          ),
           ggplot2::aes(
             x = Years_num,
             y = values_num,
@@ -213,10 +222,11 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
           shape = 15,
           na.rm = TRUE
         ) +
+        add_covid_elements(covid_plot) +
         format_axes(chart_info$data()) +
         set_plot_colours(chart_info$data()) +
         set_plot_labs(create_own_bds()) +
-        custom_theme() +
+        custom_theme(title_margin = chart_info$no_indicators() - 1) +
         # Setting legend title at top
         ggplot2::theme(
           legend.title = ggplot2::element_text(),

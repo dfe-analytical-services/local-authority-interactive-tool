@@ -523,16 +523,16 @@ set_plot_labs <- function(filtered_bds) {
 #'   geom_line() +
 #'   custom_theme()
 #'
-custom_theme <- function() {
+custom_theme <- function(title_margin = 0) {
   list(
     ggplot2::theme_minimal(),
     ggplot2::theme(
       # Keeps title within chart
       plot.title = ggtext::element_textbox(
         hjust = 0.5,
-        width = unit(0.9, "npc"),
+        width = unit(1, "npc"),
         halign = 0.5,
-        margin = margin(b = unit(10, "lines"))
+        margin = margin(b = unit(22.5 + 7.5 * title_margin, "lines"))
       ),
       axis.title.x = element_text(
         hjust = 0.5,
@@ -1063,7 +1063,11 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
 #' @export
 create_show_point <- function(data, covid_affected) {
   data |>
-    dplyr::group_by(`LA and Regions`) |>
+    dplyr::group_by(
+      `LA and Regions`,
+      # Groupby Measure if it exists (for create your own)
+      !!!rlang::syms(if ("Measure" %in% colnames(data)) "Measure" else NULL)
+    ) |>
     dplyr::arrange(`LA and Regions`, Years_num) |>
     dplyr::mutate(
       # Helper: Is the current value NA
@@ -1091,8 +1095,9 @@ create_show_point <- function(data, covid_affected) {
           # Isolated at end of plot
           (dplyr::row_number() == dplyr::n() & dplyr::lag(is_na)) |
           # Covid start and end points
-          (covid_affected & is_prev_covid) |
-          (covid_affected & is_post_covid),
+          # (uses all for multiple indicators in create your own)
+          (all(covid_affected) & is_prev_covid) |
+          (all(covid_affected) & is_post_covid),
         TRUE,
         FALSE
       )
@@ -1106,25 +1111,50 @@ create_show_point <- function(data, covid_affected) {
 
 # Update calculate_na_regions to include a long format for vertical lines
 calculate_covid_plot <- function(data, covid_affected, chart_type) {
-  if (covid_affected) {
+  if (any(covid_affected)) {
     # Filter rows with NA values in `values_num` between 2019 and 2021
     na_rows <- data |>
-      dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num)) |>
+      dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num), !is.nan(values_num)) |>
       dplyr::arrange(Years_num)
 
+    # Whether to offset vline to last non-NA point (for line chart)
     yr_offset <- ifelse(chart_type == "line", 1, 0)
 
-    # Identify the start (year before first NA) and end (year after last NA)
-    start_year <- max(na_rows$Years_num[1] - yr_offset, min(data$Years_num)) # Ensure within bounds
-    end_year <- min(na_rows$Years_num[nrow(na_rows)] + yr_offset, max(data$Years_num))
+    # Find missing periods by indicator
+    na_periods <- na_rows |>
+      dplyr::group_by(!!!rlang::syms(if ("Measure" %in% colnames(na_rows)) "Measure" else NULL)) |>
+      dplyr::summarise(
+        start_year = min(Years_num) - yr_offset,
+        end_year = max(Years_num) + yr_offset,
+        .groups = "drop"
+      )
 
-    # Create a tibble with shading coordinates
+    # Check if all indicators share the same period
+    shared_period <- na_periods |>
+      dplyr::summarise(
+        same_period = all(
+          length(unique(na_periods$start_year)) == 1,
+          length(unique(na_periods$end_year)) == 1
+        ),
+        start_year = min(start_year),
+        end_year = max(end_year)
+      )
+
+    # Determine the label - set
+    label_text <- if (shared_period$same_period && all(covid_affected)) {
+      "No data\ndue to COVID"
+    } else {
+      "Some indicators have\nmissing data due to COVID"
+    }
+
+    # Return the plot information
     tibble::tibble(
-      xmin = start_year,
-      xmax = end_year,
-      label_x = (start_year + end_year) / 2, # Midpoint for label placement
+      xmin = shared_period$start_year,
+      xmax = shared_period$end_year,
+      label_x = (shared_period$start_year + shared_period$end_year) / 2,
       label_y = max(data$values_num, na.rm = TRUE) * 1, # Use max value for label height
-      vertical_lines = c(start_year, end_year) # Coordinates for vlines
+      vertical_lines = c(shared_period$start_year, shared_period$end_year),
+      label = label_text
     )
   } else {
     NULL
@@ -1159,13 +1189,18 @@ add_covid_elements <- function(covid_plot_data) {
         ggplot2::aes(
           x = label_x, # Centered horizontally in the shaded region
           y = Inf, # Positioned relative to the data's range
-          label = "No data\ndue to COVID"
+          label = label
         ),
-        vjust = 1.25,
+        vjust = 0.5,
         color = "black",
         size = 4,
         fontface = "italic",
         inherit.aes = FALSE
+      ),
+      ggplot2::coord_cartesian(clip = "off"),
+      # Ensure the plot does not clip elements outside the plot area
+      ggplot2::theme(
+        plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10) # Add padding around plot
       )
     )
   } else {
