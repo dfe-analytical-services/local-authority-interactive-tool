@@ -90,7 +90,8 @@ server_mod <- function(input, output, session) {
     "stat_n_focus_line",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_indicators
   )
 
   # Multi-choice line chart ---------------------------------------------------
@@ -99,7 +100,8 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    shared_values
+    shared_values,
+    covid_affected_indicators
   )
 
   # Focus bar chart -----------------------------------------------------------
@@ -107,7 +109,8 @@ server_mod <- function(input, output, session) {
     "stat_n_focus_bar",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_indicators
   )
 
   # Multi-choice bar chart ----------------------------------------------------
@@ -116,7 +119,8 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    shared_values
+    shared_values,
+    covid_affected_indicators
   )
 
   CopyToClipboardPopUpServer("copy-to-clipboard")
