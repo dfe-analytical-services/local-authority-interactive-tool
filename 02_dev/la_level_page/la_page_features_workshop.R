@@ -276,8 +276,8 @@ dfe_reactable(
 # Check if measure affected by COVID
 covid_affected <- selected_indicator %in% covid_affected_indicators
 
-# Generate the shading region if covid_affected is TRUE
-covid_plot <- calculate_covid_plot(la_long, covid_affected)
+# Generate the covid plotting elements if covid_affected is TRUE
+covid_plot_line <- calculate_covid_plot(la_long, covid_affected, "line")
 
 # Plot
 la_line_chart <- la_long |>
@@ -307,7 +307,7 @@ la_line_chart <- la_long |>
     linewidth = 1
   ) +
   # Add COVID plot if indicator affected
-  add_covid_elements(covid_plot) +
+  add_covid_elements(covid_plot_line) +
   format_axes(la_long) +
   set_plot_colours(la_long, focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
@@ -347,6 +347,9 @@ ggsave(
 htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
+# Generate the covid plotting elementsfor bar chart if covid_affected is TRUE
+covid_plot_bar <- calculate_covid_plot(la_long, covid_affected, "bar")
+
 # Plot
 la_bar_chart <- la_long |>
   ggplot2::ggplot() +
@@ -363,35 +366,8 @@ la_bar_chart <- la_long |>
     na.rm = TRUE,
     colour = "black"
   ) +
-  {
-    if (!is.null(na_regions)) {
-      list(
-        ggplot2::geom_rect(
-          data = na_regions,
-          ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-          fill = "grey",
-          alpha = 0.2,
-          inherit.aes = FALSE
-        ),
-        # Add a label inside the shaded region
-        ggplot2::geom_text(
-          data = na_regions,
-          ggplot2::aes(
-            x = label_x, # Centered horizontally in the shaded region
-            y = Inf, # Positioned relative to the data's range
-            label = "COVID - No data"
-          ),
-          vjust = 2,
-          color = "black",
-          size = 4,
-          fontface = "italic",
-          inherit.aes = FALSE
-        )
-      )
-    } else {
-      NULL
-    }
-  } +
+  # Add COVID plot if indicator affected
+  add_covid_elements(covid_plot_bar) +
   format_axes(la_long) +
   set_plot_colours(la_long, "fill", selected_la) +
   set_plot_labs(filtered_bds) +

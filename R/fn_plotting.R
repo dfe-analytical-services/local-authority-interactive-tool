@@ -1105,16 +1105,18 @@ create_show_point <- function(data, covid_affected) {
 
 
 # Update calculate_na_regions to include a long format for vertical lines
-calculate_covid_plot <- function(data, covid_affected) {
+calculate_covid_plot <- function(data, covid_affected, chart_type) {
   if (covid_affected) {
     # Filter rows with NA values in `values_num` between 2019 and 2021
     na_rows <- data |>
       dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num)) |>
       dplyr::arrange(Years_num)
 
+    yr_offset <- ifelse(chart_type == "line", 1, 0)
+
     # Identify the start (year before first NA) and end (year after last NA)
-    start_year <- max(na_rows$Years_num[1] - 1, min(data$Years_num)) # Ensure within bounds
-    end_year <- min(na_rows$Years_num[nrow(na_rows)] + 1, max(data$Years_num))
+    start_year <- max(na_rows$Years_num[1] - yr_offset, min(data$Years_num)) # Ensure within bounds
+    end_year <- min(na_rows$Years_num[nrow(na_rows)] + yr_offset, max(data$Years_num))
 
     # Create a tibble with shading coordinates
     tibble::tibble(
