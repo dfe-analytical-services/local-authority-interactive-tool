@@ -322,7 +322,7 @@ LA_BarChartServer <- function(id,
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
-            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+            css = "stroke-dasharray:5,5;stroke:yellow;stroke-width:2px;"
           )
         ),
         fonts = list(sans = "Arial")
