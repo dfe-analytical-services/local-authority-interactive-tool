@@ -186,8 +186,6 @@ ui <- function(input, output, session) {
 
         # Statistical Neighbour tables ========================================
         StatN_TablesUI("stat_n_tables"),
-        # Statistical Neighbour Statistics Table ----------------------------
-        StatN_StatsTableUI("stat_n_stats_table"),
 
         # Statistical Neighbour charts ========================================
         div(

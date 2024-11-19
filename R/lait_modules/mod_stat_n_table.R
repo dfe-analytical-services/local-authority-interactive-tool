@@ -278,7 +278,7 @@ StatN_TablesUI <- function(id) {
         ),
         br(),
         # Statistical Neighbour Statistics Table ------------------------------
-        StatN_StatsTableUI("stat_n_stats_mod"),
+        StatN_StatsTableUI("stat_n_stats_mod")
       ),
       bslib::nav_panel(
         "Download",
