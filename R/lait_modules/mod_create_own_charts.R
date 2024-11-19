@@ -471,7 +471,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
           ),
           # Gives space between the charts so x-axis labels don't overlap
           plot.margin = ggplot2::margin(r = 30),
-          panel.spacing.x = unit(15, "mm")
+          panel.spacing.x = unit(10, "mm")
         ) +
         ggplot2::guides(
           fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
@@ -501,7 +501,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
       # Plotting interactive graph
       ggiraph::girafe(
         ggobj = (bar_chart()),
-        width_svg = 8.5,
+        width_svg = 8.5 + (chart_info$no_indicators() - 1) * 3.5,
         options = generic_ggiraph_options(),
         fonts = list(sans = "Arial")
       )
