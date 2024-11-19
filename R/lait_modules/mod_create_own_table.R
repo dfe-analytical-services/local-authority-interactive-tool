@@ -129,6 +129,7 @@ StagingDataServer <- function(
     staging_table <- reactive({
       # Selected relevant cols
       # Coerce to wide format
+      # (any new values created set to NaN so can be picked up as user created NAs)
       # Set regions and England as themselves for Region
       wide_table <- staging_bds() |>
         dplyr::select(
@@ -139,6 +140,7 @@ StagingDataServer <- function(
           id_cols = c("LA Number", "LA and Regions", "Region", "Topic", "Measure"),
           names_from = Years,
           values_from = values_num,
+          values_fill = NaN
         ) |>
         dplyr::mutate(Region = dplyr::case_when(
           `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
@@ -152,7 +154,6 @@ StagingDataServer <- function(
           Topic, Measure,
           dplyr::all_of(sort_year_columns(wide_table))
         )
-
 
       # If SNs included, add SN LA association column
       # Multi-join as want to include an association for every row (even duplicates)
