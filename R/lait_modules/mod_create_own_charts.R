@@ -106,31 +106,12 @@ CreateOwnLineChartUI <- function(id) {
                align-items: center;
                background: white;",
       # Line chart
-      bslib::card(
-        bslib::card_body(
-          ggiraph::girafeOutput(ns("line_chart"))
-        ),
-        full_screen = TRUE,
-        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
-      ),
+      # Line chart
+      create_chart_card_ui(ns("line_chart")),
       # Download options
-      div(
-        # Download button to trigger chart download modal
-        shiny::tagAppendAttributes(
-          DownloadChartBtnUI(ns("download_btn")),
-          style = "max-width: none; margin-left: 0;  align-self: auto;"
-        ),
-        br(),
-        shiny::tagAppendAttributes(
-          actionButton(
-            ns("copybtn"),
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
     ),
     # Hidden static plot for copy-to-clipboard
@@ -356,31 +337,11 @@ CreateOwnBarChartUI <- function(id) {
                    align-items: center;
                    background: white;",
       # Bar chart
-      bslib::card(
-        bslib::card_body(
-          ggiraph::girafeOutput(ns("bar_chart"))
-        ),
-        full_screen = TRUE,
-        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
-      ),
+      create_chart_card_ui(ns("bar_chart")),
       # Download options
-      div(
-        # Download button to trigger chart download modal
-        shiny::tagAppendAttributes(
-          DownloadChartBtnUI(ns("download_btn")),
-          style = "max-width: none; margin-left: 0; align-self: auto;"
-        ),
-        br(),
-        shiny::tagAppendAttributes(
-          actionButton(
-            ns("copybtn"),
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
     ),
     # Hidden static plot for copy-to-clipboard

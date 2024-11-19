@@ -199,7 +199,10 @@ StagingTableUI <- function(id) {
     style = "overflow-y: visible;",
     h3("Staging Table (View of current selections)"),
     bslib::card(
-      reactable::reactableOutput(ns("staging_table"))
+      with_gov_spinner(
+        reactable::reactableOutput(ns("staging_table")),
+        size = 0.5
+      )
     )
   )
 }
@@ -490,7 +493,10 @@ QueryTableUI <- function(id) {
     style = "overflow-y: visible;",
     h3("Summary of Selections"),
     bslib::card(
-      reactable::reactableOutput(ns("query_table"))
+      with_gov_spinner(
+        reactable::reactableOutput(ns("query_table")),
+        size = 0.5
+      )
     )
   )
 }
@@ -744,7 +750,10 @@ CreateOwnTableUI <- function(id) {
       # Create Own Table -------------------------------------------------------
       bslib::nav_panel(
         title = "Output Table",
-        reactable::reactableOutput(ns("output_table"))
+        with_gov_spinner(
+          reactable::reactableOutput(ns("output_table")),
+          size = 0.75
+        )
       ),
       # Create Own Download ----------------------------------------------------
       bslib::nav_panel(
