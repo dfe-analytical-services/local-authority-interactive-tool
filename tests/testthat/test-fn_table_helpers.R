@@ -328,7 +328,8 @@ test_that("1. build_la_stats_table works with standard inputs", {
   change_since_prev <- 5.2
   rank <- 1
   quartile <- "A"
-  quartile_bands <- c("25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
+  quartile_bands <- c("0%" = 0, "25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
+  indicator_dps <- 1
   indicator_polarity <- "High"
 
   result <- build_la_stats_table(
@@ -339,6 +340,7 @@ test_that("1. build_la_stats_table works with standard inputs", {
     rank,
     quartile,
     quartile_bands,
+    indicator_dps,
     indicator_polarity
   )
 
@@ -350,10 +352,10 @@ test_that("1. build_la_stats_table works with standard inputs", {
     "Polarity" = "High",
     "Latest National Rank" = 1,
     "Quartile Banding" = "A",
-    "(D) Up to and including" = 10,
-    "(C) Up to and including" = 20,
-    "(B) Up to and including" = 30,
-    "(A) Up to and including" = 40,
+    "A" = "40 to 30.1",
+    "B" = "30 to 20.1",
+    "C" = "20 to 10.1",
+    "D" = "10 to 0",
     check.names = FALSE
   )
 
@@ -372,6 +374,7 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
   rank <- numeric(0)
   quartile <- character(0)
   quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_dps <- 1
   indicator_polarity <- character(0)
 
   expect_warning(
@@ -384,6 +387,7 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
         rank,
         quartile,
         quartile_bands,
+        indicator_dps,
         indicator_polarity
       ),
       "argument is of length zero"
@@ -403,7 +407,8 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
   change_since_prev <- NA
   rank <- NA
   quartile <- NA
-  quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_dps <- 1
   indicator_polarity <- NA
 
   expected <- data.frame(
@@ -414,10 +419,10 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
     "Polarity" = NA,
     "Latest National Rank" = "-",
     "Quartile Banding" = "-",
-    "(A) Up to and including" = "-",
-    "(B) Up to and including" = "-",
-    "(C) Up to and including" = "-",
-    "(D) Up to and including" = "-",
+    "A" = "-",
+    "B" = "-",
+    "C" = "-",
+    "D" = "-",
     check.names = FALSE
   )
 
@@ -431,6 +436,7 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
         rank,
         quartile,
         quartile_bands,
+        indicator_dps,
         indicator_polarity
       ),
       expected
@@ -450,7 +456,8 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
   change_since_prev <- NA
   rank <- NA
   quartile <- NA
-  quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_dps <- 1
   indicator_polarity <- "Low"
 
   expected <- data.frame(
@@ -461,10 +468,10 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
     "Polarity" = "Low",
     "Latest National Rank" = NA,
     "Quartile Banding" = NA,
-    "(A) Up to and including" = 0,
-    "(B) Up to and including" = 0,
-    "(C) Up to and including" = 0,
-    "(D) Up to and including" = 0,
+    "A" = "0 to 0",
+    "B" = "0.1 to 0",
+    "C" = "0.1 to 0",
+    "D" = "0.1 to 0",
     check.names = FALSE
   )
 
@@ -478,6 +485,7 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
         rank,
         quartile,
         quartile_bands,
+        indicator_dps,
         indicator_polarity
       ),
       expected

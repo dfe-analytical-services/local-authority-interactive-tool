@@ -60,7 +60,8 @@ StatN_FocusLineChartUI <- function(id) {
 StatN_FocusLineChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
-                                       stat_n_la) {
+                                       stat_n_la,
+                                       covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -97,6 +98,12 @@ StatN_FocusLineChartServer <- function(id,
       if (all(is.na(focus_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(focus_chart_data(), covid_affected, "line")
+
         # Build plot
         focus_chart_data() |>
           ggplot2::ggplot() +
@@ -112,7 +119,10 @@ StatN_FocusLineChartServer <- function(id,
           ) +
           # Only show point data where line won't appear (NAs)
           ggplot2::geom_point(
-            data = subset(create_show_point(focus_chart_data()), show_point),
+            data = subset(
+              create_show_point(focus_chart_data(), covid_affected),
+              show_point
+            ),
             ggplot2::aes(
               x = Years_num,
               y = values_num,
@@ -122,6 +132,7 @@ StatN_FocusLineChartServer <- function(id,
             shape = 15,
             na.rm = TRUE
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(focus_chart_data()) +
           set_plot_colours(focus_chart_data(), colour_type = "focus", focus_group = app_inputs$la()) +
           set_plot_labs(filtered_bds()) +
@@ -143,7 +154,6 @@ StatN_FocusLineChartServer <- function(id,
             na.rm = TRUE
           ) +
           custom_theme() +
-          coord_cartesian(clip = "off") +
           theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
           guides(color = "none", size = "none")
       }
@@ -279,7 +289,8 @@ StatN_FocusBarChartUI <- function(id) {
 StatN_FocusBarChartServer <- function(id,
                                       app_inputs,
                                       bds_metrics,
-                                      stat_n_la) {
+                                      stat_n_la,
+                                      covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -313,6 +324,13 @@ StatN_FocusBarChartServer <- function(id,
       if (all(is.na(focus_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(focus_chart_data(), covid_affected, "bar")
+
+        # Build plot
         focus_chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_col_interactive(
@@ -333,6 +351,7 @@ StatN_FocusBarChartServer <- function(id,
             na.rm = TRUE,
             colour = "black"
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(focus_chart_data()) +
           set_plot_colours(focus_chart_data(), "focus-fill", app_inputs$la()) +
           set_plot_labs(filtered_bds()) +
@@ -675,7 +694,8 @@ StatN_MultiLineChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
                                        stat_n_la,
-                                       shared_values) {
+                                       shared_values,
+                                       covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -720,6 +740,12 @@ StatN_MultiLineChartServer <- function(id,
       if (all(is.na(chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(chart_data(), covid_affected, "line")
+
         # Plot - selected areas
         chart_data() |>
           ggplot2::ggplot() +
@@ -735,7 +761,7 @@ StatN_MultiLineChartServer <- function(id,
           ) +
           # Only show point data where line won't appear (NAs)
           ggplot2::geom_point(
-            data = subset(create_show_point(chart_data()), show_point),
+            data = subset(create_show_point(chart_data(), covid_affected), show_point),
             ggplot2::aes(
               x = Years_num,
               y = values_num,
@@ -745,6 +771,7 @@ StatN_MultiLineChartServer <- function(id,
             na.rm = TRUE,
             size = 1.5
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(chart_data()) +
           set_plot_colours(
             data.frame(
@@ -913,7 +940,8 @@ StatN_MultiBarChartServer <- function(id,
                                       app_inputs,
                                       bds_metrics,
                                       stat_n_la,
-                                      shared_values) {
+                                      shared_values,
+                                      covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -957,6 +985,13 @@ StatN_MultiBarChartServer <- function(id,
       if (all(is.na(multi_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
+        # Check if measure affected by COVID
+        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
+
+        # Generate the covid plot data if add_covid_plot is TRUE
+        covid_plot <- calculate_covid_plot(multi_chart_data(), covid_affected, "bar")
+
+        # Build plot
         multi_chart_data() |>
           ggplot2::ggplot() +
           ggiraph::geom_col_interactive(
@@ -976,6 +1011,7 @@ StatN_MultiBarChartServer <- function(id,
             na.rm = TRUE,
             colour = "black"
           ) +
+          add_covid_elements(covid_plot) +
           format_axes(multi_chart_data()) +
           set_plot_colours(multi_chart_data(), "fill", app_inputs$la()) +
           set_plot_labs(filtered_bds()) +

@@ -13,8 +13,9 @@ list.files("R/", full.names = TRUE) |>
 # - Local Authority, Region and England table ---
 selected_topic <- "Health and Wellbeing"
 selected_indicator <- "Children killed or seriously injured in road traffic accidents"
+# "Children killed or seriously injured in road traffic accidents"
 # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
-selected_la <- "Barnet" # "Barnet" # Cumberland
+selected_la <- "Bedford Borough" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -221,8 +222,10 @@ la_stats_table <- build_la_stats_table(
   la_rank,
   la_quartile,
   la_quartile_bands,
+  indicator_dps,
   la_indicator_polarity
 )
+
 
 # Format stats table
 # Use modifyList to merge the lists properly
@@ -236,49 +239,55 @@ dfe_reactable(
       num_exclude = "LA Number",
       categorical = c(
         "Trend", "Quartile Banding", "Latest National Rank",
-        "(A) Up to and including", "(B) Up to and including",
-        "(C) Up to and including", "(D) Up to and including"
+        "A", "B",
+        "C", "D"
       )
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
       set_custom_default_col_widths(),
+      Trend = reactable::colDef(
+        header = add_tooltip_to_reactcol(
+          "Trend",
+          "Based on change from previous year"
+        ),
+        cell = trend_icon_renderer,
+        style = function(value) {
+          get_trend_colour(value, la_stats_table$Polarity[1])
+        }
+      ),
       `Quartile Banding` = reactable::colDef(
-        cell = function(value) {
-          # Apply the NA value logic based on Polarity
-          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
-        },
         style = function(value, index) {
           quartile_banding_col_def(la_stats_table[index, ])
         }
       ),
       `Latest National Rank` = reactable::colDef(
-        cell = function(value) {
-          get_na_value_based_on_polarity(value, la_stats_table$Polarity[1])
-        }
-      ),
-      Trend = reactable::colDef(
-        cell = trend_icon_renderer,
-        style = function(value) {
-          get_trend_colour(value, la_stats_table$Polarity[1])
-        }
+        header = add_tooltip_to_reactcol(
+          "Latest National Rank",
+          "Rank 1 is always the best performer"
+        )
       ),
       Polarity = reactable::colDef(show = FALSE)
     )
   )
 )
 
-
-
-
 # LA line chart plot ----------------------------------------------------------
+# Check if measure affected by COVID
+covid_affected <- selected_indicator %in% covid_affected_indicators
+
+# Generate the covid plot data if add_covid_plot is TRUE
+covid_plot_line <- calculate_covid_plot(la_long, covid_affected, "line")
+
 # Plot
 la_line_chart <- la_long |>
   ggplot2::ggplot() +
   # Only show point data where line won't appear (NAs)
   ggplot2::geom_point(
-    data = subset(create_show_point(la_long), show_point),
-    ggplot2::aes(
+    data = subset(
+      create_show_point(la_long, covid_affected),
+      show_point
+    ), ggplot2::aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`
@@ -297,6 +306,8 @@ la_line_chart <- la_long |>
     na.rm = TRUE,
     linewidth = 1
   ) +
+  # Add COVID plot if indicator affected
+  add_covid_elements(covid_plot_line) +
   format_axes(la_long) +
   set_plot_colours(la_long, focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
@@ -336,6 +347,9 @@ ggsave(
 htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
+# Generate the covid plot data if add_covid_plot is TRUE (for bar chart)
+covid_plot_bar <- calculate_covid_plot(la_long, covid_affected, "bar")
+
 # Plot
 la_bar_chart <- la_long |>
   ggplot2::ggplot() +
@@ -352,6 +366,8 @@ la_bar_chart <- la_long |>
     na.rm = TRUE,
     colour = "black"
   ) +
+  # Add COVID plot if indicator affected
+  add_covid_elements(covid_plot_bar) +
   format_axes(la_long) +
   set_plot_colours(la_long, "fill", selected_la) +
   set_plot_labs(filtered_bds) +
@@ -361,7 +377,11 @@ la_bar_chart <- la_long |>
 ggiraph::girafe(
   ggobj = la_bar_chart,
   width_svg = 8.5,
-  options = generic_ggiraph_options(),
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  ),
   fonts = list(sans = "Arial")
 )
 

@@ -37,7 +37,9 @@ ui_dev <- bslib::page_fillable(
         label = NULL,
         choices = metric_names
       )
-    )
+    ),
+    # Conditional State-funded school banner
+    shiny::uiOutput("state_funded_banner")
   ),
   div(
     class = "well",
@@ -45,7 +47,11 @@ ui_dev <- bslib::page_fillable(
     bslib::card(
       bslib::card_header("Local Authority, Region and England"),
       bslib::card_body(
-        reactable::reactableOutput("la_table")
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput("la_table"),
+          type = 6,
+          color = "#1d70b8"
+        )
       )
     )
   ),
@@ -54,7 +60,13 @@ ui_dev <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
-        reactable::reactableOutput("la_stats_table")
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput("la_stats_table"),
+          type = 6,
+          color = "#1d70b8",
+          size = 0.5,
+          proxy.height = "100px"
+        )
       )
     )
   ),
@@ -67,7 +79,11 @@ ui_dev <- bslib::page_fillable(
         title = "Line chart",
         bslib::card(
           bslib::card_body(
-            ggiraph::girafeOutput("la_line_chart")
+            shinycssloaders::withSpinner(
+              ggiraph::girafeOutput("la_line_chart"),
+              type = 6,
+              color = "#1d70b8"
+            )
           ),
           full_screen = TRUE
         ),
@@ -77,7 +93,11 @@ ui_dev <- bslib::page_fillable(
         bslib::card(
           id = "la_bar_body",
           bslib::card_body(
-            ggiraph::girafeOutput("la_bar_chart")
+            shinycssloaders::withSpinner(
+              ggiraph::girafeOutput("la_bar_chart"),
+              type = 6,
+              color = "#1d70b8"
+            )
           ),
           full_screen = TRUE
         )
@@ -90,35 +110,56 @@ ui_dev <- bslib::page_fillable(
     bslib::card(
       bslib::card_body(
         h3("Description:"),
-        textOutput("description"),
+        shinycssloaders::withSpinner(
+          textOutput("description"),
+          type = 6,
+          color = "#1d70b8"
+        ),
         h3("Methodology:"),
-        uiOutput("methodology"),
+        shinycssloaders::withSpinner(
+          uiOutput("methodology"),
+          type = 6,
+          color = "#1d70b8"
+        ),
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
           h3("Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          textOutput("last_update")
+          shinycssloaders::withSpinner(
+            textOutput("last_update"),
+            type = 6,
+            color = "#1d70b8"
+          )
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          uiOutput("next_update")
+          shinycssloaders::withSpinner(
+            uiOutput("next_update"),
+            type = 6,
+            color = "#1d70b8"
+          )
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Source:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          uiOutput("source")
+          shinycssloaders::withSpinner(
+            uiOutput("source"),
+            type = 6,
+            color = "#1d70b8"
+          )
         )
       )
     )
   )
 )
+
 
 # Server
 server_dev <- function(input, output, session) {
@@ -242,6 +283,27 @@ server_dev <- function(input, output, session) {
       dplyr::arrange(`LA and Regions`)
   })
 
+
+  # Stet funded school banner (appears for certain indicators)
+  output$state_funded_banner <- renderUI({
+    # Get whether state-funded idnicator
+    state_funded <- filtered_bds$data |>
+      pull_uniques("state_funded_flag") |>
+      (\(x) !is.na(x))()
+
+    # Render banner if state-funded
+    if (state_funded) {
+      tagList(
+        br(),
+        shinyGovstyle::noti_banner(
+          inputId = "notId",
+          title_txt = "Note",
+          body_txt = "Data includes only State-funded Schools."
+        )
+      )
+    }
+  })
+
   output$la_table <- reactable::renderReactable({
     dfe_reactable(
       la_table(),
@@ -304,6 +366,7 @@ server_dev <- function(input, output, session) {
       la_rank,
       la_quartile,
       la_quartile_bands,
+      get_indicator_dps(filtered_bds$data),
       la_indicator_polarity
     )
 
@@ -321,23 +384,36 @@ server_dev <- function(input, output, session) {
           num_exclude = "LA Number",
           categorical = c(
             "Trend", "Quartile Banding", "Latest National Rank",
-            "(A) Up to and including", "(B) Up to and including",
-            "(C) Up to and including", "(D) Up to and including"
+            "A", "B",
+            "C", "D"
           )
         ),
         # Style Quartile Banding column with colour
         list(
           set_custom_default_col_widths(),
+          Trend = reactable::colDef(
+            header = add_tooltip_to_reactcol(
+              "Trend",
+              "Based on change from previous year"
+            ),
+            cell = trend_icon_renderer,
+            style = function(value) {
+              get_trend_colour(value, la_stats_table()$Polarity[1])
+            }
+          ),
           `Quartile Banding` = reactable::colDef(
             style = function(value, index) {
               quartile_banding_col_def(la_stats_table()[index, ])
             }
           ),
-          Trend = reactable::colDef(
-            cell = trend_icon_renderer,
-            style = function(value) {
-              get_trend_colour(value, la_stats_table()$Polarity[1])
-            }
+          `Latest National Rank` = reactable::colDef(
+            header = add_tooltip_to_reactcol(
+              "Latest National Rank",
+              paste0(
+                "Rank 1 corresponds to the best value based on the ",
+                "indicator's direction."
+              )
+            )
           ),
           Polarity = reactable::colDef(show = FALSE)
         )
@@ -348,6 +424,12 @@ server_dev <- function(input, output, session) {
 
   # LA Level line chart plot ----------------------------------
   la_line_chart <- reactive({
+    # Check if measure affected by COVID
+    covid_affected <- input$indicator %in% covid_affected_indicators
+
+    # Generate the covid plot data if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(la_long(), covid_affected, "line")
+
     # Build plot
     la_line_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -363,7 +445,7 @@ server_dev <- function(input, output, session) {
       ) +
       # Only show point data where line won't appear (NAs)
       ggplot2::geom_point(
-        data = subset(create_show_point(la_long()), show_point),
+        data = subset(create_show_point(la_long(), covid_affected), show_point),
         ggplot2::aes(
           x = Years_num,
           y = values_num,
@@ -373,6 +455,8 @@ server_dev <- function(input, output, session) {
         size = 1,
         na.rm = TRUE
       ) +
+      # Add COVID plot if indicator affected
+      add_covid_elements(covid_plot) +
       format_axes(la_long()) +
       set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
@@ -408,6 +492,12 @@ server_dev <- function(input, output, session) {
 
   # LA Level bar plot ----------------------------------
   la_bar_chart <- reactive({
+    # Check if measure affected by COVID
+    covid_affected <- input$indicator %in% covid_affected_indicators
+
+    # Generate the covid plot data if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(la_long(), covid_affected, "bar")
+
     # Build plot
     la_bar_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -424,6 +514,8 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE,
         colour = "black"
       ) +
+      # Add COVID plot if indicator affected
+      add_covid_elements(covid_plot) +
       format_axes(la_long()) +
       set_plot_colours(la_long(), "fill", input$la_input) +
       set_plot_labs(filtered_bds$data) +
@@ -433,7 +525,11 @@ server_dev <- function(input, output, session) {
     ggiraph::girafe(
       ggobj = la_bar_chart,
       width_svg = 8.5,
-      options = generic_ggiraph_options(),
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      ),
       fonts = list(sans = "Arial")
     )
   })

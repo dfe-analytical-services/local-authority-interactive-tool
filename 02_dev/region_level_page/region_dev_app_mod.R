@@ -93,7 +93,8 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_geog,
-    region_names_bds
+    region_names_bds,
+    covid_affected_indicators
   )
 
   # Region multi-choice line chart --------------------------------------------
@@ -103,7 +104,8 @@ server_mod <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    shared_values
+    shared_values,
+    covid_affected_indicators
   )
 
   # Region focus bar chart ---------------------------------------------------
@@ -112,7 +114,8 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_geog,
-    region_names_bds
+    region_names_bds,
+    covid_affected_indicators
   )
 
   # Region multi-choice bar chart ---------------------------------------------
@@ -122,7 +125,8 @@ server_mod <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    shared_values
+    shared_values,
+    covid_affected_indicators
   )
 }
 

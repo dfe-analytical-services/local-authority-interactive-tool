@@ -261,18 +261,24 @@ StatN_TablesUI <- function(id) {
         bslib::card(
           # Statistical Neighbour LA SNs Table --------------------------------
           bslib::card_header("Statistical Neighbours"),
-          reactable::reactableOutput(ns("statn_table")),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("statn_table")),
+            size = 1.6
+          ),
           # Statistical Neighbour LA Geog Compare Table -----------------------
           div(
             # Add black border between the tables
             style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
             bslib::card_header("Other Geographies"),
-            reactable::reactableOutput(ns("geog_table"))
+            with_gov_spinner(
+              reactable::reactableOutput(ns("geog_table")),
+              size = 0.7
+            )
           )
         ),
         br(),
         # Statistical Neighbour Statistics Table ------------------------------
-        StatN_StatsTableUI("stat_n_stats_mod")
+        StatN_StatsTableUI("stat_n_stats_mod"),
       ),
       bslib::nav_panel(
         "Download",
@@ -378,6 +384,7 @@ StatN_LASNsTableServer <- function(id,
 
 # LA Statistical Neighbour Geographic comparison table ========================
 #' Statistical Neighbour Geographic Comparison Table UI Module
+#' NOT CURRENTLY IN USE (DUE TO SHARING DATA DOWNLOAD)
 #'
 #' This UI module generates a table for comparing the selected Local Authority
 #' (LA) with its statistical neighbours, region, and England.
@@ -394,7 +401,10 @@ StatN_GeogCompTableUI <- function(id) {
   div(
     # Add black border between the tables
     style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    reactable::reactableOutput(ns("output_table"))
+    with_gov_spinner(
+      reactable::reactableOutput(ns("output_table")),
+      size = 0.8
+    )
   )
 }
 
@@ -515,7 +525,10 @@ StatN_StatsTableUI <- function(id) {
     bslib::card(
       # bslib::card_header(""),
       bslib::card_body(
-        reactable::reactableOutput(ns("output_table"))
+        with_gov_spinner(
+          reactable::reactableOutput(ns("output_table")),
+          size = 1
+        )
       )
     )
   )
@@ -635,18 +648,25 @@ StatN_StatsTableServer <- function(id,
 
       dfe_reactable(
         stat_n_stats_output,
+        rowStyle = function(index) {
+          highlight_selected_row(index, stat_n_stats_output, app_inputs$la())
+        },
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
             stat_n_stats_output,
             get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding", "National Rank")
+            categorical = c("Trend", "Quartile Banding", "Latest National Rank")
           ),
           # Define specific formatting for the Trend and Quartile Banding columns
           list(
             set_custom_default_col_widths(),
             Trend = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Trend",
+                "Based on change from previous year"
+              ),
               cell = trend_icon_renderer,
               style = function(value) {
                 get_trend_colour(value, stat_n_stats_output$Polarity[1])
@@ -654,19 +674,20 @@ StatN_StatsTableServer <- function(id,
             ),
             `Quartile Banding` = reactable::colDef(
               style = function(value, index) {
-                color <- get_quartile_band_cell_colour(
-                  stat_n_stats_output[index, "Polarity"],
-                  stat_n_stats_output[index, "Quartile Banding"]
+                quartile_banding_col_def(
+                  stat_n_stats_output[index, ]
                 )
-                list(background = color)
               }
+            ),
+            `Latest National Rank` = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Latest National Rank",
+                "Rank 1 is always the best performer"
+              )
             ),
             Polarity = reactable::colDef(show = FALSE)
           )
-        ),
-        rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_stats_output, app_inputs$la())
-        }
+        )
       )
     })
   })

@@ -8,7 +8,9 @@
 create_chart_card_ui <- function(output_id) {
   bslib::card(
     bslib::card_body(
-      ggiraph::girafeOutput(output_id)
+      with_gov_spinner(
+        ggiraph::girafeOutput(output_id)
+      )
     ),
     full_screen = TRUE,
     style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
@@ -65,5 +67,110 @@ create_hidden_clipboard_plot <- function(clipboard_plot_id) {
   div(
     shiny::plotOutput(clipboard_plot_id),
     style = "content-visibility: hidden;"
+  )
+}
+
+
+#' Create a Closable Notification Banner
+#'
+#' This function generates a notification banner styled with the GOV.UK
+#' notification style. The banner includes a close button (an "×" icon)
+#' that removes the banner from the page when clicked.
+#'
+#' @param input_id A unique ID for the notification banner. This ID is used
+#'   for JavaScript interactions to handle the banner's close functionality.
+#' @param title_txt A character string representing the title of the
+#'   notification banner. This text appears prominently at the top of the banner.
+#' @param body_txt HTML content or a character string representing the main
+#'   content of the notification banner. Can include links or other formatted text.
+#' @param type A character string specifying the type of notification. Options
+#'   are `"standard"`, `"success"`, `"warning"`, or `"error"`. Defaults to `"standard"`.
+#'
+#' @return A Shiny `tagList` object containing the notification banner with
+#'   a close button. The banner is styled for GOV.UK aesthetics and functionality.
+#'
+#' @examples
+#' # Create a simple closable notification banner in a Shiny app
+#' ui <- fluidPage(
+#'   closable_noti_banner(
+#'     input_id = "example_banner",
+#'     title_txt = "Information",
+#'     body_txt = shiny::HTML("This is a sample notification banner."),
+#'     type = "standard"
+#'   )
+#' )
+#'
+closable_noti_banner <- function(input_id, title_txt, body_txt, type = "standard") {
+  shiny::tagList(
+    shiny::tags$div(
+      id = paste0(input_id, "-banner"),
+      class = "govuk-notification-banner",
+      style = "position: relative; padding-right: 2rem;", # Adjust padding for close button
+      shinyGovstyle::noti_banner(
+        inputId = input_id,
+        title_txt = title_txt,
+        body_txt = body_txt,
+        type = type
+      ),
+      # Close button
+      shiny::tags$button(
+        type = "button",
+        class = "govuk-notification-banner__close",
+        style = paste(
+          "position: absolute; top: 10px; right: 10px; background: none;",
+          "border: none; font-size: 18px; cursor: pointer; color: #ffffff;",
+          "font-weight: bold; line-height: 1;"
+        ),
+        "×"
+      )
+    ),
+    # JavaScript to remove banner on click
+    shiny::tags$script(
+      shiny::HTML(sprintf("
+        $(document).on('click', '#%s-banner .govuk-notification-banner__close', function() {
+          $('#%s-banner').remove();
+        });
+      ", input_id, input_id))
+    )
+  )
+}
+
+
+#' Create a Notification Banner for Full Data on GitHub
+#'
+#' This function generates a closable notification banner informing users
+#' about the availability of the full dataset as a downloadable .csv file
+#' on GitHub. The banner includes a link to the dataset and a close button.
+#'
+#' @return A Shiny `tagList` object containing the notification banner with
+#'   a close button. The banner provides information and a clickable link
+#'   to the dataset on GitHub.
+#'
+#' @examples
+#' # Add the banner to a Shiny app
+#' ui <- fluidPage(
+#'   full_data_on_github_noti()
+#' )
+#'
+full_data_on_github_noti <- function() {
+  closable_noti_banner(
+    input_id = "full_data_on_github",
+    title_txt = "Information",
+    body_txt = shiny::HTML(paste0(
+      "The full dataset is available to download as a .csv on GitHub. ",
+      "The file is ",
+      dfeshiny::external_link(
+        href = paste0(
+          "https://github.com/dfe-analytical-services/",
+          "local-authority-interactive-tool/tree/main/01_data/02_prod"
+        ),
+        link_text = "bds_long.csv"
+      ),
+      ".<br>",
+      "<span style='font-weight: normal;'>",
+      "This should be the preferred method for large data downloads ",
+      "especially for use with code.</span>"
+    )),
+    type = "standard"
   )
 }

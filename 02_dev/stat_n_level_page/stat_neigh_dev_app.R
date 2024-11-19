@@ -370,13 +370,16 @@ server_dev <- function(input, output, session) {
 
     dfe_reactable(
       stat_n_stats_output,
+      rowStyle = function(index) {
+        highlight_selected_row(index, stat_n_stats_output, input$la_input)
+      },
       columns = modifyList(
         # Create the reactable with specific column alignments
         format_num_reactable_cols(
           stat_n_stats_output,
           get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding", "National Rank")
+          categorical = c("Trend", "Quartile Banding", "Latest National Rank")
         ),
         # Define specific formatting for the Trend and Quartile Banding columns
         list(
@@ -396,12 +399,15 @@ server_dev <- function(input, output, session) {
               list(background = color)
             }
           ),
+          `Latest National Rank` = reactable::colDef(
+            header = add_tooltip_to_reactcol(
+              "Latest National Rank",
+              "Rank 1 is always the best performer"
+            )
+          ),
           Polarity = reactable::colDef(show = FALSE)
         )
-      ),
-      rowStyle = function(index) {
-        highlight_selected_row(index, stat_n_stats_output, input$la_input)
-      }
+      )
     )
   })
 
@@ -532,7 +538,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -621,7 +631,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -695,7 +709,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -729,7 +747,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = stat_n_focus_bar_chart,
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     }
@@ -756,7 +778,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -788,7 +814,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = stat_n_multi_bar_chart,
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     }

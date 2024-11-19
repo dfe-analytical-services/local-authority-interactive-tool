@@ -127,7 +127,9 @@ LA_LevelTableUI <- function(id) {
       bslib::nav_panel(
         "Table",
         bslib::card_header("Local Authority, Region and England"),
-        reactable::reactableOutput(ns("la_table"))
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table"))
+        )
       ),
       bslib::nav_panel(
         "Download data",
@@ -227,11 +229,17 @@ LA_StatsTableUI <- function(id) {
         ),
         div(
           bslib::card_header("General Statistics", style = "color: #0000;"),
-          reactable::reactableOutput(ns("la_stats"))
+          with_gov_spinner(
+            reactable::reactableOutput(ns("la_stats")),
+            size = 0.4
+          )
         ),
         div(
           bslib::card_header("Quartile bands"),
-          reactable::reactableOutput(ns("la_quartiles"))
+          with_gov_spinner(
+            reactable::reactableOutput(ns("la_quartiles")),
+            size = 0.4
+          )
         )
       )
     )
@@ -313,12 +321,9 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_rank,
         la_quartile,
         la_quartile_bands,
+        get_indicator_dps(filtered_bds()),
         la_indicator_polarity
-      ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = c("LA Number", "Trend", "Latest National Rank")
-        )
+      )
 
       la_stats_table
     })
@@ -327,7 +332,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_stats <- reactable::renderReactable({
       dfe_reactable(
         la_stats_table() |>
-          dplyr::select(!dplyr::ends_with("including")),
+          dplyr::select(-c("A", "B", "C", "D")),
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
@@ -340,16 +345,26 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           # Style Quartile Banding column with colour
           list(
             set_custom_default_col_widths(),
+            Trend = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Trend",
+                "Based on change from previous year"
+              ),
+              cell = trend_icon_renderer,
+              style = function(value) {
+                get_trend_colour(value, la_stats_table()$Polarity[1])
+              }
+            ),
             `Quartile Banding` = reactable::colDef(
               style = function(value, index) {
                 quartile_banding_col_def(la_stats_table()[index, ])
               }
             ),
-            Trend = reactable::colDef(
-              cell = trend_icon_renderer,
-              style = function(value) {
-                get_trend_colour(value, la_stats_table()$Polarity[1])
-              }
+            `Latest National Rank` = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Latest National Rank",
+                "Rank 1 is always the best performer"
+              )
             ),
             Polarity = reactable::colDef(show = FALSE)
           )
@@ -361,7 +376,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_quartiles <- reactable::renderReactable({
       # Get quartile bands only
       qb_table <- la_stats_table() |>
-        dplyr::select(dplyr::ends_with("including"), -Polarity)
+        dplyr::select(c("A", "B", "C", "D"))
 
       dfe_reactable(
         qb_table,

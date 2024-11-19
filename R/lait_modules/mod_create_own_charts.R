@@ -106,31 +106,12 @@ CreateOwnLineChartUI <- function(id) {
                align-items: center;
                background: white;",
       # Line chart
-      bslib::card(
-        bslib::card_body(
-          ggiraph::girafeOutput(ns("line_chart"))
-        ),
-        full_screen = TRUE,
-        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
-      ),
+      # Line chart
+      create_chart_card_ui(ns("line_chart")),
       # Download options
-      div(
-        # Download button to trigger chart download modal
-        shiny::tagAppendAttributes(
-          DownloadChartBtnUI(ns("download_btn")),
-          style = "max-width: none; margin-left: 0;  align-self: auto;"
-        ),
-        br(),
-        shiny::tagAppendAttributes(
-          actionButton(
-            ns("copybtn"),
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
     ),
     # Hidden static plot for copy-to-clipboard
@@ -156,7 +137,7 @@ CreateOwnLineChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnLineChartServer <- function(id, query, bds_metrics) {
+CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -187,6 +168,12 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
+      # Check if measure affected by COVID
+      covid_affected <- create_own_bds() |>
+        pull_uniques("Measure") %in% covid_affected_indicators
+
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(chart_info$data(), covid_affected, "line")
 
       # Plot data - colour represents Geographies & linetype represents Indicator
       chart_info$data() |>
@@ -204,7 +191,10 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
         ) +
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
-          data = subset(create_show_point(chart_info$data()), show_point),
+          data = subset(
+            create_show_point(chart_info$data(), covid_affected),
+            show_point
+          ),
           ggplot2::aes(
             x = Years_num,
             y = values_num,
@@ -213,10 +203,11 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics) {
           shape = 15,
           na.rm = TRUE
         ) +
+        add_covid_elements(covid_plot) +
         format_axes(chart_info$data()) +
         set_plot_colours(chart_info$data()) +
         set_plot_labs(create_own_bds()) +
-        custom_theme() +
+        custom_theme(title_margin = chart_info$no_indicators() - 1) +
         # Setting legend title at top
         ggplot2::theme(
           legend.title = ggplot2::element_text(),
@@ -346,31 +337,11 @@ CreateOwnBarChartUI <- function(id) {
                    align-items: center;
                    background: white;",
       # Bar chart
-      bslib::card(
-        bslib::card_body(
-          ggiraph::girafeOutput(ns("bar_chart"))
-        ),
-        full_screen = TRUE,
-        style = "flex-grow: 1; display: flex; justify-content: center; padding: 0 10px;"
-      ),
+      create_chart_card_ui(ns("bar_chart")),
       # Download options
-      div(
-        # Download button to trigger chart download modal
-        shiny::tagAppendAttributes(
-          DownloadChartBtnUI(ns("download_btn")),
-          style = "max-width: none; margin-left: 0; align-self: auto;"
-        ),
-        br(),
-        shiny::tagAppendAttributes(
-          actionButton(
-            ns("copybtn"),
-            "Copy Chart to Clipboard",
-            icon = icon("copy"),
-            class = "gov-uk-button"
-          ),
-          style = "max-width: none;"
-        ),
-        style = "display: flex; flex-direction: column; align-self: flex-start; margin: 15px;"
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
     ),
     # Hidden static plot for copy-to-clipboard
@@ -396,7 +367,7 @@ CreateOwnBarChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnBarChartServer <- function(id, query, bds_metrics) {
+CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indicators) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -428,6 +399,10 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         chart_info$no_geogs() <= 4
       )
 
+      # Prepare data by removing NaN values
+      clean_plot_data <- chart_info$data() |>
+        dplyr::filter(!is.nan(values_num))
+
       # Giving facet_wrap charts the correct chart names
       # Get chart names for each indicator
       chart_names <- create_own_bds() |>
@@ -448,15 +423,23 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
       )
 
       # Set x axis limits if one bar so its not super wide
-      n_chart_rows <- nrow(chart_info$data()) == 1
+      n_chart_rows <- nrow(clean_plot_data) == 1
       thin_bar_xlim <- if (n_chart_rows) {
-        thin_bar(chart_info$data(), Years_num)
+        thin_bar(clean_plot_data, Years_num)
       } else {
         NULL
       }
 
+      # Check if measure affected by COVID
+      covid_affected <- create_own_bds() |>
+        pull_uniques("Measure") %in% covid_affected_indicators
+
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(clean_plot_data, covid_affected, "bar")
+
       # Plot chart - split by indicators, colours represent Geographies
-      chart_info$data() |>
+      clean_plot_data |>
+        dplyr::filter(!is.nan(values_num)) |>
         ggplot2::ggplot() +
         ggiraph::geom_col_interactive(
           ggplot2::aes(
@@ -464,7 +447,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
             y = values_num,
             fill = `LA and Regions`,
             tooltip = tooltip_bar(
-              chart_info$data(),
+              clean_plot_data,
               get_indicator_dps(create_own_bds()),
               include_measure = TRUE
             )
@@ -474,15 +457,23 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
           na.rm = TRUE,
           color = "black"
         ) +
-        format_axes(chart_info$data()) +
-        set_plot_colours(chart_info$data(), "fill") +
+        add_covid_elements(covid_plot) +
+        format_axes(clean_plot_data) +
+        set_plot_colours(clean_plot_data, "fill") +
         set_plot_labs(create_own_bds()) +
         custom_theme() +
         ggplot2::theme(
-          legend.title = ggplot2::element_text(),
-          legend.title.position = "top"
+          legend.title.position = "top",
+          # Set heigh & size of mini chart titles
+          strip.text = ggplot2::element_text(
+            size = 11,
+            margin = ggplot2::margin(b = 30)
+          ),
+          # Gives space between the charts so x-axis labels don't overlap
+          plot.margin = ggplot2::margin(r = 30),
+          panel.spacing.x = unit(10, "mm")
         ) +
-        guides(
+        ggplot2::guides(
           fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
         ) +
         ggplot2::labs(title = "Bar charts showing selected indicators") +
@@ -490,13 +481,13 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
         ggplot2::facet_wrap(
           ~Measure,
           labeller = labeller(Measure = as_labeller(custom_titles)),
+          # scales = "free_x"
         ) +
-        # Gives space between the charts so x-axis labels don't overlap
-        theme(
-          panel.spacing.x = unit(15, "mm"),
-          plot.margin = ggplot2::margin(r = 30)
-        ) +
-        ggplot2::coord_cartesian(xlim = thin_bar_xlim)
+        # Setting x limits for one value bar charts (to keep narrow)
+        ggplot2::coord_cartesian(
+          xlim = thin_bar_xlim,
+          clip = "off"
+        )
     })
 
     # Build interactive line chart
@@ -510,8 +501,12 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics) {
       # Plotting interactive graph
       ggiraph::girafe(
         ggobj = (bar_chart()),
-        width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        width_svg = 8.5 + (chart_info$no_indicators() - 1) * 3.5,
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     })

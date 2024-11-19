@@ -661,3 +661,35 @@ add_line_breaks <- function(text, max_length = 20) {
   }
   c(lines, current_line) |> paste(collapse = "\n")
 }
+
+
+#' Add a GOV.UK styled spinner to a UI element
+#'
+#' This function wraps a UI element with a spinner from the `shinycssloaders`
+#' package, with a GOV.UK style and custom size. The spinner is displayed
+#' while the UI element is loading, and its height is adjusted dynamically
+#' based on the size parameter.
+#'
+#' @param ui_element A UI element (e.g., `reactableOutput`, `plotOutput`, etc.)
+#'   to be wrapped with a spinner.
+#' @param size A numeric value (default is 1) to specify the size of the spinner.
+#'   The height of the spinner will scale based on this value (multiplied by 250px).
+#'
+#' @return A UI element wrapped in a spinner.
+#'
+#' @examples
+#' # Wrap a reactable table with a spinner
+#' with_gov_spinner(reactable::reactableOutput("la_table"))
+#'
+#' # Wrap a plot with a larger spinner
+#' with_gov_spinner(plotOutput("la_plot"), size = 2)
+#'
+with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1) {
+  shinycssloaders::withSpinner(
+    ui_element,
+    type = spinner_type,
+    color = "#1d70b8",
+    size = size,
+    proxy.height = paste0(250 * size, "px")
+  )
+}

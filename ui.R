@@ -231,10 +231,10 @@ ui <- function(input, output, session) {
       # Create Your Own Page
       # =======================================================================
       bslib::nav_panel(
-        shiny::hr(class = "mobile-only-hr"),
         title = "Create Your Own",
         value = "Create Your Own",
-
+        # Full dataset notification banner
+        full_data_on_github_noti(),
         # User Inputs =========================================================
         div(
           class = "well",

@@ -24,6 +24,8 @@ ui <- bslib::page_fillable(
 
   # Main selections ============================================================
   h1("Create your own"),
+  # Full dataset notification banner
+  full_data_on_github_noti(),
   div(
     class = "well",
     style = "overflow-y: visible; padding: 1rem;",
@@ -130,13 +132,15 @@ server <- function(input, output, session) {
   CreateOwnLineChartServer(
     "create_own_line",
     query_table,
-    bds_metrics
+    bds_metrics,
+    covid_affected_indicators
   )
 
   CreateOwnBarChartServer(
     "create_own_bar",
     query_table,
-    bds_metrics
+    bds_metrics,
+    covid_affected_indicators
   )
 }
 

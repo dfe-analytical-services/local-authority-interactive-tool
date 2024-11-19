@@ -219,7 +219,7 @@ format_reactable_num_col <- function(col, indicator_dps) {
     cell = function(value) {
       ifelse(
         is.nan(value),
-        "-",
+        "",
         dfeR::pretty_num(value, dp = indicator_dps)
       )
     }
@@ -372,6 +372,7 @@ build_la_stats_table <- function(
     rank,
     quartile,
     quartile_bands,
+    indicator_dps,
     indicator_polarity) {
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
@@ -380,33 +381,36 @@ build_la_stats_table <- function(
     warning("Suprise NA value in stats table")
   }
 
+  round_qbs <- round(quartile_bands, indicator_dps)
+  qb_adj <- 10**-(indicator_dps)
+
   # Create the ranking and Quartile Banding based on polarity
   rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "(A) Up to and including" = quartile_bands[["25%"]],
-      "(B) Up to and including" = quartile_bands[["50%"]],
-      "(C) Up to and including" = quartile_bands[["75%"]],
-      "(D) Up to and including" = quartile_bands[["100%"]]
+      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
     )
   } else if (indicator_polarity %in% "High") {
     list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "(D) Up to and including" = quartile_bands[["25%"]],
-      "(C) Up to and including" = quartile_bands[["50%"]],
-      "(B) Up to and including" = quartile_bands[["75%"]],
-      "(A) Up to and including" = quartile_bands[["100%"]]
+      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
+      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
+      "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
+      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
     )
   } else {
     list(
       "Latest National Rank" = "-",
       "Quartile Banding" = "-",
-      "(A) Up to and including" = "-",
-      "(B) Up to and including" = "-",
-      "(C) Up to and including" = "-",
-      "(D) Up to and including" = "-"
+      "A" = "-",
+      "B" = "-",
+      "C" = "-",
+      "D" = "-"
     )
   }
 
@@ -496,7 +500,7 @@ build_sn_stats_table <- function(
     "LA and Regions" = la_and_regions,
     "Trend" = trend,
     "Change from previous year" = change_prev,
-    "National Rank" = c(national_rank, "", ""),
+    "Latest National Rank" = c(national_rank, "", ""),
     "Quartile Banding" = c(quartile_band, "", ""),
     "Polarity" = polarity,
     check.names = FALSE
@@ -584,20 +588,6 @@ get_indicator_dps <- function(data_full) {
 }
 
 
-# Function to handle NA values based on Polarity
-get_na_value_based_on_polarity <- function(value, polarity) {
-  if (is.na(value)) {
-    if (polarity %in% c("High", "Low")) {
-      return("NA") # Return "NA" if Polarity is "High" or "Low"
-    } else {
-      return("-") # Return "-" for other cases
-    }
-  }
-  return(value) # Return the value as-is if not NA
-}
-
-
-
 #' Render Trend Icons Based on Value
 #'
 #' This function determines and renders a trend icon based on the given
@@ -666,17 +656,17 @@ get_trend_colour <- function(value, polarity) {
     return(list(color = "black"))
   }
 
-  # Define the logic for low and high polarity
-  low_colour <- "#d4351c"
-  high_colour <- "#00703c"
+  # Colours to set trend arrow
+  red_colour <- "#d4351c"
+  green_colour <- "#00703c"
 
-  # Check conditions for trend colour
-  trend_colour <- ifelse(polarity == "Low",
-    ifelse(value < 0, high_colour, low_colour),
-    ifelse(polarity == "High",
-      ifelse(value > 0, high_colour, low_colour),
-      "black"
-    )
+  # Apply colour dependent on polarity and vlaue
+  trend_colour <- dplyr::case_when(
+    polarity == "Low" & value < 0 ~ green_colour,
+    polarity == "Low" & value > 0 ~ red_colour,
+    polarity == "High" & value > 0 ~ green_colour,
+    polarity == "High" & value > 0 ~ red_colour,
+    TRUE ~ "black"
   )
 
   return(list(color = trend_colour))
@@ -714,7 +704,18 @@ quartile_banding_col_def <- function(data) {
     data$`Quartile Banding`
   )
 
-  list(background = qb_color)
+  # Setting text colour based on whether cell background has colour
+  if (qb_color != "none") {
+    text_colour <- "white"
+  } else {
+    text_colour <- NA
+  }
+
+  list(
+    background = qb_color,
+    textAlign = "center",
+    color = text_colour
+  )
 }
 
 
@@ -883,4 +884,82 @@ truncate_cell_with_hover <- function(text, tooltip) {
              text-overflow: ellipsis;",
     tippy::tippy(text = text, tooltip = tooltip)
   )
+}
+
+
+#' Add Tooltip to Reactable Column
+#'
+#' Creates a tooltip with an embedded Font Awesome icon for a specified value
+#' in a reactable column. The tooltip is styled and positioned for better
+#' usability and appearance, including options for color, interactivity,
+#' and cursor following.
+#'
+#' @param value Character string. The main content to display in the cell.
+#' @param tooltip Character string or HTML content. The tooltip text or HTML
+#'   to display when hovering over the icon.
+#' @param ... Additional arguments passed to `tippy::tippy` for further
+#'   customization.
+#'
+#' @return A div element containing the `value` and an embedded Font Awesome
+#'   icon with an interactive tooltip.
+#'
+#' @examples
+#' # Basic usage in a reactable column
+#' add_tooltip_to_reactcol("Sample Text", "This is a tooltip example")
+#'
+#' @importFrom htmltools div htmlDependency tags
+#' @importFrom tippy tippy
+add_tooltip_to_reactcol <- function(value, tooltip, ...) {
+  div(
+    style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
+    value,
+    tippy::tippy(
+      htmltools::tags$span(
+        htmltools::tags$i(
+          class = "fas fa-question-circle",
+          style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
+        )
+      ),
+      tooltip = div(tooltip),
+      theme = "gov",
+      placement = "top",
+      followCursor = TRUE,
+      interactive = TRUE,
+      interactiveBorder = 10,
+      arrow = TRUE,
+      inertia = TRUE,
+      ...
+    )
+  )
+}
+
+
+#' Replace "NaN" values with empty strings in columns starting with "2"
+#'
+#' This function takes a data frame and performs the following actions:
+#' 1. Converts all columns starting with "2" to character type.
+#' 2. Replaces any "NaN" string values with an empty string ("").
+#'
+#' @param data A data frame to be processed.
+#'
+#' @return A data frame with columns starting with "2" converted to character
+#' type, and any "NaN" values replaced with empty strings.
+#'
+#' @examples
+#' # Assuming `df` is a data frame with columns starting with "2"
+#' result <- replace_nan_with_empty(df)
+#'
+replace_nan_with_empty <- function(data) {
+  data |>
+    dplyr::mutate(
+      dplyr::across(
+        .cols = dplyr::starts_with("2"),
+        .fns = ~ as.character(.x),
+        .names = "{.col}"
+      ),
+      dplyr::across(
+        .cols = dplyr::starts_with("2"),
+        .fns = ~ ifelse(.x == "NaN", "", .x)
+      )
+    )
 }

@@ -223,13 +223,19 @@ RegionLevel_TableUI <- function(id) {
           bslib::card_body(
             # Region LA Table -------------------------------------------------
             bslib::card_header("Local Authorities"),
-            reactable::reactableOutput(ns("la_table")),
+            with_gov_spinner(
+              reactable::reactableOutput(ns("la_table")),
+              size = 2
+            ),
             # Region Table ----------------------------------------------------
             div(
               # Add black border between the tables
               style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
               bslib::card_header("Regions"),
-              reactable::reactableOutput(ns("region_table"))
+              with_gov_spinner(
+                reactable::reactableOutput(ns("region_table")),
+                size = 1.6
+              )
             )
           )
         ),
@@ -562,7 +568,10 @@ Region_StatsTableUI <- function(id) {
 
   bslib::card(
     bslib::card_body(
-      reactable::reactableOutput(ns("stats_table"))
+      with_gov_spinner(
+        reactable::reactableOutput(ns("stats_table")),
+        size = 0.6
+      )
     )
   )
 }
@@ -679,6 +688,10 @@ Region_StatsTableServer <- function(id,
           list(
             set_custom_default_col_widths(),
             Trend = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Trend",
+                "Based on change from previous year"
+              ),
               cell = trend_icon_renderer,
               style = function(value) {
                 get_trend_colour(value, region_stats_table()$Polarity[1])

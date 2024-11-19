@@ -195,7 +195,7 @@ test_that("Check LA charts behave as expected", {
   # Check hover css
   testthat::expect_true(
     grepl(
-      "fill:orange;stroke:black;cursor:pointer;",
+      "stroke-dasharray:5,5;stroke:yellow;stroke-width:2px;",
       la_barchart_list$x$settings$hover$css
     )
   )

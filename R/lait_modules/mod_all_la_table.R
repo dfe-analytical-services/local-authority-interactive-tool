@@ -157,11 +157,18 @@ AllLA_TableUI <- function(id) {
             style = "text-align: center;"
           ),
           bslib::card_header("Local Authorities"),
-          reactable::reactableOutput(ns("la_table")),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("la_table")),
+            size = 3
+          ),
           div(
-            style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+            # Add black border between the tables
+            style = "border-top: 2px solid black; padding-top: 2.5rem;",
             bslib::card_header("Regions"),
-            reactable::reactableOutput(ns("region_table"))
+            with_gov_spinner(
+              reactable::reactableOutput(ns("region_table")),
+              size = 1.6
+            )
           )
         )
       ),
