@@ -291,7 +291,6 @@ Region_FocusLineChartServer <- function(id,
             na.rm = TRUE
           ) +
           custom_theme() +
-          coord_cartesian(clip = "off") +
           theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
           guides(colour = "none", size = "none")
       }

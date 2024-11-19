@@ -1042,25 +1042,44 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
 }
 
 
-#' Identify Data Points Surrounded by NAs
+#' Create Show Points for COVID-Affected Data
 #'
-#' Adds a `show_point` column to indicate if a data point in `values_num` is
-#' surrounded by `NA` values or is the first/last point in a group where the
-#' adjacent point is `NA`. Groups are based on `LA and Regions`.
+#' This function processes data to identify key points to display on a plot
+#' when handling COVID-affected data, such as the first and last non-missing
+#' values before and after missing periods (2019–2021).
 #'
-#' @param data A dataframe containing `values_num` and `LA and Regions` columns.
+#' @param data A data frame or tibble containing the dataset with columns
+#'   `LA and Regions`, `Years_num`, and `values_num`. Optionally, it may
+#'   include a `Measure` column for custom groupings.
+#' @param covid_affected A logical vector indicating whether the data is
+#'   affected by COVID (e.g., missing values in 2019–2021).
 #'
-#' @return A dataframe with an additional logical column `show_point`, set to
-#' `TRUE` if the point meets conditions to be highlighted, `FALSE` otherwise.
+#' @details
+#' This function:
+#' - Groups the data by `LA and Regions` and `Measure` (if present).
+#' - Identifies the first and last missing (`NA`) values in the period
+#'   2019–2021 due to COVID-19.
+#' - Marks the last non-missing value before the first COVID-affected year
+#'   and the first non-missing value after the last COVID-affected year.
+#' - Identifies isolated points for better visualisation.
+#' - Removes intermediate helper columns used for processing.
 #'
-#' @details The `show_point` column is `TRUE` if the `values_num` entry is:
-#' - Surrounded by `NA` values on both sides.
-#' - The first or last non-NA value within its group with an adjacent `NA`.
+#' @return A tibble with the same structure as the input, augmented with a
+#'   `show_point` column, which is a logical flag indicating whether a
+#'   specific row should be highlighted in the plot.
 #'
 #' @examples
-#' df <- create_show_point(data)
+#' # Example dataset
+#' data <- tibble::tibble(
+#'   `LA and Regions` = rep("Region A", 10),
+#'   Years_num = 2015:2024,
+#'   values_num = c(1:5, NA, NA, 8:10)
+#' )
+#' covid_affected <- rep(TRUE, 10)
 #'
-#' @export
+#' # Process data
+#' result <- create_show_point(data, covid_affected)
+#'
 create_show_point <- function(data, covid_affected) {
   data |>
     dplyr::group_by(
@@ -1108,8 +1127,56 @@ create_show_point <- function(data, covid_affected) {
 }
 
 
-
-# Function to build data to create COVID plot (break in timeseries)
+#' Calculate Data for COVID Plot (Break in Timeseries)
+#'
+#' This function identifies periods in the data affected by missing values
+#' during the COVID-19 pandemic (2019–2021) and prepares the data required
+#' to visualise these periods on a plot.
+#'
+#' @param data A data frame or tibble containing the dataset, including columns
+#'   `Years_num` (years), `values_num` (values), and optionally `Measure`
+#'   (for custom groupings in "Create Own" charts).
+#' @param covid_affected A logical vector indicating whether the data is
+#'   affected by COVID-19 (e.g., missing values in 2019–2021).
+#' @param chart_type A string specifying the type of chart: either `"line"` or
+#'   `"bar"`. This determines whether to apply an offset to align with
+#'   non-missing points.
+#'
+#' @details
+#' The function:
+#' - Filters rows with missing (`NA`) values in `values_num` during 2019–2021.
+#' - Calculates start and end years of the missing period and adjusts these
+#'   with an offset for line charts.
+#' - Groups by `Measure` if applicable, allowing for multiple indicators in
+#'   custom charts.
+#' - Checks whether the missing period is consistent across all indicators.
+#' - Generates appropriate labels and returns a data structure for plotting.
+#'
+#' If `chart_type` is `"bar"` and `Measure` is present, it returns grouped data
+#' to support `facet_wrap`. Otherwise, it returns shared COVID-affected period
+#' data for the entire dataset.
+#'
+#' @return A tibble with columns:
+#' - `start_year`: Start of the COVID-affected period.
+#' - `end_year`: End of the COVID-affected period.
+#' - `label_x`: Position for the label.
+#' - `vertical_lines`: Years to draw vertical lines (if applicable).
+#' - `label`: Text label explaining the missing data.
+#'
+#' Returns `NULL` if `covid_affected` is `FALSE`.
+#'
+#' @examples
+#' # Example dataset
+#' data <- tibble::tibble(
+#'   Years_num = c(2018, 2019, 2020, 2021, 2022),
+#'   values_num = c(10, NA, NA, 15, 20),
+#'   Measure = rep("Example Measure", 5)
+#' )
+#' covid_affected <- rep(TRUE, 5)
+#'
+#' # Line chart example
+#' covid_plot_data <- calculate_covid_plot(data, covid_affected, "line")
+#'
 calculate_covid_plot <- function(data, covid_affected, chart_type) {
   if (any(covid_affected)) {
     # Filter rows with NA values in `values_num` between 2019 and 2021 (COVID)
@@ -1178,12 +1245,61 @@ calculate_covid_plot <- function(data, covid_affected, chart_type) {
 }
 
 
-
+#' Add COVID Plot Elements to a ggplot Object
+#'
+#' This function generates ggplot elements to visually indicate periods
+#' affected by missing data during the COVID-19 pandemic. It includes options
+#' for vertical lines, explanatory labels, and optionally a shaded box.
+#'
+#' @param covid_plot_data A data frame or tibble containing information about
+#'   COVID-affected periods, with columns such as:
+#'   - `start_year`, `end_year`: Start and end years of the COVID-affected
+#'     period.
+#'   - `vertical_lines`: Years to draw vertical lines (alternative format).
+#'   - `label_x`: Horizontal position for the explanatory label.
+#'   - `label`: Text to display in the label.
+#'   - Optionally, `xmin` and `xmax` for shaded box boundaries.
+#' @param include_shaded_box A logical value indicating whether to include a
+#'   shaded rectangle to highlight the COVID-affected period
+#'   (`FALSE` by default).
+#'
+#' @details
+#' The function:
+#' - Adds dashed vertical lines at `start_year` and `end_year` to mark the
+#'   boundaries of COVID-affected periods.
+#' - Optionally adds vertical lines using the `vertical_lines` column, if present.
+#' - Includes an explanatory label positioned at `label_x` and the top of the
+#'   plot, with customisable text from the `label` column.
+#' - Optionally adds a shaded rectangle between `xmin` and `xmax` if
+#'   `include_shaded_box` is `TRUE`.
+#' - Ensures that plot elements outside the plot area are not clipped and adds
+#'   padding around the plot.
+#'
+#' @return A list of ggplot2 elements representing the COVID-related annotations.
+#'   Returns `NULL` if `covid_plot_data` is `NULL`.
+#'
+#' @examples
+#' # Example dataset for COVID plot data
+#' covid_plot_data <- tibble::tibble(
+#'   start_year = 2019,
+#'   end_year = 2021,
+#'   label_x = 2020,
+#'   label = "No data\ndue to COVID",
+#'   xmin = 2019,
+#'   xmax = 2021
+#' )
+#'
+#' # Add COVID elements without a shaded box
+#' covid_elements <- add_covid_elements(covid_plot_data, include_shaded_box = FALSE)
+#'
+#' # Add COVID elements with a shaded box
+#' covid_elements_with_box <- add_covid_elements(covid_plot_data, include_shaded_box = TRUE)
+#'
 add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
   if (!is.null(covid_plot_data)) {
     elements <- list()
 
-    # Add vertical lines for COVID periods
+    # Add vertical lines for COVID periods (mainly for Create Own Bar - facet_wrap)
     if ("start_year" %in% colnames(covid_plot_data) && "end_year" %in% colnames(covid_plot_data)) {
       elements <- append(elements, list(
         ggplot2::geom_vline(
@@ -1205,6 +1321,7 @@ add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
       ))
     }
 
+    # Add vertical lines for COVID periods (for all other line and bar charts)
     if ("vertical_lines" %in% colnames(covid_plot_data)) {
       elements <- append(elements, list(
         ggplot2::geom_vline(
@@ -1229,16 +1346,17 @@ add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
             y = Inf, # Positioned at the top of the plot
             label = label
           ),
-          vjust = 0.5,
+          vjust = 0.5, # Move label slightly higher
           color = "black",
           size = 4,
           fontface = "italic",
           inherit.aes = FALSE
         ),
-        ggplot2::coord_cartesian(clip = "off"),
         # Ensure the plot does not clip elements outside the plot area
+        ggplot2::coord_cartesian(clip = "off"),
+        # Add padding around the plot
         ggplot2::theme(
-          plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10) # Add padding around the plot
+          plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10)
         )
       )
     )
@@ -1268,55 +1386,6 @@ add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
     return(NULL)
   }
 }
-
-
-
-
-add_covid_elements <- function(covid_plot_data) {
-  if (!is.null(covid_plot_data)) {
-    list(
-      # Add vertical lines where COVID breaks timeseries
-      ggplot2::geom_vline(
-        data = covid_plot_data,
-        ggplot2::aes(xintercept = vertical_lines),
-        linetype = "dashed",
-        color = "grey50",
-        alpha = 0.5,
-        linewidth = 0.3
-      ),
-      # # Add a shaded box to show COVID impact
-      # ggplot2::geom_rect(
-      #   data = covid_plot_data,
-      #   ggplot2::aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
-      #   fill = "grey",
-      #   alpha = 0.1,
-      #   inherit.aes = FALSE
-      # ),
-      # Add a label to explain COVID causes missing data
-      ggplot2::geom_text(
-        data = covid_plot_data,
-        ggplot2::aes(
-          x = label_x, # Centered horizontally in the shaded region
-          y = Inf, # Positioned relative to the data's range
-          label = label
-        ),
-        vjust = 0.5,
-        color = "black",
-        size = 4,
-        fontface = "italic",
-        inherit.aes = FALSE
-      ),
-      ggplot2::coord_cartesian(clip = "off"),
-      # Ensure the plot does not clip elements outside the plot area
-      ggplot2::theme(
-        plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10) # Add padding around plot
-      )
-    )
-  } else {
-    NULL
-  }
-}
-
 
 
 #' Calculate padded range for a specified variable

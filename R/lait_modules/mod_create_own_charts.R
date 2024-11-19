@@ -496,45 +496,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
           na.rm = TRUE,
           color = "black"
         ) +
-        {
-          if (!is.null(covid_plot)) {
-            list(
-              ggplot2::geom_vline(
-                data = covid_plot,
-                ggplot2::aes(
-                  xintercept = start_year
-                ),
-                linetype = "dashed",
-                color = "grey50",
-                alpha = 0.5,
-                linewidth = 0.3
-              ),
-              ggplot2::geom_vline(
-                data = covid_plot,
-                ggplot2::aes(
-                  xintercept = end_year
-                ),
-                linetype = "dashed",
-                color = "grey50",
-                alpha = 0.5,
-                linewidth = 0.3
-              ),
-              ggplot2::geom_text(
-                data = covid_plot,
-                ggplot2::aes(
-                  x = label_x,
-                  y = Inf,
-                  label = label
-                ),
-                vjust = 0.5,
-                color = "black",
-                size = 3,
-                fontface = "italic",
-                inherit.aes = FALSE
-              )
-            )
-          }
-        } +
+        add_covid_elements(covid_plot) +
         format_axes(clean_plot_data) +
         set_plot_colours(clean_plot_data, "fill") +
         set_plot_labs(create_own_bds()) +
@@ -547,10 +509,10 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
             margin = ggplot2::margin(b = 30)
           ),
           # Gives space between the charts so x-axis labels don't overlap
-          plot.margin = ggplot2::margin(t = 10, r = 30, b = 10, l = 10),
+          plot.margin = ggplot2::margin(r = 30),
           panel.spacing.x = unit(15, "mm")
         ) +
-        guides(
+        ggplot2::guides(
           fill = ggplot2::guide_legend(ncol = 2, title = "Geographies:")
         ) +
         ggplot2::labs(title = "Bar charts showing selected indicators") +
