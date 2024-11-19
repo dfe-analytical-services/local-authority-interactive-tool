@@ -261,18 +261,24 @@ StatN_TablesUI <- function(id) {
         bslib::card(
           # Statistical Neighbour LA SNs Table --------------------------------
           bslib::card_header("Statistical Neighbours"),
-          reactable::reactableOutput(ns("statn_table")),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("statn_table")),
+            size = 1.6
+          ),
           # Statistical Neighbour LA Geog Compare Table -----------------------
           div(
             # Add black border between the tables
             style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
             bslib::card_header("Other Geographies"),
-            reactable::reactableOutput(ns("geog_table"))
+            with_gov_spinner(
+              reactable::reactableOutput(ns("geog_table")),
+              size = 0.7
+            )
           )
         ),
         br(),
         # Statistical Neighbour Statistics Table ------------------------------
-        StatN_StatsTableUI("stat_n_stats_mod")
+        StatN_StatsTableUI("stat_n_stats_mod"),
       ),
       bslib::nav_panel(
         "Download",
@@ -378,6 +384,7 @@ StatN_LASNsTableServer <- function(id,
 
 # LA Statistical Neighbour Geographic comparison table ========================
 #' Statistical Neighbour Geographic Comparison Table UI Module
+#' NOT CURRENTLY IN USE (DUE TO SHARING DATA DOWNLOAD)
 #'
 #' This UI module generates a table for comparing the selected Local Authority
 #' (LA) with its statistical neighbours, region, and England.
@@ -394,7 +401,10 @@ StatN_GeogCompTableUI <- function(id) {
   div(
     # Add black border between the tables
     style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    reactable::reactableOutput(ns("output_table"))
+    with_gov_spinner(
+      reactable::reactableOutput(ns("output_table")),
+      size = 0.8
+    )
   )
 }
 
@@ -515,7 +525,10 @@ StatN_StatsTableUI <- function(id) {
     bslib::card(
       # bslib::card_header(""),
       bslib::card_body(
-        reactable::reactableOutput(ns("output_table"))
+        with_gov_spinner(
+          reactable::reactableOutput(ns("output_table")),
+          size = 1
+        )
       )
     )
   )
