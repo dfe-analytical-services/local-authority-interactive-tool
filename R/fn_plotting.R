@@ -1109,84 +1109,163 @@ create_show_point <- function(data, covid_affected) {
 
 
 
-# Update calculate_na_regions to include a long format for vertical lines
+# Function to build data to create COVID plot (break in timeseries)
 calculate_covid_plot <- function(data, covid_affected, chart_type) {
   if (any(covid_affected)) {
-    # Filter rows with NA values in `values_num` between 2019 and 2021
+    # Filter rows with NA values in `values_num` between 2019 and 2021 (COVID)
+    # Do not include NaN here as these are user created missing vars in Create Own
     na_rows <- data |>
-      dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num), !is.nan(values_num)) |>
+      dplyr::filter(
+        Years_num >= 2019, Years_num <= 2021,
+        is.na(values_num), !is.nan(values_num)
+      ) |>
       dplyr::arrange(Years_num)
 
-    # Whether to offset vline to last non-NA point (for line chart)
+    # Whether to offset vline to last/next non-NA point (for line chart)
     yr_offset <- ifelse(chart_type == "line", 1, 0)
 
-    # Find missing periods by indicator
+    # Group by `Measure` if it exists (for Create Own charts - multiple indicators)
+    grouping_vars <- if ("Measure" %in% colnames(na_rows)) "Measure" else NULL
+
+    # Find missing COVID period and calculate label position
+    # (by indicator for Create Own)
     na_periods <- na_rows |>
-      dplyr::group_by(!!!rlang::syms(if ("Measure" %in% colnames(na_rows)) "Measure" else NULL)) |>
+      dplyr::group_by(!!!rlang::syms(grouping_vars)) |>
       dplyr::summarise(
         start_year = min(Years_num) - yr_offset,
         end_year = max(Years_num) + yr_offset,
+        label_x = (min(Years_num) - yr_offset + max(Years_num) + yr_offset) / 2,
+        label = "No data\ndue to COVID",
         .groups = "drop"
       )
 
-    # Check if all indicators share the same period
+    # Check if all indicators share the same period (for Create Own)
     shared_period <- na_periods |>
       dplyr::summarise(
         same_period = all(
-          length(unique(na_periods$start_year)) == 1,
-          length(unique(na_periods$end_year)) == 1
+          length(unique(start_year)) == 1,
+          length(unique(end_year)) == 1
         ),
         start_year = min(start_year),
-        end_year = max(end_year)
+        end_year = max(end_year),
+        label_x = (min(start_year) + max(end_year)) / 2
       )
 
-    # Determine the label - set
-    label_text <- if (shared_period$same_period && all(covid_affected)) {
-      "No data\ndue to COVID"
+    # Set label based on whether the COVID period is the same across all indicators
+    if (shared_period$same_period && all(covid_affected)) {
+      shared_period$label <- "No data\ndue to COVID"
     } else {
-      "Some indicators have\nmissing data due to COVID"
+      shared_period$label <- "Some indicators have\nmissing data due to COVID"
     }
 
-    # Return the plot information
-    tibble::tibble(
-      xmin = shared_period$start_year,
-      xmax = shared_period$end_year,
-      label_x = (shared_period$start_year + shared_period$end_year) / 2,
-      vertical_lines = c(shared_period$start_year, shared_period$end_year),
-      label = label_text
-    )
+    # If Create Own bar chart then use grouped COVID period data (for facet_wrap)
+    if (!is.null(grouping_vars) && chart_type == "bar") {
+      na_periods
+    } else if (!is.null(shared_period)) {
+      # Otherwise, return the shared COVID period (or individual if only one indicator)
+      tibble::tibble(
+        xmin = shared_period$start_year,
+        xmax = shared_period$end_year,
+        label_x = shared_period$label_x,
+        vertical_lines = c(shared_period$start_year, shared_period$end_year),
+        label = shared_period$label
+      )
+    }
   } else {
+    # Return nothing if not affected by COVID
     NULL
   }
 }
 
 
-calculate_covid_plot_bar <- function(data, covid_affected, chart_type) {
-  if (any(covid_affected)) {
-    # Filter rows with NA values in `values_num` between 2019 and 2021
-    na_rows <- data |>
-      dplyr::filter(Years_num >= 2019, Years_num <= 2021, is.na(values_num)) |>
-      dplyr::arrange(Years_num)
 
-    # Whether to offset vline to last non-NA point (for line chart)
-    yr_offset <- ifelse(chart_type == "line", 1, 0)
+add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
+  if (!is.null(covid_plot_data)) {
+    elements <- list()
 
-    na_periods <- na_rows |>
-      dplyr::group_by(Measure) |>
-      dplyr::summarise(
-        # Find missing periods by indicator
-        start_year = min(Years_num) - yr_offset,
-        end_year = max(Years_num) + yr_offset,
-        # Add labels
-        label_x = (start_year + end_year) / 2,
-        label = "No data\ndue to COVID",
-        .groups = "drop"
+    # Add vertical lines for COVID periods
+    if ("start_year" %in% colnames(covid_plot_data) && "end_year" %in% colnames(covid_plot_data)) {
+      elements <- append(elements, list(
+        ggplot2::geom_vline(
+          data = covid_plot_data,
+          ggplot2::aes(xintercept = start_year),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        ),
+        ggplot2::geom_vline(
+          data = covid_plot_data,
+          ggplot2::aes(xintercept = end_year),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        )
+      ))
+    }
+
+    if ("vertical_lines" %in% colnames(covid_plot_data)) {
+      elements <- append(elements, list(
+        ggplot2::geom_vline(
+          data = covid_plot_data,
+          ggplot2::aes(xintercept = vertical_lines),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        )
+      ))
+    }
+
+    # Add a label to explain COVID impact
+    elements <- append(
+      elements,
+      list(
+        ggplot2::geom_text(
+          data = covid_plot_data,
+          ggplot2::aes(
+            x = label_x, # Centered horizontally in the shaded region
+            y = Inf, # Positioned at the top of the plot
+            label = label
+          ),
+          vjust = 0.5,
+          color = "black",
+          size = 4,
+          fontface = "italic",
+          inherit.aes = FALSE
+        ),
+        ggplot2::coord_cartesian(clip = "off"),
+        # Ensure the plot does not clip elements outside the plot area
+        ggplot2::theme(
+          plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10) # Add padding around the plot
+        )
       )
+    )
 
-    # Return the COVID-affected periods
-    na_periods
+    # Optionally add a shaded box to show COVID-affected periods
+    if (include_shaded_box) {
+      elements <- append(
+        elements,
+        ggplot2::geom_rect(
+          data = covid_plot_data,
+          ggplot2::aes(
+            xmin = xmin,
+            xmax = xmax,
+            ymin = -Inf,
+            ymax = Inf
+          ),
+          fill = "grey",
+          alpha = 0.1,
+          inherit.aes = FALSE
+        )
+      )
+    }
+
+    # Return COVID plotting elements
+    return(elements)
   } else {
-    NULL
+    return(NULL)
   }
 }
 

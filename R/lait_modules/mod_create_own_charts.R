@@ -558,7 +558,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         ggplot2::facet_wrap(
           ~Measure,
           labeller = labeller(Measure = as_labeller(custom_titles)),
-          scales = "free_x"
+          # scales = "free_x"
         ) +
         # Setting x limits for one value bar charts (to keep narrow)
         ggplot2::coord_cartesian(
