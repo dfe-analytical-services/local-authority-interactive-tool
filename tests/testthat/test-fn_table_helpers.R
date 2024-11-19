@@ -141,7 +141,7 @@ pretty_tbl_data <- data.frame(
 
 test_that("1. pretty_num_table formats all numeric cols when no include/ exclude cols", {
   # Apply pretty_num_table
-  result <- pretty_num_table(pretty_tbl_data)
+  result <- pretty_num_table(pretty_tbl_data, dp = 2)
 
   # Expected result
   expected <- data.frame(
@@ -156,7 +156,7 @@ test_that("1. pretty_num_table formats all numeric cols when no include/ exclude
 
 test_that("2. pretty_num_table processes only the specified columns with include_columns", {
   # Apply pretty_num_table
-  result <- pretty_num_table(pretty_tbl_data, include_columns = c("A"))
+  result <- pretty_num_table(pretty_tbl_data, include_columns = c("A"), dp = 2)
 
   # Expected result
   expected <- data.frame(
@@ -172,7 +172,8 @@ test_that("2. pretty_num_table processes only the specified columns with include
 test_that("3. pretty_num_table excludes specified columns with exclude_columns", {
   # Apply pretty_num_table
   result <- pretty_num_table(pretty_tbl_data,
-    exclude_columns = c("A")
+    exclude_columns = c("A"),
+    dp = 2
   )
 
   # Expected result
@@ -200,7 +201,8 @@ test_that("4. pretty_num_table handles both include_columns and exclude_columns"
   # Apply pretty_num_table
   result <- pretty_num_table(data,
     include_columns = c("A", "D"),
-    exclude_columns = c("B")
+    exclude_columns = c("B"),
+    dp = 2
   )
 
   # Expected result
