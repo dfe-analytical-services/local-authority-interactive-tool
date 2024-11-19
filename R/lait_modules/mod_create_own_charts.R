@@ -435,7 +435,7 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         pull_uniques("Measure") %in% covid_affected_indicators
 
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot_bar(clean_plot_data, covid_affected, "bar")
+      covid_plot <- calculate_covid_plot(clean_plot_data, covid_affected, "bar")
 
       # Plot chart - split by indicators, colours represent Geographies
       clean_plot_data |>
@@ -502,7 +502,11 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
       ggiraph::girafe(
         ggobj = (bar_chart()),
         width_svg = 8.5 + (chart_info$no_indicators() - 1) * 3.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     })

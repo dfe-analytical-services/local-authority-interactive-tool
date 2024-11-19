@@ -377,7 +377,11 @@ la_bar_chart <- la_long |>
 ggiraph::girafe(
   ggobj = la_bar_chart,
   width_svg = 8.5,
-  options = generic_ggiraph_options(),
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  ),
   fonts = list(sans = "Arial")
 )
 

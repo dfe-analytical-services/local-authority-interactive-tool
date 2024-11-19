@@ -1170,7 +1170,11 @@ server <- function(input, output, session) {
     ggiraph::girafe(
       ggobj = (bar_chart()),
       width_svg = 8.5,
-      options = generic_ggiraph_options(),
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      ),
       fonts = list(sans = "Arial")
     )
   })
