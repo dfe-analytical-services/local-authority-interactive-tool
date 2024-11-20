@@ -1,6 +1,21 @@
 source(here::here("global.R"))
 
-ui <- function(input, output, session) {
+# # Load functions
+# list.files("R/", full.names = TRUE) |>
+#   (\(x) {
+#     x[grepl("fn_", x)]
+#   })() |>
+#   purrr::walk(source)
+#
+# # Load modules
+# list.files("R/lait_modules/", full.names = TRUE) |>
+#   purrr::walk(source)
+
+# Load ui panels
+list.files("R/ui_panels/", full.names = TRUE) |>
+  purrr::walk(source)
+
+ui_dev <- function(input, output, session) {
   bslib::page_fillable(
 
     # Set application metadata ------------------------------------------------
@@ -92,9 +107,9 @@ ui <- function(input, output, session) {
 
 
 # Define the `server` function
-server <- function(input, output, session) {
+server_dev <- function(input, output, session) {
   # Add server logic here as needed
 }
 
 # Launch the Shiny app
-shinyApp(ui, server)
+shinyApp(ui_dev, server_dev)
