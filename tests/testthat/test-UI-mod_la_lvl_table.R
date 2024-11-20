@@ -167,7 +167,7 @@ test_that("Check LA charts behave as expected", {
 
   # Change to different topic
   app$set_inputs(
-    `la_inputs-topic_name` = "Key Stage 1",
+    `la_inputs-topic_name` = "Key Stage 1 and Phonics",
     la_charts = "Bar chart"
   )
   app$wait_for_idle()
