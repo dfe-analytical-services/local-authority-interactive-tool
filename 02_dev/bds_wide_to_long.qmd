@@ -123,9 +123,9 @@ bds_long_la <- bds_long_clean |>
 # Pull list of measures from data dictionary (primary key and filters for
 # only public-safe/in-use measures)
 # NOTE: Children_away changed to Children_Away to match BDS
-data_dict <- readxl::read_xlsx(
-  path = paste0("01_data/02_prod/LAIT Data Dictionary.xlsx"),
-  sheet = "Data_prod"
+data_dict <- read.csv(
+  file = paste0("01_data/02_prod/LAIT Data Dictionary.csv"),
+  check.names = FALSE
 ) |>
   dplyr::mutate(Measure_short = trimws(Measure_short)) |>
   dplyr::filter(!grepl("DISCONTINUE", Table_status)) |>
