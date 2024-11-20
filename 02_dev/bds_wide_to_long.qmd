@@ -153,3 +153,24 @@ write.csv(
   row.names = FALSE
 )
 ```
+
+
+Load the latest Data Dictionary
+
+```{r write-data_dict}
+# Load raw Data Dict from shared folder
+data_dict <- readxl::read_xlsx(
+  path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
+  sheet = "Data_prod",
+  # Replace multi-space with single-space
+  .name_repair = clean_spaces
+)
+
+# Write .csv version
+write.csv(
+  data_dict,
+  here::here("01_data/02_prod/LAIT Data Dictionary.csv"),
+  row.names = FALSE
+)
+```
+
