@@ -363,7 +363,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             `Latest National Rank` = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Latest National Rank",
-                "Rank 1 is always the best performer"
+                "Rank 1 is always best/top"
               )
             ),
             Polarity = reactable::colDef(show = FALSE)
