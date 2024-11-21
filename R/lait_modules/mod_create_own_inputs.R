@@ -182,6 +182,9 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       updateRadioButtons(session, "la_group", selected = "no_groups")
       updateCheckboxInput(session, "inc_regions", value = FALSE)
       updateCheckboxInput(session, "inc_england", value = FALSE)
+
+      # Emit a reset signal for year_range
+      session$sendCustomMessage("clear_year_range", TRUE)
     })
 
     # Return create your own main inputs
@@ -288,6 +291,11 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
           )
         )
       }
+    })
+
+    # Handle reset signal for year range (from clear all button)
+    observeEvent(session$userData$clear_year_range, {
+      shinyWidgets::updatePickerInput(session, "year_range", selected = NULL)
     })
 
     # Collect selected year range and available year choices
