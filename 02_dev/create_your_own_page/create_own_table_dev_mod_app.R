@@ -36,7 +36,8 @@ ui <- bslib::page_fillable(
       Create_MainInputsUI("create_inputs")["LA grouping"],
       Create_MainInputsUI("create_inputs")["Other grouping"],
       YearRangeUI("year_range"),
-      Create_MainInputsUI("create_inputs")["Add selection"]
+      Create_MainInputsUI("create_inputs")["Add selection"],
+      Create_MainInputsUI("create_inputs")["Clear all current selections"]
     )
   ),
   StagingTableUI("staging_table"),

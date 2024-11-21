@@ -77,6 +77,14 @@ Create_MainInputsUI <- function(id) {
       shiny::checkboxInput(ns("inc_regions"), "Include All Regions", FALSE),
       shiny::checkboxInput(ns("inc_england"), "Include England", FALSE)
     ),
+    # Clear all current selections
+    "Clear all current selections" = div(
+      shinyGovstyle::button_Input(
+        inputId = ns("clear_all"),
+        label = "Clear all current selections",
+        type = "warning"
+      )
+    ),
     # Add selection (query) button
     "Add selection" = div(
       style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
@@ -165,6 +173,16 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       },
       ignoreNULL = FALSE
     )
+
+    # Clear all current selections
+    observeEvent(input$clear_all, {
+      # Reset inputs to their initial state
+      updateSelectizeInput(session, "geog_input", selected = NA)
+      updateSelectizeInput(session, "indicator", selected = NA)
+      updateRadioButtons(session, "la_group", selected = "no_groups")
+      updateCheckboxInput(session, "inc_regions", value = FALSE)
+      updateCheckboxInput(session, "inc_england", value = FALSE)
+    })
 
     # Return create your own main inputs
     create_inputs <- list(
