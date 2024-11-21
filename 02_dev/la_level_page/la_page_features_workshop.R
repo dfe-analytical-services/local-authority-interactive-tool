@@ -281,6 +281,8 @@ covid_plot_line <- calculate_covid_plot(la_long, covid_affected, "line")
 
 # Plot
 la_line_chart <- la_long |>
+  # Set geog orders so selected LA is on top of plot
+  reorder_la_regions(reverse = TRUE) |>
   ggplot2::ggplot() +
   # Only show point data where line won't appear (NAs)
   ggplot2::geom_point(
@@ -309,7 +311,7 @@ la_line_chart <- la_long |>
   # Add COVID plot if indicator affected
   add_covid_elements(covid_plot_line) +
   format_axes(la_long) +
-  set_plot_colours(la_long, focus_group = selected_la) +
+  set_plot_colours(la_long, "colour", focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 

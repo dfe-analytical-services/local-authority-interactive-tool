@@ -934,10 +934,11 @@ generic_ggiraph_options <- function(...) {
 #' reordered_data <- reorder_la_regions(chart_data, factor_order)
 #' print(reordered_data)
 #'
-reorder_la_regions <- function(chart_data, factor_order, ...) {
+reorder_la_regions <- function(chart_data, factor_order = NULL, reverse = FALSE, ...) {
   chart_data |>
     dplyr::mutate(
-      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...)
+      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...),
+      `LA and Regions` = if (reverse) forcats::fct_rev(`LA and Regions`) else `LA and Regions`
     ) |>
     dplyr::arrange(`LA and Regions`)
 }
