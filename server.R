@@ -381,7 +381,8 @@ server <- function(input, output, session) {
   year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
-    create_inputs$indicator
+    create_inputs$indicator,
+    create_inputs$clear_selections
   )
 
   # Logic to create own =======================================================
