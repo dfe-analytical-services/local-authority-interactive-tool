@@ -79,6 +79,7 @@ Create_MainInputsUI <- function(id) {
     ),
     # Clear all current selections
     "Clear all current selections" = div(
+      style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
       shinyGovstyle::button_Input(
         inputId = ns("clear_all"),
         label = "Clear all current selections",
@@ -88,7 +89,11 @@ Create_MainInputsUI <- function(id) {
     # Add selection (query) button
     "Add selection" = div(
       style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
-      shiny::actionButton(ns("add_query"), "Add selections", class = "gov-uk-button")
+      shinyGovstyle::button_Input(
+        inputId = ns("add_query"),
+        label = "Add selections",
+        type = "start"
+      )
     )
   )
 }

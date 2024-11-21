@@ -197,7 +197,14 @@ StagingTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Staging Table (View of current selections)"),
+    bslib::layout_column_wrap(
+      h3("Staging Table (View of current selections)"),
+      # Include empty divs so matches inputs above and add selections aligns
+      div(),
+      div(),
+      # Add selections button
+      Create_MainInputsUI("create_inputs")["Add selection"]
+    ),
     bslib::card(
       with_gov_spinner(
         reactable::reactableOutput(ns("staging_table")),
@@ -206,6 +213,7 @@ StagingTableUI <- function(id) {
     )
   )
 }
+
 
 # Staging table Server ---------------------------------------------------------
 # Output a formatted reactable table of the staging data
