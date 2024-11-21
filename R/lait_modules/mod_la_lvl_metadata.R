@@ -36,9 +36,11 @@ MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
         metadata <- dfeshiny::external_link(href = metadata, link_text = label)
       }
 
-      # Handle metadata that is text by converting newlines to <br> tags
+      # Collapse multiple newlines and limit <br> tags
       if (is.character(metadata)) {
-        metadata <- gsub("\r\n|\n", "<br>", metadata)
+        metadata <- gsub("\r\n|\n", "\n", metadata) # Normalize newlines
+        metadata <- gsub("\n{2,}", "<br><br>", metadata) # Replace multiple newlines with a single <br><br>
+        metadata <- gsub("\n", "", metadata) # Remove stray newlines
         metadata <- HTML(metadata)
       }
 
