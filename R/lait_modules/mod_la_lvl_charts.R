@@ -102,6 +102,8 @@ LA_LineChartServer <- function(id,
 
       # Build plot
       la_long() |>
+        # Set geog orders so selected LA is on top of plot
+        reorder_la_regions(reverse = TRUE) |>
         ggplot2::ggplot() +
         ggiraph::geom_line_interactive(
           ggplot2::aes(
@@ -130,7 +132,9 @@ LA_LineChartServer <- function(id,
         format_axes(la_long()) +
         set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
-        custom_theme()
+        custom_theme() +
+        # Revert order of the legend so goes from right to left
+        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
     })
 
     # Build interactive line chart

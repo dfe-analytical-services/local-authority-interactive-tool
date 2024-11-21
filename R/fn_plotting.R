@@ -51,14 +51,14 @@ get_yaxis_title <- function(data_full) {
 #' This function retrieves the title for the X-axis based on the `Year_Type`
 #' column of the provided dataset. If there is only one unique value for
 #' `Year_Type`, the title will be formatted with line breaks. If there are
-#' multiple unique values, a generic "Plain Years" label is used.
+#' multiple unique values, a generic "Mixed Year Types" label is used.
 #'
 #' @param data_full A data frame containing the `Year_Type` column, which will
 #'   be used to determine the X-axis title.
 #'
 #' @return A character string representing the X-axis title. This can either
 #'   be the value of `Year_Type` formatted with line breaks or the string
-#'   "Plain Years" if there are multiple unique values.
+#'   "Mixed Year Types" if there are multiple unique values.
 #'
 #' @details The function uses `pull_uniques` to extract unique values from
 #'   the `Year_Type` column. If a single unique value is found, it formats
@@ -79,7 +79,7 @@ get_xaxis_title <- function(data_full) {
   if (length(x_axis_title) == 1) {
     add_line_breaks(x_axis_title)
   } else {
-    "Plain Years"
+    "Mixed Year Types"
   }
 }
 
@@ -934,10 +934,11 @@ generic_ggiraph_options <- function(...) {
 #' reordered_data <- reorder_la_regions(chart_data, factor_order)
 #' print(reordered_data)
 #'
-reorder_la_regions <- function(chart_data, factor_order, ...) {
+reorder_la_regions <- function(chart_data, factor_order = NULL, reverse = FALSE, ...) {
   chart_data |>
     dplyr::mutate(
-      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...)
+      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...),
+      `LA and Regions` = if (reverse) forcats::fct_rev(`LA and Regions`) else `LA and Regions`
     ) |>
     dplyr::arrange(`LA and Regions`)
 }

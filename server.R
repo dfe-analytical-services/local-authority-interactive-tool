@@ -19,30 +19,32 @@
 # -----------------------------------------------------------------------------
 server <- function(input, output, session) {
   # Bookmarking ===============================================================
-  # The template uses bookmarking to store input choices in the url. You can
-  # exclude specific inputs (for example extra info created for a datatable
-  # or plotly chart) using the list below, but it will need updating to match
-  # any entries in your own dashboard's bookmarking url that you don't want
-  # including.
-  shiny::setBookmarkExclude(c(
-    "cookies", "link_to_app_content_tab",
-    "tabBenchmark_rows_current", "tabBenchmark_rows_all",
-    "tabBenchmark_columns_selected", "tabBenchmark_cell_clicked",
-    "tabBenchmark_cells_selected", "tabBenchmark_search",
-    "tabBenchmark_rows_selected", "tabBenchmark_row_last_clicked",
-    "tabBenchmark_state",
-    "plotly_relayout-A",
-    "plotly_click-A", "plotly_hover-A", "plotly_afterplot-A",
-    ".clientValue-default-plotlyCrosstalkOpts"
-  ))
-
+  # This uses bookmarking to store input choices in the url.
+  # All inputs are excluded by default, and inputs can be added explicitly
+  # in the included_inputs variable below
   shiny::observe({
-    # Trigger this observer every time an input changes
-    shiny::reactiveValuesToList(input)
+    # Include these inputs
+    included_inputs <- c(
+      "la_inputs-la_name",
+      "la_inputs-topic_name",
+      "navsetpillslist"
+    )
+
+    # Exclude all inputs except the specified ones
+    excluded_inputs <- setdiff(
+      names(shiny::reactiveValuesToList(input)),
+      included_inputs
+    )
+
+    # Set the excluded inputs for bookmarking
+    shiny::setBookmarkExclude(excluded_inputs)
+
+    # Trigger bookmarking whenever relevant inputs change
     session$doBookmark()
   })
 
   shiny::onBookmarked(function(url) {
+    # Update the query string with the bookmark URL
     shiny::updateQueryString(url)
   })
 

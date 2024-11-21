@@ -432,6 +432,8 @@ server_dev <- function(input, output, session) {
 
     # Build plot
     la_line_chart <- la_long() |>
+      # Set geog orders so selected LA is on top of plot
+      reorder_la_regions(reverse = TRUE) |>
       ggplot2::ggplot() +
       ggiraph::geom_line_interactive(
         ggplot2::aes(
@@ -460,8 +462,9 @@ server_dev <- function(input, output, session) {
       format_axes(la_long()) +
       set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
-      custom_theme()
-
+      custom_theme() +
+      # Revert order of the legend so goes from right to left
+      ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
