@@ -292,7 +292,7 @@ StagingTableServer <- function(id,
           format_num_reactable_cols(
             staging_data(),
             get_indicator_dps(staging_bds()),
-            num_exclude = c("LA Number", "Measure")
+            num_exclude = c("LA Number", "Topic", "Measure")
           ),
           list(
             set_custom_default_col_widths(
