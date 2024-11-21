@@ -196,6 +196,7 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       la_group = reactive(input$la_group),
       inc_regions = reactive(input$inc_regions),
       inc_england = reactive(input$inc_england),
+      clear_selections = reactive(input$clear_all),
       add_query = reactive(input$add_query)
     )
 
@@ -244,7 +245,7 @@ YearRangeUI <- function(id) {
 #' @return A list containing reactive values for selected year range
 #'         and available year choices.
 #'
-YearRangeServer <- function(id, bds_metrics, indicator_input) {
+YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) {
   moduleServer(id, function(input, output, session) {
     # Compute years choices available based on selected indicator
     years_choices <- reactive({
@@ -293,8 +294,8 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
       }
     })
 
-    # Handle reset signal for year range (from clear all button)
-    observeEvent(session$userData$clear_year_range, {
+    # Reset year range when clear all current selections button clicked
+    observeEvent(clear_selections(), {
       shinyWidgets::updatePickerInput(session, "year_range", selected = NULL)
     })
 
