@@ -12,7 +12,7 @@ list.files("R/", full.names = TRUE) |>
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
 selected_topic <- "Child Protection"
-selected_indicator <- "Cafcass Care applications per 10,000 child population"
+selected_indicator <- "Continuous assessments completed within 45 working days"
 # "Children killed or seriously injured in road traffic accidents"
 # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
 selected_la <- "Bedford Borough" # "Barnet" # Cumberland

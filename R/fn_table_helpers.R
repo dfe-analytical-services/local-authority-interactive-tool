@@ -665,7 +665,7 @@ get_trend_colour <- function(value, polarity) {
     polarity == "Low" & value < 0 ~ green_colour,
     polarity == "Low" & value > 0 ~ red_colour,
     polarity == "High" & value > 0 ~ green_colour,
-    polarity == "High" & value > 0 ~ red_colour,
+    polarity == "High" & value < 0 ~ red_colour,
     TRUE ~ "black"
   )
 
