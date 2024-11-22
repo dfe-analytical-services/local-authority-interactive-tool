@@ -59,6 +59,77 @@ filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
 }
 
 
+#' Determine Decimal Places for Large Numeric Values
+#'
+#' This helper function calculates the appropriate number of decimal places
+#' based on the value's magnitude. Values smaller than 1 million use the
+#' supplied default decimal places. For values over 1 million or 1 billion,
+#' decimal places are conditionally applied if the value normalised by a
+#' million or billion is not divisible by 10.
+#'
+#' @param value A single numeric value.
+#' @param dp Integer. The default number of decimal places for values
+#'   over 1 million or 1 billion.
+#'
+#' @return An integer indicating the number of decimal places to use.
+#' @examples
+#' determine_decimal_places(999, dp = 2) # Returns 2
+#' determine_decimal_places(1234567, dp = 3) # Returns 3
+#' determine_decimal_places(10000000, dp = 2) # Returns 0
+#' determine_decimal_places(5000000000, dp = 3) # Returns 3
+#' @export
+determine_decimal_places <- function(value, dp = 0) {
+  if (is.na(value)) {
+    return(dp)
+  } else if (abs(value) >= 1e9) {
+    # For values over 1 billion, check divisibility by 10 after dividing by 1 billion
+    if ((value / 1e9) %% 10 != 0) {
+      return(3)
+    } else {
+      return(0)
+    }
+  } else if (abs(value) >= 1e6) {
+    # For values between 1 million and 1 billion,
+    # check divisibility by 10 after dividing by 1 million
+    if ((value / 1e6) %% 10 != 0) {
+      return(3)
+    } else {
+      return(0)
+    }
+  } else {
+    # For values less than 1 million, use the default decimal places
+    return(dp)
+  }
+}
+
+
+#' Format Large Numeric Values with Conditional Decimal Places
+#'
+#' This function formats numeric values, applying specific rules for values
+#' greater than 1 million or 1 billion. Numbers smaller than 1 million use
+#' the user-supplied default decimal places. Decimal places for larger values
+#' are applied only if the value normalised by a million or billion is not
+#' divisible by 10.
+#'
+#' @param x A numeric vector to be formatted.
+#' @param dp Integer. The default number of decimal places for values
+#'   over 1 million or 1 billion. Default is 3.
+#' @param ... Additional arguments passed to `dfeR::pretty_num`.
+#'
+#' @return A character vector with formatted numeric values.
+#' @examples
+#' pretty_num_large(c(999, 1000000, 1234567), dp = 2)
+#' pretty_num_large(c(5000000000, 9876543210), dp = 3)
+#' @export
+pretty_num_large <- function(x, dp = 0, ...) {
+  # Determine decimal places for each value
+  decimal_places <- sapply(x, determine_decimal_places, dp = dp)
+
+  # Format the numbers using dfeR::pretty_num
+  dfeR::pretty_num(x, dp = decimal_places, ...)
+}
+
+
 #' Format Numeric Columns with Pretty Numbers
 #'
 #' This function formats numeric columns in a data frame using the
@@ -100,25 +171,30 @@ pretty_num_table <- function(data,
                              include_columns = NULL,
                              exclude_columns = NULL,
                              ...) {
+  # Check if data is empty
   if (nrow(data) < 1) {
-    warning("Data seems to be empty")
+    warning("Data seems to be empty. Returning unmodified.")
+    return(data)
   }
 
-  # Determine the columns to include or exclude
-  if (!is.null(include_columns)) {
-    cols_to_include <- include_columns
+  # Determine numeric columns to process
+  numeric_cols <- names(data)[sapply(data, is.numeric)]
+  cols_to_include <- if (!is.null(include_columns)) {
+    include_columns
   } else if (!is.null(exclude_columns)) {
-    cols_to_include <- setdiff(names(data)[sapply(data, is.numeric)], exclude_columns)
+    setdiff(numeric_cols, exclude_columns)
   } else {
-    cols_to_include <- names(data)[sapply(data, is.numeric)]
+    numeric_cols
   }
 
-  # Apply the pretty_num function across the selected columns
-  data |>
+  # Apply formatting to selected columns
+  data <- data |>
     dplyr::mutate(dplyr::across(
       .cols = dplyr::all_of(cols_to_include),
-      ~ sapply(., dfeR::pretty_num, ...)
+      ~ sapply(., pretty_num_large, ...)
     ))
+
+  data
 }
 
 
@@ -220,7 +296,7 @@ format_reactable_num_col <- function(col, indicator_dps) {
       ifelse(
         is.nan(value),
         "",
-        dfeR::pretty_num(value, dp = indicator_dps)
+        pretty_num_large(value, dp = indicator_dps)
       )
     }
   )
@@ -665,7 +741,7 @@ get_trend_colour <- function(value, polarity) {
     polarity == "Low" & value < 0 ~ green_colour,
     polarity == "Low" & value > 0 ~ red_colour,
     polarity == "High" & value > 0 ~ green_colour,
-    polarity == "High" & value > 0 ~ red_colour,
+    polarity == "High" & value < 0 ~ red_colour,
     TRUE ~ "black"
   )
 
@@ -920,10 +996,8 @@ add_tooltip_to_reactcol <- function(value, tooltip, ...) {
           style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
         )
       ),
-      tooltip = div(tooltip),
+      tooltip = tooltip,
       theme = "gov",
-      placement = "top",
-      followCursor = TRUE,
       interactive = TRUE,
       interactiveBorder = 10,
       arrow = TRUE,
