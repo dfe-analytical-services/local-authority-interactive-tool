@@ -60,7 +60,6 @@ server <- function(input, output, session) {
     shiny::updateQueryString(url, mode = "replace")
   })
 
-
   # Dynamically changes window title to be LAIT - page - LA - indicator
   # (Selected by user)
   shiny::observe({
@@ -394,7 +393,8 @@ server <- function(input, output, session) {
   year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
-    create_inputs$indicator
+    create_inputs$indicator,
+    create_inputs$clear_selections
   )
 
   # Logic to create own =======================================================
