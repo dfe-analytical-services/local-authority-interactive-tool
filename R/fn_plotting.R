@@ -382,7 +382,7 @@ get_years <- function(data_long, type = "numeric") {
 #' pretty_num_remove_trailing_zeroes(c(5000000000, 9876543210), dp = 2)
 #'
 #' @export
-pretty_num_remove_trailing_zeroes <- function(x, dp = 2, ...) {
+pretty_num_remove_zero <- function(x, dp = 2, ...) {
   # Apply pretty_num_large to format the numbers
   formatted_numbers <- pretty_num_large(x, dp = dp, ...)
 
@@ -441,7 +441,7 @@ format_axes <- function(data_long, indicator_dps = 2) {
       limits = range(y_breaks),
       expand = expansion(0, 0),
       breaks = pretty(y_breaks),
-      labels = unlist(lapply(pretty(y_breaks), pretty_num_remove_trailing_zeroes, indicator_dps))
+      labels = unlist(lapply(pretty(y_breaks), pretty_num_remove_zero, indicator_dps))
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
