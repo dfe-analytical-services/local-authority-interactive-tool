@@ -76,7 +76,9 @@ get_xaxis_title <- function(data_full) {
     pull_uniques("Year_Type")
 
   # If more than one y-axis title then give generic
-  if (length(x_axis_title) == 1) {
+  if (is.na(x_axis_title)) {
+    "Years (no type given)"
+  } else if (length(x_axis_title) == 1) {
     add_line_breaks(x_axis_title)
   } else {
     "Mixed Year Types"
@@ -361,6 +363,38 @@ get_years <- function(data_long, type = "numeric") {
 }
 
 
+#' Remove Trailing Zeroes from Formatted Numbers
+#'
+#' This function takes numeric values, formats them using `pretty_num_large()`
+#' and removes any trailing zeroes from the decimal part, but only for values
+#' greater than zero.
+#'
+#' @param x A numeric vector to be formatted.
+#' @param dp Integer. The default number of decimal places to be used if the
+#'   number has decimals. Default is 0.
+#' @param ... Additional arguments passed to `pretty_num_large`.
+#'
+#' @return A character vector with formatted numeric values and no trailing zeroes,
+#'         only for values greater than 0.
+#'
+#' @examples
+#' pretty_num_remove_trailing_zeroes(c(1000000, 1234567.8901, 100.0), dp = 3)
+#' pretty_num_remove_trailing_zeroes(c(5000000000, 9876543210), dp = 2)
+#'
+#' @export
+pretty_num_remove_zero <- function(x, dp = 2, ...) {
+  # Apply pretty_num_large to format the numbers
+  formatted_numbers <- pretty_num_large(x, dp = dp, ...)
+
+  # Remove trailing zeroes after decimal point
+  if (abs(as.numeric(x)) >= 1 || abs(as.numeric(x)) == 0) {
+    formatted_numbers <- sub("\\.0+(?=\\s|$)", "", formatted_numbers, perl = TRUE)
+  }
+
+  formatted_numbers
+}
+
+
 #' Format Axes for Plotting
 #'
 #' This function formats the axes for a ggplot2 plot based on the provided
@@ -386,7 +420,7 @@ get_years <- function(data_long, type = "numeric") {
 #' ggplot(data_long) +
 #'   axes +
 #'   geom_line()
-format_axes <- function(data_long) {
+format_axes <- function(data_long, indicator_dps = 2) {
   # Get pretty Y-axis breaks
   y_breaks <- pretty_y_gridlines(data_long)
 
@@ -407,7 +441,7 @@ format_axes <- function(data_long) {
       limits = range(y_breaks),
       expand = expansion(0, 0),
       breaks = pretty(y_breaks),
-      labels = unlist(lapply(pretty(y_breaks), dfeR::pretty_num))
+      labels = unlist(lapply(pretty(y_breaks), pretty_num_remove_zero, indicator_dps))
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
