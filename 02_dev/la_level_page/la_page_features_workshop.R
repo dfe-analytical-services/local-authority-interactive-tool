@@ -11,8 +11,8 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Children's Service Finance"
-selected_indicator <- "Total Children Looked After (finance) - Gross"
+selected_topic <- "Key Stage 2"
+selected_indicator <- "KS2 TA - % working at greater depth in writing - All Pupils"
 # "Children killed or seriously injured in road traffic accidents"
 # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
 selected_la <- "Barking and Dagenham" # "Barnet" # Cumberland
@@ -47,7 +47,9 @@ la_region_ldn_clean <- clean_ldn_region(la_region, filtered_bds)
 la_filtered_bds <- filtered_bds |>
   dplyr::filter(
     `LA and Regions` %in% c(selected_la, la_region_ldn_clean, la_sns, "England")
-  )
+  ) |>
+  dplyr::distinct(`LA and Regions`, Years, .keep_all = TRUE)
+
 
 # SN average
 sn_avg <- la_filtered_bds |>

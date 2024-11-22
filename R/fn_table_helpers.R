@@ -996,10 +996,8 @@ add_tooltip_to_reactcol <- function(value, tooltip, ...) {
           style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
         )
       ),
-      tooltip = div(tooltip),
+      tooltip = tooltip,
       theme = "gov",
-      placement = "top",
-      followCursor = TRUE,
       interactive = TRUE,
       interactiveBorder = 10,
       arrow = TRUE,
