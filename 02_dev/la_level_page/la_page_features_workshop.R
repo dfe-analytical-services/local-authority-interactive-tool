@@ -11,11 +11,11 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Child Protection"
-selected_indicator <- "Continuous assessments completed within 45 working days"
+selected_topic <- "Children's Service Finance"
+selected_indicator <- "Total Children Looked After (finance) - Gross"
 # "Children killed or seriously injured in road traffic accidents"
 # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
-selected_la <- "Bedford Borough" # "Barnet" # Cumberland
+selected_la <- "Barking and Dagenham" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
