@@ -173,7 +173,7 @@ pretty_num_table <- function(data,
                              ...) {
   # Check if data is empty
   if (nrow(data) < 1) {
-    message("Data seems to be empty. Returning unmodified.")
+    warning("Data seems to be empty. Returning unmodified.")
     return(data)
   }
 
