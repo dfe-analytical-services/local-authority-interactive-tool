@@ -23,14 +23,15 @@ server <- function(input, output, session) {
   # All inputs are excluded by default, and inputs can be added explicitly
   # in the included_inputs variable below
   shiny::observe({
-    # Include these inputs
+    # Include these inputs for bookmarking
     included_inputs <- c(
       "la_inputs-la_name",
       "la_inputs-topic_name",
+      "la_inputs-indicator_name",
       "navsetpillslist"
     )
 
-    # Exclude all inputs except the specified ones
+    # Exclude all other inputs
     excluded_inputs <- setdiff(
       names(shiny::reactiveValuesToList(input)),
       included_inputs
@@ -39,14 +40,26 @@ server <- function(input, output, session) {
     # Set the excluded inputs for bookmarking
     shiny::setBookmarkExclude(excluded_inputs)
 
-    # Trigger bookmarking whenever relevant inputs change
-    session$doBookmark()
+    # Validate topic and indicator consistency
+    valid_indicators <- bds_metrics |>
+      dplyr::filter(Topic == input$`la_inputs-topic_name`) |>
+      dplyr::pull(Measure)
+
+    if (input$`la_inputs-indicator_name` %in% valid_indicators) {
+      # Trigger bookmarking if topic and indicator are consistent
+      session$doBookmark()
+    } else {
+      # Redirect to a default URL if there is a mismatch
+      default_url <- site_primary # Replace with your default URL
+      shiny::updateQueryString(default_url, mode = "replace")
+    }
   })
 
   shiny::onBookmarked(function(url) {
     # Update the query string with the bookmark URL
-    shiny::updateQueryString(url)
+    shiny::updateQueryString(url, mode = "replace")
   })
+
 
   # Dynamically changes window title to be LAIT - page - LA - indicator
   # (Selected by user)
