@@ -39,7 +39,7 @@ minimal_server <- function(input, output, session) {
     topic = NULL,
     indicator = NULL
   )
-  appInputsServer("la_level", shared_values)
+  appInputsServer("la_level", shared_values, bds_metrics, topic_indicator_full)
 }
 
 minimal_app <- shinyApp(minimal_ui, minimal_server)
@@ -61,7 +61,7 @@ test_that("Deafult inputs", {
   # Topic
   expect_equal(
     shinytest_app$get_value(input = "la_level-topic_name"),
-    "Health and Wellbeing"
+    "All Topics"
   )
 
   # Indicator
