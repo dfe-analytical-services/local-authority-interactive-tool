@@ -493,7 +493,7 @@ build_la_stats_table <- function(
       list(
         "Latest National Rank" = "-",
         "Quartile Banding" = "-",
-        "No Quartiles" = "Data not suitable for quartiles.",
+        "No Quartiles" = "-",
         "A" = NULL,
         "B" = NULL,
         "C" = NULL,
