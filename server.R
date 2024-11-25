@@ -26,7 +26,6 @@ server <- function(input, output, session) {
     # Include these inputs for bookmarking
     included_inputs <- c(
       "la_inputs-la_name",
-      "la_inputs-topic_name",
       "la_inputs-indicator_name",
       "navsetpillslist"
     )
@@ -39,20 +38,6 @@ server <- function(input, output, session) {
 
     # Set the excluded inputs for bookmarking
     shiny::setBookmarkExclude(excluded_inputs)
-
-    # Validate topic and indicator consistency
-    valid_indicators <- bds_metrics |>
-      dplyr::filter(Topic == input$`la_inputs-topic_name`) |>
-      dplyr::pull(Measure)
-
-    if (input$`la_inputs-indicator_name` %in% valid_indicators) {
-      # Trigger bookmarking if topic and indicator are consistent
-      session$doBookmark()
-    } else {
-      # Redirect to a default URL if there is a mismatch
-      default_url <- site_primary # Replace with your default URL
-      shiny::updateQueryString(default_url, mode = "replace")
-    }
   })
 
   shiny::onBookmarked(function(url) {

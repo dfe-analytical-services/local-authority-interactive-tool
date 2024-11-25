@@ -27,7 +27,15 @@ MetadataUI <- function(id) {
 #'
 MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
   moduleServer(id, function(input, output, session) {
+    # Reactive value to store the previous metadata
+    previous_metadata <- reactiveVal(NULL)
+
     output$metadata <- renderUI({
+      # If indicator_input is NULL, return the previous metadata
+      if (is.null(indicator_input()) || indicator_input() == "") {
+        return(previous_metadata())
+      }
+
       metadata <- data_metrics |>
         get_metadata(indicator_input(), metadata_type)
 
@@ -43,6 +51,9 @@ MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
         metadata <- gsub("\n", "", metadata) # Remove stray newlines
         metadata <- HTML(metadata)
       }
+
+      # Update the previous metadata value
+      previous_metadata(metadata)
 
       metadata
     })
