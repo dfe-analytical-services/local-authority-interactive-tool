@@ -63,8 +63,12 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("la_inputs", shared_values)
-
+  app_inputs <- appInputsServer(
+    "la_inputs",
+    shared_values,
+    bds_metrics,
+    metrics_raw
+  )
 
   # LA level table ----------------------------------
   LA_LevelTableServer(

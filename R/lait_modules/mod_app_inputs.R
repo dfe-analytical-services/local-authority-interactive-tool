@@ -69,7 +69,7 @@ appInputsUI <- function(id) {
 #' @return A list of reactive expressions for the app inputs, including
 #' the selected LA name, topic name, and indicator name.
 #'
-appInputsServer <- function(id, shared_values) {
+appInputsServer <- function(id, shared_values, bds_metrics, metrics_raw) {
   moduleServer(id, function(input, output, session) {
     # Reactive value to store the previous LA name
     previous_la_name <- reactiveVal(NULL)
@@ -146,23 +146,25 @@ appInputsServer <- function(id, shared_values) {
       ignoreNULL = FALSE
     )
 
+    topic_label <- "Indicator:"
+
     # Dynamically update the Indicator label with the related topic
     shiny::observeEvent(debounced_indicator_name(), {
       indicator <- debounced_indicator_name()
 
       if (!is.null(indicator) && indicator != "") {
         # Find the topic related to the selected indicator
-        related_topic <- metrics_clean |>
+        related_topic <- metrics_raw |>
           dplyr::filter(.data$Measure == indicator) |>
-          dplyr::pull("Topic") |>
-          unique() |>
-          trimws()
+          pull_uniques("Topic")
 
         # Use the first topic if multiple exist (unlikely but handled)
-        topic_label <- if (length(related_topic) > 0) {
-          paste0(related_topic, collapse = ", ")
-        } else {
-          "Unknown Topic"
+        if (length(related_topic) > 0) {
+          topic_label <- paste0(
+            "Indicator:&nbsp;&nbsp;(Topic: ",
+            paste0(related_topic, collapse = ", "),
+            ")"
+          )
         }
 
         # Update the Indicator label to include the topic
@@ -176,9 +178,7 @@ appInputsServer <- function(id, shared_values) {
       # Setting custom indicator lable (to include topics related to)
       shinyjs::html(
         "indicator_label",
-        paste0(
-          "Indicator:&nbsp;&nbsp;(Topic - ", related_topic, ")"
-        )
+        topic_label
       )
 
       shared_values$indicator <- indicator

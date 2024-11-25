@@ -113,7 +113,12 @@ server <- function(input, output, session) {
   # LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  la_app_inputs <- appInputsServer("la_inputs", shared_page_inputs)
+  la_app_inputs <- appInputsServer(
+    "la_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    metrics_raw
+  )
 
   # Page header
   PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
@@ -174,7 +179,12 @@ server <- function(input, output, session) {
   # Regional Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  region_app_inputs <- appInputsServer("region_inputs", shared_page_inputs)
+  region_app_inputs <- appInputsServer(
+    "region_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    metrics_raw
+  )
 
   # Header
   PageHeaderServer("region_header", region_app_inputs, "Regional View")
@@ -266,7 +276,12 @@ server <- function(input, output, session) {
   # Statistical Neighbour Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  stat_n_app_inputs <- appInputsServer("stat_n_inputs", shared_page_inputs)
+  stat_n_app_inputs <- appInputsServer(
+    "stat_n_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    metrics_raw
+  )
 
   # Header
   PageHeaderServer("stat_n_header", stat_n_app_inputs, "Statistical Neighbour View")
@@ -354,7 +369,12 @@ server <- function(input, output, session) {
   # All LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  all_la_app_inputs <- appInputsServer("all_la_inputs", shared_page_inputs)
+  all_la_app_inputs <- appInputsServer(
+    "all_la_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    metrics_raw
+  )
 
   # Header
   PageHeaderServer("all_la_header", all_la_app_inputs, "All LA View")
