@@ -577,92 +577,59 @@ server_dev <- function(input, output, session) {
 
   # LA Metadata ----------------------------------
   # Reactive values to store previous data
-  previous_description <- reactiveVal(NULL)
-  previous_methodology <- reactiveVal(NULL)
-  previous_last_update <- reactiveVal(NULL)
-  previous_next_update <- reactiveVal(NULL)
-  previous_source <- reactiveVal(NULL)
+  previous_metadata <- reactiveValues(
+    description = NULL,
+    methodology = NULL,
+    last_update = NULL,
+    next_update = NULL,
+    source = NULL
+  )
 
-  # Description
+  # Outputs using the helper function
   output$description <- renderText({
-    # If input$indicator is NULL, return the previous value
-    if (input$indicator == "") {
-      return(previous_description())
-    }
-
-    # Fetch the description for the selected indicator
-    description <- metrics_clean |>
-      get_metadata(input$indicator, "Description")
-
-    # Update the previous description
-    previous_description(description)
-
-    return(description)
+    update_and_fetch_metadata(
+      input$indicator,
+      "Description",
+      previous_metadata,
+      "description"
+    )
   })
 
-  # Methodology
   output$methodology <- renderUI({
-    if (input$indicator == "") {
-      return(previous_methodology())
-    }
-
-    # Fetch the methodology for the selected indicator
-    methodology <- metrics_clean |>
-      get_metadata(input$indicator, "Methodology")
-
-    # Update the previous methodology
-    previous_methodology(methodology)
-
-    return(methodology)
+    update_and_fetch_metadata(
+      input$indicator,
+      "Methodology",
+      previous_metadata,
+      "methodology"
+    )
   })
 
-  # Last updated
   output$last_update <- renderText({
-    if (input$indicator == "") {
-      return(previous_last_update())
-    }
-
-    # Fetch the last updated information for the selected indicator
-    last_update <- metrics_clean |>
-      get_metadata(input$indicator, "Last Update")
-
-    # Update the previous last update
-    previous_last_update(last_update)
-
-    return(last_update)
+    update_and_fetch_metadata(
+      input$indicator,
+      "Last Update",
+      previous_metadata,
+      "last_update"
+    )
   })
 
-  # Next updated
   output$next_update <- renderUI({
-    if (input$indicator == "") {
-      return(previous_next_update())
-    }
-
-    # Fetch the next update information for the selected indicator
-    next_update <- metrics_clean |>
-      get_metadata(input$indicator, "Next Update")
-
-    # Update the previous next update
-    previous_next_update(next_update)
-
-    return(next_update)
+    update_and_fetch_metadata(
+      input$indicator,
+      "Next Update",
+      previous_metadata,
+      "next_update"
+    )
   })
 
-  # Source (hyperlink)
   output$source <- renderUI({
-    if (input$indicator == "") {
-      return(previous_source())
-    }
-
-    # Fetch the source (hyperlink) for the selected indicator
-    hyperlink <- metrics_clean |>
-      get_metadata(input$indicator, "Hyperlink(s)")
-    label <- input$indicator
-
-    # Update the previous source
-    previous_source(dfeshiny::external_link(href = hyperlink, link_text = label))
-
-    return(previous_source())
+    hyperlink <- update_and_fetch_metadata(
+      input$indicator,
+      "Hyperlink(s)",
+      previous_metadata,
+      "source"
+    )
+    dfeshiny::external_link(href = hyperlink, link_text = input$indicator)
   })
 }
 

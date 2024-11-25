@@ -261,3 +261,51 @@ file_type_input_btn <- function(input_id, file_type = "table") {
     selected = if (file_type == "table") "CSV" else "SVG"
   )
 }
+
+
+#' Update and fetch metadata for a given indicator
+#'
+#' This function retrieves the metadata for a specified indicator and updates
+#' the associated reactive storage. If the indicator is empty, the previously
+#' stored value is returned.
+#'
+#' @param input_indicator A string representing the selected indicator. If
+#'   empty, the function returns the previously stored value.
+#' @param metadata_type A string specifying the type of metadata to fetch (e.g.,
+#'   "Description", "Methodology").
+#' @param reactive_storage A `reactiveValues` object where the metadata is
+#'   stored and updated.
+#' @param key A string representing the key in `reactive_storage` corresponding
+#'   to the metadata type.
+#'
+#' @return The metadata associated with the specified indicator and metadata
+#'   type. If the indicator is empty, the previously stored value is returned.
+#'
+#' @examples
+#' \dontrun{
+#' previous_metadata <- reactiveValues(description = NULL)
+#' update_and_fetch_metadata(
+#'   input_indicator = "Indicator A",
+#'   metadata_type = "Description",
+#'   reactive_storage = previous_metadata,
+#'   key = "description"
+#' )
+#' }
+#'
+update_and_fetch_metadata <- function(input_indicator,
+                                      metadata_type,
+                                      reactive_storage,
+                                      key) {
+  if (input_indicator == "") {
+    return(reactive_storage[[key]])
+  }
+
+  # Fetch the metadata for the selected indicator
+  metadata <- metrics_clean |>
+    get_metadata(input_indicator, metadata_type)
+
+  # Update the previous value in the reactive storage
+  reactive_storage[[key]] <- metadata
+
+  return(metadata)
+}
