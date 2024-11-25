@@ -33,8 +33,8 @@ appInputsUI <- function(id) {
           id = ns("topic_label"),
           "Topic:"
         ),
-        choices = c("All topics", metric_topics),
-        selected = "All topics",
+        choices = c("All Topics", metric_topics),
+        selected = "All Topics",
         options = list(
           placeholder = "No topic selected, showing all indicators.",
           plugins = list("clear_button")
@@ -113,11 +113,11 @@ appInputsServer <- function(id,
         topic_filter <- debounced_topic_name()
 
         # Get indicator choices for selected topic
-        # Include all rows if no topic is selected or "All topics" is selected
+        # Include all rows if no topic is selected or "All Topics" is selected
         filtered_topic_bds <- bds_metrics |>
           dplyr::filter(
             if (is.null(input$topic_name) ||
-              "All topics" %in% input$topic_name ||
+              "All Topics" %in% input$topic_name ||
               "" %in% input$topic_name) {
               TRUE
             } else {
@@ -158,7 +158,8 @@ appInputsServer <- function(id,
 
       # When no topic is selected, show the currently selected indicator topic
       # in the topic label
-      if (!is.null(indicator) && indicator != "" && topic == "") {
+      if (!is.null(indicator) && indicator != "" &&
+        (topic %in% c("", "All Topics"))) {
         # Get topic
         related_topic <- topic_indicator_full |>
           dplyr::filter(.data$Measure == indicator) |>
