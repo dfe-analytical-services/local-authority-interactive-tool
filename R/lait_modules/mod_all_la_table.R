@@ -52,11 +52,16 @@ Build_AllLATableServer <- function(id, filtered_bds, la_names_bds) {
         filter_la_regions(la_names_bds, latest = TRUE) |>
         dplyr::mutate(
           Rank = dplyr::case_when(
+            indicator_polarity %notin% c("High", "Low") ~ "-",
             is.na(values_num) ~ NA,
             # Rank in descending order
-            indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+            indicator_polarity == "High" ~ as.character(
+              rank(-values_num, ties.method = "min", na.last = TRUE)
+            ),
             # Rank in ascending order
-            indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+            indicator_polarity == "Low" ~ as.character(
+              rank(values_num, ties.method = "min", na.last = TRUE)
+            )
           )
         ) |>
         dplyr::select(`LA and Regions`, Rank)

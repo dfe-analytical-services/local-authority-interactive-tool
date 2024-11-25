@@ -356,6 +356,10 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
   )
 })
 
+# Topic and indicators pairs (full - no duplicates filtered out)
+topic_indicator_full <- metrics_raw |>
+  dplyr::distinct(Topic, Measure)
+
 # Metric topics
 metric_topics <- pull_uniques(metrics_clean, "Topic")
 

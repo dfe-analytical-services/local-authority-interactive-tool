@@ -69,7 +69,10 @@ appInputsUI <- function(id) {
 #' @return A list of reactive expressions for the app inputs, including
 #' the selected LA name, topic name, and indicator name.
 #'
-appInputsServer <- function(id, shared_values, bds_metrics, metrics_raw) {
+appInputsServer <- function(id,
+                            shared_values,
+                            bds_metrics,
+                            topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
     # Reactive value to store the previous LA name
     previous_la_name <- reactiveVal(NULL)
@@ -154,7 +157,7 @@ appInputsServer <- function(id, shared_values, bds_metrics, metrics_raw) {
 
       if (!is.null(indicator) && indicator != "") {
         # Find the topic related to the selected indicator
-        related_topic <- metrics_raw |>
+        related_topic <- topic_indicator_full |>
           dplyr::filter(.data$Measure == indicator) |>
           pull_uniques("Topic")
 

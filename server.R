@@ -117,7 +117,7 @@ server <- function(input, output, session) {
     "la_inputs",
     shared_page_inputs,
     bds_metrics,
-    metrics_raw
+    topic_indicator_full
   )
 
   # Page header
@@ -183,7 +183,7 @@ server <- function(input, output, session) {
     "region_inputs",
     shared_page_inputs,
     bds_metrics,
-    metrics_raw
+    topic_indicator_full
   )
 
   # Header
@@ -280,7 +280,7 @@ server <- function(input, output, session) {
     "stat_n_inputs",
     shared_page_inputs,
     bds_metrics,
-    metrics_raw
+    topic_indicator_full
   )
 
   # Header
@@ -373,7 +373,7 @@ server <- function(input, output, session) {
     "all_la_inputs",
     shared_page_inputs,
     bds_metrics,
-    metrics_raw
+    topic_indicator_full
   )
 
   # Header
