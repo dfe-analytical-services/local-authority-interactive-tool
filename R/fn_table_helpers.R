@@ -449,7 +449,8 @@ build_la_stats_table <- function(
     quartile,
     quartile_bands,
     indicator_dps,
-    indicator_polarity) {
+    indicator_polarity,
+    no_show_qb) {
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
@@ -461,32 +462,59 @@ build_la_stats_table <- function(
   qb_adj <- 10**-(indicator_dps)
 
   # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
-    list(
-      "Latest National Rank" = rank,
-      "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+  rank_quartile_band_values <- list()
+  if (indicator_polarity %in% "Low") {
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = rank,
+        "Quartile Banding" = quartile,
+        "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+        "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+        "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+        "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+      )
     )
   } else if (indicator_polarity %in% "High") {
-    list(
-      "Latest National Rank" = rank,
-      "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
-      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
-      "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
-      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = rank,
+        "Quartile Banding" = quartile,
+        "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
+        "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
+        "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
+        "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+      )
     )
   } else {
-    list(
-      "Latest National Rank" = "-",
-      "Quartile Banding" = "-",
-      "A" = "-",
-      "B" = "-",
-      "C" = "-",
-      "D" = "-"
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = "-",
+        "Quartile Banding" = "-",
+        "No Quartiles" = "-",
+        "A" = NULL,
+        "B" = NULL,
+        "C" = NULL,
+        "D" = NULL
+      )
+    )
+  }
+
+  # Hide QB if no_show_qb is True value which is derived from the
+  # No Quartile column of the Data Dict (normally due to small data range)
+  if (no_show_qb) {
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Quartile Banding" = "-",
+        "No Quartiles" = "Data range is too small.",
+        "A" = NULL,
+        "B" = NULL,
+        "C" = NULL,
+        "D" = NULL
+      )
     )
   }
 
@@ -540,11 +568,7 @@ build_region_stats_table <- function(la_number,
     "Change from previous year" = change_since_prev,
     "Polarity" = pull_uniques(filtered_bds, "Polarity"),
     check.names = FALSE
-  ) |>
-    pretty_num_table(
-      dp = get_indicator_dps(filtered_bds),
-      exclude_columns = c("LA Number", "Trend")
-    )
+  )
 }
 
 
@@ -789,7 +813,7 @@ quartile_banding_col_def <- function(data) {
 
   list(
     background = qb_color,
-    textAlign = "center",
+    textAlign = "right",
     color = text_colour
   )
 }

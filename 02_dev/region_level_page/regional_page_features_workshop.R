@@ -12,8 +12,8 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Regional Level LA table ------------------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Children's Service Finance"
-selected_indicator <- "Total Services for Young People  (finance) - Gross"
+selected_topic <- "Health and Wellbeing" # "Children's Service Finance"
+selected_indicator <- "Infant Mortality" # "Total Services for Young People  (finance) - Gross"
 selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
@@ -212,7 +212,7 @@ dfe_reactable(
     # Create the reactable with specific column alignments
     format_num_reactable_cols(
       region_stats_table,
-      get_indicator_dps(filtered_bds$data),
+      get_indicator_dps(filtered_bds),
       num_exclude = "LA Number"
     ),
     # Define specific formatting for the Trend and Quartile Banding columns

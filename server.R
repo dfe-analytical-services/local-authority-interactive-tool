@@ -26,9 +26,15 @@ server <- function(input, output, session) {
     # Include these inputs for bookmarking
     included_inputs <- c(
       "la_inputs-la_name",
-      "la_inputs-topic_name",
       "la_inputs-indicator_name",
-      "navsetpillslist"
+      "navsetpillslist",
+      "create_inputs-geog_input",
+      "create_inputs-topic_input",
+      "create_inputs-indicator",
+      "create_inputs-la_group",
+      "create_inputs-inc_regions",
+      "create_inputs-inc_england",
+      "year_range-year_range"
     )
 
     # Exclude all other inputs
@@ -39,26 +45,19 @@ server <- function(input, output, session) {
 
     # Set the excluded inputs for bookmarking
     shiny::setBookmarkExclude(excluded_inputs)
+  })
 
-    # Validate topic and indicator consistency
-    valid_indicators <- bds_metrics |>
-      dplyr::filter(Topic == input$`la_inputs-topic_name`) |>
-      dplyr::pull(Measure)
-
-    if (input$`la_inputs-indicator_name` %in% valid_indicators) {
-      # Trigger bookmarking if topic and indicator are consistent
-      session$doBookmark()
-    } else {
-      # Redirect to a default URL if there is a mismatch
-      default_url <- site_primary # Replace with your default URL
-      shiny::updateQueryString(default_url, mode = "replace")
-    }
+  shiny::observe({
+    # Trigger this observer every time an input changes
+    shiny::reactiveValuesToList(input)
+    session$doBookmark()
   })
 
   shiny::onBookmarked(function(url) {
     # Update the query string with the bookmark URL
     shiny::updateQueryString(url, mode = "replace")
   })
+
 
   # Dynamically changes window title to be LAIT - page - LA - indicator
   # (Selected by user)
@@ -114,7 +113,12 @@ server <- function(input, output, session) {
   # LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  la_app_inputs <- appInputsServer("la_inputs", shared_page_inputs)
+  la_app_inputs <- appInputsServer(
+    "la_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    topic_indicator_full
+  )
 
   # Page header
   PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
@@ -133,7 +137,8 @@ server <- function(input, output, session) {
     "la_stats",
     la_app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    no_qb_indicators
   )
 
   # LA level charts ===========================================================
@@ -174,7 +179,12 @@ server <- function(input, output, session) {
   # Regional Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  region_app_inputs <- appInputsServer("region_inputs", shared_page_inputs)
+  region_app_inputs <- appInputsServer(
+    "region_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    topic_indicator_full
+  )
 
   # Header
   PageHeaderServer("region_header", region_app_inputs, "Regional View")
@@ -266,7 +276,12 @@ server <- function(input, output, session) {
   # Statistical Neighbour Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  stat_n_app_inputs <- appInputsServer("stat_n_inputs", shared_page_inputs)
+  stat_n_app_inputs <- appInputsServer(
+    "stat_n_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    topic_indicator_full
+  )
 
   # Header
   PageHeaderServer("stat_n_header", stat_n_app_inputs, "Statistical Neighbour View")
@@ -294,7 +309,8 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    la_names_bds
+    la_names_bds,
+    no_qb_indicators
   )
 
   # Statistical Neighbour charts ==============================================
@@ -353,7 +369,12 @@ server <- function(input, output, session) {
   # All LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  all_la_app_inputs <- appInputsServer("all_la_inputs", shared_page_inputs)
+  all_la_app_inputs <- appInputsServer(
+    "all_la_inputs",
+    shared_page_inputs,
+    bds_metrics,
+    topic_indicator_full
+  )
 
   # Header
   PageHeaderServer("all_la_header", all_la_app_inputs, "All LA View")

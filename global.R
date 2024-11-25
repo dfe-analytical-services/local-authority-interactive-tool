@@ -177,7 +177,9 @@ metrics_clean <- metrics_raw |>
       TRUE ~ as.character(`Next Update`)
     )
   ) |>
-  dplyr::filter(!grepl("DISCONTINUE", Table_status))
+  dplyr::filter(!grepl("DISCONTINUE", Table_status)) |>
+  # Removing any second instances of a Measure (duplicate across Topics)
+  dplyr::filter(!duplicated(Measure))
 
 metrics_discontinued <- metrics_raw |>
   dplyr::filter(Measure_short %notin% metrics_clean$Measure_short) |>
@@ -354,6 +356,10 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
   )
 })
 
+# Topic and indicators pairs (full - no duplicates filtered out)
+topic_indicator_full <- metrics_raw |>
+  dplyr::distinct(Topic, Measure)
+
 # Metric topics
 metric_topics <- pull_uniques(metrics_clean, "Topic")
 
@@ -367,6 +373,11 @@ covid_affected_indicators <- bds_metrics |>
   dplyr::group_by(Topic, Measure, Years_num) |>
   dplyr::summarise(all_na = all(is.na(values_num)), .groups = "keep") |>
   dplyr::filter(all_na) |>
+  pull_uniques("Measure")
+
+# Indicators with too small a range for QB'ing
+no_qb_indicators <- metrics_clean |>
+  dplyr::filter(No_Quartile == "N") |>
   pull_uniques("Measure")
 
 # Successful load of global.R message
