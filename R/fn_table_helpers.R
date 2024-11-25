@@ -449,7 +449,8 @@ build_la_stats_table <- function(
     quartile,
     quartile_bands,
     indicator_dps,
-    indicator_polarity) {
+    indicator_polarity,
+    no_show_qb) {
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
@@ -483,10 +484,27 @@ build_la_stats_table <- function(
     list(
       "Latest National Rank" = "-",
       "Quartile Banding" = "-",
-      "A" = "-",
-      "B" = "-",
-      "C" = "-",
-      "D" = "-"
+      "No Quartiles" = "Data not suitable for quartiles.",
+      "A" = NULL,
+      "B" = NULL,
+      "C" = NULL,
+      "D" = NULL
+    )
+  }
+
+  # Hide QB if no_show_qb is True value which is derived from the
+  # No Quartile column of the Data Dict (normally due to small data range)
+  if (no_show_qb) {
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Quartile Banding" = "-",
+        "No Quartiles" = "Data range is too small.",
+        "A" = NULL,
+        "B" = NULL,
+        "C" = NULL,
+        "D" = NULL
+      )
     )
   }
 
@@ -785,7 +803,7 @@ quartile_banding_col_def <- function(data) {
 
   list(
     background = qb_color,
-    textAlign = "center",
+    textAlign = "right",
     color = text_colour
   )
 }

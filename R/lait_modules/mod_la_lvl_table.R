@@ -271,7 +271,11 @@ LA_StatsTableUI <- function(id) {
 #' @param bds_metrics A data frame of BDS metrics
 #' @param stat_n_la A data frame of statistical neighbours for each LA
 #' @return A list of outputs for the UI, including a data table of the LA stats
-LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
+LA_StatsTableServer <- function(id,
+                                app_inputs,
+                                bds_metrics,
+                                stat_n_la,
+                                no_qb_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -329,6 +333,9 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_indicator_polarity
       )
 
+      # Boolean as to whether to include Quartile Banding
+      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
+
       # Build stats LA Level table
       la_stats_table <- build_la_stats_table(
         la_diff(),
@@ -339,7 +346,8 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_quartile,
         la_quartile_bands,
         get_indicator_dps(filtered_bds()),
-        la_indicator_polarity
+        la_indicator_polarity,
+        no_show_qb
       )
 
       la_stats_table
@@ -347,9 +355,12 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # LA Stats table
     output$la_stats <- reactable::renderReactable({
+      # Drop Quartile Bands
+      stats_table <- la_stats_table() |>
+        dplyr::select(-dplyr::any_of(c("A", "B", "C", "D", "No Quartiles")))
+
       dfe_reactable(
-        la_stats_table() |>
-          dplyr::select(-c("A", "B", "C", "D")),
+        stats_table,
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
@@ -393,7 +404,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_quartiles <- reactable::renderReactable({
       # Get quartile bands only
       qb_table <- la_stats_table() |>
-        dplyr::select(c("A", "B", "C", "D"))
+        dplyr::select(dplyr::any_of(c("A", "B", "C", "D", "No Quartiles")))
 
       dfe_reactable(
         qb_table,

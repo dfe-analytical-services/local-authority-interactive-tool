@@ -369,5 +369,10 @@ covid_affected_indicators <- bds_metrics |>
   dplyr::filter(all_na) |>
   pull_uniques("Measure")
 
+# Indicators with too small a range for QB'ing
+no_qb_indicators <- metrics_clean |>
+  dplyr::filter(No_Quartile == "N") |>
+  pull_uniques("Measure")
+
 # Successful load of global.R message
 cat(crayon::green("global.R successfully loaded!"))

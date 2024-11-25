@@ -78,7 +78,8 @@ server_mod <- function(input, output, session) {
     "la_stats",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    no_qb_indicators
   )
 
   # LA line chart  ----------------------------------

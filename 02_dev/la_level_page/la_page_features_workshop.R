@@ -216,6 +216,8 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
     )
 }
 
+no_show_qb <- selected_indicator %in% no_qb_indicators
+
 la_stats_table <- build_la_stats_table(
   la_table,
   selected_la,
@@ -225,7 +227,8 @@ la_stats_table <- build_la_stats_table(
   la_quartile,
   la_quartile_bands,
   indicator_dps,
-  la_indicator_polarity
+  la_indicator_polarity,
+  no_show_qb
 )
 
 

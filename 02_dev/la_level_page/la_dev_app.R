@@ -357,6 +357,9 @@ server_dev <- function(input, output, session) {
       la_indicator_polarity
     )
 
+    # Boolean as to whether to include Quartile Banding
+    no_show_qb <- input$indicator %in% no_qb_indicators
+
     # Build stats LA Level table
     la_stats_table <- build_la_stats_table(
       la_diff(),
@@ -367,7 +370,8 @@ server_dev <- function(input, output, session) {
       la_quartile,
       la_quartile_bands,
       get_indicator_dps(filtered_bds$data),
-      la_indicator_polarity
+      la_indicator_polarity,
+      no_show_qb
     )
 
     la_stats_table

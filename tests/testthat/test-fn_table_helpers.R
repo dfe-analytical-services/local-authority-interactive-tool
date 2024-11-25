@@ -333,6 +333,7 @@ test_that("1. build_la_stats_table works with standard inputs", {
   quartile_bands <- c("0%" = 0, "25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
   indicator_dps <- 1
   indicator_polarity <- "High"
+  no_show_qb <- FALSE
 
   result <- build_la_stats_table(
     main_table,
@@ -343,7 +344,8 @@ test_that("1. build_la_stats_table works with standard inputs", {
     quartile,
     quartile_bands,
     indicator_dps,
-    indicator_polarity
+    indicator_polarity,
+    no_show_qb
   )
 
   expected <- data.frame(
@@ -378,6 +380,7 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
   quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
   indicator_dps <- 1
   indicator_polarity <- character(0)
+  no_show_qb <- FALSE
 
   expect_warning(
     expect_error(
@@ -390,7 +393,8 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
         quartile,
         quartile_bands,
         indicator_dps,
-        indicator_polarity
+        indicator_polarity,
+        no_show_qb
       ),
       "argument is of length zero"
     ),
@@ -412,6 +416,7 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
   quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
   indicator_dps <- 1
   indicator_polarity <- NA
+  no_show_qb <- FALSE
 
   expected <- data.frame(
     "LA Number" = NA,
@@ -439,7 +444,8 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
         quartile,
         quartile_bands,
         indicator_dps,
-        indicator_polarity
+        indicator_polarity,
+        no_show_qb
       ),
       expected
     ),
@@ -461,6 +467,7 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
   quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
   indicator_dps <- 1
   indicator_polarity <- "Low"
+  no_show_qb <- FALSE
 
   expected <- data.frame(
     "LA Number" = NA,
@@ -488,7 +495,8 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
         quartile,
         quartile_bands,
         indicator_dps,
-        indicator_polarity
+        indicator_polarity,
+        no_show_qb
       ),
       expected
     ),
