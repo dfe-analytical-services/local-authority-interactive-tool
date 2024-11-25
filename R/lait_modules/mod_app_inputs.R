@@ -18,7 +18,7 @@ appInputsUI <- function(id) {
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = ns("la_name"),
         label = "LA:",
         choices = la_names_bds
@@ -26,7 +26,8 @@ appInputsUI <- function(id) {
       shiny::selectInput(
         inputId = ns("topic_name"),
         label = "Topic:",
-        choices = metric_topics
+        choices = metric_topics,
+        selected = NULL
       ),
       shiny::selectInput(
         inputId = ns("indicator_name"),
@@ -74,13 +75,16 @@ appInputsServer <- function(id, shared_values) {
 
     # Update Indicator dropdown for selected Topic
     shiny::observeEvent(debounced_topic_name(), {
-      # Get indicator choices for selected topic
+      # Determine the filter condition for Topic
+      topic_filter <- debounced_topic_name()
+
+      # Get indicator choices for the selected topic or all topics if topic_filter is NA
       filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(.data$Topic == debounced_topic_name()) |>
+        dplyr::filter(if (!is.null(topic_filter)) .data$Topic == topic_filter else TRUE) |>
         pull_uniques("Measure")
 
       # Update the Indicator dropdown based on selected Topic
-      updateSelectInput(
+      shiny::updateSelectizeInput(
         session = session,
         inputId = "indicator_name",
         label = "Indicator:",

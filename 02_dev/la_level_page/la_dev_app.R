@@ -22,19 +22,26 @@ ui_dev <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "la_input",
         label = "LA:",
         choices = la_names_bds
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "topic_input",
         label = "Topic:",
-        choices = metric_topics
+        choices = metric_topics,
+        multiple = TRUE,
+        options = list(
+          maxItems = 1,
+          placeholder = "All topics",
+          plugins = list("remove_button"),
+          dropdownParent = "body"
+        )
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "indicator",
-        label = NULL,
+        label = "Indicator:",
         choices = metric_names
       )
     ),
@@ -165,21 +172,24 @@ ui_dev <- bslib::page_fillable(
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input, {
-    # Get indicator choices for selected topic
-    filtered_topic_bds <- bds_metrics |>
-      dplyr::filter(
-        Topic == input$topic_input
-      ) |>
-      pull_uniques("Measure")
+  shiny::observeEvent(input$topic_input,
+    {
+      # Get indicator choices for selected topic
+      filtered_topic_bds <- bds_metrics |>
+        dplyr::filter(
+          if (!is.null(input$topic_input)) .data$Topic %in% input$topic_input else TRUE
+        ) |>
+        pull_uniques("Measure")
 
-    updateSelectInput(
-      session = session,
-      inputId = "indicator",
-      label = "Indicator:",
-      choices = filtered_topic_bds
-    )
-  })
+      shiny::updateSelectizeInput(
+        session = session,
+        inputId = "indicator",
+        label = "Indicator:",
+        choices = filtered_topic_bds
+      )
+    },
+    ignoreNULL = FALSE
+  )
 
 
   # Main LA Level table ----------------------------------
@@ -188,11 +198,15 @@ server_dev <- function(input, output, session) {
   filtered_bds <- reactiveValues(data = NULL)
 
   observeEvent(input$indicator, {
+    # Check if the indicator is NULL or empty before applying the filter
+    if (is.null(input$indicator) || input$indicator == "") {
+      return() # Don't filter anything if no indicator is selected
+    }
+
     # Main LA Level table ----------------------------------
     # Filter for selected topic and indicator
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
-        Topic == input$topic_input,
         Measure == input$indicator
       )
   })
@@ -546,39 +560,94 @@ server_dev <- function(input, output, session) {
 
   # LA Metadata ----------------------------------
 
+  # Reactive values to store previous data
+  previous_description <- reactiveVal(NULL)
+  previous_methodology <- reactiveVal(NULL)
+  previous_last_update <- reactiveVal(NULL)
+  previous_next_update <- reactiveVal(NULL)
+  previous_source <- reactiveVal(NULL)
+
   # Description
   output$description <- renderText({
-    metrics_clean |>
+    # If input$indicator is NULL, return the previous value
+    if (input$indicator == "") {
+      return(previous_description())
+    }
+    print(input$indicator)
+
+    # Fetch the description for the selected indicator
+    description <- metrics_clean |>
       get_metadata(input$indicator, "Description")
+
+    # Update the previous description
+    previous_description(description)
+
+    return(description)
   })
 
   # Methodology
   output$methodology <- renderUI({
-    metrics_clean |>
+    if (input$indicator == "") {
+      return(previous_methodology())
+    }
+
+    # Fetch the methodology for the selected indicator
+    methodology <- metrics_clean |>
       get_metadata(input$indicator, "Methodology")
+
+    # Update the previous methodology
+    previous_methodology(methodology)
+
+    return(methodology)
   })
 
   # Last updated
   output$last_update <- renderText({
-    metrics_clean |>
+    if (input$indicator == "") {
+      return(previous_last_update())
+    }
+
+    # Fetch the last updated information for the selected indicator
+    last_update <- metrics_clean |>
       get_metadata(input$indicator, "Last Update")
+
+    # Update the previous last update
+    previous_last_update(last_update)
+
+    return(last_update)
   })
 
   # Next updated
   output$next_update <- renderUI({
-    metrics_clean |>
+    if (input$indicator == "") {
+      return(previous_next_update())
+    }
+
+    # Fetch the next update information for the selected indicator
+    next_update <- metrics_clean |>
       get_metadata(input$indicator, "Next Update")
+
+    # Update the previous next update
+    previous_next_update(next_update)
+
+    return(next_update)
   })
 
   # Source (hyperlink)
   output$source <- renderUI({
+    if (input$indicator == "") {
+      return(previous_source())
+    }
+
+    # Fetch the source (hyperlink) for the selected indicator
     hyperlink <- metrics_clean |>
       get_metadata(input$indicator, "Hyperlink(s)")
     label <- input$indicator
-    dfeshiny::external_link(
-      href = hyperlink,
-      link_text = label
-    )
+
+    # Update the previous source
+    previous_source(dfeshiny::external_link(href = hyperlink, link_text = label))
+
+    return(previous_source())
   })
 }
 

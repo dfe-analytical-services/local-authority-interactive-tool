@@ -94,7 +94,7 @@ server_dev <- function(input, output, session) {
     # Get indicator choices for selected topic
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(
-        Topic == input$topic_input
+        if (!is.null(input$topic_input)) .data$Topic == input$topic_input else TRUE
       ) |>
       pull_uniques("Measure")
 
@@ -117,7 +117,6 @@ server_dev <- function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
-        Topic == input$topic_input,
         Measure == input$indicator
       )
   })

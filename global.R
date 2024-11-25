@@ -177,7 +177,9 @@ metrics_clean <- metrics_raw |>
       TRUE ~ as.character(`Next Update`)
     )
   ) |>
-  dplyr::filter(!grepl("DISCONTINUE", Table_status))
+  dplyr::filter(!grepl("DISCONTINUE", Table_status)) |>
+  # Removing any second instances of a Measure (duplicate across Topics)
+  dplyr::filter(!duplicated(Measure))
 
 metrics_discontinued <- metrics_raw |>
   dplyr::filter(Measure_short %notin% metrics_clean$Measure_short) |>
