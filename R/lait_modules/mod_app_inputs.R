@@ -20,7 +20,10 @@ appInputsUI <- function(id) {
       width = "15rem", # Minimum width for each input box before wrapping
       shiny::selectizeInput(
         inputId = ns("la_name"),
-        label = "LA:",
+        label = tags$label(
+          id = ns("la_label"),
+          "Local Authority:"
+        ),
         choices = la_names_bds,
         options = list(
           placeholder = "Select a Local Authority...",
@@ -29,7 +32,10 @@ appInputsUI <- function(id) {
       ),
       shiny::selectizeInput(
         inputId = ns("topic_name"),
-        label = "Topic:",
+        label = tags$label(
+          id = ns("topic_label"),
+          "Topic:"
+        ),
         choices = c("All topics", metric_topics),
         selected = "All topics",
         options = list(
@@ -149,7 +155,9 @@ appInputsServer <- function(id,
       ignoreNULL = FALSE
     )
 
-    topic_label <- "Indicator:"
+    indicator_label <- "Indicator:"
+    topic_label <- "Topic:"
+    la_label <- "LA:"
 
     # Dynamically update the Indicator label with the related topic
     shiny::observeEvent(debounced_indicator_name(), {
@@ -163,10 +171,23 @@ appInputsServer <- function(id,
 
         # Use the first topic if multiple exist (unlikely but handled)
         if (length(related_topic) > 0) {
-          topic_label <- paste0(
-            "Indicator:&nbsp;&nbsp;(Topic: ",
+          indicator_label <- paste0(
+            "Indicator:&nbsp;&nbsp;<span style='font-size: 0.85em;'>",
+            "(Topic: ",
             paste0(related_topic, collapse = ", "),
-            ")"
+            ")</span>"
+          )
+          topic_label <- paste0(
+            "Topic:&nbsp;&nbsp<span style='font-size: 0.85em; color: #ffffff00;'>",
+            "(Topic:&nbsp;iiiiiiii",
+            paste0(related_topic, collapse = ", "),
+            ")</span>"
+          )
+          la_label <- paste0(
+            "Local Authority:<span style='font-size: 0.85em; color: #ffffff00;'>",
+            "&nbsp;&nbsp;",
+            paste0(related_topic, collapse = ", "),
+            ")</span>"
           )
         }
 
@@ -181,7 +202,15 @@ appInputsServer <- function(id,
       # Setting custom indicator lable (to include topics related to)
       shinyjs::html(
         "indicator_label",
+        indicator_label
+      )
+      shinyjs::html(
+        "topic_label",
         topic_label
+      )
+      shinyjs::html(
+        "la_label",
+        la_label
       )
 
       shared_values$indicator <- indicator
