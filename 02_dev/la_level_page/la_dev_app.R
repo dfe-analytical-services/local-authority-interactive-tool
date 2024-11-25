@@ -30,12 +30,12 @@ ui_dev <- bslib::page_fillable(
       shiny::selectizeInput(
         inputId = "topic_input",
         label = "Topic:",
-        choices = metric_topics,
+        choices = c("All topics", metric_topics),
         multiple = TRUE,
         options = list(
           maxItems = 1,
-          placeholder = "All topics",
-          plugins = list("remove_button"),
+          placeholder = "No topic selected, showing all indicators.",
+          plugins = list("clear_button"),
           dropdownParent = "body"
         )
       ),
@@ -174,18 +174,34 @@ server_dev <- function(input, output, session) {
   # Using the server to power to the provider dropdown for increased speed
   shiny::observeEvent(input$topic_input,
     {
+      # Save the currently selected indicator
+      current_indicator <- input$indicator
+
       # Get indicator choices for selected topic
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(
-          if (!is.null(input$topic_input)) .data$Topic %in% input$topic_input else TRUE
+          # If topic_input is not NULL or "All topics", filter by selected topics
+          if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
+            TRUE # Include all rows if no topic is selected or "All topics" is selected
+          } else {
+            .data$Topic %in% input$topic_input # Filter by selected topic(s)
+          }
         ) |>
         pull_uniques("Measure")
+
+      # Ensure the current indicator stays selected if it's in the new list of available indicators
+      selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+        current_indicator
+      } else {
+        filtered_topic_bds[1] # Default to the first available indicator if the current one is no longer valid
+      }
 
       shiny::updateSelectizeInput(
         session = session,
         inputId = "indicator",
         label = "Indicator:",
-        choices = filtered_topic_bds
+        choices = filtered_topic_bds,
+        selected = selected_indicator
       )
     },
     ignoreNULL = FALSE
@@ -573,7 +589,6 @@ server_dev <- function(input, output, session) {
     if (input$indicator == "") {
       return(previous_description())
     }
-    print(input$indicator)
 
     # Fetch the description for the selected indicator
     description <- metrics_clean |>
