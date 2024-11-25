@@ -15,15 +15,12 @@ appInputsUI <- function(id) {
 
   div(
     class = "well",
-    style = "overflow-y: visible;",
+    style = "overflow-y: visible; position: relative;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
       shiny::selectizeInput(
         inputId = ns("la_name"),
-        label = tags$label(
-          id = ns("la_label"),
-          "Local Authority:"
-        ),
+        label = "Local Authority:",
         choices = la_names_bds,
         options = list(
           placeholder = "Select a Local Authority...",
@@ -40,16 +37,12 @@ appInputsUI <- function(id) {
         selected = "All topics",
         options = list(
           placeholder = "No topic selected, showing all indicators.",
-          plugins = list("clear_button"),
-          dropdownParent = "body"
+          plugins = list("clear_button")
         )
       ),
       shiny::selectizeInput(
         inputId = ns("indicator_name"),
-        label = tags$label(
-          id = ns("indicator_label"),
-          "Indicator:"
-        ),
+        label = "Indicator:",
         choices = metric_names,
         options = list(
           placeholder = "Select an indicator...",
@@ -155,65 +148,39 @@ appInputsServer <- function(id,
       ignoreNULL = FALSE
     )
 
-    indicator_label <- "Indicator:"
+    # Default topic label
     topic_label <- "Topic:"
-    la_label <- "LA:"
 
-    # Dynamically update the Indicator label with the related topic
-    shiny::observeEvent(debounced_indicator_name(), {
+    # Dynamically update the Topic label with the related topic
+    shiny::observeEvent(c(debounced_indicator_name(), debounced_topic_name()), {
       indicator <- debounced_indicator_name()
+      topic <- debounced_topic_name()
 
-      if (!is.null(indicator) && indicator != "") {
-        # Find the topic related to the selected indicator
+      # When no topic is selected, show the currently selected indicator topic
+      # in the topic label
+      if (!is.null(indicator) && indicator != "" && topic == "") {
+        # Get topic
         related_topic <- topic_indicator_full |>
           dplyr::filter(.data$Measure == indicator) |>
           pull_uniques("Topic")
 
-        # Use the first topic if multiple exist (unlikely but handled)
+        # Create label, combine topics if multiple exist
         if (length(related_topic) > 0) {
-          indicator_label <- paste0(
-            "Indicator:&nbsp;&nbsp;<span style='font-size: 0.85em;'>",
-            "(Topic: ",
-            paste0(related_topic, collapse = ", "),
-            ")</span>"
-          )
           topic_label <- paste0(
-            "Topic:&nbsp;&nbsp<span style='font-size: 0.85em; color: #ffffff00;'>",
-            "(Topic:&nbsp;iiiiiiii",
+            "Topic:&nbsp;&nbsp;(",
             paste0(related_topic, collapse = ", "),
-            ")</span>"
-          )
-          la_label <- paste0(
-            "Local Authority:<span style='font-size: 0.85em; color: #ffffff00;'>",
-            "&nbsp;&nbsp;",
-            paste0(related_topic, collapse = ", "),
-            ")</span>"
+            ")"
           )
         }
-
-        # Update the Indicator label to include the topic
-        shiny::updateSelectizeInput(
-          session = session,
-          inputId = "indicator_name",
-          selected = indicator
-        )
       }
 
-      # Setting custom indicator lable (to include topics related to)
-      shinyjs::html(
-        "indicator_label",
-        indicator_label
-      )
-      shinyjs::html(
-        "topic_label",
-        topic_label
-      )
-      shinyjs::html(
-        "la_label",
-        la_label
-      )
+      # Apply topic label
+      shinyjs::html("topic_label", topic_label)
+    })
 
-      shared_values$indicator <- indicator
+    # Observe and synchronise Indicator input changes
+    observeEvent(debounced_indicator_name(), {
+      shared_values$indicator <- debounced_indicator_name()
     })
 
     # Return reactive settings
