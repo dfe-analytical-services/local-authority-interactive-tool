@@ -40,7 +40,10 @@ appInputsUI <- function(id) {
       ),
       shiny::selectizeInput(
         inputId = ns("indicator_name"),
-        label = "Indicator:",
+        label = tags$label(
+          id = ns("indicator_label"),
+          "Indicator:"
+        ),
         choices = metric_names,
         options = list(
           placeholder = "Select an indicator...",
@@ -133,7 +136,6 @@ appInputsServer <- function(id, shared_values) {
         shiny::updateSelectizeInput(
           session = session,
           inputId = "indicator_name",
-          label = "Indicator:",
           choices = filtered_topic_bds,
           selected = selected_indicator
         )
@@ -144,9 +146,42 @@ appInputsServer <- function(id, shared_values) {
       ignoreNULL = FALSE
     )
 
-    # Observe and synchronise Indicator input changes
-    observeEvent(debounced_indicator_name(), {
-      shared_values$indicator <- debounced_indicator_name()
+    # Dynamically update the Indicator label with the related topic
+    shiny::observeEvent(debounced_indicator_name(), {
+      indicator <- debounced_indicator_name()
+
+      if (!is.null(indicator) && indicator != "") {
+        # Find the topic related to the selected indicator
+        related_topic <- metrics_clean |>
+          dplyr::filter(.data$Measure == indicator) |>
+          dplyr::pull("Topic") |>
+          unique() |>
+          trimws()
+
+        # Use the first topic if multiple exist (unlikely but handled)
+        topic_label <- if (length(related_topic) > 0) {
+          paste0(related_topic, collapse = ", ")
+        } else {
+          "Unknown Topic"
+        }
+
+        # Update the Indicator label to include the topic
+        shiny::updateSelectizeInput(
+          session = session,
+          inputId = "indicator_name",
+          selected = indicator
+        )
+      }
+
+      # Setting custom indicator lable (to include topics related to)
+      shinyjs::html(
+        "indicator_label",
+        paste0(
+          "Indicator:&nbsp;&nbsp;(Topic - ", related_topic, ")"
+        )
+      )
+
+      shared_values$indicator <- indicator
     })
 
     # Return reactive settings

@@ -19,6 +19,7 @@ ui_mod <- bslib::page_fillable(
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
   tags$head(htmltools::includeScript("www/custom_js.js")),
   shinyToastify::useShinyToastify(),
+  shinyjs::useShinyjs(),
 
   # Tab header ================================================================
   h1("Local Authority View"),
