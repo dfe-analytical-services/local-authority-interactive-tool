@@ -178,11 +178,11 @@ server_dev <- function(input, output, session) {
       current_indicator <- input$indicator
 
       # Get indicator choices for selected topic
+      # Include all rows if no topic is selected or "All topics" is selected
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(
-          # If topic_input is not NULL or "All topics", filter by selected topics
           if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
-            TRUE # Include all rows if no topic is selected or "All topics" is selected
+            TRUE
           } else {
             .data$Topic %in% input$topic_input # Filter by selected topic(s)
           }
@@ -190,10 +190,11 @@ server_dev <- function(input, output, session) {
         pull_uniques("Measure")
 
       # Ensure the current indicator stays selected if it's in the new list of available indicators
+      # Default to the first available indicator if the current one is no longer valid
       selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
         current_indicator
       } else {
-        filtered_topic_bds[1] # Default to the first available indicator if the current one is no longer valid
+        filtered_topic_bds[1]
       }
 
       shiny::updateSelectizeInput(
@@ -209,18 +210,18 @@ server_dev <- function(input, output, session) {
 
 
   # Main LA Level table ----------------------------------
-  # Filter for selected topic and indicator
+  # Filter for selectedindicator
   # Define filtered_bds outside of observeEvent
   filtered_bds <- reactiveValues(data = NULL)
 
   observeEvent(input$indicator, {
-    # Check if the indicator is NULL or empty before applying the filter
+    # Don't change the currently selected indicator if no indicator is selected
     if (is.null(input$indicator) || input$indicator == "") {
-      return() # Don't filter anything if no indicator is selected
+      return()
     }
 
     # Main LA Level table ----------------------------------
-    # Filter for selected topic and indicator
+    # Filter for selected indicator
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
         Measure == input$indicator
@@ -575,7 +576,6 @@ server_dev <- function(input, output, session) {
 
 
   # LA Metadata ----------------------------------
-
   # Reactive values to store previous data
   previous_description <- reactiveVal(NULL)
   previous_methodology <- reactiveVal(NULL)
