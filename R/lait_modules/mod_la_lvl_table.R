@@ -22,11 +22,28 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
     # Must ensure filtering only done when Indicator is changed
     # Otherwise it will filter immediately on Topic change
     observeEvent(app_inputs$indicator(), {
-      filtered_bds$data <- bds_metrics |>
+      filtered_data <- bds_metrics |>
         dplyr::filter(
           Topic == app_inputs$topic(),
           Measure == app_inputs$indicator()
         )
+
+      # Check for duplicates
+      duplicates <- filtered_data |>
+        dplyr::group_by(Measure, `LA and Regions`, Years) |>
+        dplyr::summarise(YearCount = dplyr::n(), .groups = "drop") |>
+        dplyr::filter(YearCount > 1)
+
+      # Issue warning if duplicates exist
+      if (nrow(duplicates) > 0) {
+        warning(
+          "There is duplicate data for the following indicator:\n",
+          paste0("Indicator: ", app_inputs$indicator())
+        )
+      }
+
+      # Update reactive values with the filtered data
+      filtered_bds$data <- filtered_data
     })
 
     reactive({
