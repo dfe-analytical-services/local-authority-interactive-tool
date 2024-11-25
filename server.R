@@ -27,7 +27,14 @@ server <- function(input, output, session) {
     included_inputs <- c(
       "la_inputs-la_name",
       "la_inputs-indicator_name",
-      "navsetpillslist"
+      "navsetpillslist",
+      "create_inputs-geog_input",
+      "create_inputs-topic_input",
+      "create_inputs-indicator",
+      "create_inputs-la_group",
+      "create_inputs-inc_regions",
+      "create_inputs-inc_england",
+      "year_range-year_range"
     )
 
     # Exclude all other inputs
@@ -40,9 +47,15 @@ server <- function(input, output, session) {
     shiny::setBookmarkExclude(excluded_inputs)
   })
 
+  shiny::observe({
+    # Trigger this observer every time an input changes
+    shiny::reactiveValuesToList(input)
+    session$doBookmark()
+  })
+
   shiny::onBookmarked(function(url) {
     # Update the query string with the bookmark URL
-    shiny::updateQueryString(url, mode = "replace")
+    shiny::updateQueryString(url)
   })
 
 
