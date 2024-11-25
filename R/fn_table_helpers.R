@@ -540,11 +540,7 @@ build_region_stats_table <- function(la_number,
     "Change from previous year" = change_since_prev,
     "Polarity" = pull_uniques(filtered_bds, "Polarity"),
     check.names = FALSE
-  ) |>
-    pretty_num_table(
-      dp = get_indicator_dps(filtered_bds),
-      exclude_columns = c("LA Number", "Trend")
-    )
+  )
 }
 
 
