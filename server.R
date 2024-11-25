@@ -55,7 +55,7 @@ server <- function(input, output, session) {
 
   shiny::onBookmarked(function(url) {
     # Update the query string with the bookmark URL
-    shiny::updateQueryString(url)
+    shiny::updateQueryString(url, mode = "replace")
   })
 
 
@@ -414,7 +414,8 @@ server <- function(input, output, session) {
   year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
-    create_inputs$indicator
+    create_inputs$indicator,
+    create_inputs$clear_selections
   )
 
   # Logic to create own =======================================================

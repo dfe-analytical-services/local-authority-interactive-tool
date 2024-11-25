@@ -36,9 +36,10 @@ ui <- bslib::page_fillable(
       Create_MainInputsUI("create_inputs")["LA grouping"],
       Create_MainInputsUI("create_inputs")["Other grouping"],
       YearRangeUI("year_range"),
-      Create_MainInputsUI("create_inputs")["Add selection"]
+      Create_MainInputsUI("create_inputs")["Clear all current selections"]
     )
   ),
+  # Staging table and Add selections button
   StagingTableUI("staging_table"),
   QueryTableUI("query_table"),
   CreateOwnTableUI("create_own_table"),
@@ -66,7 +67,8 @@ server <- function(input, output, session) {
   year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
-    create_inputs$indicator
+    create_inputs$indicator,
+    create_inputs$clear_selections
   )
 
   # Geog Groupings

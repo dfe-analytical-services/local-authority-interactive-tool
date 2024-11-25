@@ -77,10 +77,23 @@ Create_MainInputsUI <- function(id) {
       shiny::checkboxInput(ns("inc_regions"), "Include All Regions", FALSE),
       shiny::checkboxInput(ns("inc_england"), "Include England", FALSE)
     ),
+    # Clear all current selections
+    "Clear all current selections" = div(
+      style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
+      shinyGovstyle::button_Input(
+        inputId = ns("clear_all"),
+        label = "Clear all current selections",
+        type = "warning"
+      )
+    ),
     # Add selection (query) button
     "Add selection" = div(
       style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
-      shiny::actionButton(ns("add_query"), "Add selections", class = "gov-uk-button")
+      shinyGovstyle::button_Input(
+        inputId = ns("add_query"),
+        label = "Add selections",
+        type = "start"
+      )
     )
   )
 }
@@ -166,6 +179,19 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       ignoreNULL = FALSE
     )
 
+    # Clear all current selections
+    observeEvent(input$clear_all, {
+      # Reset inputs to their initial state
+      updateSelectizeInput(session, "geog_input", selected = NA)
+      updateSelectizeInput(session, "indicator", selected = NA)
+      updateRadioButtons(session, "la_group", selected = "no_groups")
+      updateCheckboxInput(session, "inc_regions", value = FALSE)
+      updateCheckboxInput(session, "inc_england", value = FALSE)
+
+      # Emit a reset signal for year_range
+      session$sendCustomMessage("clear_year_range", TRUE)
+    })
+
     # Return create your own main inputs
     create_inputs <- list(
       geog = reactive(input$geog_input),
@@ -175,6 +201,7 @@ Create_MainInputsServer <- function(id, bds_metrics) {
       la_group = reactive(input$la_group),
       inc_regions = reactive(input$inc_regions),
       inc_england = reactive(input$inc_england),
+      clear_selections = reactive(input$clear_all),
       add_query = reactive(input$add_query)
     )
 
@@ -223,7 +250,7 @@ YearRangeUI <- function(id) {
 #' @return A list containing reactive values for selected year range
 #'         and available year choices.
 #'
-YearRangeServer <- function(id, bds_metrics, indicator_input) {
+YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) {
   moduleServer(id, function(input, output, session) {
     # Compute years choices available based on selected indicator
     years_choices <- reactive({
@@ -270,6 +297,11 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
           )
         )
       }
+    })
+
+    # Reset year range when clear all current selections button clicked
+    observeEvent(clear_selections(), {
+      shinyWidgets::updatePickerInput(session, "year_range", selected = NULL)
     })
 
     # Collect selected year range and available year choices

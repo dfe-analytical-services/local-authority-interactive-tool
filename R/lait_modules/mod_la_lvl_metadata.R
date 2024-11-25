@@ -8,8 +8,13 @@
 #'
 MetadataUI <- function(id) {
   ns <- NS(id)
-  tagList(
-    uiOutput(ns("metadata"))
+
+  shinycssloaders::withSpinner(
+    uiOutput(ns("metadata")),
+    type = 7,
+    color = "#1d70b8",
+    size = 0.6,
+    proxy.height = "10px"
   )
 }
 
