@@ -22,9 +22,14 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
     # Must ensure filtering only done when Indicator is changed
     # Otherwise it will filter immediately on Topic change
     observeEvent(app_inputs$indicator(), {
+      # Don't change the currently selected indicator if no indicator is selected
+      if (is.null(app_inputs$indicator()) || app_inputs$indicator() == "") {
+        return()
+      }
+
+      # Filter for selected indicator
       filtered_data <- bds_metrics |>
         dplyr::filter(
-          Topic == app_inputs$topic(),
           Measure == app_inputs$indicator()
         )
 

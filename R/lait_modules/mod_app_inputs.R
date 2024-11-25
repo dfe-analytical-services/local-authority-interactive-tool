@@ -23,13 +23,19 @@ appInputsUI <- function(id) {
         label = "LA:",
         choices = la_names_bds
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = ns("topic_name"),
         label = "Topic:",
-        choices = metric_topics,
-        selected = NULL
+        choices = c("All topics", metric_topics),
+        multiple = TRUE,
+        options = list(
+          maxItems = 1,
+          placeholder = "No topic selected, showing all indicators.",
+          plugins = list("clear_button"),
+          dropdownParent = "body"
+        )
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = ns("indicator_name"),
         label = "Indicator:",
         choices = metric_names
@@ -74,26 +80,48 @@ appInputsServer <- function(id, shared_values) {
     })
 
     # Update Indicator dropdown for selected Topic
-    shiny::observeEvent(debounced_topic_name(), {
-      # Determine the filter condition for Topic
-      topic_filter <- debounced_topic_name()
+    shiny::observeEvent(debounced_topic_name(),
+      {
+        # Save the currently selected indicator
+        current_indicator <- debounced_indicator_name()
 
-      # Get indicator choices for the selected topic or all topics if topic_filter is NA
-      filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(if (!is.null(topic_filter)) .data$Topic == topic_filter else TRUE) |>
-        pull_uniques("Measure")
+        # Determine the filter condition for Topic
+        topic_filter <- debounced_topic_name()
 
-      # Update the Indicator dropdown based on selected Topic
-      shiny::updateSelectizeInput(
-        session = session,
-        inputId = "indicator_name",
-        label = "Indicator:",
-        choices = filtered_topic_bds
-      )
+        # Get indicator choices for selected topic
+        # Include all rows if no topic is selected or "All topics" is selected
+        filtered_topic_bds <- bds_metrics |>
+          dplyr::filter(
+            if (is.null(input$topic_name) || "All topics" %in% input$topic_name) {
+              TRUE
+            } else {
+              .data$Topic %in% input$topic_name # Filter by selected topic(s)
+            }
+          ) |>
+          pull_uniques("Measure")
 
-      # Update the shared reactive value for the topic
-      shared_values$topic <- debounced_topic_name()
-    })
+        # Ensure the current indicator stays selected
+        # Default to the first topic indicator if the current is not valid
+        selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+          current_indicator
+        } else {
+          filtered_topic_bds[1]
+        }
+
+        # Update the Indicator dropdown based on selected Topic
+        shiny::updateSelectizeInput(
+          session = session,
+          inputId = "indicator_name",
+          label = "Indicator:",
+          choices = filtered_topic_bds,
+          selected = selected_indicator
+        )
+
+        # Update the shared reactive value for the topic
+        shared_values$topic <- debounced_topic_name()
+      },
+      ignoreNULL = FALSE
+    )
 
     # Observe and synchronise LA input changes
     observeEvent(debounced_la_name(), {
