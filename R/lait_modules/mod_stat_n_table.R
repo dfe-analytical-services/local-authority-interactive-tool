@@ -564,7 +564,8 @@ StatN_StatsTableServer <- function(id,
                                    app_inputs,
                                    bds_metrics,
                                    stat_n_la,
-                                   la_names_bds) {
+                                   la_names_bds,
+                                   no_qb_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -623,11 +624,15 @@ StatN_StatsTableServer <- function(id,
       stat_n_indicator_val <- filtered_bds() |>
         filter_la_regions(app_inputs$la(), latest = TRUE, pull_col = "values_num")
 
+      # Boolean as to whether to include Quartile Banding
+      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
+
       # Calculating which quartile this value sits in
       stat_n_quartile <- calculate_quartile_band(
         stat_n_indicator_val,
         stat_n_quartile_bands,
-        stat_n_indicator_polarity
+        stat_n_indicator_polarity,
+        no_show_qb
       )
 
       # SN stats table

@@ -181,10 +181,13 @@ if (la_indicator_polarity %in% "Low") {
   la_quartile <- "-"
 }
 
+no_show_qb <- selected_indicator %in% no_qb_indicators
+
 la_quartile <- calculate_quartile_band(
   la_indicator_val,
   la_quartile_bands,
-  la_indicator_polarity
+  la_indicator_polarity,
+  no_show_qb
 )
 
 # Build stats table - code logic
@@ -215,8 +218,6 @@ if (la_indicator_polarity %notin% c("High", "Low")) {
       "(D) Up to and including" = "-"
     )
 }
-
-no_show_qb <- selected_indicator %in% no_qb_indicators
 
 la_stats_table <- build_la_stats_table(
   la_table,

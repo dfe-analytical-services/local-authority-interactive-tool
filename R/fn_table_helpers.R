@@ -462,33 +462,43 @@ build_la_stats_table <- function(
   qb_adj <- 10**-(indicator_dps)
 
   # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
-    list(
-      "Latest National Rank" = rank,
-      "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+  rank_quartile_band_values <- list()
+  if (indicator_polarity %in% "Low") {
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = rank,
+        "Quartile Banding" = quartile,
+        "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+        "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+        "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+        "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+      )
     )
   } else if (indicator_polarity %in% "High") {
-    list(
-      "Latest National Rank" = rank,
-      "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
-      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
-      "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
-      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = rank,
+        "Quartile Banding" = quartile,
+        "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
+        "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
+        "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
+        "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+      )
     )
   } else {
-    list(
-      "Latest National Rank" = "-",
-      "Quartile Banding" = "-",
-      "No Quartiles" = "Data not suitable for quartiles.",
-      "A" = NULL,
-      "B" = NULL,
-      "C" = NULL,
-      "D" = NULL
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = "-",
+        "Quartile Banding" = "-",
+        "No Quartiles" = "Data not suitable for quartiles.",
+        "A" = NULL,
+        "B" = NULL,
+        "C" = NULL,
+        "D" = NULL
+      )
     )
   }
 

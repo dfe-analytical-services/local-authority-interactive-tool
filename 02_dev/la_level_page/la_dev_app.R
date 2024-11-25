@@ -350,15 +350,15 @@ server_dev <- function(input, output, session) {
     la_indicator_val <- filtered_bds$data |>
       filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
 
+    # Boolean as to whether to include Quartile Banding
+    no_show_qb <- input$indicator %in% no_qb_indicators
+
     # Calculating which quartile this value sits in
     la_quartile <- calculate_quartile_band(
       la_indicator_val,
       la_quartile_bands,
       la_indicator_polarity
     )
-
-    # Boolean as to whether to include Quartile Banding
-    no_show_qb <- input$indicator %in% no_qb_indicators
 
     # Build stats LA Level table
     la_stats_table <- build_la_stats_table(

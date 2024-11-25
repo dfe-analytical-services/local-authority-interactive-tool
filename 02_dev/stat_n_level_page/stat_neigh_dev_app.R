@@ -345,11 +345,15 @@ server_dev <- function(input, output, session) {
     stat_n_indicator_val <- filtered_bds$data |>
       filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
 
+    # Boolean as to whether to include Quartile Banding
+    no_show_qb <- input$indicator %in% no_qb_indicators
+
     # Calculating which quartile this value sits in
     stat_n_quartile <- calculate_quartile_band(
       stat_n_indicator_val,
       stat_n_quartile_bands,
-      stat_n_indicator_polarity
+      stat_n_indicator_polarity,
+      no_show_qb
     )
 
     # SN stats table

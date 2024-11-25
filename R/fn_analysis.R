@@ -110,7 +110,10 @@ calculate_change_from_prev_yr <- function(data) {
 #'   "High"
 #' )
 #'
-calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_polarity) {
+calculate_quartile_band <- function(indicator_val,
+                                    quartile_bands,
+                                    indicator_polarity,
+                                    no_show_qb = FALSE) {
   # Check if all required quartile bands are present
   required_bands <- c("0%", "25%", "50%", "75%", "100%")
   missing_bands <- setdiff(required_bands, names(quartile_bands))
@@ -128,7 +131,9 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
   }
 
   # Set the Quartile Band (dependent on polarity)
-  if (indicator_polarity %in% "Low") {
+  if (no_show_qb) {
+    quartile_band <- "-"
+  } else if (indicator_polarity %in% "Low") {
     quartile_band <- dplyr::case_when(
       is.na(indicator_val) ~ NA_character_,
       (indicator_val >= quartile_bands[["0%"]]) &

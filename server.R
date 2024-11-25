@@ -296,7 +296,8 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    la_names_bds
+    la_names_bds,
+    no_qb_indicators
   )
 
   # Statistical Neighbour charts ==============================================

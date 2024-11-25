@@ -326,15 +326,16 @@ LA_StatsTableServer <- function(id,
           pull_col = "values_num"
         )
 
+      # Boolean as to whether to include Quartile Banding
+      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
+
       # Calculating which quartile this value sits in
       la_quartile <- calculate_quartile_band(
         la_indicator_val,
         la_quartile_bands,
-        la_indicator_polarity
+        la_indicator_polarity,
+        no_show_qb
       )
-
-      # Boolean as to whether to include Quartile Banding
-      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
 
       # Build stats LA Level table
       la_stats_table <- build_la_stats_table(

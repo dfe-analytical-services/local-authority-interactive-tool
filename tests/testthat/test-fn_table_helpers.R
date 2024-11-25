@@ -426,10 +426,7 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
     "Polarity" = NA,
     "Latest National Rank" = "-",
     "Quartile Banding" = "-",
-    "A" = "-",
-    "B" = "-",
-    "C" = "-",
-    "D" = "-",
+    "No Quartiles" = "Data not suitable for quartiles.",
     check.names = FALSE
   )
 
