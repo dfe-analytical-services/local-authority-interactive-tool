@@ -36,15 +36,9 @@ StagingBDSServer <- function(id,
 
     # Filter BDS for topic-indicator pairs in the selected_values reactive
     topic_indicator_bds <- reactive({
-      req(nrow(create_inputs$selected_indicators()) > 0)
+      req(length(create_inputs$indicator()) > 0)
       bds_metrics |>
-        dplyr::semi_join(
-          create_inputs$selected_indicators(),
-          by = c(
-            "Topic" = "Topic",
-            "Measure" = "Measure"
-          )
-        )
+        dplyr::filter(Measure %in% create_inputs$indicator())
     })
 
     # Now filter BDS for geographies and year range
