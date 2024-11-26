@@ -81,24 +81,16 @@ appInputsServer <- function(id,
     debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 150)
     debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
 
-    # Observe and synchronise LA input across pages
+    # Synchronise inputs across pages:
+    # LA
     observe({
-      # Check if the LA name is NULL or empty
-      la_name <- debounced_la_name()
-
-      if ("" %notin% la_name && !is.null(la_name)) {
-        # Update the reactive value with the current valid input
-        previous_la_name(la_name)
-
-        # Synchronise the shared reactive value
-        shared_values$la <- la_name
-      }
+      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
     })
-
+    # Topic
     observe({
       shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
     })
-
+    # Indicator
     observe({
       shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
     })
@@ -147,6 +139,20 @@ appInputsServer <- function(id,
       },
       ignoreNULL = FALSE
     )
+
+    # Prevent LA input from being empty by storing its previous value
+    shiny::observeEvent(debounced_la_name(), {
+      # Check if the LA name is NULL or empty
+      la_name <- debounced_la_name()
+
+      if ("" %notin% la_name && !is.null(la_name)) {
+        # Update the reactive value with the current valid input
+        previous_la_name(la_name)
+
+        # Synchronise the shared reactive value
+        shared_values$la <- la_name
+      }
+    })
 
     # Default topic label
     topic_label <- "Topic:"
