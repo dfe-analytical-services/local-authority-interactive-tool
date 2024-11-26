@@ -394,7 +394,8 @@ metric_topics <- pull_uniques(topic_indicator_full, "Topic")
 # Metric names
 metric_names <- pull_uniques(topic_indicator_full, "Measure")
 
-# Years
+# All Years across string and num Years
+# (for Create Your Own year range choices - initially)
 all_year_types <- unique(c(
   bds_metrics |>
     pull_uniques("Years"),
