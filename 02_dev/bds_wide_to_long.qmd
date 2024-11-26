@@ -30,7 +30,8 @@ data_dict <- readxl::read_xlsx(
   sheet = "Data_prod",
   # Replace multi-space with single-space
   .name_repair = clean_spaces
-)
+) |>
+  dplyr::filter(!grepl("DISCONTINUE", Table_status))
 
 # Write .csv version
 write.csv(
