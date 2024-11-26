@@ -153,10 +153,33 @@ stat_n_geog <- stat_n |>
 
 
 # Metrics
-# Remove whitesapce from key & filter out discontinued metrics
+# Filter out discontinued metrics
+metrics_included <- metrics_raw |>
+  dplyr::filter(!grepl("DISCONTINUE", Table_status))
+
+# Topic and indicators pairs (full - no duplicates filtered out)
+topic_indicator_full <- metrics_included |>
+  dplyr::distinct(Topic, Measure)
+
+# Duplicate indicators across topics
+dupes_across_topics <- topic_indicator_full |>
+  dplyr::group_by(Measure) |>
+  dplyr::filter(dplyr::n() > 1)
+
+# For each dupe combine topic names
+dupes_combined_topics <- dupes_across_topics |>
+  dplyr::summarise(
+    Topic = stringr::str_c(unique(Topic), collapse = " / "),
+    .groups = "drop"
+  )
+
+# Cleaning
+# Remove whitesapce from key
 # Set any NA decimal place column values to 1
 # Convert Last and Next updated to Format Month Year
-metrics_clean <- metrics_raw |>
+# Add in combined topic names for duplicate indicators
+# Remove duplicates
+metrics_clean <- metrics_included |>
   dplyr::mutate(
     Measure_short = trimws(Measure_short),
     dps = ifelse(is.na(dps), 1, dps),
@@ -177,14 +200,24 @@ metrics_clean <- metrics_raw |>
       TRUE ~ as.character(`Next Update`)
     )
   ) |>
-  dplyr::filter(!grepl("DISCONTINUE", Table_status)) |>
-  # Removing any second instances of a Measure (duplicate across Topics)
+  dplyr::left_join(
+    dupes_combined_topics,
+    by = "Measure",
+    suffix = c("", "_dupe_combined")
+  ) |>
+  # Update Topic where combined values exist
+  dplyr::mutate(
+    Topic = dplyr::case_when(
+      !is.na(Topic_dupe_combined) ~ Topic_dupe_combined,
+      TRUE ~ Topic
+    )
+  ) |>
+  dplyr::select(-Topic_dupe_combined) |>
   dplyr::filter(!duplicated(Measure))
 
 metrics_discontinued <- metrics_raw |>
   dplyr::filter(Measure_short %notin% metrics_clean$Measure_short) |>
   pull_uniques("Measure_short")
-
 
 # Joining data ================================================================
 
@@ -356,15 +389,11 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
   )
 })
 
-# Topic and indicators pairs (full - no duplicates filtered out)
-topic_indicator_full <- metrics_raw |>
-  dplyr::distinct(Topic, Measure)
-
 # Metric topics
-metric_topics <- pull_uniques(metrics_clean, "Topic")
+metric_topics <- pull_uniques(topic_indicator_full, "Topic")
 
 # Metric names
-metric_names <- pull_uniques(metrics_clean, "Measure")
+metric_names <- pull_uniques(topic_indicator_full, "Measure")
 
 # Indicators that are impacted by COVID
 # (aka missing data across all LAs for a whole year between 2091-2022)
