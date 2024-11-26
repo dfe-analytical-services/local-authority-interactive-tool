@@ -695,7 +695,38 @@ with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1) {
 }
 
 
-
+#' Update Topic Label Dynamically
+#'
+#' Dynamically updates a topic label in the user interface based on the selected
+#' indicator and topic inputs. If no topic is selected or "All Topics" is
+#' chosen, the label reflects the related topic(s) of the selected indicator.
+#'
+#' @param indicator_input A reactive expression that returns the selected
+#'   indicator input value.
+#' @param topic_input A reactive expression that returns the selected topic
+#'   input value.
+#' @param topic_indicator_data A data frame containing `Topic` and `Measure`
+#'   columns, used to identify related topics for a given indicator.
+#' @param topic_label_id A string specifying the ID of the HTML element where
+#'   the topic label will be updated. Defaults to `"topic_label"`.
+#'
+#' @details
+#' This function listens for changes in the provided `indicator_input` and
+#' `topic_input`. If the topic is not selected or is set to "All Topics", the
+#' label is updated to include the topic(s) related to the selected indicator.
+#' Multiple topics are combined with a " / " separator.
+#'
+#' @return None. The function operates for its side effects of updating the UI.
+#'
+#' @examples
+#' # In a Shiny server function
+#' update_topic_label(
+#'   indicator_input = reactive(input$indicator),
+#'   topic_input = reactive(input$topic_input),
+#'   topic_indicator_data = topic_indicator_full,
+#'   topic_label_id = "topic_label"
+#' )
+#'
 update_topic_label <- function(
     indicator_input,
     topic_input,
