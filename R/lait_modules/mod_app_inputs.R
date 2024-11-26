@@ -70,7 +70,6 @@ appInputsUI <- function(id) {
 #'
 appInputsServer <- function(id,
                             shared_values,
-                            bds_metrics,
                             topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
     # Reactive value to store the previous LA name
@@ -81,24 +80,16 @@ appInputsServer <- function(id,
     debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 150)
     debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
 
-    # Observe and synchronise LA input across pages
+    # Synchronise inputs across pages:
+    # LA
     observe({
-      # Check if the LA name is NULL or empty
-      la_name <- debounced_la_name()
-
-      if ("" %notin% la_name && !is.null(la_name)) {
-        # Update the reactive value with the current valid input
-        previous_la_name(la_name)
-
-        # Synchronise the shared reactive value
-        shared_values$la <- la_name
-      }
+      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
     })
-
+    # Topic
     observe({
       shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
     })
-
+    # Indicator
     observe({
       shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
     })
@@ -114,16 +105,8 @@ appInputsServer <- function(id,
 
         # Get indicator choices for selected topic
         # Include all rows if no topic is selected or "All Topics" is selected
-        filtered_topic_bds <- bds_metrics |>
-          dplyr::filter(
-            if (is.null(input$topic_name) ||
-              "All Topics" %in% input$topic_name ||
-              "" %in% input$topic_name) {
-              TRUE
-            } else {
-              .data$Topic %in% input$topic_name # Filter by selected topic(s)
-            }
-          ) |>
+        filtered_topic_bds <- topic_indicator_full |>
+          filter_by_topic("Topic", topic_filter) |>
           pull_uniques("Measure")
 
         # Ensure the current indicator stays selected
@@ -148,36 +131,28 @@ appInputsServer <- function(id,
       ignoreNULL = FALSE
     )
 
-    # Default topic label
-    topic_label <- "Topic:"
+    # Prevent LA input from being empty by storing its previous value
+    shiny::observeEvent(debounced_la_name(), {
+      # Check if the LA name is NULL or empty
+      la_name <- debounced_la_name()
 
-    # Dynamically update the Topic label with the related topic
-    shiny::observeEvent(c(debounced_indicator_name(), debounced_topic_name()), {
-      indicator <- debounced_indicator_name()
-      topic <- debounced_topic_name()
+      if ("" %notin% la_name && !is.null(la_name)) {
+        # Update the reactive value with the current valid input
+        previous_la_name(la_name)
 
-      # When no topic is selected, show the currently selected indicator topic
-      # in the topic label
-      if (!is.null(indicator) && indicator != "" &&
-        (topic %in% c("", "All Topics"))) {
-        # Get topic
-        related_topic <- topic_indicator_full |>
-          dplyr::filter(.data$Measure == indicator) |>
-          pull_uniques("Topic")
-
-        # Create label, combine topics if multiple exist
-        if (length(related_topic) > 0) {
-          topic_label <- paste0(
-            "Topic:&nbsp;&nbsp;(",
-            paste0(related_topic, collapse = ", "),
-            ")"
-          )
-        }
+        # Synchronise the shared reactive value
+        shared_values$la <- la_name
       }
-
-      # Apply topic label
-      shinyjs::html("topic_label", topic_label)
     })
+
+    # Set dynamic topic label
+    # (to display topic when not selected or all topics selected)
+    update_topic_label(
+      indicator_input = debounced_indicator_name,
+      topic_input = debounced_topic_name,
+      topic_indicator_data = topic_indicator_full,
+      topic_label_id = "topic_label"
+    )
 
     # Observe and synchronise Indicator input changes
     observeEvent(debounced_indicator_name(), {

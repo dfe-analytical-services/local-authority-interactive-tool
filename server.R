@@ -29,7 +29,6 @@ server <- function(input, output, session) {
       "la_inputs-indicator_name",
       "navsetpillslist",
       "create_inputs-geog_input",
-      "create_inputs-topic_input",
       "create_inputs-indicator",
       "create_inputs-la_group",
       "create_inputs-inc_regions",
@@ -116,7 +115,6 @@ server <- function(input, output, session) {
   la_app_inputs <- appInputsServer(
     "la_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -182,7 +180,6 @@ server <- function(input, output, session) {
   region_app_inputs <- appInputsServer(
     "region_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -279,7 +276,6 @@ server <- function(input, output, session) {
   stat_n_app_inputs <- appInputsServer(
     "stat_n_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -372,7 +368,6 @@ server <- function(input, output, session) {
   all_la_app_inputs <- appInputsServer(
     "all_la_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -408,7 +403,10 @@ server <- function(input, output, session) {
   # ===========================================================================
   # User Inputs ===============================================================
   # Create own main inputs ----------------------------------------------------
-  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
+  create_inputs <- Create_MainInputsServer(
+    "create_inputs",
+    topic_indicator_full
+  )
 
   # Year range input ----------------------------------------------------------
   year_input <- YearRangeServer(

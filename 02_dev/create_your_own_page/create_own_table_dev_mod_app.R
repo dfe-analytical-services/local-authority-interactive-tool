@@ -61,7 +61,10 @@ ui <- bslib::page_fillable(
 # Main App Server
 server <- function(input, output, session) {
   # Call the main inputs module
-  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
+  create_inputs <- Create_MainInputsServer(
+    "create_inputs",
+    topic_indicator_full
+  )
 
   # Year range
   year_input <- YearRangeServer(

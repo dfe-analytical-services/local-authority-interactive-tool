@@ -36,15 +36,9 @@ StagingBDSServer <- function(id,
 
     # Filter BDS for topic-indicator pairs in the selected_values reactive
     topic_indicator_bds <- reactive({
-      req(nrow(create_inputs$selected_indicators()) > 0)
+      req(length(create_inputs$indicator()) > 0)
       bds_metrics |>
-        dplyr::semi_join(
-          create_inputs$selected_indicators(),
-          by = c(
-            "Topic" = "Topic",
-            "Measure" = "Measure"
-          )
-        )
+        dplyr::filter(Measure %in% create_inputs$indicator())
     })
 
     # Now filter BDS for geographies and year range
@@ -379,7 +373,7 @@ QueryDataServer <- function(id,
     observeEvent(create_inputs$add_query(),
       {
         # Check if anything selected
-        req(length(geog_groups()) > 0 && nrow(create_inputs$selected_indicators()) > 0)
+        req(length(geog_groups()) > 0 && length(create_inputs$indicator()) > 0)
 
         # Create a unique identifier for the new query (current no of queries + 1)
         new_q_id <- max(c(0, query$data$.query_id), na.rm = TRUE) + 1
@@ -406,6 +400,10 @@ QueryDataServer <- function(id,
           inc_england = create_inputs$inc_england()
         )
 
+        # Get selected Indicator Topics
+        selected_topics <- staging_data() |>
+          pull_uniques("Topic")
+
         # Create query information
         # Split multiple input choices with commas and line breaks
         # (indicator x, indicator y)
@@ -414,8 +412,8 @@ QueryDataServer <- function(id,
         # year range (with logic from above) and the remove col
         new_query <- data.frame(
           .query_id = new_q_id,
-          Topic = I(list(create_inputs$selected_indicators()$Topic)),
-          Indicator = paste(create_inputs$selected_indicators()$Measure, collapse = ",<br>"),
+          Topic = paste(selected_topics, collapse = ",<br>"),
+          Indicator = paste(create_inputs$indicator(), collapse = ",<br>"),
           `LA and Regions` = paste(
             get_geog_selection(evaluated_inputs, la_names_bds, region_names_bds, stat_n_geog),
             collapse = ",<br>"
@@ -559,17 +557,7 @@ QueryTableServer <- function(id, query) {
               }"
             )
           ),
-          Topic = reactable::colDef(
-            cell = function(value) {
-              unique_values <- unique(unlist(value))
-              if (length(unique_values) > 0) {
-                return(paste(unique_values, collapse = ",<br>"))
-              } else {
-                return("")
-              }
-            },
-            html = TRUE
-          ),
+          Topic = html_col_def(),
           .query_id = reactable::colDef(show = FALSE)
         ),
         defaultPageSize = 5,
@@ -602,7 +590,14 @@ QueryTableServer <- function(id, query) {
             # the legacy years aren't still there
             if (nrow(query$output) == 0) {
               query$output <- query$output |>
-                dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure)
+                dplyr::select(
+                  `LA Number`,
+                  `LA and Regions`,
+                  Region,
+                  Topic,
+                  Measure,
+                  .query_id
+                )
             }
           },
           ignoreInit = TRUE

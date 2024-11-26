@@ -29,7 +29,7 @@ Create_MainInputsUI <- function(id) {
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select a LA, Region or England",
+            "placeholder" = "Select a LA, Region or England...",
             plugins = list("remove_button")
           )
         )
@@ -40,7 +40,12 @@ Create_MainInputsUI <- function(id) {
         shiny::selectizeInput(
           inputId = ns("topic_input"),
           label = "Topic:",
-          choices = metric_topics
+          choices = c("All Topics", metric_topics),
+          selected = "All Topics",
+          options = list(
+            placeholder = "No topic selected, showing all indicators.",
+            plugins = list("clear_button")
+          )
         )
       ),
       # Indicator input
@@ -52,7 +57,7 @@ Create_MainInputsUI <- function(id) {
           choices = metric_names,
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select an indicator",
+            "placeholder" = "Select an indicator...",
             plugins = list("remove_button")
           )
         )
@@ -113,40 +118,35 @@ Create_MainInputsUI <- function(id) {
 #'                   used for filtering indicators based on selected topics.
 #' @return A list of reactive values containing user inputs.
 #'
-Create_MainInputsServer <- function(id, bds_metrics) {
+Create_MainInputsServer <- function(id, topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
     # Reactive to store all selected topic-indicator pairs
     # Used to filter BDS correctly (due to duplication of indicator names
     # across topics)
-    selected_indicators <- reactiveVal({
-      data.frame(
-        Topic = character(),
-        Measure = character()
-      )
-    })
+    selected_indicators <- reactiveVal(NULL)
 
     # Filter indicator choices based on the selected topic
     # But keep already selected indicators from other topics
     shiny::observeEvent(input$topic_input, {
       # Available indicators (based on topic chosen)
-      filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(Topic %in% input$topic_input) |>
-        dplyr::select(Topic, Measure)
+      topic_indicators <- topic_indicator_full |>
+        filter_by_topic("Topic", input$topic_input) |>
+        pull_uniques("Measure")
 
       # Get the already selected topic-indicator pairs
       current_selection <- selected_indicators()
 
       # Combine already selected topic-indicator pairs with new topic indicators
       # Allows indicators to stay selected despite not being part of the new topic
-      combined_choices <- unique(rbind(current_selection, filtered_topic_bds))
+      combined_choices <- unique(c(current_selection, topic_indicators))
 
       # Update the choices with new topic whilst retaining the
       # already selected indicators
       shiny::updateSelectizeInput(
         session = session,
         inputId = "indicator",
-        choices = combined_choices$Measure,
-        selected = current_selection$Measure
+        choices = combined_choices,
+        selected = current_selection
       )
     })
 
@@ -155,23 +155,20 @@ Create_MainInputsServer <- function(id, bds_metrics) {
     shiny::observeEvent(input$indicator,
       {
         # Get the new topic-indicator pairs
-        current_filtered <- bds_metrics |>
+        current_filtered <- topic_indicator_full |>
           dplyr::filter(
-            Topic %in% input$topic_input,
             Measure %in% input$indicator
           ) |>
-          dplyr::distinct(Topic, Measure)
+          pull_uniques("Measure")
 
         # Get previously selected indicators
         previous_selection <- selected_indicators()
 
         # Remove any topic-indicator pairs that have been deselected
-        deselected_measures <- setdiff(previous_selection$Measure, input$indicator)
-        updated_selection <- previous_selection |>
-          dplyr::filter(!Measure %in% deselected_measures)
+        updated_selection <- setdiff(input$indicator, previous_selection)
 
         # Combine the new topic-indicator pairs with the previous selections
-        combined_selection <- unique(rbind(updated_selection, current_filtered))
+        combined_selection <- unique(c(updated_selection, current_filtered))
 
         # Update the reactive value for all topic-indicator pairs
         selected_indicators(combined_selection)
@@ -195,9 +192,7 @@ Create_MainInputsServer <- function(id, bds_metrics) {
     # Return create your own main inputs
     create_inputs <- list(
       geog = reactive(input$geog_input),
-      topic = reactive(selected_indicators()$Topic),
-      indicator = reactive(selected_indicators()$Measure),
-      selected_indicators = reactive(selected_indicators()),
+      indicator = reactive(selected_indicators()),
       la_group = reactive(input$la_group),
       inc_regions = reactive(input$inc_regions),
       inc_england = reactive(input$inc_england),
