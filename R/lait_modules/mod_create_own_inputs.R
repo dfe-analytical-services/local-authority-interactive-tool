@@ -127,28 +127,33 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
 
     # Filter indicator choices based on the selected topic
     # But keep already selected indicators from other topics
-    shiny::observeEvent(input$topic_input, {
-      # Available indicators (based on topic chosen)
-      topic_indicators <- topic_indicator_full |>
-        filter_by_topic("Topic", input$topic_input) |>
-        pull_uniques("Measure")
+    shiny::observeEvent(input$topic_input,
+      {
+        req(input$topic_input)
+        # Available indicators (based on topic chosen)
+        topic_indicators <- topic_indicator_full |>
+          filter_by_topic("Topic", input$topic_input) |>
+          pull_uniques("Measure")
 
-      # Get the already selected topic-indicator pairs
-      current_selection <- selected_indicators()
+        # Get the already selected topic-indicator pairs
+        current_selection <- selected_indicators()
 
-      # Combine already selected topic-indicator pairs with new topic indicators
-      # Allows indicators to stay selected despite not being part of the new topic
-      combined_choices <- unique(c(current_selection, topic_indicators))
+        # Combine already selected topic-indicator pairs with new topic indicators
+        # Allows indicators to stay selected despite not being part of the new topic
+        # Ensure only valid indicators are retained
+        combined_choices <- unique(c(current_selection, topic_indicators))
 
-      # Update the choices with new topic whilst retaining the
-      # already selected indicators
-      shiny::updateSelectizeInput(
-        session = session,
-        inputId = "indicator",
-        choices = combined_choices,
-        selected = current_selection
-      )
-    })
+        # Update the choices with new topic whilst retaining the
+        # already selected indicators
+        shiny::updateSelectizeInput(
+          session = session,
+          inputId = "indicator",
+          choices = combined_choices,
+          selected = current_selection
+        )
+      },
+      priority = 1
+    )
 
     # Update the selected_indicators reactive for newly selected topic-indicator pairs
     # This keeps selection consistent across topics
@@ -173,7 +178,8 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
         # Update the reactive value for all topic-indicator pairs
         selected_indicators(combined_selection)
       },
-      ignoreNULL = FALSE
+      ignoreNULL = FALSE,
+      priority = 2
     )
 
     # Clear all current selections
@@ -223,7 +229,16 @@ YearRangeUI <- function(id) {
   shinyWidgets::pickerInput(
     ns("year_range"),
     "Select Year Range",
-    choices = NULL,
+    choices = all_year_types,
+    choicesOpt = list(
+      content = rep("Loading...", length(all_year_types))
+    ),
+    options = shinyWidgets::pickerOptions(
+      noneSelectedText = "Loading...",
+      maxOptions = 2,
+      maxOptionsText = "Still loading...",
+      size = 1
+    ),
     multiple = TRUE
   )
 }
@@ -267,15 +282,24 @@ YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) 
 
     # Update the year range choices based on the selected indicator
     observeEvent(indicator_input(), {
+      # Get the valid choices based on the selected indicator
+      valid_choices <- years_choices()
+
+      # Retain only the valid selected years from the current input
+      valid_selection <- intersect(input$year_range, valid_choices)
+
+      # Update the picker input with the new choices and valid selections
       shinyWidgets::updatePickerInput(
         session = session,
         inputId = "year_range",
-        choices = years_choices(),
+        choices = valid_choices,
+        selected = valid_selection,
         options = shinyWidgets::pickerOptions(
           maxOptions = 2,
           maxOptionsText = "Deselect a year",
           multipleSeparator = " to ",
-          noneSelectedText = "All years available"
+          noneSelectedText = "All years available",
+          size = "auto"
         )
       )
     })
@@ -288,7 +312,10 @@ YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) 
           inputId = "year_range",
           choices = "Please select an indicator first",
           options = shinyWidgets::pickerOptions(
-            noneSelectedText = "Select an indicator to see year range"
+            noneSelectedText = "Select an indicator to see year range",
+            maxOptions = 2,
+            maxOptionsText = "Select and indicator",
+            size = "auto"
           )
         )
       }

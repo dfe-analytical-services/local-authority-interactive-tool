@@ -394,6 +394,14 @@ metric_topics <- pull_uniques(topic_indicator_full, "Topic")
 # Metric names
 metric_names <- pull_uniques(topic_indicator_full, "Measure")
 
+# Years
+all_year_types <- unique(c(
+  bds_metrics |>
+    pull_uniques("Years"),
+  bds_metrics |>
+    pull_uniques("Years_num")
+))
+
 # Indicators that are impacted by COVID
 # (aka missing data across all LAs for a whole year between 2091-2022)
 covid_affected_indicators <- bds_metrics |>
