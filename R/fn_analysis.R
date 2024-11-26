@@ -439,7 +439,7 @@ get_query_table_values <- function(data, column) {
 #' @return A filtered data frame or tibble based on the topic selection.
 filter_by_topic <- function(data, topic_column, selected_topics) {
   # Check if selected topics are all selected or empty (return whole df if so)
-  if (is.null(selected_topics) || c("All Topics", "") %in% selected_topics) {
+  if (is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))) {
     return(data)
   }
 
