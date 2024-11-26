@@ -740,8 +740,7 @@ update_topic_label <- function(
     label <- "Topic:"
 
     # Update label if conditions are met
-    if (!is.null(indicator) && indicator != "" &&
-      (topic %in% c("", "All Topics"))) {
+    if (!is.null(indicator) && indicator != "" && (topic %in% c("", "All Topics"))) {
       # Get related topic(s)
       related_topics <- topic_indicator_data |>
         dplyr::filter(.data$Measure == indicator) |>
