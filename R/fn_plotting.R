@@ -76,7 +76,7 @@ get_xaxis_title <- function(data_full) {
     pull_uniques("Year_Type")
 
   # If more than one y-axis title then give generic
-  if (is.na(x_axis_title)) {
+  if (length(x_axis_title) == 0 || all(is.na(x_axis_title))) {
     "Years (no type given)"
   } else if (length(x_axis_title) == 1) {
     add_line_breaks(x_axis_title)

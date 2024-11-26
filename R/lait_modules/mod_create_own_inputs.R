@@ -142,8 +142,6 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
       # Combine already selected topic-indicator pairs with new topic indicators
       # Allows indicators to stay selected despite not being part of the new topic
       combined_choices <- unique(c(current_selection, topic_indicators))
-      print(combined_choices)
-      print(topic_indicators)
 
       # Update the choices with new topic whilst retaining the
       # already selected indicators
@@ -197,9 +195,7 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
     # Return create your own main inputs
     create_inputs <- list(
       geog = reactive(input$geog_input),
-      # topic = reactive(selected_indicators()$Topic),
       indicator = reactive(selected_indicators()),
-      selected_indicators = reactive(selected_indicators()),
       la_group = reactive(input$la_group),
       inc_regions = reactive(input$inc_regions),
       inc_england = reactive(input$inc_england),

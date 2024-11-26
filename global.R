@@ -163,14 +163,13 @@ topic_indicator_full <- metrics_included |>
 
 # Duplicate indicators across topics
 dupes_across_topics <- topic_indicator_full |>
-  dplyr::group_by(Measure) |>
-  dplyr::filter(dplyr::n() > 1)
+  dplyr::filter(dplyr::n() > 1, .by = "Measure")
 
 # For each dupe combine topic names
 dupes_combined_topics <- dupes_across_topics |>
   dplyr::summarise(
     Topic = stringr::str_c(unique(Topic), collapse = " / "),
-    .groups = "drop"
+    .by = "Measure"
   )
 
 # Cleaning
