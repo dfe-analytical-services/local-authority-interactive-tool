@@ -29,7 +29,6 @@ server <- function(input, output, session) {
       "la_inputs-indicator_name",
       "navsetpillslist",
       "create_inputs-geog_input",
-      "create_inputs-topic_input",
       "create_inputs-indicator",
       "create_inputs-la_group",
       "create_inputs-inc_regions",
@@ -404,7 +403,10 @@ server <- function(input, output, session) {
   # ===========================================================================
   # User Inputs ===============================================================
   # Create own main inputs ----------------------------------------------------
-  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
+  create_inputs <- Create_MainInputsServer(
+    "create_inputs",
+    topic_indicator_full
+  )
 
   # Year range input ----------------------------------------------------------
   year_input <- YearRangeServer(
