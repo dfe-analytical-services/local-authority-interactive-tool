@@ -70,7 +70,6 @@ appInputsUI <- function(id) {
 #'
 appInputsServer <- function(id,
                             shared_values,
-                            bds_metrics,
                             topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
     # Reactive value to store the previous LA name

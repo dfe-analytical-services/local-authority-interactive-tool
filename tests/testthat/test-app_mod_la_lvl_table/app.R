@@ -25,7 +25,6 @@ minimal_server <- function(input, output, session) {
   app_inputs <- appInputsServer(
     "la_level",
     shared_values,
-    bds_metrics,
     topic_indicator_full
   )
 

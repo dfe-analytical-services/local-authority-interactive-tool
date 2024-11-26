@@ -46,7 +46,6 @@ server_mod <- function(input, output, session) {
   app_inputs <- appInputsServer(
     "all_la_inputs",
     shared_values,
-    bds_metrics,
     topic_indicator_full
   )
 

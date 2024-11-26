@@ -116,7 +116,6 @@ server <- function(input, output, session) {
   la_app_inputs <- appInputsServer(
     "la_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -182,7 +181,6 @@ server <- function(input, output, session) {
   region_app_inputs <- appInputsServer(
     "region_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -279,7 +277,6 @@ server <- function(input, output, session) {
   stat_n_app_inputs <- appInputsServer(
     "stat_n_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
@@ -372,7 +369,6 @@ server <- function(input, output, session) {
   all_la_app_inputs <- appInputsServer(
     "all_la_inputs",
     shared_page_inputs,
-    bds_metrics,
     topic_indicator_full
   )
 
