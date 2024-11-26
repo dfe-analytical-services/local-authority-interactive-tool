@@ -39,10 +39,7 @@ Create_MainInputsUI <- function(id) {
         style = "margin-bottom: 1rem;",
         shiny::selectizeInput(
           inputId = ns("topic_input"),
-          label = tags$label(
-            id = ns("topic_label"),
-            "Topic:"
-          ),
+          label = "Topic:",
           choices = c("All Topics", metric_topics),
           selected = "All Topics",
           options = list(

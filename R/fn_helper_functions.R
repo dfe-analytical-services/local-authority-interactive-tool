@@ -693,3 +693,40 @@ with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1) {
     proxy.height = paste0(250 * size, "px")
   )
 }
+
+
+
+update_topic_label <- function(
+    indicator_input,
+    topic_input,
+    topic_indicator_data,
+    topic_label_id = "topic_label") {
+  shiny::observeEvent(c(indicator_input(), topic_input()), {
+    indicator <- indicator_input()
+    topic <- topic_input()
+
+    # Default topic label
+    label <- "Topic:"
+
+    # Update label if conditions are met
+    if (!is.null(indicator) && indicator != "" &&
+      (topic %in% c("", "All Topics"))) {
+      # Get related topic(s)
+      related_topics <- topic_indicator_data |>
+        dplyr::filter(.data$Measure == indicator) |>
+        pull_uniques("Topic")
+
+      # Create label, combining topics if multiple exist
+      if (length(related_topics) > 0) {
+        label <- paste0(
+          "Topic:&nbsp;&nbsp;(",
+          paste0(related_topics, collapse = " / "),
+          ")"
+        )
+      }
+    }
+
+    # Update the HTML element with the new label
+    shinyjs::html(topic_label_id, label)
+  })
+}

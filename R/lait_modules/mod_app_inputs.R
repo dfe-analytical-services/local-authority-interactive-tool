@@ -145,36 +145,14 @@ appInputsServer <- function(id,
       }
     })
 
-    # Default topic label
-    topic_label <- "Topic:"
-
-    # Dynamically update the Topic label with the related topic
-    shiny::observeEvent(c(debounced_indicator_name(), debounced_topic_name()), {
-      indicator <- debounced_indicator_name()
-      topic <- debounced_topic_name()
-
-      # When no topic is selected, show the currently selected indicator topic
-      # in the topic label
-      if (!is.null(indicator) && indicator != "" &&
-        (topic %in% c("", "All Topics"))) {
-        # Get topic
-        related_topic <- topic_indicator_full |>
-          dplyr::filter(.data$Measure == indicator) |>
-          pull_uniques("Topic")
-
-        # Create label, combine topics if multiple exist
-        if (length(related_topic) > 0) {
-          topic_label <- paste0(
-            "Topic:&nbsp;&nbsp;(",
-            paste0(related_topic, collapse = ", "),
-            ")"
-          )
-        }
-      }
-
-      # Apply topic label
-      shinyjs::html("topic_label", topic_label)
-    })
+    # Set dynamic topic label
+    # (to display topic when not selected or all topics selected)
+    update_topic_label(
+      indicator_input = debounced_indicator_name,
+      topic_input = debounced_topic_name,
+      topic_indicator_data = topic_indicator_full,
+      topic_label_id = "topic_label"
+    )
 
     # Observe and synchronise Indicator input changes
     observeEvent(debounced_indicator_name(), {
