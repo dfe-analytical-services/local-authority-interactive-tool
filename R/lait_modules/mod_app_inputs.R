@@ -106,16 +106,8 @@ appInputsServer <- function(id,
 
         # Get indicator choices for selected topic
         # Include all rows if no topic is selected or "All Topics" is selected
-        filtered_topic_bds <- bds_metrics |>
-          dplyr::filter(
-            if (is.null(input$topic_name) ||
-              "All Topics" %in% input$topic_name ||
-              "" %in% input$topic_name) {
-              TRUE
-            } else {
-              .data$Topic %in% input$topic_name # Filter by selected topic(s)
-            }
-          ) |>
+        filtered_topic_bds <- topic_indicator_full |>
+          filter_by_topic("Topic", topic_filter) |>
           pull_uniques("Measure")
 
         # Ensure the current indicator stays selected

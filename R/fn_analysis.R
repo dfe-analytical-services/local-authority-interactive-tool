@@ -429,3 +429,22 @@ get_query_table_values <- function(data, column) {
     dplyr::mutate({{ column }} := trimws({{ column }})) |>
     pull_uniques(as.character(substitute(column)))
 }
+
+
+#' Filter data based on topic selection
+#'
+#' @param data A data frame or tibble to filter.
+#' @param topic_column The name of the column containing topic values (as a string).
+#' @param selected_topics A vector of selected topics from the user input.
+#' @return A filtered data frame or tibble based on the topic selection.
+filter_by_topic <- function(data, topic_column, selected_topics) {
+  # Check if selected topics are all selected or empty (return whole df if so)
+  if (is.null(selected_topics) ||
+    "All Topics" %in% selected_topics ||
+    "" %in% selected_topics) {
+    return(data)
+  }
+
+  # Filter by selected topic
+  dplyr::filter(data, .data[[topic_column]] %in% selected_topics)
+}
