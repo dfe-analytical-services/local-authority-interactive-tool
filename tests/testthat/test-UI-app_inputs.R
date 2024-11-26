@@ -39,7 +39,7 @@ minimal_server <- function(input, output, session) {
     topic = NULL,
     indicator = NULL
   )
-  appInputsServer("la_level", shared_values, bds_metrics, topic_indicator_full)
+  appInputsServer("la_level", shared_values, topic_indicator_full)
 }
 
 minimal_app <- shinyApp(minimal_ui, minimal_server)
