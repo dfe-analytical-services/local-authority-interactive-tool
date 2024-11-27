@@ -22,15 +22,7 @@ appInputsUI <- function(id) {
         inputId = ns("la_name"),
         label = tags$label(
           "Local Authority:",
-          bslib::tooltip(
-            htmltools::tags$span(
-              htmltools::tags$i(
-                class = "fas fa-question-circle",
-                style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
-              )
-            ),
-            "Change selection by scrolling or typing."
-          )
+          create_tooltip_icon("Change selection by scrolling or typing.")
         ),
         choices = la_names_bds,
         options = list(

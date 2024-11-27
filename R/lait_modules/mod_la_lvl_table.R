@@ -399,7 +399,7 @@ LA_StatsTableServer <- function(id,
               header = add_tooltip_to_reactcol(
                 "Latest National Rank",
                 "Rank 1 is always best/top",
-                placement = "top"
+                placement = "right"
               )
             ),
             Polarity = reactable::colDef(show = FALSE)
