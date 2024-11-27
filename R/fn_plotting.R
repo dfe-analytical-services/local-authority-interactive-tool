@@ -1224,18 +1224,18 @@ calculate_covid_plot <- function(data, covid_affected_data, selected_indicators,
     dplyr::filter(Measure %in% selected_indicators)
 
   if (nrow(covid_affected) > 0) {
-    # Filter rows with NA values in `values_num` between 2019 and 2021 (COVID)
-    # Do not include NaN here as these are user created missing vars in Create Own
+    # Group/ filter by `Measure` if it exists (for Create Own charts - multiple indicators)
+    grouping_vars <- if ("Measure" %in% colnames(data)) "Measure" else NULL
+
+    # Join covid data to find the NA years due to COVID
     na_rows <- data |>
-      dplyr::filter(
-        Years_num %in% covid_affected$Years_num
+      dplyr::inner_join(
+        covid_affected |> dplyr::select(Measure, Years_num),
+        by = c(grouping_vars, "Years_num")
       )
 
     # Whether to offset vline to last/next non-NA point (for line chart)
     yr_offset <- ifelse(chart_type == "line", 1, 0)
-
-    # Group by `Measure` if it exists (for Create Own charts - multiple indicators)
-    grouping_vars <- if ("Measure" %in% colnames(na_rows)) "Measure" else NULL
 
     # Find missing COVID period and calculate label position
     # (by indicator for Create Own)
