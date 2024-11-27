@@ -148,17 +148,14 @@ appInputsServer <- function(id,
     # Synchronise inputs across pages:
     # LA
     observe({
-      print(shared_values$la)
       shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
     })
     # Topic
     observe({
-      print(shared_values$topic)
       shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
     })
     # Indicator
     observe({
-      print(shared_values$indicator)
       shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
     })
 

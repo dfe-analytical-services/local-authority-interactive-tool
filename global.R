@@ -391,8 +391,15 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
 # Metric topics
 metric_topics <- pull_uniques(topic_indicator_full, "Topic")
 
-# Metric names
-metric_names <- pull_uniques(topic_indicator_full, "Measure")
+# Metric names (alphabetically ordered)
+metric_names <- tibble::tibble(
+  Measure = topic_indicator_full |>
+    pull_uniques("Measure")
+) |>
+  dplyr::arrange(
+    !grepl("^[A-Za-z]", Measure),
+    Measure
+  )
 
 # All Years across string and num Years
 # (for Create Your Own year range choices - initially)
