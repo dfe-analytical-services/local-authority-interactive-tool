@@ -987,6 +987,26 @@ truncate_cell_with_hover <- function(text, tooltip) {
 }
 
 
+# Function to create a tooltip with a FontAwesome icon
+create_tooltip_icon <- function(
+    tooltip_text,
+    icon_class = "fas fa-question-circle",
+    icon_style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;",
+    ...) {
+  bslib::tooltip(
+    htmltools::tags$span(
+      htmltools::tags$i(
+        class = icon_class,
+        style = icon_style
+      )
+    ),
+    tooltip_text,
+    ...
+  )
+}
+
+
+
 #' Add Tooltip to Reactable Column
 #'
 #' Creates a tooltip with an embedded Font Awesome icon for a specified value
@@ -1009,24 +1029,12 @@ truncate_cell_with_hover <- function(text, tooltip) {
 #'
 #' @importFrom htmltools div htmlDependency tags
 #' @importFrom tippy tippy
-add_tooltip_to_reactcol <- function(value, tooltip, ...) {
-  div(
-    style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
-    value,
-    tippy::tippy(
-      htmltools::tags$span(
-        htmltools::tags$i(
-          class = "fas fa-question-circle",
-          style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
-        )
-      ),
-      tooltip = tooltip,
-      theme = "gov",
-      interactive = TRUE,
-      interactiveBorder = 10,
-      arrow = TRUE,
-      inertia = TRUE,
-      ...
+add_tooltip_to_reactcol <- function(value, tooltip_text, ...) {
+  as.character(
+    div(
+      style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
+      value,
+      create_tooltip_icon(tooltip_text, ...)
     )
   )
 }
