@@ -27,6 +27,12 @@ server <- function(input, output, session) {
     included_inputs <- c(
       "la_inputs-la_name",
       "la_inputs-indicator_name",
+      "region_inputs-la_name",
+      "region_inputs-indicator_name",
+      "stat_n_inputs-la_name",
+      "stat_n_inputs-indicator_name",
+      "all_la_inputs-la_name",
+      "all_la_inputs-indicator_name",
       "navsetpillslist",
       "create_inputs-geog_input",
       "create_inputs-indicator",

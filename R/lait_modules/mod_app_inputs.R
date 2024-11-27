@@ -80,20 +80,6 @@ appInputsServer <- function(id,
     debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 150)
     debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
 
-    # Synchronise inputs across pages:
-    # LA
-    observe({
-      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
-    })
-    # Topic
-    observe({
-      shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
-    })
-    # Indicator
-    observe({
-      shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
-    })
-
     # Update Indicator dropdown for selected Topic
     shiny::observeEvent(debounced_topic_name(),
       {
@@ -157,6 +143,23 @@ appInputsServer <- function(id,
     # Observe and synchronise Indicator input changes
     observeEvent(debounced_indicator_name(), {
       shared_values$indicator <- debounced_indicator_name()
+    })
+
+    # Synchronise inputs across pages:
+    # LA
+    observe({
+      print(shared_values$la)
+      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
+    })
+    # Topic
+    observe({
+      print(shared_values$topic)
+      shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
+    })
+    # Indicator
+    observe({
+      print(shared_values$indicator)
+      shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
     })
 
     # Return reactive settings
