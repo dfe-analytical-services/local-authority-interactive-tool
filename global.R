@@ -416,7 +416,8 @@ covid_affected_data <- bds_metrics |>
   dplyr::filter(Years_num >= 2019, Years_num <= 2022) |>
   dplyr::group_by(Topic, Measure, Years_num) |>
   dplyr::summarise(all_na = all(is.na(values_num)), .groups = "keep") |>
-  dplyr::filter(all_na)
+  dplyr::filter(all_na) |>
+  dplyr::ungroup()
 
 # Indicators with too small a range for QB'ing
 no_qb_indicators <- metrics_clean |>

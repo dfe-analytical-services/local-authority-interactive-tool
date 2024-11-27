@@ -92,7 +92,7 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # LA bar chart  ----------------------------------
@@ -101,7 +101,7 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # LA Meta

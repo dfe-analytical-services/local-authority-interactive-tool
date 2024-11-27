@@ -138,14 +138,14 @@ server <- function(input, output, session) {
     "create_own_line",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   CreateOwnBarChartServer(
     "create_own_bar",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 }
 
