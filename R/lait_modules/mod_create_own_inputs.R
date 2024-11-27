@@ -29,7 +29,7 @@ Create_MainInputsUI <- function(id) {
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select a LA, Region or England...",
+            "placeholder" = "Start typing or scroll to find a LA, Region or England...",
             plugins = list("remove_button")
           )
         )
@@ -57,7 +57,7 @@ Create_MainInputsUI <- function(id) {
           choices = metric_names,
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select an indicator...",
+            "placeholder" = "Start typing or scroll to find an indicator...",
             plugins = list("remove_button")
           )
         )

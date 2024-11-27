@@ -20,10 +20,21 @@ appInputsUI <- function(id) {
       width = "15rem", # Minimum width for each input box before wrapping
       shiny::selectizeInput(
         inputId = ns("la_name"),
-        label = "Local Authority:",
+        label = tags$label(
+          "Local Authority:",
+          bslib::tooltip(
+            htmltools::tags$span(
+              htmltools::tags$i(
+                class = "fas fa-question-circle",
+                style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
+              )
+            ),
+            "Change selection by scrolling or typing."
+          )
+        ),
         choices = la_names_bds,
         options = list(
-          placeholder = "Select a Local Authority...",
+          placeholder = "Start typing or scroll to find a Local Authority...",
           plugins = list("clear_button")
         )
       ),
@@ -45,7 +56,7 @@ appInputsUI <- function(id) {
         label = "Indicator:",
         choices = metric_names,
         options = list(
-          placeholder = "Select an indicator...",
+          placeholder = "Start typing or scroll to find an indicator...",
           plugins = list("clear_button")
         )
       )
