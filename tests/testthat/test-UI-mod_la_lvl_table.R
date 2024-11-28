@@ -156,7 +156,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check title
   testthat::expect_true(
-    grepl("Infant Mortality rate per 1000 live births", cleaned_plot_str)
+    grepl("Average point score per entry A Level Cohort", cleaned_plot_str)
   )
 
   # Check visual of line chart
