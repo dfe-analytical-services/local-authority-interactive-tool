@@ -613,13 +613,6 @@ html {
   box-shadow: none; /* remove any default shadow */
 }
 
-/* Setting tooltip styling */
-.tippy-tooltip.gov-theme {
-  background-color: #5694ca;
-  color: white;
-  max-width: 100px;
-}
-
 /* shinyGovstyle notification banner styling */
 .govuk-notification-banner {
   font-family: GDS Transport, arial, sans-serif;
@@ -962,4 +955,29 @@ screen and (forced-colors:active) {
 
 .govuk-frontend-supported .govuk-radios__conditional--hidden {
     display: none
+}
+
+/* Styling bslib tooltip with gov colour */
+.gov-tooltip .tooltip-inner {
+  background-color: #5694ca !important;
+  color: #fff !important;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+/* Applying gov colour to the arrow */
+.gov-tooltip[data-popper-placement^="top"] .tooltip-arrow::before {
+  border-top-color: #5694ca !important;
+}
+
+.gov-tooltip[data-popper-placement^="right"] .tooltip-arrow::before {
+  border-right-color: #5694ca !important;
+}
+
+.gov-tooltip[data-popper-placement^="bottom"] .tooltip-arrow::before {
+  border-bottom-color: #5694ca !important;
+}
+
+.gov-tooltip[data-popper-placement^="left"] .tooltip-arrow::before {
+  border-left-color: #5694ca !important;
 }

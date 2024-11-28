@@ -1021,8 +1021,8 @@ truncate_cell_with_hover <- function(text, tooltip) {
 #'
 create_tooltip_icon <- function(
     tooltip_text,
-    icon_class = "fas fa-question-circle",
-    icon_style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;",
+    icon_class = "fas fa-info-circle",
+    icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
     ...) {
   bslib::tooltip(
     htmltools::tags$span(
@@ -1032,6 +1032,7 @@ create_tooltip_icon <- function(
       )
     ),
     tooltip_text,
+    options = list(customClass = "gov-tooltip"),
     ...
   )
 }
