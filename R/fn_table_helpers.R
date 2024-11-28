@@ -1031,7 +1031,7 @@ create_tooltip_icon <- function(
         style = icon_style
       )
     ),
-    tooltip_text,
+    shiny::HTML(tooltip_text),
     options = list(customClass = "gov-tooltip"),
     ...
   )

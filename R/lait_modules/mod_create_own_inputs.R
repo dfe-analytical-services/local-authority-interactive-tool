@@ -25,7 +25,10 @@ Create_MainInputsUI <- function(id) {
         style = "margin-bottom: 1rem;",
         shiny::selectizeInput(
           inputId = ns("geog_input"),
-          label = "LAs, Regions, and England:",
+          label = tags$label(
+            "LAs, Regions, and England:",
+            create_tooltip_icon("You can change selection by typing or scrolling.")
+          ),
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
           options = list(
@@ -228,7 +231,15 @@ YearRangeUI <- function(id) {
 
   shinyWidgets::pickerInput(
     ns("year_range"),
-    "Select Year Range",
+    label = tags$label(
+      "Select Year Range:",
+      create_tooltip_icon(
+        "Select a year to view data for that year.<br>
+        Select two years to view data from Year X to Year Y.<br>
+        Leave unselected to display all years.",
+        placement = "right"
+      )
+    ),
     choices = all_year_types,
     choicesOpt = list(
       content = rep("Loading...", length(all_year_types))
