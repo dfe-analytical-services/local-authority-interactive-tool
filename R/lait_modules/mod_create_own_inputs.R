@@ -235,7 +235,7 @@ YearRangeUI <- function(id) {
       "Select Year Range:",
       create_tooltip_icon(
         "Select a year to view data for that year.<br>
-        Select two years to view data from Year X to Year Y.<br>
+        Select two years to view data from Year A to Year B.<br>
         Leave unselected to display all years.",
         placement = "right"
       )
@@ -309,7 +309,7 @@ YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) 
           maxOptions = 2,
           maxOptionsText = "Deselect a year",
           multipleSeparator = " to ",
-          noneSelectedText = "All years available",
+          noneSelectedText = "All years selected",
           size = "auto"
         )
       )
