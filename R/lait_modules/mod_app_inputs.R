@@ -20,10 +20,13 @@ appInputsUI <- function(id) {
       width = "15rem", # Minimum width for each input box before wrapping
       shiny::selectizeInput(
         inputId = ns("la_name"),
-        label = "Local Authority:",
+        label = tags$label(
+          "Local Authority:",
+          create_tooltip_icon("Change selection by scrolling or typing")
+        ),
         choices = la_names_bds,
         options = list(
-          placeholder = "Select a Local Authority...",
+          placeholder = "Start typing or scroll to find a Local Authority...",
           plugins = list("clear_button")
         )
       ),
@@ -36,7 +39,7 @@ appInputsUI <- function(id) {
         choices = c("All Topics", metric_topics),
         selected = "All Topics",
         options = list(
-          placeholder = "No topic selected, showing all indicators.",
+          placeholder = "No topic selected, showing all indicators...",
           plugins = list("clear_button")
         )
       ),
@@ -45,7 +48,7 @@ appInputsUI <- function(id) {
         label = "Indicator:",
         choices = metric_names,
         options = list(
-          placeholder = "Select an indicator...",
+          placeholder = "Start typing or scroll to find an indicator...",
           plugins = list("clear_button")
         )
       )
@@ -79,20 +82,6 @@ appInputsServer <- function(id,
     debounced_la_name <- shiny::debounce(reactive(input$la_name), 150)
     debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 150)
     debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
-
-    # Synchronise inputs across pages:
-    # LA
-    observe({
-      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
-    })
-    # Topic
-    observe({
-      shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
-    })
-    # Indicator
-    observe({
-      shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
-    })
 
     # Update Indicator dropdown for selected Topic
     shiny::observeEvent(debounced_topic_name(),
@@ -157,6 +146,20 @@ appInputsServer <- function(id,
     # Observe and synchronise Indicator input changes
     observeEvent(debounced_indicator_name(), {
       shared_values$indicator <- debounced_indicator_name()
+    })
+
+    # Synchronise inputs across pages:
+    # LA
+    observe({
+      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
+    })
+    # Topic
+    observe({
+      shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
+    })
+    # Indicator
+    observe({
+      shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
     })
 
     # Return reactive settings

@@ -440,7 +440,13 @@ get_query_table_values <- function(data, column) {
 filter_by_topic <- function(data, topic_column, selected_topics) {
   # Check if selected topics are all selected or empty (return whole df if so)
   if (is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))) {
-    return(data)
+    # Return data ordered alphabetically by "Measure", with letters first
+    alphabet_ordered <- data |>
+      dplyr::arrange(
+        !grepl("^[A-Za-z]", .data$Measure),
+        .data$Measure
+      )
+    return(alphabet_ordered)
   }
 
   # Filter by selected topic

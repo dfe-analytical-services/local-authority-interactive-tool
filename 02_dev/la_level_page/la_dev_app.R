@@ -456,11 +456,13 @@ server_dev <- function(input, output, session) {
 
   # LA Level line chart plot ----------------------------------
   la_line_chart <- reactive({
-    # Check if measure affected by COVID
-    covid_affected <- input$indicator %in% covid_affected_indicators
-
     # Generate the covid plot data if add_covid_plot is TRUE
-    covid_plot <- calculate_covid_plot(la_long(), covid_affected, "line")
+    covid_plot <- calculate_covid_plot(
+      la_long(),
+      covid_affected_data,
+      input$indicator,
+      "line"
+    )
 
     # Build plot
     la_line_chart <- la_long() |>
@@ -479,7 +481,11 @@ server_dev <- function(input, output, session) {
       ) +
       # Only show point data where line won't appear (NAs)
       ggplot2::geom_point(
-        data = subset(create_show_point(la_long(), covid_affected), show_point),
+        data = subset(create_show_point(
+          la_long(),
+          covid_affected_data,
+          input$indicator
+        ), show_point),
         ggplot2::aes(
           x = Years_num,
           y = values_num,
@@ -527,11 +533,13 @@ server_dev <- function(input, output, session) {
 
   # LA Level bar plot ----------------------------------
   la_bar_chart <- reactive({
-    # Check if measure affected by COVID
-    covid_affected <- input$indicator %in% covid_affected_indicators
-
     # Generate the covid plot data if add_covid_plot is TRUE
-    covid_plot <- calculate_covid_plot(la_long(), covid_affected, "bar")
+    covid_plot <- calculate_covid_plot(
+      la_long(),
+      covid_affected_data,
+      input$indicator,
+      "bar"
+    )
 
     # Build plot
     la_bar_chart <- la_long() |>

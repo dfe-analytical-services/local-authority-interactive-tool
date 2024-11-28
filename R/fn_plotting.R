@@ -1115,7 +1115,13 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
 #' # Process data
 #' result <- create_show_point(data, covid_affected)
 #'
-create_show_point <- function(data, covid_affected) {
+create_show_point <- function(data, covid_affected_data, selected_indicators) {
+  # Check if all indicators affected by COVID
+  all_covid_affected <- all(
+    covid_affected_data |>
+      pull_uniques("Measure") %in% selected_indicators
+  )
+
   data |>
     dplyr::group_by(
       `LA and Regions`,
@@ -1150,8 +1156,8 @@ create_show_point <- function(data, covid_affected) {
           (dplyr::row_number() == dplyr::n() & dplyr::lag(is_na)) |
           # Covid start and end points
           # (uses all for multiple indicators in create your own)
-          (all(covid_affected) & is_prev_covid) |
-          (all(covid_affected) & is_post_covid),
+          (all_covid_affected & is_prev_covid) |
+          (all_covid_affected & is_post_covid),
         TRUE,
         FALSE
       )
@@ -1212,22 +1218,24 @@ create_show_point <- function(data, covid_affected) {
 #' # Line chart example
 #' covid_plot_data <- calculate_covid_plot(data, covid_affected, "line")
 #'
-calculate_covid_plot <- function(data, covid_affected, chart_type) {
-  if (any(covid_affected)) {
-    # Filter rows with NA values in `values_num` between 2019 and 2021 (COVID)
-    # Do not include NaN here as these are user created missing vars in Create Own
+calculate_covid_plot <- function(data, covid_affected_data, selected_indicators, chart_type) {
+  # Check if measures affected by COVID
+  covid_affected <- covid_affected_data |>
+    dplyr::filter(Measure %in% selected_indicators)
+
+  if (nrow(covid_affected) > 0) {
+    # Group/ filter by `Measure` if it exists (for Create Own charts - multiple indicators)
+    grouping_vars <- if ("Measure" %in% colnames(data)) "Measure" else NULL
+
+    # Join covid data to find the NA years due to COVID
     na_rows <- data |>
-      dplyr::filter(
-        Years_num >= 2019, Years_num <= 2021,
-        is.na(values_num), !is.nan(values_num)
-      ) |>
-      dplyr::arrange(Years_num)
+      dplyr::inner_join(
+        covid_affected |> dplyr::select(Measure, Years_num),
+        by = c(grouping_vars, "Years_num")
+      )
 
     # Whether to offset vline to last/next non-NA point (for line chart)
     yr_offset <- ifelse(chart_type == "line", 1, 0)
-
-    # Group by `Measure` if it exists (for Create Own charts - multiple indicators)
-    grouping_vars <- if ("Measure" %in% colnames(na_rows)) "Measure" else NULL
 
     # Find missing COVID period and calculate label position
     # (by indicator for Create Own)
@@ -1253,8 +1261,14 @@ calculate_covid_plot <- function(data, covid_affected, chart_type) {
         label_x = (min(start_year) + max(end_year)) / 2
       )
 
+    # Check if all indicators affected by COVID
+    all_covid_affected <- all(
+      covid_affected |>
+        pull_uniques("Measure") %in% selected_indicators
+    )
+
     # Set label based on whether the COVID period is the same across all indicators
-    if (shared_period$same_period && all(covid_affected)) {
+    if (shared_period$same_period && all_covid_affected) {
       shared_period$label <- "No data\ndue to COVID"
     } else {
       shared_period$label <- "Some indicators have\nmissing data due to COVID"

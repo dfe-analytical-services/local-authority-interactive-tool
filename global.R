@@ -391,8 +391,15 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
 # Metric topics
 metric_topics <- pull_uniques(topic_indicator_full, "Topic")
 
-# Metric names
-metric_names <- pull_uniques(topic_indicator_full, "Measure")
+# Metric names (alphabetically ordered)
+metric_names <- tibble::tibble(
+  Measure = topic_indicator_full |>
+    pull_uniques("Measure")
+) |>
+  dplyr::arrange(
+    !grepl("^[A-Za-z]", Measure),
+    Measure
+  )
 
 # All Years across string and num Years
 # (for Create Your Own year range choices - initially)
@@ -405,12 +412,12 @@ all_year_types <- unique(c(
 
 # Indicators that are impacted by COVID
 # (aka missing data across all LAs for a whole year between 2091-2022)
-covid_affected_indicators <- bds_metrics |>
+covid_affected_data <- bds_metrics |>
   dplyr::filter(Years_num >= 2019, Years_num <= 2022) |>
   dplyr::group_by(Topic, Measure, Years_num) |>
   dplyr::summarise(all_na = all(is.na(values_num)), .groups = "keep") |>
   dplyr::filter(all_na) |>
-  pull_uniques("Measure")
+  dplyr::ungroup()
 
 # Indicators with too small a range for QB'ing
 no_qb_indicators <- metrics_clean |>

@@ -47,7 +47,10 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Output Charts (Charts showing data from saved selections)"),
+    h3(
+      "Output Charts",
+      create_tooltip_icon("Charts showing data from all the saved selections")
+    ),
     p("Note a maximum of 4 geographies and 3 indicators can be shown."),
 
     # Line chart ---------------------------------------------------------------
@@ -138,14 +141,14 @@ server <- function(input, output, session) {
     "create_own_line",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   CreateOwnBarChartServer(
     "create_own_bar",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 }
 

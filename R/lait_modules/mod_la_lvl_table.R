@@ -382,7 +382,8 @@ LA_StatsTableServer <- function(id,
             Trend = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Trend",
-                "Based on change from previous year"
+                "Based on change from previous year",
+                placement = "top"
               ),
               cell = trend_icon_renderer,
               style = function(value) {
@@ -397,7 +398,8 @@ LA_StatsTableServer <- function(id,
             `Latest National Rank` = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Latest National Rank",
-                "Rank 1 is always best/top"
+                "Rank 1 is always best/top",
+                placement = "right"
               )
             ),
             Polarity = reactable::colDef(show = FALSE)

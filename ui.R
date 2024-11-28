@@ -259,7 +259,10 @@ ui <- function(input, output, session) {
         div(
           class = "well",
           style = "overflow-y: visible;",
-          h3("Output Charts (Charts showing data from saved selections)"),
+          h3(
+            "Output Charts",
+            create_tooltip_icon("Charts showing data from all the saved selections")
+          ),
           p("Note a maximum of 4 geographies and 3 indicators can be shown."),
           bslib::navset_tab(
             # Line chart ------------------------------------------------------

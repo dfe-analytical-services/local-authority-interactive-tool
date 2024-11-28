@@ -987,46 +987,91 @@ truncate_cell_with_hover <- function(text, tooltip) {
 }
 
 
-#' Add Tooltip to Reactable Column
+#' Create a Tooltip with a FontAwesome Icon
 #'
-#' Creates a tooltip with an embedded Font Awesome icon for a specified value
-#' in a reactable column. The tooltip is styled and positioned for better
-#' usability and appearance, including options for color, interactivity,
-#' and cursor following.
+#' Generates a tooltip that displays a specified message when hovering over
+#' a FontAwesome icon. The tooltip and icon can be customised using parameters
+#' for text, style, and class.
 #'
-#' @param value Character string. The main content to display in the cell.
-#' @param tooltip Character string or HTML content. The tooltip text or HTML
-#'   to display when hovering over the icon.
-#' @param ... Additional arguments passed to `tippy::tippy` for further
-#'   customization.
+#' @param tooltip_text A character string specifying the tooltip text to display.
+#' @param icon_class A character string specifying the FontAwesome class for the
+#'   icon. Default is `"fas fa-question-circle"`.
+#' @param icon_style A character string specifying the CSS styling for the icon.
+#'   Default is `"color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"`.
+#' @param ... Additional arguments passed to `bslib::tooltip` for further
+#'   customisation.
 #'
-#' @return A div element containing the `value` and an embedded Font Awesome
-#'   icon with an interactive tooltip.
+#' @return An HTML element containing a FontAwesome icon with an attached tooltip.
 #'
 #' @examples
-#' # Basic usage in a reactable column
-#' add_tooltip_to_reactcol("Sample Text", "This is a tooltip example")
+#' # Create a tooltip with default icon and style
+#' create_tooltip_icon("Hover to see the tooltip")
 #'
-#' @importFrom htmltools div htmlDependency tags
-#' @importFrom tippy tippy
-add_tooltip_to_reactcol <- function(value, tooltip, ...) {
-  div(
-    style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
-    value,
-    tippy::tippy(
-      htmltools::tags$span(
-        htmltools::tags$i(
-          class = "fas fa-question-circle",
-          style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
-        )
-      ),
-      tooltip = tooltip,
-      theme = "gov",
-      interactive = TRUE,
-      interactiveBorder = 10,
-      arrow = TRUE,
-      inertia = TRUE,
-      ...
+#' # Customise the icon style
+#' create_tooltip_icon(
+#'   "Hover to see the tooltip",
+#'   icon_style = "color: red; font-size: 1.5em;"
+#' )
+#'
+#' # Pass additional options to the tooltip
+#' create_tooltip_icon(
+#'   "Tooltip with placement",
+#'   placement = "bottom"
+#' )
+#'
+create_tooltip_icon <- function(
+    tooltip_text,
+    icon_class = "fas fa-info-circle",
+    icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
+    ...) {
+  bslib::tooltip(
+    htmltools::tags$span(
+      htmltools::tags$i(
+        class = icon_class,
+        style = icon_style
+      )
+    ),
+    shiny::HTML(tooltip_text),
+    options = list(customClass = "gov-tooltip"),
+    ...
+  )
+}
+
+
+#' Add a Tooltip to a Reactable Column Header
+#'
+#' Creates an interactive tooltip for a reactable column header with an
+#' accompanying FontAwesome icon. The tooltip displays specified text when the
+#' user hovers over the icon. The function also formats the header content for
+#' better alignment and appearance.
+#'
+#' @param value A character string specifying the main text to display in the
+#'   column header.
+#' @param tooltip_text A character string specifying the tooltip text to display
+#'   when hovering over the icon.
+#' @param ... Additional arguments passed to `create_tooltip_icon` for further
+#'   customisation of the tooltip or icon.
+#'
+#' @return A character string containing HTML for the styled column header with
+#'   an embedded tooltip icon.
+#'
+#' @examples
+#' # Add a tooltip to a column header
+#' add_tooltip_to_reactcol("Trend", "Based on change from previous year")
+#'
+#' # Customise the tooltip placement
+#' add_tooltip_to_reactcol(
+#'   "Latest Rank",
+#'   "Rank 1 is the top rank",
+#'   placement = "bottom"
+#' )
+#'
+add_tooltip_to_reactcol <- function(value, tooltip_text, ...) {
+  as.character(
+    div(
+      style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
+      value,
+      create_tooltip_icon(tooltip_text, ...)
     )
   )
 }

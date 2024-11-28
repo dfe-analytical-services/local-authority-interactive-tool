@@ -137,7 +137,7 @@ CreateOwnLineChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_indicators) {
+CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -168,12 +168,17 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_indi
         chart_info$no_indicators() <= 3,
         chart_info$no_geogs() <= 4
       )
-      # Check if measure affected by COVID
-      covid_affected <- create_own_bds() |>
-        pull_uniques("Measure") %in% covid_affected_indicators
+      # Get selected indicators
+      selected_indicators <- create_own_bds() |>
+        pull_uniques("Measure")
 
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(chart_info$data(), covid_affected, "line")
+      covid_plot <- calculate_covid_plot(
+        chart_info$data(),
+        covid_affected_data,
+        selected_indicators,
+        "line"
+      )
 
       # Plot data - colour represents Geographies & linetype represents Indicator
       chart_info$data() |>
@@ -192,7 +197,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_indi
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
           data = subset(
-            create_show_point(chart_info$data(), covid_affected),
+            create_show_point(chart_info$data(), covid_affected_data, selected_indicators),
             show_point
           ),
           ggplot2::aes(
@@ -367,7 +372,7 @@ CreateOwnBarChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indicators) {
+CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -430,12 +435,17 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_indic
         NULL
       }
 
-      # Check if measure affected by COVID
-      covid_affected <- create_own_bds() |>
-        pull_uniques("Measure") %in% covid_affected_indicators
+      # Get selected indicators
+      selected_indicators <- create_own_bds() |>
+        pull_uniques("Measure")
 
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(clean_plot_data, covid_affected, "bar")
+      covid_plot <- calculate_covid_plot(
+        clean_plot_data,
+        covid_affected_data,
+        selected_indicators,
+        "bar"
+      )
 
       # Plot chart - split by indicators, colours represent Geographies
       clean_plot_data |>

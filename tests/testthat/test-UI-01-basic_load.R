@@ -31,7 +31,10 @@ testthat::test_that("App loads and title of app appears as expected", {
     app$get_text("title"),
     # This is the title of the app on load, you should change to match your app's title
     # The app title is usually set early on in the ui.R script or through a variable in the global.R script
-    "Local Authority Interactive Tool (LAIT) - LA Level: Barking and Dagenham, Infant Mortality"
+    paste0(
+      "Local Authority Interactive Tool (LAIT) - LA Level: ",
+      "Barking and Dagenham, A level cohort Average point score per entry"
+    )
   )
 })
 

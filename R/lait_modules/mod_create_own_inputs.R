@@ -25,11 +25,14 @@ Create_MainInputsUI <- function(id) {
         style = "margin-bottom: 1rem;",
         shiny::selectizeInput(
           inputId = ns("geog_input"),
-          label = "LAs, Regions, and England:",
+          label = tags$label(
+            "LAs, Regions, and England:",
+            create_tooltip_icon("You can change selection by typing or scrolling")
+          ),
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select a LA, Region or England...",
+            "placeholder" = "Start typing or scroll to add LAs, Regions or England...",
             plugins = list("remove_button")
           )
         )
@@ -43,7 +46,7 @@ Create_MainInputsUI <- function(id) {
           choices = c("All Topics", metric_topics),
           selected = "All Topics",
           options = list(
-            placeholder = "No topic selected, showing all indicators.",
+            placeholder = "No topic selected, showing all indicators...",
             plugins = list("clear_button")
           )
         )
@@ -57,7 +60,7 @@ Create_MainInputsUI <- function(id) {
           choices = metric_names,
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select an indicator...",
+            "placeholder" = "Start typing or scroll to add indicators...",
             plugins = list("remove_button")
           )
         )
@@ -228,7 +231,18 @@ YearRangeUI <- function(id) {
 
   shinyWidgets::pickerInput(
     ns("year_range"),
-    "Select Year Range",
+    label = tags$label(
+      "Select Year Range:",
+      create_tooltip_icon(
+        "<ul style='text-align: left; margin-left: 0; padding-left: 20px;'>
+          <li>Select a year to view data for that year</li>
+          <li>Select two years to view data from Year A to Year B</li>
+          <li>Leave unselected to display all years</li>
+        </ul>
+        ",
+        placement = "right"
+      )
+    ),
     choices = all_year_types,
     choicesOpt = list(
       content = rep("Loading...", length(all_year_types))
@@ -298,7 +312,7 @@ YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) 
           maxOptions = 2,
           maxOptionsText = "Deselect a year",
           multipleSeparator = " to ",
-          noneSelectedText = "All years available",
+          noneSelectedText = "All years selected",
           size = "auto"
         )
       )

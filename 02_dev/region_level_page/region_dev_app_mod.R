@@ -57,7 +57,7 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("region_inputs", shared_values)
+  app_inputs <- appInputsServer("region_inputs", shared_values, topic_indicator_full)
 
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------
@@ -94,7 +94,7 @@ server_mod <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region multi-choice line chart --------------------------------------------
@@ -105,7 +105,7 @@ server_mod <- function(input, output, session) {
     stat_n_geog,
     region_names_bds,
     shared_values,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region focus bar chart ---------------------------------------------------
@@ -115,7 +115,7 @@ server_mod <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region multi-choice bar chart ---------------------------------------------
@@ -126,7 +126,7 @@ server_mod <- function(input, output, session) {
     stat_n_geog,
     region_names_bds,
     shared_values,
-    covid_affected_indicators
+    covid_affected_data
   )
 }
 

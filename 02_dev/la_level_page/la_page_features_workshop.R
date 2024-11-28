@@ -279,11 +279,13 @@ dfe_reactable(
 )
 
 # LA line chart plot ----------------------------------------------------------
-# Check if measure affected by COVID
-covid_affected <- selected_indicator %in% covid_affected_indicators
-
 # Generate the covid plot data if add_covid_plot is TRUE
-covid_plot_line <- calculate_covid_plot(la_long, covid_affected, "line")
+covid_plot_line <- calculate_covid_plot(
+  la_long,
+  covid_affected_data,
+  selected_indicator,
+  "line"
+)
 
 # Plot
 la_line_chart <- la_long |>
@@ -293,7 +295,7 @@ la_line_chart <- la_long |>
   # Only show point data where line won't appear (NAs)
   ggplot2::geom_point(
     data = subset(
-      create_show_point(la_long, covid_affected),
+      create_show_point(la_long, covid_affected_data, selected_indicator),
       show_point
     ), ggplot2::aes(
       x = Years_num,
@@ -356,7 +358,7 @@ htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
 # Generate the covid plot data if add_covid_plot is TRUE (for bar chart)
-covid_plot_bar <- calculate_covid_plot(la_long, covid_affected, "bar")
+covid_plot_bar <- calculate_covid_plot(la_long, covid_affected_data, selected_la, "bar")
 
 # Plot
 la_bar_chart <- la_long |>

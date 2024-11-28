@@ -67,7 +67,7 @@ test_that("Deafult inputs", {
   # Indicator
   expect_equal(
     shinytest_app$get_value(input = "la_level-indicator_name"),
-    "Infant Mortality"
+    "A level cohort Average point score per entry"
   )
 })
 

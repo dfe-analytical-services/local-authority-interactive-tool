@@ -81,7 +81,7 @@ LA_LineChartServer <- function(id,
                                app_inputs,
                                bds_metrics,
                                stat_n_la,
-                               covid_affected_indicators) {
+                               covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -94,11 +94,13 @@ LA_LineChartServer <- function(id,
 
     # Build main static plot
     line_chart <- reactive({
-      # Check if measure affected by COVID
-      covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(la_long(), covid_affected, "line")
+      covid_plot <- calculate_covid_plot(
+        la_long(),
+        covid_affected_data,
+        app_inputs$indicator(),
+        "line"
+      )
 
       # Build plot
       la_long() |>
@@ -117,12 +119,11 @@ LA_LineChartServer <- function(id,
         ) +
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
-          data = subset(create_show_point(la_long(), covid_affected), show_point),
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`
+          data = subset(
+            create_show_point(la_long(), covid_affected_data, app_inputs$indicator()),
+            show_point
           ),
+          ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
           shape = 15,
           size = 1,
           na.rm = TRUE
@@ -272,7 +273,7 @@ LA_BarChartServer <- function(id,
                               app_inputs,
                               bds_metrics,
                               stat_n_la,
-                              covid_affected_indicators) {
+                              covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -285,11 +286,13 @@ LA_BarChartServer <- function(id,
 
     # Build main static plot
     bar_chart <- reactive({
-      # Check if measure affected by COVID
-      covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(la_long(), covid_affected, "bar")
+      covid_plot <- calculate_covid_plot(
+        la_long(),
+        covid_affected_data,
+        app_inputs$indicator(),
+        "bar"
+      )
 
       # Build plot
       la_long() |>

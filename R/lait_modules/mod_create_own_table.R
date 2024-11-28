@@ -192,7 +192,10 @@ StagingTableUI <- function(id) {
     class = "well",
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
-      h3("Staging Table (View of current selections)"),
+      h3(
+        "Staging Table",
+        create_tooltip_icon("Showing data from current selections")
+      ),
       # Include empty divs so matches inputs above and add selections aligns
       div(),
       div(),
@@ -748,7 +751,16 @@ CreateOwnTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Output Table (View of all saved selections)"),
+    h3(
+      "Output Table",
+      create_tooltip_icon(
+        '<ul style="text-align: left; margin-left: 0; padding-left: 20px;">
+         <li>Showing data from all the saved selections</li>
+         <li>Populate by clicking the "Add selections" button</li>
+       </ul>
+      '
+      )
+    ),
     bslib::navset_card_tab(
       # Create Own Table -------------------------------------------------------
       bslib::nav_panel(
