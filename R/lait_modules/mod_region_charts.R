@@ -531,7 +531,8 @@ Region_MultiChartInputUI <- function(id) {
       options = list(
         maxItems = 3,
         plugins = list("remove_button"),
-        dropdownParent = "body"
+        dropdownParent = "body",
+        placeholder = "Start typing or scroll to add..."
       )
     ),
     shiny::selectizeInput(
@@ -542,7 +543,8 @@ Region_MultiChartInputUI <- function(id) {
       options = list(
         maxItems = 3,
         plugins = list("remove_button"),
-        dropdownParent = "body"
+        dropdownParent = "body",
+        placeholder = "Start typing or scroll to add..."
       )
     )
   )

@@ -440,7 +440,8 @@ StatN_Chart_InputUI <- function(id) {
       options = list(
         maxItems = 3,
         plugins = list("remove_button"),
-        dropdownParent = "body"
+        dropdownParent = "body",
+        placeholder = "Start typing or scroll to add..."
       )
     ),
     shiny::selectizeInput(
@@ -451,7 +452,8 @@ StatN_Chart_InputUI <- function(id) {
       options = list(
         maxItems = 3,
         plugins = list("remove_button"),
-        dropdownParent = "body"
+        dropdownParent = "body",
+        placeholder = "Start typing or scroll to add..."
       )
     )
   )
