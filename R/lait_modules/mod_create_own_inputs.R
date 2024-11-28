@@ -234,9 +234,12 @@ YearRangeUI <- function(id) {
     label = tags$label(
       "Select Year Range:",
       create_tooltip_icon(
-        "Select a year to view data for that year.<br>
-        Select two years to view data from Year A to Year B.<br>
-        Leave unselected to display all years.",
+        "<ul style='text-align: left; margin-left: 0; padding-left: 20px;'>
+          <li>Select a year to view data for that year.</li>
+          <li>Select two years to view data from Year A to Year B.</li>
+          <li>Leave unselected to display all years.</li>
+        </ul>
+        ",
         placement = "right"
       )
     ),
