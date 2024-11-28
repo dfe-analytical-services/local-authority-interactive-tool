@@ -25,11 +25,14 @@ Create_MainInputsUI <- function(id) {
         style = "margin-bottom: 1rem;",
         shiny::selectizeInput(
           inputId = ns("geog_input"),
-          label = "LAs, Regions, and England:",
+          label = tags$label(
+            "LAs, Regions, and England:",
+            create_tooltip_icon("You can change selection by typing or scrolling")
+          ),
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select a LA, Region or England",
+            "placeholder" = "Start typing or scroll to add LAs, Regions or England...",
             plugins = list("remove_button")
           )
         )
@@ -40,7 +43,12 @@ Create_MainInputsUI <- function(id) {
         shiny::selectizeInput(
           inputId = ns("topic_input"),
           label = "Topic:",
-          choices = metric_topics
+          choices = c("All Topics", metric_topics),
+          selected = "All Topics",
+          options = list(
+            placeholder = "No topic selected, showing all indicators...",
+            plugins = list("clear_button")
+          )
         )
       ),
       # Indicator input
@@ -52,7 +60,7 @@ Create_MainInputsUI <- function(id) {
           choices = metric_names,
           multiple = TRUE,
           options = list(
-            "placeholder" = "Select an indicator",
+            "placeholder" = "Start typing or scroll to add indicators...",
             plugins = list("remove_button")
           )
         )
@@ -77,10 +85,23 @@ Create_MainInputsUI <- function(id) {
       shiny::checkboxInput(ns("inc_regions"), "Include All Regions", FALSE),
       shiny::checkboxInput(ns("inc_england"), "Include England", FALSE)
     ),
+    # Clear all current selections
+    "Clear all current selections" = div(
+      style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
+      shinyGovstyle::button_Input(
+        inputId = ns("clear_all"),
+        label = "Clear all current selections",
+        type = "warning"
+      )
+    ),
     # Add selection (query) button
     "Add selection" = div(
       style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
-      shiny::actionButton(ns("add_query"), "Add selections", class = "gov-uk-button")
+      shinyGovstyle::button_Input(
+        inputId = ns("add_query"),
+        label = "Add selections",
+        type = "start"
+      )
     )
   )
 }
@@ -100,81 +121,91 @@ Create_MainInputsUI <- function(id) {
 #'                   used for filtering indicators based on selected topics.
 #' @return A list of reactive values containing user inputs.
 #'
-Create_MainInputsServer <- function(id, bds_metrics) {
+Create_MainInputsServer <- function(id, topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
     # Reactive to store all selected topic-indicator pairs
     # Used to filter BDS correctly (due to duplication of indicator names
     # across topics)
-    selected_indicators <- reactiveVal({
-      data.frame(
-        Topic = character(),
-        Measure = character()
-      )
-    })
+    selected_indicators <- reactiveVal(NULL)
 
     # Filter indicator choices based on the selected topic
     # But keep already selected indicators from other topics
-    shiny::observeEvent(input$topic_input, {
-      # Available indicators (based on topic chosen)
-      filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(Topic %in% input$topic_input) |>
-        dplyr::select(Topic, Measure)
+    shiny::observeEvent(input$topic_input,
+      {
+        req(input$topic_input)
+        # Available indicators (based on topic chosen)
+        topic_indicators <- topic_indicator_full |>
+          filter_by_topic("Topic", input$topic_input) |>
+          pull_uniques("Measure")
 
-      # Get the already selected topic-indicator pairs
-      current_selection <- selected_indicators()
+        # Get the already selected topic-indicator pairs
+        current_selection <- selected_indicators()
 
-      # Combine already selected topic-indicator pairs with new topic indicators
-      # Allows indicators to stay selected despite not being part of the new topic
-      combined_choices <- unique(rbind(current_selection, filtered_topic_bds))
+        # Combine already selected topic-indicator pairs with new topic indicators
+        # Allows indicators to stay selected despite not being part of the new topic
+        # Ensure only valid indicators are retained
+        combined_choices <- unique(c(current_selection, topic_indicators))
 
-      # Update the choices with new topic whilst retaining the
-      # already selected indicators
-      shiny::updateSelectizeInput(
-        session = session,
-        inputId = "indicator",
-        choices = combined_choices$Measure,
-        selected = current_selection$Measure
-      )
-    })
+        # Update the choices with new topic whilst retaining the
+        # already selected indicators
+        shiny::updateSelectizeInput(
+          session = session,
+          inputId = "indicator",
+          choices = combined_choices,
+          selected = current_selection
+        )
+      },
+      priority = 1
+    )
 
     # Update the selected_indicators reactive for newly selected topic-indicator pairs
     # This keeps selection consistent across topics
     shiny::observeEvent(input$indicator,
       {
         # Get the new topic-indicator pairs
-        current_filtered <- bds_metrics |>
+        current_filtered <- topic_indicator_full |>
           dplyr::filter(
-            Topic %in% input$topic_input,
             Measure %in% input$indicator
           ) |>
-          dplyr::distinct(Topic, Measure)
+          pull_uniques("Measure")
 
         # Get previously selected indicators
         previous_selection <- selected_indicators()
 
         # Remove any topic-indicator pairs that have been deselected
-        deselected_measures <- setdiff(previous_selection$Measure, input$indicator)
-        updated_selection <- previous_selection |>
-          dplyr::filter(!Measure %in% deselected_measures)
+        updated_selection <- setdiff(input$indicator, previous_selection)
 
         # Combine the new topic-indicator pairs with the previous selections
-        combined_selection <- unique(rbind(updated_selection, current_filtered))
+        combined_selection <- unique(c(updated_selection, current_filtered))
 
         # Update the reactive value for all topic-indicator pairs
         selected_indicators(combined_selection)
       },
-      ignoreNULL = FALSE
+      ignoreNULL = FALSE,
+      priority = 2
     )
+
+    # Clear all current selections
+    observeEvent(input$clear_all, {
+      # Reset inputs to their initial state
+      updateSelectizeInput(session, "geog_input", selected = NA)
+      updateSelectizeInput(session, "indicator", selected = NA)
+      updateRadioButtons(session, "la_group", selected = "no_groups")
+      updateCheckboxInput(session, "inc_regions", value = FALSE)
+      updateCheckboxInput(session, "inc_england", value = FALSE)
+
+      # Emit a reset signal for year_range
+      session$sendCustomMessage("clear_year_range", TRUE)
+    })
 
     # Return create your own main inputs
     create_inputs <- list(
       geog = reactive(input$geog_input),
-      topic = reactive(selected_indicators()$Topic),
-      indicator = reactive(selected_indicators()$Measure),
-      selected_indicators = reactive(selected_indicators()),
+      indicator = reactive(selected_indicators()),
       la_group = reactive(input$la_group),
       inc_regions = reactive(input$inc_regions),
       inc_england = reactive(input$inc_england),
+      clear_selections = reactive(input$clear_all),
       add_query = reactive(input$add_query)
     )
 
@@ -200,8 +231,28 @@ YearRangeUI <- function(id) {
 
   shinyWidgets::pickerInput(
     ns("year_range"),
-    "Select Year Range",
-    choices = NULL,
+    label = tags$label(
+      "Select Year Range:",
+      create_tooltip_icon(
+        "<ul style='text-align: left; margin-left: 0; padding-left: 20px;'>
+          <li>Select a year to view data for that year</li>
+          <li>Select two years to view data from Year A to Year B</li>
+          <li>Leave unselected to display all years</li>
+        </ul>
+        ",
+        placement = "right"
+      )
+    ),
+    choices = all_year_types,
+    choicesOpt = list(
+      content = rep("Loading...", length(all_year_types))
+    ),
+    options = shinyWidgets::pickerOptions(
+      noneSelectedText = "Loading...",
+      maxOptions = 2,
+      maxOptionsText = "Still loading...",
+      size = 1
+    ),
     multiple = TRUE
   )
 }
@@ -223,7 +274,7 @@ YearRangeUI <- function(id) {
 #' @return A list containing reactive values for selected year range
 #'         and available year choices.
 #'
-YearRangeServer <- function(id, bds_metrics, indicator_input) {
+YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) {
   moduleServer(id, function(input, output, session) {
     # Compute years choices available based on selected indicator
     years_choices <- reactive({
@@ -245,15 +296,24 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
 
     # Update the year range choices based on the selected indicator
     observeEvent(indicator_input(), {
+      # Get the valid choices based on the selected indicator
+      valid_choices <- years_choices()
+
+      # Retain only the valid selected years from the current input
+      valid_selection <- intersect(input$year_range, valid_choices)
+
+      # Update the picker input with the new choices and valid selections
       shinyWidgets::updatePickerInput(
         session = session,
         inputId = "year_range",
-        choices = years_choices(),
+        choices = valid_choices,
+        selected = valid_selection,
         options = shinyWidgets::pickerOptions(
           maxOptions = 2,
           maxOptionsText = "Deselect a year",
           multipleSeparator = " to ",
-          noneSelectedText = "All years available"
+          noneSelectedText = "All years selected",
+          size = "auto"
         )
       )
     })
@@ -266,10 +326,18 @@ YearRangeServer <- function(id, bds_metrics, indicator_input) {
           inputId = "year_range",
           choices = "Please select an indicator first",
           options = shinyWidgets::pickerOptions(
-            noneSelectedText = "Select an indicator to see year range"
+            noneSelectedText = "Select an indicator to see year range",
+            maxOptions = 2,
+            maxOptionsText = "Select and indicator",
+            size = "auto"
           )
         )
       }
+    })
+
+    # Reset year range when clear all current selections button clicked
+    observeEvent(clear_selections(), {
+      shinyWidgets::updatePickerInput(session, "year_range", selected = NULL)
     })
 
     # Collect selected year range and available year choices

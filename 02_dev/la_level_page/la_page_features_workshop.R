@@ -11,11 +11,11 @@ list.files("R/", full.names = TRUE) |>
 
 # LAIT LA Level ----------------------------------
 # - Local Authority, Region and England table ---
-selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Children killed or seriously injured in road traffic accidents"
+selected_topic <- "Key Stage 2"
+selected_indicator <- "KS2 TA - % working at greater depth in writing - All Pupils"
 # "Children killed or seriously injured in road traffic accidents"
 # "Infant Mortality" # "Assessed Child Deaths - modifiable factors"
-selected_la <- "Bedford Borough" # "Barnet" # Cumberland
+selected_la <- "Barking and Dagenham" # "Barnet" # Cumberland
 
 # Filter stat neighbour for selected LA
 filtered_sn <- stat_n_la |>
@@ -47,7 +47,9 @@ la_region_ldn_clean <- clean_ldn_region(la_region, filtered_bds)
 la_filtered_bds <- filtered_bds |>
   dplyr::filter(
     `LA and Regions` %in% c(selected_la, la_region_ldn_clean, la_sns, "England")
-  )
+  ) |>
+  dplyr::distinct(`LA and Regions`, Years, .keep_all = TRUE)
+
 
 # SN average
 sn_avg <- la_filtered_bds |>
@@ -179,10 +181,13 @@ if (la_indicator_polarity %in% "Low") {
   la_quartile <- "-"
 }
 
+no_show_qb <- selected_indicator %in% no_qb_indicators
+
 la_quartile <- calculate_quartile_band(
   la_indicator_val,
   la_quartile_bands,
-  la_indicator_polarity
+  la_indicator_polarity,
+  no_show_qb
 )
 
 # Build stats table - code logic
@@ -223,7 +228,8 @@ la_stats_table <- build_la_stats_table(
   la_quartile,
   la_quartile_bands,
   indicator_dps,
-  la_indicator_polarity
+  la_indicator_polarity,
+  no_show_qb
 )
 
 
@@ -264,7 +270,7 @@ dfe_reactable(
       `Latest National Rank` = reactable::colDef(
         header = add_tooltip_to_reactcol(
           "Latest National Rank",
-          "Rank 1 is always the best performer"
+          "Rank 1 is always best/top"
         )
       ),
       Polarity = reactable::colDef(show = FALSE)
@@ -273,19 +279,23 @@ dfe_reactable(
 )
 
 # LA line chart plot ----------------------------------------------------------
-# Check if measure affected by COVID
-covid_affected <- selected_indicator %in% covid_affected_indicators
-
 # Generate the covid plot data if add_covid_plot is TRUE
-covid_plot_line <- calculate_covid_plot(la_long, covid_affected, "line")
+covid_plot_line <- calculate_covid_plot(
+  la_long,
+  covid_affected_data,
+  selected_indicator,
+  "line"
+)
 
 # Plot
 la_line_chart <- la_long |>
+  # Set geog orders so selected LA is on top of plot
+  reorder_la_regions(reverse = TRUE) |>
   ggplot2::ggplot() +
   # Only show point data where line won't appear (NAs)
   ggplot2::geom_point(
     data = subset(
-      create_show_point(la_long, covid_affected),
+      create_show_point(la_long, covid_affected_data, selected_indicator),
       show_point
     ), ggplot2::aes(
       x = Years_num,
@@ -309,7 +319,7 @@ la_line_chart <- la_long |>
   # Add COVID plot if indicator affected
   add_covid_elements(covid_plot_line) +
   format_axes(la_long) +
-  set_plot_colours(la_long, focus_group = selected_la) +
+  set_plot_colours(la_long, "colour", focus_group = selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 
@@ -348,7 +358,7 @@ htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
 # Generate the covid plot data if add_covid_plot is TRUE (for bar chart)
-covid_plot_bar <- calculate_covid_plot(la_long, covid_affected, "bar")
+covid_plot_bar <- calculate_covid_plot(la_long, covid_affected_data, selected_la, "bar")
 
 # Plot
 la_bar_chart <- la_long |>

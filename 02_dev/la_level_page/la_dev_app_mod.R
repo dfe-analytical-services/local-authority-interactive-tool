@@ -19,6 +19,7 @@ ui_mod <- bslib::page_fillable(
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
   tags$head(htmltools::includeScript("www/custom_js.js")),
   shinyToastify::useShinyToastify(),
+  shinyjs::useShinyjs(),
 
   # Tab header ================================================================
   h1("Local Authority View"),
@@ -62,8 +63,11 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("la_inputs", shared_values)
-
+  app_inputs <- appInputsServer(
+    "la_inputs",
+    shared_values,
+    metrics_raw
+  )
 
   # LA level table ----------------------------------
   LA_LevelTableServer(
@@ -78,7 +82,8 @@ server_mod <- function(input, output, session) {
     "la_stats",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    no_qb_indicators
   )
 
   # LA line chart  ----------------------------------
@@ -87,7 +92,7 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # LA bar chart  ----------------------------------
@@ -96,7 +101,7 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # LA Meta

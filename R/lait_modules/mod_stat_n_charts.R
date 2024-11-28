@@ -61,7 +61,7 @@ StatN_FocusLineChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
                                        stat_n_la,
-                                       covid_affected_indicators) {
+                                       covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -98,11 +98,13 @@ StatN_FocusLineChartServer <- function(id,
       if (all(is.na(focus_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
-        # Check if measure affected by COVID
-        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
         # Generate the covid plot data if add_covid_plot is TRUE
-        covid_plot <- calculate_covid_plot(focus_chart_data(), covid_affected, "line")
+        covid_plot <- calculate_covid_plot(
+          focus_chart_data(),
+          covid_affected_data,
+          app_inputs$indicator(),
+          "line"
+        )
 
         # Build plot
         focus_chart_data() |>
@@ -120,7 +122,7 @@ StatN_FocusLineChartServer <- function(id,
           # Only show point data where line won't appear (NAs)
           ggplot2::geom_point(
             data = subset(
-              create_show_point(focus_chart_data(), covid_affected),
+              create_show_point(focus_chart_data(), covid_affected_data, app_inputs$indicator()),
               show_point
             ),
             ggplot2::aes(
@@ -290,7 +292,7 @@ StatN_FocusBarChartServer <- function(id,
                                       app_inputs,
                                       bds_metrics,
                                       stat_n_la,
-                                      covid_affected_indicators) {
+                                      covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -324,11 +326,13 @@ StatN_FocusBarChartServer <- function(id,
       if (all(is.na(focus_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
-        # Check if measure affected by COVID
-        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
         # Generate the covid plot data if add_covid_plot is TRUE
-        covid_plot <- calculate_covid_plot(focus_chart_data(), covid_affected, "bar")
+        covid_plot <- calculate_covid_plot(
+          focus_chart_data(),
+          covid_affected_data,
+          app_inputs$indicator(),
+          "bar"
+        )
 
         # Build plot
         focus_chart_data() |>
@@ -436,7 +440,8 @@ StatN_Chart_InputUI <- function(id) {
       options = list(
         maxItems = 3,
         plugins = list("remove_button"),
-        dropdownParent = "body"
+        dropdownParent = "body",
+        placeholder = "Start typing or scroll to add..."
       )
     ),
     shiny::selectizeInput(
@@ -447,7 +452,8 @@ StatN_Chart_InputUI <- function(id) {
       options = list(
         maxItems = 3,
         plugins = list("remove_button"),
-        dropdownParent = "body"
+        dropdownParent = "body",
+        placeholder = "Start typing or scroll to add..."
       )
     )
   )
@@ -695,7 +701,7 @@ StatN_MultiLineChartServer <- function(id,
                                        bds_metrics,
                                        stat_n_la,
                                        shared_values,
-                                       covid_affected_indicators) {
+                                       covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -740,11 +746,13 @@ StatN_MultiLineChartServer <- function(id,
       if (all(is.na(chart_data()$values_num))) {
         display_no_data_plot()
       } else {
-        # Check if measure affected by COVID
-        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
         # Generate the covid plot data if add_covid_plot is TRUE
-        covid_plot <- calculate_covid_plot(chart_data(), covid_affected, "line")
+        covid_plot <- calculate_covid_plot(
+          chart_data(),
+          covid_affected_data,
+          app_inputs$indicator(),
+          "line"
+        )
 
         # Plot - selected areas
         chart_data() |>
@@ -761,12 +769,11 @@ StatN_MultiLineChartServer <- function(id,
           ) +
           # Only show point data where line won't appear (NAs)
           ggplot2::geom_point(
-            data = subset(create_show_point(chart_data(), covid_affected), show_point),
-            ggplot2::aes(
-              x = Years_num,
-              y = values_num,
-              color = `LA and Regions`
+            data = subset(
+              create_show_point(chart_data(), covid_affected_data, app_inputs$indicator()),
+              show_point
             ),
+            ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
             shape = 15,
             na.rm = TRUE,
             size = 1.5
@@ -941,7 +948,7 @@ StatN_MultiBarChartServer <- function(id,
                                       bds_metrics,
                                       stat_n_la,
                                       shared_values,
-                                      covid_affected_indicators) {
+                                      covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -985,11 +992,13 @@ StatN_MultiBarChartServer <- function(id,
       if (all(is.na(multi_chart_data()$values_num))) {
         display_no_data_plot()
       } else {
-        # Check if measure affected by COVID
-        covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
         # Generate the covid plot data if add_covid_plot is TRUE
-        covid_plot <- calculate_covid_plot(multi_chart_data(), covid_affected, "bar")
+        covid_plot <- calculate_covid_plot(
+          multi_chart_data(),
+          covid_affected_data,
+          app_inputs$indicator(),
+          "bar"
+        )
 
         # Build plot
         multi_chart_data() |>

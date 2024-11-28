@@ -21,6 +21,27 @@ source(here::here("R/fn_helper_functions.R"))
 source(here::here("R/fn_load_data.R"))
 ```
 
+Load the latest Data Dictionary
+
+```{r write-data_dict}
+# Load raw Data Dict from shared folder
+data_dict <- readxl::read_xlsx(
+  path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
+  sheet = "Data_prod",
+  # Replace multi-space with single-space
+  .name_repair = clean_spaces
+) |>
+  dplyr::filter(!grepl("DISCONTINUE", Table_status))
+
+# Write .csv version
+write.csv(
+  data_dict,
+  here::here("01_data/02_prod/LAIT Data Dictionary.csv"),
+  row.names = FALSE
+)
+```
+
+Logic to load BDS wide and convert to long
 
 ```{r pull-latest-bds-data}
 # Load raw BDS wide from shared folder
@@ -123,9 +144,9 @@ bds_long_la <- bds_long_clean |>
 # Pull list of measures from data dictionary (primary key and filters for
 # only public-safe/in-use measures)
 # NOTE: Children_away changed to Children_Away to match BDS
-data_dict <- readxl::read_xlsx(
-  path = paste0("01_data/02_prod/LAIT Data Dictionary.xlsx"),
-  sheet = "Data_prod"
+data_dict <- read.csv(
+  file = paste0("01_data/02_prod/LAIT Data Dictionary.csv"),
+  check.names = FALSE
 ) |>
   dplyr::mutate(Measure_short = trimws(Measure_short)) |>
   dplyr::filter(!grepl("DISCONTINUE", Table_status)) |>

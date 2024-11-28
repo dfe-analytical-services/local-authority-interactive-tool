@@ -51,14 +51,14 @@ get_yaxis_title <- function(data_full) {
 #' This function retrieves the title for the X-axis based on the `Year_Type`
 #' column of the provided dataset. If there is only one unique value for
 #' `Year_Type`, the title will be formatted with line breaks. If there are
-#' multiple unique values, a generic "Plain Years" label is used.
+#' multiple unique values, a generic "Mixed Year Types" label is used.
 #'
 #' @param data_full A data frame containing the `Year_Type` column, which will
 #'   be used to determine the X-axis title.
 #'
 #' @return A character string representing the X-axis title. This can either
 #'   be the value of `Year_Type` formatted with line breaks or the string
-#'   "Plain Years" if there are multiple unique values.
+#'   "Mixed Year Types" if there are multiple unique values.
 #'
 #' @details The function uses `pull_uniques` to extract unique values from
 #'   the `Year_Type` column. If a single unique value is found, it formats
@@ -76,10 +76,12 @@ get_xaxis_title <- function(data_full) {
     pull_uniques("Year_Type")
 
   # If more than one y-axis title then give generic
-  if (length(x_axis_title) == 1) {
+  if (length(x_axis_title) == 0 || all(is.na(x_axis_title))) {
+    "Years (no type given)"
+  } else if (length(x_axis_title) == 1) {
     add_line_breaks(x_axis_title)
   } else {
-    "Plain Years"
+    "Mixed Year Types"
   }
 }
 
@@ -361,6 +363,38 @@ get_years <- function(data_long, type = "numeric") {
 }
 
 
+#' Remove Trailing Zeroes from Formatted Numbers
+#'
+#' This function takes numeric values, formats them using `pretty_num_large()`
+#' and removes any trailing zeroes from the decimal part, but only for values
+#' greater than zero.
+#'
+#' @param x A numeric vector to be formatted.
+#' @param dp Integer. The default number of decimal places to be used if the
+#'   number has decimals. Default is 0.
+#' @param ... Additional arguments passed to `pretty_num_large`.
+#'
+#' @return A character vector with formatted numeric values and no trailing zeroes,
+#'         only for values greater than 0.
+#'
+#' @examples
+#' pretty_num_remove_trailing_zeroes(c(1000000, 1234567.8901, 100.0), dp = 3)
+#' pretty_num_remove_trailing_zeroes(c(5000000000, 9876543210), dp = 2)
+#'
+#' @export
+pretty_num_remove_zero <- function(x, dp = 2, ...) {
+  # Apply pretty_num_large to format the numbers
+  formatted_numbers <- pretty_num_large(x, dp = dp, ...)
+
+  # Remove trailing zeroes after decimal point
+  if (abs(as.numeric(x)) >= 1 || abs(as.numeric(x)) == 0) {
+    formatted_numbers <- sub("\\.0+(?=\\s|$)", "", formatted_numbers, perl = TRUE)
+  }
+
+  formatted_numbers
+}
+
+
 #' Format Axes for Plotting
 #'
 #' This function formats the axes for a ggplot2 plot based on the provided
@@ -386,7 +420,7 @@ get_years <- function(data_long, type = "numeric") {
 #' ggplot(data_long) +
 #'   axes +
 #'   geom_line()
-format_axes <- function(data_long) {
+format_axes <- function(data_long, indicator_dps = 2) {
   # Get pretty Y-axis breaks
   y_breaks <- pretty_y_gridlines(data_long)
 
@@ -407,7 +441,7 @@ format_axes <- function(data_long) {
       limits = range(y_breaks),
       expand = expansion(0, 0),
       breaks = pretty(y_breaks),
-      labels = unlist(lapply(pretty(y_breaks), dfeR::pretty_num))
+      labels = unlist(lapply(pretty(y_breaks), pretty_num_remove_zero, indicator_dps))
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
@@ -934,10 +968,11 @@ generic_ggiraph_options <- function(...) {
 #' reordered_data <- reorder_la_regions(chart_data, factor_order)
 #' print(reordered_data)
 #'
-reorder_la_regions <- function(chart_data, factor_order, ...) {
+reorder_la_regions <- function(chart_data, factor_order = NULL, reverse = FALSE, ...) {
   chart_data |>
     dplyr::mutate(
-      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...)
+      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...),
+      `LA and Regions` = if (reverse) forcats::fct_rev(`LA and Regions`) else `LA and Regions`
     ) |>
     dplyr::arrange(`LA and Regions`)
 }
@@ -1080,7 +1115,13 @@ display_no_data_plot <- function(label = "No plot due to no available data.") {
 #' # Process data
 #' result <- create_show_point(data, covid_affected)
 #'
-create_show_point <- function(data, covid_affected) {
+create_show_point <- function(data, covid_affected_data, selected_indicators) {
+  # Check if all indicators affected by COVID
+  all_covid_affected <- all(
+    covid_affected_data |>
+      pull_uniques("Measure") %in% selected_indicators
+  )
+
   data |>
     dplyr::group_by(
       `LA and Regions`,
@@ -1115,8 +1156,8 @@ create_show_point <- function(data, covid_affected) {
           (dplyr::row_number() == dplyr::n() & dplyr::lag(is_na)) |
           # Covid start and end points
           # (uses all for multiple indicators in create your own)
-          (all(covid_affected) & is_prev_covid) |
-          (all(covid_affected) & is_post_covid),
+          (all_covid_affected & is_prev_covid) |
+          (all_covid_affected & is_post_covid),
         TRUE,
         FALSE
       )
@@ -1177,22 +1218,24 @@ create_show_point <- function(data, covid_affected) {
 #' # Line chart example
 #' covid_plot_data <- calculate_covid_plot(data, covid_affected, "line")
 #'
-calculate_covid_plot <- function(data, covid_affected, chart_type) {
-  if (any(covid_affected)) {
-    # Filter rows with NA values in `values_num` between 2019 and 2021 (COVID)
-    # Do not include NaN here as these are user created missing vars in Create Own
+calculate_covid_plot <- function(data, covid_affected_data, selected_indicators, chart_type) {
+  # Check if measures affected by COVID
+  covid_affected <- covid_affected_data |>
+    dplyr::filter(Measure %in% selected_indicators)
+
+  if (nrow(covid_affected) > 0) {
+    # Group/ filter by `Measure` if it exists (for Create Own charts - multiple indicators)
+    grouping_vars <- if ("Measure" %in% colnames(data)) "Measure" else NULL
+
+    # Join covid data to find the NA years due to COVID
     na_rows <- data |>
-      dplyr::filter(
-        Years_num >= 2019, Years_num <= 2021,
-        is.na(values_num), !is.nan(values_num)
-      ) |>
-      dplyr::arrange(Years_num)
+      dplyr::inner_join(
+        covid_affected |> dplyr::select(Measure, Years_num),
+        by = c(grouping_vars, "Years_num")
+      )
 
     # Whether to offset vline to last/next non-NA point (for line chart)
     yr_offset <- ifelse(chart_type == "line", 1, 0)
-
-    # Group by `Measure` if it exists (for Create Own charts - multiple indicators)
-    grouping_vars <- if ("Measure" %in% colnames(na_rows)) "Measure" else NULL
 
     # Find missing COVID period and calculate label position
     # (by indicator for Create Own)
@@ -1218,8 +1261,14 @@ calculate_covid_plot <- function(data, covid_affected, chart_type) {
         label_x = (min(start_year) + max(end_year)) / 2
       )
 
+    # Check if all indicators affected by COVID
+    all_covid_affected <- all(
+      covid_affected |>
+        pull_uniques("Measure") %in% selected_indicators
+    )
+
     # Set label based on whether the COVID period is the same across all indicators
-    if (shared_period$same_period && all(covid_affected)) {
+    if (shared_period$same_period && all_covid_affected) {
       shared_period$label <- "No data\ndue to COVID"
     } else {
       shared_period$label <- "Some indicators have\nmissing data due to COVID"

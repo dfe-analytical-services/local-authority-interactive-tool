@@ -30,7 +30,6 @@ if (FALSE) {
   shhh(library(lintr))
   shhh(library(roxygen2))
   shhh(library(rstudioapi))
-  shhh(library(rsconnect)) # Needs to be removed once internal testing done
   # Housekeeping
   shhh(library(devtools))
   shhh(library(usethis))
@@ -108,9 +107,9 @@ stat_n_raw <- readxl::read_xlsx(
 )
 
 # Data dictionary
-metrics_raw <- readxl::read_xlsx(
-  here::here("01_data/02_prod/LAIT Data Dictionary.xlsx"),
-  sheet = "Data_prod"
+metrics_raw <- read.csv(
+  here::here("01_data/02_prod/LAIT Data Dictionary.csv"),
+  check.names = FALSE
 )
 
 
@@ -154,10 +153,32 @@ stat_n_geog <- stat_n |>
 
 
 # Metrics
-# Remove whitesapce from key & filter out discontinued metrics
+# Filter out discontinued metrics
+metrics_included <- metrics_raw |>
+  dplyr::filter(!grepl("DISCONTINUE", Table_status))
+
+# Topic and indicators pairs (full - no duplicates filtered out)
+topic_indicator_full <- metrics_included |>
+  dplyr::distinct(Topic, Measure)
+
+# Duplicate indicators across topics
+dupes_across_topics <- topic_indicator_full |>
+  dplyr::filter(dplyr::n() > 1, .by = "Measure")
+
+# For each dupe combine topic names
+dupes_combined_topics <- dupes_across_topics |>
+  dplyr::summarise(
+    Topic = stringr::str_c(unique(Topic), collapse = " / "),
+    .by = "Measure"
+  )
+
+# Cleaning
+# Remove whitesapce from key
 # Set any NA decimal place column values to 1
 # Convert Last and Next updated to Format Month Year
-metrics_clean <- metrics_raw |>
+# Add in combined topic names for duplicate indicators
+# Remove duplicates
+metrics_clean <- metrics_included |>
   dplyr::mutate(
     Measure_short = trimws(Measure_short),
     dps = ifelse(is.na(dps), 1, dps),
@@ -178,12 +199,24 @@ metrics_clean <- metrics_raw |>
       TRUE ~ as.character(`Next Update`)
     )
   ) |>
-  dplyr::filter(!grepl("DISCONTINUE", Table_status))
+  dplyr::left_join(
+    dupes_combined_topics,
+    by = "Measure",
+    suffix = c("", "_dupe_combined")
+  ) |>
+  # Update Topic where combined values exist
+  dplyr::mutate(
+    Topic = dplyr::case_when(
+      !is.na(Topic_dupe_combined) ~ Topic_dupe_combined,
+      TRUE ~ Topic
+    )
+  ) |>
+  dplyr::select(-Topic_dupe_combined) |>
+  dplyr::filter(!duplicated(Measure))
 
 metrics_discontinued <- metrics_raw |>
   dplyr::filter(Measure_short %notin% metrics_clean$Measure_short) |>
   pull_uniques("Measure_short")
-
 
 # Joining data ================================================================
 
@@ -356,18 +389,39 @@ testthat::test_that("Ther are 11 Region names & match Stat Neighbours", {
 })
 
 # Metric topics
-metric_topics <- pull_uniques(metrics_clean, "Topic")
+metric_topics <- pull_uniques(topic_indicator_full, "Topic")
 
-# Metric names
-metric_names <- pull_uniques(metrics_clean, "Measure")
+# Metric names (alphabetically ordered)
+metric_names <- tibble::tibble(
+  Measure = topic_indicator_full |>
+    pull_uniques("Measure")
+) |>
+  dplyr::arrange(
+    !grepl("^[A-Za-z]", Measure),
+    Measure
+  )
+
+# All Years across string and num Years
+# (for Create Your Own year range choices - initially)
+all_year_types <- unique(c(
+  bds_metrics |>
+    pull_uniques("Years"),
+  bds_metrics |>
+    pull_uniques("Years_num")
+))
 
 # Indicators that are impacted by COVID
 # (aka missing data across all LAs for a whole year between 2091-2022)
-covid_affected_indicators <- bds_metrics |>
+covid_affected_data <- bds_metrics |>
   dplyr::filter(Years_num >= 2019, Years_num <= 2022) |>
   dplyr::group_by(Topic, Measure, Years_num) |>
   dplyr::summarise(all_na = all(is.na(values_num)), .groups = "keep") |>
   dplyr::filter(all_na) |>
+  dplyr::ungroup()
+
+# Indicators with too small a range for QB'ing
+no_qb_indicators <- metrics_clean |>
+  dplyr::filter(No_Quartile == "N") |>
   pull_uniques("Measure")
 
 # Successful load of global.R message

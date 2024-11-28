@@ -22,7 +22,11 @@ minimal_server <- function(input, output, session) {
     topic = NULL,
     indicator = NULL
   )
-  app_inputs <- appInputsServer("la_level", shared_values)
+  app_inputs <- appInputsServer(
+    "la_level",
+    shared_values,
+    topic_indicator_full
+  )
 
   # Main table
   la_main_tbl <- LA_LevelTableServer(

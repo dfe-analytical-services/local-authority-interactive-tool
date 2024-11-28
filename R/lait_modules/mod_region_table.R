@@ -690,7 +690,8 @@ Region_StatsTableServer <- function(id,
             Trend = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Trend",
-                "Based on change from previous year"
+                "Based on change from previous year",
+                placement = "top"
               ),
               cell = trend_icon_renderer,
               style = function(value) {

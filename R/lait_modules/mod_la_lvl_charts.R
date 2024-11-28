@@ -81,7 +81,7 @@ LA_LineChartServer <- function(id,
                                app_inputs,
                                bds_metrics,
                                stat_n_la,
-                               covid_affected_indicators) {
+                               covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -94,14 +94,18 @@ LA_LineChartServer <- function(id,
 
     # Build main static plot
     line_chart <- reactive({
-      # Check if measure affected by COVID
-      covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(la_long(), covid_affected, "line")
+      covid_plot <- calculate_covid_plot(
+        la_long(),
+        covid_affected_data,
+        app_inputs$indicator(),
+        "line"
+      )
 
       # Build plot
       la_long() |>
+        # Set geog orders so selected LA is on top of plot
+        reorder_la_regions(reverse = TRUE) |>
         ggplot2::ggplot() +
         ggiraph::geom_line_interactive(
           ggplot2::aes(
@@ -115,12 +119,11 @@ LA_LineChartServer <- function(id,
         ) +
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
-          data = subset(create_show_point(la_long(), covid_affected), show_point),
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`
+          data = subset(
+            create_show_point(la_long(), covid_affected_data, app_inputs$indicator()),
+            show_point
           ),
+          ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
           shape = 15,
           size = 1,
           na.rm = TRUE
@@ -130,7 +133,9 @@ LA_LineChartServer <- function(id,
         format_axes(la_long()) +
         set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
-        custom_theme()
+        custom_theme() +
+        # Revert order of the legend so goes from right to left
+        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
     })
 
     # Build interactive line chart
@@ -268,7 +273,7 @@ LA_BarChartServer <- function(id,
                               app_inputs,
                               bds_metrics,
                               stat_n_la,
-                              covid_affected_indicators) {
+                              covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -281,11 +286,13 @@ LA_BarChartServer <- function(id,
 
     # Build main static plot
     bar_chart <- reactive({
-      # Check if measure affected by COVID
-      covid_affected <- app_inputs$indicator() %in% covid_affected_indicators
-
       # Generate the covid plot data if add_covid_plot is TRUE
-      covid_plot <- calculate_covid_plot(la_long(), covid_affected, "bar")
+      covid_plot <- calculate_covid_plot(
+        la_long(),
+        covid_affected_data,
+        app_inputs$indicator(),
+        "bar"
+      )
 
       # Build plot
       la_long() |>

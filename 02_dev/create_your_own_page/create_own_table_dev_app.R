@@ -1020,7 +1020,7 @@ server <- function(input, output, session) {
     # Error messages for missing selections
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot("No plot as not enough selections made"),
+        ggobj = display_no_data_plot("No plot as not enough selections made."),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1035,7 +1035,7 @@ server <- function(input, output, session) {
       number_of_geogs() > 4
     ) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected"),
+        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1048,7 +1048,7 @@ server <- function(input, output, session) {
       number_of_indicators() > 3
     ) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected"),
+        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1184,7 +1184,7 @@ server <- function(input, output, session) {
     # Error messages for missing or too many selections
     if ("Message from tool" %in% colnames(clean_final_table())) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot("No plot as not enough selections made"),
+        ggobj = display_no_data_plot("No plot as not enough selections made."),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1197,7 +1197,7 @@ server <- function(input, output, session) {
       number_of_geogs() > 4
     ) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected"),
+        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1210,7 +1210,7 @@ server <- function(input, output, session) {
       number_of_indicators() > 3
     ) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected"),
+        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(

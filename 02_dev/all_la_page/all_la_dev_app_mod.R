@@ -43,7 +43,11 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("all_la_inputs", shared_values)
+  app_inputs <- appInputsServer(
+    "all_la_inputs",
+    shared_values,
+    topic_indicator_full
+  )
 
 
   # LA and Region table -------------------------------------------------------

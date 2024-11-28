@@ -278,7 +278,7 @@ StatN_TablesUI <- function(id) {
         ),
         br(),
         # Statistical Neighbour Statistics Table ------------------------------
-        StatN_StatsTableUI("stat_n_stats_mod"),
+        StatN_StatsTableUI("stat_n_stats_mod")
       ),
       bslib::nav_panel(
         "Download",
@@ -564,7 +564,8 @@ StatN_StatsTableServer <- function(id,
                                    app_inputs,
                                    bds_metrics,
                                    stat_n_la,
-                                   la_names_bds) {
+                                   la_names_bds,
+                                   no_qb_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -623,11 +624,15 @@ StatN_StatsTableServer <- function(id,
       stat_n_indicator_val <- filtered_bds() |>
         filter_la_regions(app_inputs$la(), latest = TRUE, pull_col = "values_num")
 
+      # Boolean as to whether to include Quartile Banding
+      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
+
       # Calculating which quartile this value sits in
       stat_n_quartile <- calculate_quartile_band(
         stat_n_indicator_val,
         stat_n_quartile_bands,
-        stat_n_indicator_polarity
+        stat_n_indicator_polarity,
+        no_show_qb
       )
 
       # SN stats table
@@ -665,7 +670,8 @@ StatN_StatsTableServer <- function(id,
             Trend = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Trend",
-                "Based on change from previous year"
+                "Based on change from previous year",
+                placement = "top"
               ),
               cell = trend_icon_renderer,
               style = function(value) {
@@ -682,7 +688,8 @@ StatN_StatsTableServer <- function(id,
             `Latest National Rank` = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Latest National Rank",
-                "Rank 1 is always the best performer"
+                "Rank 1 is always best/top",
+                placement = "right"
               )
             ),
             Polarity = reactable::colDef(show = FALSE)

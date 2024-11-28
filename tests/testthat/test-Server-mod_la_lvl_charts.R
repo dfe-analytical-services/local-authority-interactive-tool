@@ -18,7 +18,7 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
   # Running the test server
   shiny::testServer(
     LA_LineChartServer,
-    args = list(app_inputs, bds_metrics, stat_n_la, covid_affected_indicators),
+    args = list(app_inputs, bds_metrics, stat_n_la, covid_affected_data),
     {
       # Trigger reactivity to simulate the app environment
       session$flushReact()
@@ -68,7 +68,7 @@ testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct 
   # Running the test server
   shiny::testServer(
     LA_BarChartServer,
-    args = list(app_inputs, bds_metrics, stat_n_la, covid_affected_indicators),
+    args = list(app_inputs, bds_metrics, stat_n_la, covid_affected_data),
     {
       # Trigger reactivity to simulate the app environment
       session$flushReact()

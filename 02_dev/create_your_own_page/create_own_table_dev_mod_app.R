@@ -36,9 +36,10 @@ ui <- bslib::page_fillable(
       Create_MainInputsUI("create_inputs")["LA grouping"],
       Create_MainInputsUI("create_inputs")["Other grouping"],
       YearRangeUI("year_range"),
-      Create_MainInputsUI("create_inputs")["Add selection"]
+      Create_MainInputsUI("create_inputs")["Clear all current selections"]
     )
   ),
+  # Staging table and Add selections button
   StagingTableUI("staging_table"),
   QueryTableUI("query_table"),
   CreateOwnTableUI("create_own_table"),
@@ -46,7 +47,10 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Output Charts (Charts showing data from saved selections)"),
+    h3(
+      "Output Charts",
+      create_tooltip_icon("Charts showing data from all the saved selections")
+    ),
     p("Note a maximum of 4 geographies and 3 indicators can be shown."),
 
     # Line chart ---------------------------------------------------------------
@@ -60,13 +64,17 @@ ui <- bslib::page_fillable(
 # Main App Server
 server <- function(input, output, session) {
   # Call the main inputs module
-  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
+  create_inputs <- Create_MainInputsServer(
+    "create_inputs",
+    topic_indicator_full
+  )
 
   # Year range
   year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
-    create_inputs$indicator
+    create_inputs$indicator,
+    create_inputs$clear_selections
   )
 
   # Geog Groupings
@@ -133,14 +141,14 @@ server <- function(input, output, session) {
     "create_own_line",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   CreateOwnBarChartServer(
     "create_own_bar",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 }
 

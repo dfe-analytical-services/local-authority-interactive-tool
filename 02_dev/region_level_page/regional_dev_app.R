@@ -21,19 +21,26 @@ ui_dev <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "la_input",
-        label = "Change Authority:",
+        label = "LA:",
         choices = la_names_bds
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "topic_input",
         label = "Topic:",
-        choices = metric_topics
+        choices = c("All topics", metric_topics),
+        multiple = TRUE,
+        options = list(
+          maxItems = 1,
+          placeholder = "No topic selected, showing all indicators.",
+          plugins = list("clear_button"),
+          dropdownParent = "body"
+        )
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "indicator",
-        label = NULL,
+        label = "Indicator:",
         choices = metric_names
       )
     )
@@ -177,34 +184,57 @@ ui_dev <- bslib::page_fillable(
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input, {
-    # Get indicator choices for selected topic
-    filtered_topic_bds <- bds_metrics |>
-      dplyr::filter(
-        Topic == input$topic_input
-      ) |>
-      pull_uniques("Measure")
+  shiny::observeEvent(input$topic_input,
+    {
+      # Save the currently selected indicator
+      current_indicator <- input$indicator
 
-    updateSelectInput(
-      session = session,
-      inputId = "indicator",
-      label = "Indicator:",
-      choices = filtered_topic_bds
-    )
-  })
+      # Get indicator choices for selected topic
+      filtered_topic_bds <- bds_metrics |>
+        dplyr::filter(
+          # If topic_input is not NULL or "All topics", filter by selected topics
+          # Include all rows if no topic is selected or "All topics" is selected
+          if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
+            TRUE
+          } else {
+            .data$Topic %in% input$topic_input
+          }
+        ) |>
+        pull_uniques("Measure")
 
+      # Ensure the current indicator stays selected if it's in the new list of available indicators
+      # Default to the first available indicator if the current one is no longer valid
+      selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+        current_indicator
+      } else {
+        filtered_topic_bds[1]
+      }
+
+      shiny::updateSelectizeInput(
+        session = session,
+        inputId = "indicator",
+        label = "Indicator:",
+        choices = filtered_topic_bds,
+        selected = selected_indicator
+      )
+    },
+    ignoreNULL = FALSE
+  )
 
   # Region LA Level table ----------------------------------
-  # Filter for selected topic and indicator
   # Define filtered_bds outside of observeEvent
   filtered_bds <- reactiveValues(data = NULL)
 
   observeEvent(input$indicator, {
+    # Don't change the currently selected indicator if no indicator is selected
+    if (is.null(input$indicator) || input$indicator == "") {
+      return()
+    }
+
     # Region LA Level table ----------------------------------
-    # Filter for selected topic and indicator
+    # Filter for selected indicator
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
-        Topic == input$topic_input,
         Measure == input$indicator
       )
   })
@@ -718,39 +748,60 @@ server_dev <- function(input, output, session) {
 
 
   # LA Metadata ---------------------------------------------------------------
-  # Description
+  # Reactive values to store previous data
+  previous_metadata <- reactiveValues(
+    description = NULL,
+    methodology = NULL,
+    last_update = NULL,
+    next_update = NULL,
+    source = NULL
+  )
+
+  # Outputs using the helper function
   output$description <- renderText({
-    metrics_clean |>
-      get_metadata(input$indicator, "Description")
-  })
-
-  # Methodology
-  output$methodology <- renderUI({
-    metrics_clean |>
-      get_metadata(input$indicator, "Methodology")
-  })
-
-  # Last updated
-  output$last_update <- renderText({
-    metrics_clean |>
-      get_metadata(input$indicator, "Last Update")
-  })
-
-  # Next updated
-  output$next_update <- renderUI({
-    metrics_clean |>
-      get_metadata(input$indicator, "Next Update")
-  })
-
-  # Source (hyperlink)
-  output$source <- renderUI({
-    hyperlink <- metrics_clean |>
-      get_metadata(input$indicator, "Hyperlink(s)")
-    label <- input$indicator
-    dfeshiny::external_link(
-      href = hyperlink,
-      link_text = label
+    update_and_fetch_metadata(
+      input$indicator,
+      "Description",
+      previous_metadata,
+      "description"
     )
+  })
+
+  output$methodology <- renderUI({
+    update_and_fetch_metadata(
+      input$indicator,
+      "Methodology",
+      previous_metadata,
+      "methodology"
+    )
+  })
+
+  output$last_update <- renderText({
+    update_and_fetch_metadata(
+      input$indicator,
+      "Last Update",
+      previous_metadata,
+      "last_update"
+    )
+  })
+
+  output$next_update <- renderUI({
+    update_and_fetch_metadata(
+      input$indicator,
+      "Next Update",
+      previous_metadata,
+      "next_update"
+    )
+  })
+
+  output$source <- renderUI({
+    hyperlink <- update_and_fetch_metadata(
+      input$indicator,
+      "Hyperlink(s)",
+      previous_metadata,
+      "source"
+    )
+    dfeshiny::external_link(href = hyperlink, link_text = input$indicator)
   })
 }
 

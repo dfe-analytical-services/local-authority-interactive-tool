@@ -8,8 +8,13 @@
 #'
 MetadataUI <- function(id) {
   ns <- NS(id)
-  tagList(
-    uiOutput(ns("metadata"))
+
+  shinycssloaders::withSpinner(
+    uiOutput(ns("metadata")),
+    type = 7,
+    color = "#1d70b8",
+    size = 0.6,
+    proxy.height = "10px"
   )
 }
 
@@ -27,7 +32,15 @@ MetadataUI <- function(id) {
 #'
 MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
   moduleServer(id, function(input, output, session) {
+    # Reactive value to store the previous metadata
+    previous_metadata <- reactiveVal(NULL)
+
     output$metadata <- renderUI({
+      # If indicator_input is NULL, return the previous metadata
+      if (is.null(indicator_input()) || indicator_input() == "") {
+        return(previous_metadata())
+      }
+
       metadata <- data_metrics |>
         get_metadata(indicator_input(), metadata_type)
 
@@ -36,11 +49,16 @@ MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
         metadata <- dfeshiny::external_link(href = metadata, link_text = label)
       }
 
-      # Handle metadata that is text by converting newlines to <br> tags
+      # Collapse multiple newlines and limit <br> tags
       if (is.character(metadata)) {
-        metadata <- gsub("\r\n|\n", "<br>", metadata)
+        metadata <- gsub("\r\n|\n", "\n", metadata) # Normalize newlines
+        metadata <- gsub("\n{2,}", "<br><br>", metadata) # Replace multiple newlines with a single <br><br>
+        metadata <- gsub("\n", "", metadata) # Remove stray newlines
         metadata <- HTML(metadata)
       }
+
+      # Update the previous metadata value
+      previous_metadata(metadata)
 
       metadata
     })

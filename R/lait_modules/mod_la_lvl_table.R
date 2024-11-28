@@ -22,11 +22,33 @@ BDS_FilteredServer <- function(id, app_inputs, bds_metrics) {
     # Must ensure filtering only done when Indicator is changed
     # Otherwise it will filter immediately on Topic change
     observeEvent(app_inputs$indicator(), {
-      filtered_bds$data <- bds_metrics |>
+      # Don't change the currently selected indicator if no indicator is selected
+      if (is.null(app_inputs$indicator()) || app_inputs$indicator() == "") {
+        return()
+      }
+
+      # Filter for selected indicator
+      filtered_data <- bds_metrics |>
         dplyr::filter(
-          Topic == app_inputs$topic(),
           Measure == app_inputs$indicator()
         )
+
+      # Check for duplicates
+      duplicates <- filtered_data |>
+        dplyr::group_by(Measure, `LA and Regions`, Years) |>
+        dplyr::summarise(YearCount = dplyr::n(), .groups = "drop") |>
+        dplyr::filter(YearCount > 1)
+
+      # Issue warning if duplicates exist
+      if (nrow(duplicates) > 0) {
+        warning(
+          "There is duplicate data for the following indicator:\n",
+          paste0("Indicator: ", app_inputs$indicator())
+        )
+      }
+
+      # Update reactive values with the filtered data
+      filtered_bds$data <- filtered_data
     })
 
     reactive({
@@ -254,7 +276,11 @@ LA_StatsTableUI <- function(id) {
 #' @param bds_metrics A data frame of BDS metrics
 #' @param stat_n_la A data frame of statistical neighbours for each LA
 #' @return A list of outputs for the UI, including a data table of the LA stats
-LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
+LA_StatsTableServer <- function(id,
+                                app_inputs,
+                                bds_metrics,
+                                stat_n_la,
+                                no_qb_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -305,11 +331,15 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           pull_col = "values_num"
         )
 
+      # Boolean as to whether to include Quartile Banding
+      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
+
       # Calculating which quartile this value sits in
       la_quartile <- calculate_quartile_band(
         la_indicator_val,
         la_quartile_bands,
-        la_indicator_polarity
+        la_indicator_polarity,
+        no_show_qb
       )
 
       # Build stats LA Level table
@@ -322,7 +352,8 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         la_quartile,
         la_quartile_bands,
         get_indicator_dps(filtered_bds()),
-        la_indicator_polarity
+        la_indicator_polarity,
+        no_show_qb
       )
 
       la_stats_table
@@ -330,9 +361,12 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # LA Stats table
     output$la_stats <- reactable::renderReactable({
+      # Drop Quartile Bands
+      stats_table <- la_stats_table() |>
+        dplyr::select(-dplyr::any_of(c("A", "B", "C", "D", "No Quartiles")))
+
       dfe_reactable(
-        la_stats_table() |>
-          dplyr::select(-c("A", "B", "C", "D")),
+        stats_table,
         columns = modifyList(
           # Create the reactable with specific column alignments
           format_num_reactable_cols(
@@ -348,7 +382,8 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             Trend = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Trend",
-                "Based on change from previous year"
+                "Based on change from previous year",
+                placement = "top"
               ),
               cell = trend_icon_renderer,
               style = function(value) {
@@ -363,7 +398,8 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             `Latest National Rank` = reactable::colDef(
               header = add_tooltip_to_reactcol(
                 "Latest National Rank",
-                "Rank 1 is always the best performer"
+                "Rank 1 is always best/top",
+                placement = "right"
               )
             ),
             Polarity = reactable::colDef(show = FALSE)
@@ -376,7 +412,7 @@ LA_StatsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     output$la_quartiles <- reactable::renderReactable({
       # Get quartile bands only
       qb_table <- la_stats_table() |>
-        dplyr::select(c("A", "B", "C", "D"))
+        dplyr::select(dplyr::any_of(c("A", "B", "C", "D", "No Quartiles")))
 
       dfe_reactable(
         qb_table,

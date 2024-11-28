@@ -110,7 +110,10 @@ calculate_change_from_prev_yr <- function(data) {
 #'   "High"
 #' )
 #'
-calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_polarity) {
+calculate_quartile_band <- function(indicator_val,
+                                    quartile_bands,
+                                    indicator_polarity,
+                                    no_show_qb = FALSE) {
   # Check if all required quartile bands are present
   required_bands <- c("0%", "25%", "50%", "75%", "100%")
   missing_bands <- setdiff(required_bands, names(quartile_bands))
@@ -128,7 +131,9 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
   }
 
   # Set the Quartile Band (dependent on polarity)
-  if (indicator_polarity %in% "Low") {
+  if (no_show_qb) {
+    quartile_band <- "-"
+  } else if (indicator_polarity %in% "Low") {
     quartile_band <- dplyr::case_when(
       is.na(indicator_val) ~ NA_character_,
       (indicator_val >= quartile_bands[["0%"]]) &
@@ -423,4 +428,27 @@ get_query_table_values <- function(data, column) {
     tidyr::separate_rows({{ column }}, sep = ",<br>") |>
     dplyr::mutate({{ column }} := trimws({{ column }})) |>
     pull_uniques(as.character(substitute(column)))
+}
+
+
+#' Filter data based on topic selection
+#'
+#' @param data A data frame or tibble to filter.
+#' @param topic_column The name of the column containing topic values (as a string).
+#' @param selected_topics A vector of selected topics from the user input.
+#' @return A filtered data frame or tibble based on the topic selection.
+filter_by_topic <- function(data, topic_column, selected_topics) {
+  # Check if selected topics are all selected or empty (return whole df if so)
+  if (is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))) {
+    # Return data ordered alphabetically by "Measure", with letters first
+    alphabet_ordered <- data |>
+      dplyr::arrange(
+        !grepl("^[A-Za-z]", .data$Measure),
+        .data$Measure
+      )
+    return(alphabet_ordered)
+  }
+
+  # Filter by selected topic
+  dplyr::filter(data, .data[[topic_column]] %in% selected_topics)
 }

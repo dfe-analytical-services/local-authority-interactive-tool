@@ -19,22 +19,38 @@
 # -----------------------------------------------------------------------------
 server <- function(input, output, session) {
   # Bookmarking ===============================================================
-  # The template uses bookmarking to store input choices in the url. You can
-  # exclude specific inputs (for example extra info created for a datatable
-  # or plotly chart) using the list below, but it will need updating to match
-  # any entries in your own dashboard's bookmarking url that you don't want
-  # including.
-  shiny::setBookmarkExclude(c(
-    "cookies", "link_to_app_content_tab",
-    "tabBenchmark_rows_current", "tabBenchmark_rows_all",
-    "tabBenchmark_columns_selected", "tabBenchmark_cell_clicked",
-    "tabBenchmark_cells_selected", "tabBenchmark_search",
-    "tabBenchmark_rows_selected", "tabBenchmark_row_last_clicked",
-    "tabBenchmark_state",
-    "plotly_relayout-A",
-    "plotly_click-A", "plotly_hover-A", "plotly_afterplot-A",
-    ".clientValue-default-plotlyCrosstalkOpts"
-  ))
+  # This uses bookmarking to store input choices in the url.
+  # All inputs are excluded by default, and inputs can be added explicitly
+  # in the included_inputs variable below
+  shiny::observe({
+    # Include these inputs for bookmarking
+    included_inputs <- c(
+      "la_inputs-la_name",
+      "la_inputs-indicator_name",
+      "region_inputs-la_name",
+      "region_inputs-indicator_name",
+      "stat_n_inputs-la_name",
+      "stat_n_inputs-indicator_name",
+      "all_la_inputs-la_name",
+      "all_la_inputs-indicator_name",
+      "navsetpillslist",
+      "create_inputs-geog_input",
+      "create_inputs-indicator",
+      "create_inputs-la_group",
+      "create_inputs-inc_regions",
+      "create_inputs-inc_england",
+      "year_range-year_range"
+    )
+
+    # Exclude all other inputs
+    excluded_inputs <- setdiff(
+      names(shiny::reactiveValuesToList(input)),
+      included_inputs
+    )
+
+    # Set the excluded inputs for bookmarking
+    shiny::setBookmarkExclude(excluded_inputs)
+  })
 
   shiny::observe({
     # Trigger this observer every time an input changes
@@ -43,8 +59,10 @@ server <- function(input, output, session) {
   })
 
   shiny::onBookmarked(function(url) {
-    shiny::updateQueryString(url)
+    # Update the query string with the bookmark URL
+    shiny::updateQueryString(url, mode = "replace")
   })
+
 
   # Dynamically changes window title to be LAIT - page - LA - indicator
   # (Selected by user)
@@ -100,7 +118,11 @@ server <- function(input, output, session) {
   # LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  la_app_inputs <- appInputsServer("la_inputs", shared_page_inputs)
+  la_app_inputs <- appInputsServer(
+    "la_inputs",
+    shared_page_inputs,
+    topic_indicator_full
+  )
 
   # Page header
   PageHeaderServer("la_header", la_app_inputs, "Local Authority View")
@@ -119,7 +141,8 @@ server <- function(input, output, session) {
     "la_stats",
     la_app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    no_qb_indicators
   )
 
   # LA level charts ===========================================================
@@ -129,7 +152,7 @@ server <- function(input, output, session) {
     la_app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # LA bar chart
@@ -138,7 +161,7 @@ server <- function(input, output, session) {
     la_app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # LA Metadata ===============================================================
@@ -160,7 +183,11 @@ server <- function(input, output, session) {
   # Regional Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  region_app_inputs <- appInputsServer("region_inputs", shared_page_inputs)
+  region_app_inputs <- appInputsServer(
+    "region_inputs",
+    shared_page_inputs,
+    topic_indicator_full
+  )
 
   # Header
   PageHeaderServer("region_header", region_app_inputs, "Regional View")
@@ -206,7 +233,7 @@ server <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region multi-choice line chart --------------------------------------------
@@ -217,7 +244,7 @@ server <- function(input, output, session) {
     stat_n_geog,
     region_names_bds,
     region_shared_inputs,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region focus bar chart ---------------------------------------------------
@@ -227,7 +254,7 @@ server <- function(input, output, session) {
     bds_metrics,
     stat_n_geog,
     region_names_bds,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region multi-choice bar chart ---------------------------------------------
@@ -238,7 +265,7 @@ server <- function(input, output, session) {
     stat_n_geog,
     region_names_bds,
     region_shared_inputs,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Region Metadata ===========================================================
@@ -252,7 +279,11 @@ server <- function(input, output, session) {
   # Statistical Neighbour Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  stat_n_app_inputs <- appInputsServer("stat_n_inputs", shared_page_inputs)
+  stat_n_app_inputs <- appInputsServer(
+    "stat_n_inputs",
+    shared_page_inputs,
+    topic_indicator_full
+  )
 
   # Header
   PageHeaderServer("stat_n_header", stat_n_app_inputs, "Statistical Neighbour View")
@@ -280,7 +311,8 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    la_names_bds
+    la_names_bds,
+    no_qb_indicators
   )
 
   # Statistical Neighbour charts ==============================================
@@ -296,7 +328,7 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Multi-choice line chart ---------------------------------------------------
@@ -306,7 +338,7 @@ server <- function(input, output, session) {
     bds_metrics,
     stat_n_la,
     stat_n_shared_inputs,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Focus bar chart -----------------------------------------------------------
@@ -315,7 +347,7 @@ server <- function(input, output, session) {
     stat_n_app_inputs,
     bds_metrics,
     stat_n_la,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Multi-choice bar chart ----------------------------------------------------
@@ -325,7 +357,7 @@ server <- function(input, output, session) {
     bds_metrics,
     stat_n_la,
     stat_n_shared_inputs,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Statistical Neighbour Metadata ============================================
@@ -339,7 +371,11 @@ server <- function(input, output, session) {
   # All LA Level Page
   # ===========================================================================
   # User Inputs ===============================================================
-  all_la_app_inputs <- appInputsServer("all_la_inputs", shared_page_inputs)
+  all_la_app_inputs <- appInputsServer(
+    "all_la_inputs",
+    shared_page_inputs,
+    topic_indicator_full
+  )
 
   # Header
   PageHeaderServer("all_la_header", all_la_app_inputs, "All LA View")
@@ -373,13 +409,17 @@ server <- function(input, output, session) {
   # ===========================================================================
   # User Inputs ===============================================================
   # Create own main inputs ----------------------------------------------------
-  create_inputs <- Create_MainInputsServer("create_inputs", bds_metrics)
+  create_inputs <- Create_MainInputsServer(
+    "create_inputs",
+    topic_indicator_full
+  )
 
   # Year range input ----------------------------------------------------------
   year_input <- YearRangeServer(
     "year_range",
     bds_metrics,
-    create_inputs$indicator
+    create_inputs$indicator,
+    create_inputs$clear_selections
   )
 
   # Logic to create own =======================================================
@@ -454,7 +494,7 @@ server <- function(input, output, session) {
     "create_own_line",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Bar chart -----------------------------------------------------------------
@@ -462,7 +502,7 @@ server <- function(input, output, session) {
     "create_own_bar",
     query_table,
     bds_metrics,
-    covid_affected_indicators
+    covid_affected_data
   )
 
   # Extras ====================================================================

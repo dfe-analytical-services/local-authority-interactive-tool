@@ -59,6 +59,77 @@ filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
 }
 
 
+#' Determine Decimal Places for Large Numeric Values
+#'
+#' This helper function calculates the appropriate number of decimal places
+#' based on the value's magnitude. Values smaller than 1 million use the
+#' supplied default decimal places. For values over 1 million or 1 billion,
+#' decimal places are conditionally applied if the value normalised by a
+#' million or billion is not divisible by 10.
+#'
+#' @param value A single numeric value.
+#' @param dp Integer. The default number of decimal places for values
+#'   over 1 million or 1 billion.
+#'
+#' @return An integer indicating the number of decimal places to use.
+#' @examples
+#' determine_decimal_places(999, dp = 2) # Returns 2
+#' determine_decimal_places(1234567, dp = 3) # Returns 3
+#' determine_decimal_places(10000000, dp = 2) # Returns 0
+#' determine_decimal_places(5000000000, dp = 3) # Returns 3
+#' @export
+determine_decimal_places <- function(value, dp = 0) {
+  if (is.na(value)) {
+    return(dp)
+  } else if (abs(value) >= 1e9) {
+    # For values over 1 billion, check divisibility by 10 after dividing by 1 billion
+    if ((value / 1e9) %% 10 != 0) {
+      return(3)
+    } else {
+      return(0)
+    }
+  } else if (abs(value) >= 1e6) {
+    # For values between 1 million and 1 billion,
+    # check divisibility by 10 after dividing by 1 million
+    if ((value / 1e6) %% 10 != 0) {
+      return(3)
+    } else {
+      return(0)
+    }
+  } else {
+    # For values less than 1 million, use the default decimal places
+    return(dp)
+  }
+}
+
+
+#' Format Large Numeric Values with Conditional Decimal Places
+#'
+#' This function formats numeric values, applying specific rules for values
+#' greater than 1 million or 1 billion. Numbers smaller than 1 million use
+#' the user-supplied default decimal places. Decimal places for larger values
+#' are applied only if the value normalised by a million or billion is not
+#' divisible by 10.
+#'
+#' @param x A numeric vector to be formatted.
+#' @param dp Integer. The default number of decimal places for values
+#'   over 1 million or 1 billion. Default is 3.
+#' @param ... Additional arguments passed to `dfeR::pretty_num`.
+#'
+#' @return A character vector with formatted numeric values.
+#' @examples
+#' pretty_num_large(c(999, 1000000, 1234567), dp = 2)
+#' pretty_num_large(c(5000000000, 9876543210), dp = 3)
+#' @export
+pretty_num_large <- function(x, dp = 0, ...) {
+  # Determine decimal places for each value
+  decimal_places <- sapply(x, determine_decimal_places, dp = dp)
+
+  # Format the numbers using dfeR::pretty_num
+  dfeR::pretty_num(x, dp = decimal_places, ...)
+}
+
+
 #' Format Numeric Columns with Pretty Numbers
 #'
 #' This function formats numeric columns in a data frame using the
@@ -100,25 +171,30 @@ pretty_num_table <- function(data,
                              include_columns = NULL,
                              exclude_columns = NULL,
                              ...) {
+  # Check if data is empty
   if (nrow(data) < 1) {
-    warning("Data seems to be empty")
+    warning("Data seems to be empty. Returning unmodified.")
+    return(data)
   }
 
-  # Determine the columns to include or exclude
-  if (!is.null(include_columns)) {
-    cols_to_include <- include_columns
+  # Determine numeric columns to process
+  numeric_cols <- names(data)[sapply(data, is.numeric)]
+  cols_to_include <- if (!is.null(include_columns)) {
+    include_columns
   } else if (!is.null(exclude_columns)) {
-    cols_to_include <- setdiff(names(data)[sapply(data, is.numeric)], exclude_columns)
+    setdiff(numeric_cols, exclude_columns)
   } else {
-    cols_to_include <- names(data)[sapply(data, is.numeric)]
+    numeric_cols
   }
 
-  # Apply the pretty_num function across the selected columns
-  data |>
+  # Apply formatting to selected columns
+  data <- data |>
     dplyr::mutate(dplyr::across(
       .cols = dplyr::all_of(cols_to_include),
-      ~ sapply(., dfeR::pretty_num, ...)
+      ~ sapply(., pretty_num_large, ...)
     ))
+
+  data
 }
 
 
@@ -220,7 +296,7 @@ format_reactable_num_col <- function(col, indicator_dps) {
       ifelse(
         is.nan(value),
         "",
-        dfeR::pretty_num(value, dp = indicator_dps)
+        pretty_num_large(value, dp = indicator_dps)
       )
     }
   )
@@ -373,7 +449,8 @@ build_la_stats_table <- function(
     quartile,
     quartile_bands,
     indicator_dps,
-    indicator_polarity) {
+    indicator_polarity,
+    no_show_qb) {
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
@@ -385,32 +462,59 @@ build_la_stats_table <- function(
   qb_adj <- 10**-(indicator_dps)
 
   # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- if (indicator_polarity %in% "Low") {
-    list(
-      "Latest National Rank" = rank,
-      "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+  rank_quartile_band_values <- list()
+  if (indicator_polarity %in% "Low") {
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = rank,
+        "Quartile Banding" = quartile,
+        "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+        "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+        "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+        "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+      )
     )
   } else if (indicator_polarity %in% "High") {
-    list(
-      "Latest National Rank" = rank,
-      "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
-      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
-      "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
-      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = rank,
+        "Quartile Banding" = quartile,
+        "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
+        "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
+        "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
+        "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+      )
     )
   } else {
-    list(
-      "Latest National Rank" = "-",
-      "Quartile Banding" = "-",
-      "A" = "-",
-      "B" = "-",
-      "C" = "-",
-      "D" = "-"
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Latest National Rank" = "-",
+        "Quartile Banding" = "-",
+        "No Quartiles" = "-",
+        "A" = NULL,
+        "B" = NULL,
+        "C" = NULL,
+        "D" = NULL
+      )
+    )
+  }
+
+  # Hide QB if no_show_qb is True value which is derived from the
+  # No Quartile column of the Data Dict (normally due to small data range)
+  if (no_show_qb) {
+    rank_quartile_band_values <- modifyList(
+      rank_quartile_band_values,
+      list(
+        "Quartile Banding" = "-",
+        "No Quartiles" = "Data range is too small.",
+        "A" = NULL,
+        "B" = NULL,
+        "C" = NULL,
+        "D" = NULL
+      )
     )
   }
 
@@ -464,11 +568,7 @@ build_region_stats_table <- function(la_number,
     "Change from previous year" = change_since_prev,
     "Polarity" = pull_uniques(filtered_bds, "Polarity"),
     check.names = FALSE
-  ) |>
-    pretty_num_table(
-      dp = get_indicator_dps(filtered_bds),
-      exclude_columns = c("LA Number", "Trend")
-    )
+  )
 }
 
 
@@ -665,7 +765,7 @@ get_trend_colour <- function(value, polarity) {
     polarity == "Low" & value < 0 ~ green_colour,
     polarity == "Low" & value > 0 ~ red_colour,
     polarity == "High" & value > 0 ~ green_colour,
-    polarity == "High" & value > 0 ~ red_colour,
+    polarity == "High" & value < 0 ~ red_colour,
     TRUE ~ "black"
   )
 
@@ -713,7 +813,7 @@ quartile_banding_col_def <- function(data) {
 
   list(
     background = qb_color,
-    textAlign = "center",
+    textAlign = "right",
     color = text_colour
   )
 }
@@ -887,48 +987,91 @@ truncate_cell_with_hover <- function(text, tooltip) {
 }
 
 
-#' Add Tooltip to Reactable Column
+#' Create a Tooltip with a FontAwesome Icon
 #'
-#' Creates a tooltip with an embedded Font Awesome icon for a specified value
-#' in a reactable column. The tooltip is styled and positioned for better
-#' usability and appearance, including options for color, interactivity,
-#' and cursor following.
+#' Generates a tooltip that displays a specified message when hovering over
+#' a FontAwesome icon. The tooltip and icon can be customised using parameters
+#' for text, style, and class.
 #'
-#' @param value Character string. The main content to display in the cell.
-#' @param tooltip Character string or HTML content. The tooltip text or HTML
-#'   to display when hovering over the icon.
-#' @param ... Additional arguments passed to `tippy::tippy` for further
-#'   customization.
+#' @param tooltip_text A character string specifying the tooltip text to display.
+#' @param icon_class A character string specifying the FontAwesome class for the
+#'   icon. Default is `"fas fa-question-circle"`.
+#' @param icon_style A character string specifying the CSS styling for the icon.
+#'   Default is `"color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"`.
+#' @param ... Additional arguments passed to `bslib::tooltip` for further
+#'   customisation.
 #'
-#' @return A div element containing the `value` and an embedded Font Awesome
-#'   icon with an interactive tooltip.
+#' @return An HTML element containing a FontAwesome icon with an attached tooltip.
 #'
 #' @examples
-#' # Basic usage in a reactable column
-#' add_tooltip_to_reactcol("Sample Text", "This is a tooltip example")
+#' # Create a tooltip with default icon and style
+#' create_tooltip_icon("Hover to see the tooltip")
 #'
-#' @importFrom htmltools div htmlDependency tags
-#' @importFrom tippy tippy
-add_tooltip_to_reactcol <- function(value, tooltip, ...) {
-  div(
-    style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
-    value,
-    tippy::tippy(
-      htmltools::tags$span(
-        htmltools::tags$i(
-          class = "fas fa-question-circle",
-          style = "color: #5694ca; padding-right: 7px; cursor: help; font-size: 1.2em;"
-        )
-      ),
-      tooltip = div(tooltip),
-      theme = "gov",
-      placement = "top",
-      followCursor = TRUE,
-      interactive = TRUE,
-      interactiveBorder = 10,
-      arrow = TRUE,
-      inertia = TRUE,
-      ...
+#' # Customise the icon style
+#' create_tooltip_icon(
+#'   "Hover to see the tooltip",
+#'   icon_style = "color: red; font-size: 1.5em;"
+#' )
+#'
+#' # Pass additional options to the tooltip
+#' create_tooltip_icon(
+#'   "Tooltip with placement",
+#'   placement = "bottom"
+#' )
+#'
+create_tooltip_icon <- function(
+    tooltip_text,
+    icon_class = "fas fa-info-circle",
+    icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
+    ...) {
+  bslib::tooltip(
+    htmltools::tags$span(
+      htmltools::tags$i(
+        class = icon_class,
+        style = icon_style
+      )
+    ),
+    shiny::HTML(tooltip_text),
+    options = list(customClass = "gov-tooltip"),
+    ...
+  )
+}
+
+
+#' Add a Tooltip to a Reactable Column Header
+#'
+#' Creates an interactive tooltip for a reactable column header with an
+#' accompanying FontAwesome icon. The tooltip displays specified text when the
+#' user hovers over the icon. The function also formats the header content for
+#' better alignment and appearance.
+#'
+#' @param value A character string specifying the main text to display in the
+#'   column header.
+#' @param tooltip_text A character string specifying the tooltip text to display
+#'   when hovering over the icon.
+#' @param ... Additional arguments passed to `create_tooltip_icon` for further
+#'   customisation of the tooltip or icon.
+#'
+#' @return A character string containing HTML for the styled column header with
+#'   an embedded tooltip icon.
+#'
+#' @examples
+#' # Add a tooltip to a column header
+#' add_tooltip_to_reactcol("Trend", "Based on change from previous year")
+#'
+#' # Customise the tooltip placement
+#' add_tooltip_to_reactcol(
+#'   "Latest Rank",
+#'   "Rank 1 is the top rank",
+#'   placement = "bottom"
+#' )
+#'
+add_tooltip_to_reactcol <- function(value, tooltip_text, ...) {
+  as.character(
+    div(
+      style = "rt-th rt-th-resizable rt-align-right bar-sort-header",
+      value,
+      create_tooltip_icon(tooltip_text, ...)
     )
   )
 }

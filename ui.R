@@ -186,8 +186,6 @@ ui <- function(input, output, session) {
 
         # Statistical Neighbour tables ========================================
         StatN_TablesUI("stat_n_tables"),
-        # Statistical Neighbour Statistics Table ----------------------------
-        StatN_StatsTableUI("stat_n_stats_table"),
 
         # Statistical Neighbour charts ========================================
         div(
@@ -246,12 +244,12 @@ ui <- function(input, output, session) {
             Create_MainInputsUI("create_inputs")["LA grouping"],
             Create_MainInputsUI("create_inputs")["Other grouping"],
             YearRangeUI("year_range"),
-            Create_MainInputsUI("create_inputs")["Add selection"]
+            Create_MainInputsUI("create_inputs")["Clear all current selections"]
           )
         ),
 
         # Tables ==============================================================
-        # Staging table -------------------------------------------------------
+        # Staging table & Add selections btn ----------------------------------
         StagingTableUI("staging_table"),
         # Query table ---------------------------------------------------------
         QueryTableUI("query_table"),
@@ -261,7 +259,10 @@ ui <- function(input, output, session) {
         div(
           class = "well",
           style = "overflow-y: visible;",
-          h3("Output Charts (Charts showing data from saved selections)"),
+          h3(
+            "Output Charts",
+            create_tooltip_icon("Charts showing data from all the saved selections")
+          ),
           p("Note a maximum of 4 geographies and 3 indicators can be shown."),
           bslib::navset_tab(
             # Line chart ------------------------------------------------------
