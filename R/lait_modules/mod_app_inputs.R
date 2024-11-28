@@ -22,7 +22,7 @@ appInputsUI <- function(id) {
         inputId = ns("la_name"),
         label = tags$label(
           "Local Authority:",
-          create_tooltip_icon("Change selection by scrolling or typing.")
+          create_tooltip_icon("Change selection by scrolling or typing")
         ),
         choices = la_names_bds,
         options = list(
@@ -39,7 +39,7 @@ appInputsUI <- function(id) {
         choices = c("All Topics", metric_topics),
         selected = "All Topics",
         options = list(
-          placeholder = "No topic selected, showing all indicators.",
+          placeholder = "No topic selected, showing all indicators...",
           plugins = list("clear_button")
         )
       ),

@@ -27,7 +27,7 @@ Create_MainInputsUI <- function(id) {
           inputId = ns("geog_input"),
           label = tags$label(
             "LAs, Regions, and England:",
-            create_tooltip_icon("You can change selection by typing or scrolling.")
+            create_tooltip_icon("You can change selection by typing or scrolling")
           ),
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
@@ -46,7 +46,7 @@ Create_MainInputsUI <- function(id) {
           choices = c("All Topics", metric_topics),
           selected = "All Topics",
           options = list(
-            placeholder = "No topic selected, showing all indicators.",
+            placeholder = "No topic selected, showing all indicators...",
             plugins = list("clear_button")
           )
         )
@@ -235,9 +235,9 @@ YearRangeUI <- function(id) {
       "Select Year Range:",
       create_tooltip_icon(
         "<ul style='text-align: left; margin-left: 0; padding-left: 20px;'>
-          <li>Select a year to view data for that year.</li>
-          <li>Select two years to view data from Year A to Year B.</li>
-          <li>Leave unselected to display all years.</li>
+          <li>Select a year to view data for that year</li>
+          <li>Select two years to view data from Year A to Year B</li>
+          <li>Leave unselected to display all years</li>
         </ul>
         ",
         placement = "right"
