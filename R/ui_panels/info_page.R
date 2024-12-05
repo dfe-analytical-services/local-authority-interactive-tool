@@ -20,18 +20,8 @@ info_page_panel <- function() {
 
           # Latest Updates =====================================================
           h2("Latest Updates"),
-          p("The Department has developed the Local Authority Interactive Tool
-              (LAIT) to provide easy access to a wide range of data related to
-              children and young people sourced from various departments across
-              government.The app is designed and maintained by the DFE's Regions
-              Group LA Performance & Data (LAPD) Team."),
-          p(
-            "We might want to add some brief introductory text here alongside
-              some links to different tabs within your dashboard. Here's an
-              example of a link working:",
-            InternalLinkUI("la_level_link")
-          ),
-
+          LatestDataUpdateUI("latest_indicator_update"),
+          br(),
 
           # Indicators metadata ===============================================
           h2("Indicator information"),
@@ -91,6 +81,59 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
         pageSizeOptions = c(5, 10, 25),
         compact = TRUE,
         searchable = TRUE
+      )
+    })
+  })
+}
+
+
+
+LatestDataUpdateUI <- function(id) {
+  ns <- NS(id)
+
+  shinyGovstyle::noti_banner(
+    inputId = ns("latest_update_indicator"),
+    title_txt = "Latest updated indicator(s)",
+    body_txt = as.character(
+      shiny::tagList(
+        shiny::p("These indicators were most recently updated:"),
+        shiny::uiOutput(ns("latest_update_table"))
+      )
+    )
+  )
+}
+
+
+LatestDataUpdateServer <- function(id, metrics_data) {
+  moduleServer(id, function(input, output, session) {
+    # Prepare the data
+    latest_updated_indicator <- metrics_data |>
+      dplyr::mutate(latest_update_date = as.Date(paste(`Last Update`, "01"),
+        format = "%B %Y %d"
+      )) |>
+      dplyr::filter(latest_update_date == max(latest_update_date)) |>
+      dplyr::select(Measure, `Last Update`)
+
+    # Render the UI
+    output$latest_update_table <- shiny::renderUI({
+      # Create an HTML table with invisible styling
+      htmltools::tags$table(
+        style = "width: 100%; border-collapse: collapse;",
+        # Iterate over each row in the data
+        htmltools::tags$tbody(
+          lapply(1:nrow(latest_updated_indicator), function(i) {
+            htmltools::tags$tr(
+              htmltools::tags$td(
+                latest_updated_indicator$Measure[i],
+                style = "text-align: left; padding: 5px;"
+              ),
+              htmltools::tags$td(
+                latest_updated_indicator$`Last Update`[i],
+                style = "text-align: right; padding: 5px;"
+              )
+            )
+          })
+        )
       )
     })
   })

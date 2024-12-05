@@ -113,6 +113,12 @@ server_dev <- function(input, output, session) {
     "indicator_info_table",
     metrics_clean
   )
+
+  # Latest indicator update notification
+  LatestDataUpdateServer(
+    "latest_indicator_update",
+    metrics_clean
+  )
 }
 
 # Launch the Shiny app
