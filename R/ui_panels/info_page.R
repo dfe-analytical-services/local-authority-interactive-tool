@@ -49,55 +49,49 @@ info_page_panel <- function() {
 }
 
 
-# Module UI
+# Display Indicator Information table
 IndicatorInfoTableUI <- function(id) {
   ns <- NS(id)
   reactable::reactableOutput(ns("indicator_info_table"))
 }
 
-# Module Server
-IndicatorInfoTableServer <- function(id, metrics_data) {
-  moduleServer(
-    id,
-    function(input, output, session) {
-      output$indicator_info_table <- reactable::renderReactable({
-        # Select columns to show indicator information
-        indicator_info <- metrics_data |>
-          dplyr::select(
-            Measure,
-            Topic,
-            `Last Update`,
-            `Next Update`,
-            `Data Owner (DO) /Supplier and Contact Details`,
-            `Hyperlink(s)`
-          ) |>
-          # Convert to nice looking links
-          dplyr::rowwise() |>
-          dplyr::mutate(
-            `Hyperlink(s) (opens in new tab)` = as.character(dfeshiny::external_link(
-              href = `Hyperlink(s)`,
-              link_text = Measure,
-              add_warning = FALSE
-            ))
-          ) |>
-          dplyr::ungroup() |>
-          order_alphabetically(Measure)
 
-        # Output table
-        dfe_reactable(
-          indicator_info,
-          columns = list(
-            `Hyperlink(s)` = reactable::colDef(
-              show = FALSE
-            )
-          ),
-          defaultPageSize = 5,
-          showPageSizeOptions = TRUE,
-          pageSizeOptions = c(5, 10, 25),
-          compact = TRUE,
-          searchable = TRUE
-        )
-      })
-    }
-  )
+# Compute Indicator Information table
+IndicatorInfoTableServer <- function(id, metrics_data) {
+  moduleServer(id, function(input, output, session) {
+    output$indicator_info_table <- reactable::renderReactable({
+      # Select columns to show indicator information
+      indicator_info <- metrics_data |>
+        dplyr::select(
+          Measure,
+          Topic,
+          `Last Update`,
+          `Next Update`,
+          `Data Owner (DO) /Supplier and Contact Details`,
+          `Hyperlink(s)`
+        ) |>
+        # Convert to nice looking links
+        dplyr::rowwise() |>
+        dplyr::mutate(`Hyperlink(s) (opens in new tab)` = as.character(
+          dfeshiny::external_link(
+            href = `Hyperlink(s)`,
+            link_text = Measure,
+            add_warning = FALSE
+          )
+        )) |>
+        dplyr::ungroup() |>
+        order_alphabetically(Measure)
+
+      # Output table
+      dfe_reactable(
+        indicator_info,
+        columns = list(`Hyperlink(s)` = reactable::colDef(show = FALSE)),
+        defaultPageSize = 5,
+        showPageSizeOptions = TRUE,
+        pageSizeOptions = c(5, 10, 25),
+        compact = TRUE,
+        searchable = TRUE
+      )
+    })
+  })
 }
