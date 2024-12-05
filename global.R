@@ -396,10 +396,7 @@ metric_names <- tibble::tibble(
   Measure = topic_indicator_full |>
     pull_uniques("Measure")
 ) |>
-  dplyr::arrange(
-    !grepl("^[A-Za-z]", Measure),
-    Measure
-  )
+  order_alphabetically(Measure)
 
 # All Years across string and num Years
 # (for Create Your Own year range choices - initially)

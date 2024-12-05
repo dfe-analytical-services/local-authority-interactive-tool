@@ -442,10 +442,7 @@ filter_by_topic <- function(data, topic_column, selected_topics) {
   if (is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))) {
     # Return data ordered alphabetically by "Measure", with letters first
     alphabet_ordered <- data |>
-      dplyr::arrange(
-        !grepl("^[A-Za-z]", .data$Measure),
-        .data$Measure
-      )
+      order_alphabetically(.data$Measure)
     return(alphabet_ordered)
   }
 

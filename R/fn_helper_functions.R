@@ -760,3 +760,34 @@ update_topic_label <- function(
     shinyjs::html(topic_label_id, label)
   })
 }
+
+
+#' Order data alphabetically with non-alphabetical entries at the top
+#'
+#' This function orders a dataset based on the values of a specified column.
+#' Entries that do not start with a letter (A-Z, a-z) are placed at the top,
+#' followed by the remaining entries sorted alphabetically.
+#'
+#' @param data A data frame or tibble to be sorted.
+#' @param column The column to be used for sorting. This should be provided
+#' as an unquoted column name.
+#'
+#' @return A data frame or tibble sorted by the specified column.
+#'
+#' @examples
+#' \dontrun{
+#' # Example dataset
+#' df <- data.frame(Measure = c("Zebra", "1234", "Apple", "Cat"))
+#'
+#' # Order by the 'Measure' column
+#' ordered_df <- order_alphabetically(df, Measure)
+#' print(ordered_df)
+#' }
+#'
+order_alphabetically <- function(data, column) {
+  data |>
+    dplyr::arrange(
+      !grepl("^[A-Za-z]", {{ column }}),
+      {{ column }}
+    )
+}
