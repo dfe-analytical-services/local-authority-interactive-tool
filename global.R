@@ -112,6 +112,11 @@ metrics_raw <- read.csv(
   check.names = FALSE
 )
 
+# Development update log
+development_update_log <- readxl::read_xlsx(
+  here::here("01_data/02_prod/Development_update_log.xlsx")
+)
+
 
 # Cleaning data ===============================================================
 # BDS

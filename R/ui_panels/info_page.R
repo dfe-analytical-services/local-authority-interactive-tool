@@ -22,6 +22,7 @@ info_page_panel <- function() {
           h2("Latest Updates"),
           LatestDataUpdateUI("latest_indicator_update"),
           br(),
+          LatestDevUpdateUI("latest_dev_update"),
 
           # Indicators metadata ===============================================
           h2("Indicator information"),
@@ -55,9 +56,9 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
         dplyr::select(
           Measure,
           Topic,
+          `Data Owner (DO) /Supplier and Contact Details`,
           `Last Update`,
           `Next Update`,
-          `Data Owner (DO) /Supplier and Contact Details`,
           `Hyperlink(s)`
         ) |>
         # Convert to nice looking links
@@ -133,6 +134,67 @@ LatestDataUpdateServer <- function(id, metrics_data) {
               )
             )
           })
+        )
+      )
+    })
+  })
+}
+
+
+LatestDevUpdateUI <- function(id) {
+  ns <- NS(id)
+
+  shinyGovstyle::noti_banner(
+    inputId = ns("latest_update_indicator"),
+    title_txt = "Latest development updates",
+    body_txt = as.character(
+      shiny::tagList(
+        shiny::p("There has been a development update..."),
+        shiny::uiOutput(ns("latest_update_table")),
+        shiny::br(),
+        shiny::HTML(paste0(
+          "Please visit the ",
+          dfeshiny::external_link(
+            href = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
+            link_text = "LAIT GitHub",
+            add_warning = TRUE
+          ),
+          " to find more information."
+        ), )
+      )
+    )
+  )
+}
+
+
+LatestDevUpdateServer <- function(id, dev_update_log) {
+  moduleServer(id, function(input, output, session) {
+    # Get most recent development update
+    latest_dev_update <- dev_update_log |>
+      dplyr::filter(Date == max(Date))
+
+    # Render the UI
+    output$latest_update_table <- shiny::renderUI({
+      htmltools::tags$div(
+        style = "width: 100%;",
+        htmltools::tags$p(
+          htmltools::tags$b("Type:"),
+          paste(latest_dev_update$Type)
+        ),
+        htmltools::tags$p(
+          htmltools::tags$b("Summary:"),
+          paste(latest_dev_update$Summary)
+        ),
+        htmltools::tags$p(
+          htmltools::tags$b("Details:"),
+          htmltools::tags$br(),
+          htmltools::tags$span(
+            latest_dev_update$Details
+          )
+        ),
+        htmltools::tags$p(
+          htmltools::tags$b("Date updated:"),
+          paste(latest_dev_update$Date)
         )
       )
     })

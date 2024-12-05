@@ -119,6 +119,12 @@ server_dev <- function(input, output, session) {
     "latest_indicator_update",
     metrics_clean
   )
+
+  # Latest development update
+  LatestDevUpdateServer(
+    "latest_dev_update",
+    development_update_log
+  )
 }
 
 # Launch the Shiny app
