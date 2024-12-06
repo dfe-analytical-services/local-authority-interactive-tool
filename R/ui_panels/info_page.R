@@ -15,24 +15,45 @@ info_page_panel <- function() {
             )
           ),
           shiny::br(),
-          h1("Local Authority Interactive Tool"),
-
+          h1("Information Page"),
+          p(
+            "This page provides easy access to information on data updates,
+              development changes and resources related to the Local Authority
+              Interactive Tool (LAIT)."
+          ),
 
           # Latest Updates =====================================================
           h2("Latest Updates"),
+          p(
+            "The section below highlights the latest updates related to
+              both data and development.
+              Please note that 'latest' updates may not always be time recent,
+              so be sure to check the update dates."
+          ),
+          # Data updates -------------------------------------------------------
           LatestDataUpdateUI("latest_indicator_update"),
           br(),
+          # Development updates ------------------------------------------------
           LatestDevUpdateUI("latest_dev_update"),
+          br(),
 
           # Indicators metadata ===============================================
-          h2("Indicator information"),
+          h2("Indicator Information"),
+          p(
+            "The table below displays key metadata for each indicator.
+              Use this to quickly locate and explore indicators of interest."
+          ),
+          p(
+            "While this information is available in the metadata section of
+              each indicator, it is consolidated here for convenience."
+          ),
           IndicatorInfoTableUI("indicator_info_table"),
+          br(),
 
 
           # Guidance sources ===================================================
-          h2("Guidance sources"),
-          p("For example, here we'll add some of the key resources we draw
-                  on to guide styling and visualisation...")
+          h2("Links to related or useful resources"),
+          p("Below is a list of links to other resources that may be of use:")
         )
       )
     )
@@ -54,8 +75,8 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
       # Select columns to show indicator information
       indicator_info <- metrics_data |>
         dplyr::select(
-          Measure,
           Topic,
+          Measure,
           `Data Owner (DO) /Supplier and Contact Details`,
           `Last Update`,
           `Next Update`,
