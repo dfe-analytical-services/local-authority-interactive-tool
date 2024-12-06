@@ -5,29 +5,12 @@ info_page_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           12,
-          shinyGovstyle::banner(
-            "beta banner",
-            "beta",
-            paste0(
-              "This page is in beta phase and we are still reviewing the content.
-               We will provide a much more detailed user guide when the tool is
-               published."
-            )
-          ),
-          shiny::br(),
           h1("Information Page"),
-          p(
-            "This page provides easy access to information on data updates,
-              development changes and resources related to the Local Authority
-              Interactive Tool (LAIT)."
-          ),
 
           # Latest Updates =====================================================
           h2("Latest Updates"),
           p(
-            "The section below highlights the latest updates related to
-              both data and development.
-              Please note that 'latest' updates may not always be time recent,
+            "Please note that 'latest' updates may not always be time recent,
               so be sure to check the update dates."
           ),
           # Data updates -------------------------------------------------------
@@ -36,24 +19,21 @@ info_page_panel <- function() {
           # Development updates ------------------------------------------------
           LatestDevUpdateUI("latest_dev_update"),
           br(),
+          br(),
 
           # Indicators metadata ===============================================
           h2("Indicator Information"),
-          p(
-            "The table below displays key metadata for each indicator.
-              Use this to quickly locate and explore indicators of interest."
-          ),
           p(
             "While this information is available in the metadata section of
               each indicator, it is consolidated here for convenience."
           ),
           IndicatorInfoTableUI("indicator_info_table"),
           br(),
+          br(),
 
 
           # Guidance sources ===================================================
-          h2("Links to related or useful resources"),
-          p("Below is a list of links to other resources that may be of use:"),
+          h2("Links to useful or related resources"),
           UsefulLinksUI("useful_links")
         )
       )

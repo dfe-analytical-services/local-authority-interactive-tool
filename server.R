@@ -505,6 +505,31 @@ server <- function(input, output, session) {
     covid_affected_data
   )
 
+  # Information pages =========================================================
+  # Latest indicator update notification
+  LatestDataUpdateServer(
+    "latest_indicator_update",
+    metrics_clean
+  )
+
+  # Latest development update
+  LatestDevUpdateServer(
+    "latest_dev_update",
+    development_update_log
+  )
+
+  # Indicator information table
+  IndicatorInfoTableServer(
+    "indicator_info_table",
+    metrics_clean
+  )
+
+  # Useful links
+  UsefulLinksServer(
+    "useful_links",
+    useful_links
+  )
+
   # Extras ====================================================================
   # Copy-to-clipboard pop-up notification
   CopyToClipboardPopUpServer("copy-to-clipboard")
