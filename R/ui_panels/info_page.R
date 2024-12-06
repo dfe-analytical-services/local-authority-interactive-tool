@@ -115,7 +115,7 @@ LatestDataUpdateUI <- function(id) {
 
   shinyGovstyle::noti_banner(
     inputId = ns("latest_update_indicator"),
-    title_txt = "Latest updated indicator(s)",
+    title_txt = "Latest Updated Indicator(s)",
     body_txt = as.character(
       shiny::tagList(
         shiny::p("These indicators were most recently updated:"),
@@ -125,8 +125,6 @@ LatestDataUpdateUI <- function(id) {
     )
   )
 }
-
-
 
 
 LatestDataUpdateServer <- function(id, metrics_data) {
@@ -157,28 +155,87 @@ LatestDataUpdateServer <- function(id, metrics_data) {
 
 
 
-
 LatestDevUpdateUI <- function(id) {
   ns <- NS(id)
 
-  shinyGovstyle::noti_banner(
-    inputId = ns("latest_update_indicator"),
-    title_txt = "Latest development updates",
-    body_txt = as.character(
-      shiny::tagList(
-        shiny::p("There has been a development update..."),
-        shiny::uiOutput(ns("latest_update_table")),
-        shiny::br(),
-        shiny::HTML(paste0(
-          "Please visit the ",
-          dfeshiny::external_link(
-            href = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-            link_text = "LAIT GitHub",
-            add_warning = TRUE
-          ),
-          " to find more information."
-        ), )
+  # Use a styled card for a modern look with icons and animations
+  htmltools::tags$div(
+    class = "dev-update-card",
+    style = "
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    ",
+    # Flex container for header and icon
+    htmltools::tags$div(
+      style = "
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      ",
+      # Header section with bold title
+      htmltools::tags$h3(
+        "Latest Development Updates",
+        style = "
+          margin: 0;
+          color: #1d70b8;
+          font-weight: bold;
+        "
+      ),
+      # Animated icon to the right
+      htmltools::tags$div(
+        style = "
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: 1rem;
+        ",
+        htmltools::tags$i(
+          class = "fas fa-gear", # Font Awesome icon
+          style = "
+            color: #1d70b8;
+            font-size: 20px;
+            animation: rotateIcon 2s infinite linear;
+          "
+        )
       )
+    ),
+    # Animated text for description
+    htmltools::tags$p(
+      "Below are the most recent development updates related to the tool:"
+    ),
+    # Latest development details
+    htmltools::tags$div(
+      style = "margin-bottom: 10px;",
+      shiny::uiOutput(ns("latest_update_table"))
+    ),
+    # Footer with an external link to LAIT GitHub
+    htmltools::tags$div(
+      style = "margin-top: 10px;",
+      shiny::HTML(paste0(
+        "For more information, please visit the ",
+        dfeshiny::external_link(
+          href = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
+          link_text = "LAIT GitHub",
+          add_warning = TRUE
+        ),
+        "."
+      ))
+    ),
+    # Add the keyframe animation for spinning
+    htmltools::tags$style(
+      HTML("
+        @keyframes rotateIcon {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      ")
     )
   )
 }
@@ -186,14 +243,15 @@ LatestDevUpdateUI <- function(id) {
 
 LatestDevUpdateServer <- function(id, dev_update_log) {
   moduleServer(id, function(input, output, session) {
-    # Get most recent development update
+    # Extract the most recent development update
     latest_dev_update <- dev_update_log |>
-      dplyr::filter(Date == max(Date))
+      dplyr::filter(Date == max(Date)) |>
+      dplyr::slice_min(1)
 
-    # Render the UI
+    # Render the update content inside a styled card
     output$latest_update_table <- shiny::renderUI({
       htmltools::tags$div(
-        style = "width: 100%;",
+        style = "line-height: 1.6;",
         htmltools::tags$p(
           htmltools::tags$b("Type:"),
           paste(latest_dev_update$Type)
@@ -204,13 +262,11 @@ LatestDevUpdateServer <- function(id, dev_update_log) {
         ),
         htmltools::tags$p(
           htmltools::tags$b("Details:"),
-          htmltools::tags$br(),
-          htmltools::tags$span(
-            latest_dev_update$Details
-          )
+          shiny::br(),
+          paste(latest_dev_update$Details)
         ),
         htmltools::tags$p(
-          htmltools::tags$b("Date updated:"),
+          htmltools::tags$b("Date Updated:"),
           paste(latest_dev_update$Date)
         )
       )
