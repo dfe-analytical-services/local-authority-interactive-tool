@@ -98,11 +98,14 @@ LatestDataUpdateUI <- function(id) {
     body_txt = as.character(
       shiny::tagList(
         shiny::p("These indicators were most recently updated:"),
-        shiny::uiOutput(ns("latest_update_table"))
+        # Adding reactableOutput for the table
+        reactable::reactableOutput(ns("latest_update_table"))
       )
     )
   )
 }
+
+
 
 
 LatestDataUpdateServer <- function(id, metrics_data) {
@@ -113,32 +116,25 @@ LatestDataUpdateServer <- function(id, metrics_data) {
         format = "%B %Y %d"
       )) |>
       dplyr::filter(latest_update_date == max(latest_update_date)) |>
-      dplyr::select(Measure, `Last Update`)
+      dplyr::select(Indicator = Measure, `Last Update`) |>
+      order_alphabetically(Indicator)
 
-    # Render the UI
-    output$latest_update_table <- shiny::renderUI({
-      # Create an HTML table with invisible styling
-      htmltools::tags$table(
-        style = "width: 100%; border-collapse: collapse;",
-        # Iterate over each row in the data
-        htmltools::tags$tbody(
-          lapply(1:nrow(latest_updated_indicator), function(i) {
-            htmltools::tags$tr(
-              htmltools::tags$td(
-                latest_updated_indicator$Measure[i],
-                style = "text-align: left; padding: 5px;"
-              ),
-              htmltools::tags$td(
-                latest_updated_indicator$`Last Update`[i],
-                style = "text-align: right; padding: 5px;"
-              )
-            )
-          })
-        )
+    # Render the reactable table with scrollable rows
+    output$latest_update_table <- reactable::renderReactable({
+      dfe_reactable(
+        latest_updated_indicator,
+        pagination = FALSE,
+        bordered = TRUE,
+        striped = TRUE,
+        compact = TRUE,
+        height = "220px",
+        searchable = TRUE
       )
     })
   })
 }
+
+
 
 
 LatestDevUpdateUI <- function(id) {

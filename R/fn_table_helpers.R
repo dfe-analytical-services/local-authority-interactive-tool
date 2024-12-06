@@ -236,6 +236,20 @@ dfe_reactable <- function(data, ...) {
       minWidth = 65,
       align = "left"
     ),
+    language = reactable::reactableLang(
+      searchPlaceholder = "Search table..."
+    ),
+    theme = reactable::reactableTheme(
+      searchInputStyle = list(
+        float = "right",
+        width = "25%",
+        marginBottom = "10px",
+        padding = "5px",
+        fontSize = "14px",
+        border = "1px solid #ccc",
+        borderRadius = "5px"
+      )
+    ),
     ...
   )
 }
