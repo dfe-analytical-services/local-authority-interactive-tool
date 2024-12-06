@@ -125,6 +125,12 @@ server_dev <- function(input, output, session) {
     "latest_dev_update",
     development_update_log
   )
+
+  # Useful links
+  UsefulLinksServer(
+    "useful_links",
+    useful_links
+  )
 }
 
 # Launch the Shiny app

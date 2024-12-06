@@ -53,7 +53,8 @@ info_page_panel <- function() {
 
           # Guidance sources ===================================================
           h2("Links to related or useful resources"),
-          p("Below is a list of links to other resources that may be of use:")
+          p("Below is a list of links to other resources that may be of use:"),
+          UsefulLinksUI("useful_links")
         )
       )
     )
@@ -269,6 +270,84 @@ LatestDevUpdateServer <- function(id, dev_update_log) {
           htmltools::tags$b("Date Updated:"),
           paste(latest_dev_update$Date)
         )
+      )
+    })
+  })
+}
+
+
+UsefulLinksUI <- function(id) {
+  ns <- NS(id)
+
+  # UI container for useful links
+  shiny::uiOutput(ns("useful_links_lst"))
+}
+
+UsefulLinksServer <- function(id, useful_links) {
+  moduleServer(id, function(input, output, session) {
+    # Prepare the data for display
+    useful_links_formatted <- useful_links |>
+      dplyr::rowwise() |>
+      dplyr::mutate(nice_useful_link = as.character(
+        dfeshiny::external_link(
+          href = Link,
+          link_text = Tool_Name,
+          add_warning = FALSE
+        )
+      )) |>
+      dplyr::ungroup()
+
+    # Render the UI
+    output$useful_links_lst <- shiny::renderUI({
+      # Create a styled container for the links
+      htmltools::tags$div(
+        style = "
+          line-height: 1.6;
+          max-width: 800px;
+          width: 100%;
+          min-width: 400px;
+          background-color: #f9f9f9;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 0 20px 20px 20px;
+          margin-bottom: 20px;
+          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        ",
+        # Group by 'Type' and render each group in a single card
+        purrr::map(unique(useful_links_formatted$Type), function(type) {
+          # Subset links of the same type
+          links_by_type <- useful_links_formatted |> dplyr::filter(Type == type)
+
+          # Wrap the entire group in a card
+          htmltools::tags$div(
+            # Type Header
+            htmltools::tags$h3(
+              type,
+              style = "margin-bottom: 15px; padding-top: 15px;"
+            ),
+            # List the links for the type
+            htmltools::tags$div(
+              purrr::map(1:nrow(links_by_type), function(i) {
+                htmltools::tags$div(
+                  style = "display: flex; justify-content: space-between; align-items: center;",
+                  # Left: The link
+                  htmltools::tags$div(
+                    style = "flex: 2;",
+                    shiny::HTML(links_by_type$nice_useful_link[i])
+                  ),
+                  # Right: The owner
+                  htmltools::tags$div(
+                    style = "
+                      flex: 1;
+                      text-align: left;
+                    ",
+                    links_by_type$Owner[i]
+                  )
+                )
+              })
+            )
+          )
+        })
       )
     })
   })

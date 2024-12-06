@@ -112,6 +112,7 @@ metrics_raw <- read.csv(
   check.names = FALSE
 )
 
+# For the Information page
 # Development update log
 development_update_log <- readxl::read_xlsx(
   here::here("01_data/02_prod/development_update_log.xlsx")
@@ -120,6 +121,12 @@ development_update_log <- readxl::read_xlsx(
 # Banner message
 banner_update <- read.csv(
   here::here("01_data/02_prod/banner_update.csv"),
+  check.names = FALSE
+)
+
+# Useful links
+useful_links <- read.csv(
+  here::here("01_data/02_prod/useful_links.csv"),
   check.names = FALSE
 )
 
