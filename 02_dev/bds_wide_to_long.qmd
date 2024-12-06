@@ -41,6 +41,24 @@ write.csv(
 )
 ```
 
+Load latest update banner
+
+```{r write-banner}
+# Load raw Data Dict from shared folder
+banner_update <- readxl::read_xlsx(
+  path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
+  sheet = "Banner_updates",
+  .name_repair = clean_spaces
+)
+
+# Write .csv version
+write.csv(
+  banner_update,
+  here::here("01_data/02_prod/Banner_update.csv"),
+  row.names = FALSE
+)
+```
+
 Logic to load BDS wide and convert to long
 
 ```{r pull-latest-bds-data}

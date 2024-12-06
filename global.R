@@ -117,6 +117,12 @@ development_update_log <- readxl::read_xlsx(
   here::here("01_data/02_prod/Development_update_log.xlsx")
 )
 
+# Banner message
+banner_update <- read.csv(
+  here::here("01_data/02_prod/Banner_update.csv"),
+  check.names = FALSE
+)
+
 
 # Cleaning data ===============================================================
 # BDS
