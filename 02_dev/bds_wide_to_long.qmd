@@ -25,18 +25,13 @@ Load the latest Data Dictionary
 
 ```{r write-data_dict}
 # Load raw Data Dict from shared folder
-data_dict <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
-  sheet = "Data_prod",
-  # Replace multi-space with single-space
-  .name_repair = clean_spaces
-) |>
+data_dict <- read_data_dict_shared_folder(shared_folder, "Data_prod") |>
   dplyr::filter(!grepl("DISCONTINUE", Table_status))
 
 # Write .csv version
 write.csv(
   data_dict,
-  here::here("01_data/02_prod/LAIT Data Dictionary.csv"),
+  here::here("01_data/02_prod/lait_data_dictionary.csv"),
   row.names = FALSE
 )
 ```
@@ -45,16 +40,25 @@ Load latest update banner
 
 ```{r write-banner}
 # Load raw Data Dict from shared folder
-banner_update <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
-  sheet = "Banner_updates",
-  .name_repair = clean_spaces
-)
+banner_update <- read_data_dict_shared_folder(shared_folder, "Banner_updates") |>
+  # Write .csv version
+  write.csv(
+    banner_update,
+    here::here("01_data/02_prod/banner_update.csv"),
+    row.names = FALSE
+  )
+```
+
+Load latest update banner
+
+```{r write-banner}
+# Load raw Data Dict from shared folder
+useful_links <- read_data_dict_shared_folder(shared_folder, "Other Tools")
 
 # Write .csv version
 write.csv(
-  banner_update,
-  here::here("01_data/02_prod/Banner_update.csv"),
+  useful_links,
+  here::here("01_data/02_prod/useful_links.csv"),
   row.names = FALSE
 )
 ```
@@ -72,8 +76,6 @@ bds_wide_raw_sf <- readxl::read_xlsx(
   .name_repair = clean_spaces,
   col_types = "text"
 )
-
-
 
 # Save to data folder
 write.csv(
@@ -148,7 +150,7 @@ bds_long_clean <- bds_long |>
 ```{r bds-la_codes}
 # Load LA codes
 la_codes <- readxl::read_xlsx(
-  path = here::here("01_data/02_prod/LA code list.xlsx")
+  path = here::here("01_data/02_prod/la_code_list.xlsx")
 )
 
 # Join to bds and create combined codes var
@@ -163,7 +165,7 @@ bds_long_la <- bds_long_clean |>
 # only public-safe/in-use measures)
 # NOTE: Children_away changed to Children_Away to match BDS
 data_dict <- read.csv(
-  file = paste0("01_data/02_prod/LAIT Data Dictionary.csv"),
+  file = paste0("01_data/02_prod/lait_data_dictionary.csv"),
   check.names = FALSE
 ) |>
   dplyr::mutate(Measure_short = trimws(Measure_short)) |>

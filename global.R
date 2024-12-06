@@ -99,7 +99,7 @@ bds <- arrow::read_parquet(
 
 # Statistical Neighbours
 stat_n_raw <- readxl::read_xlsx(
-  here::here("01_data/02_prod/SN_April 2021.xlsx"),
+  here::here("01_data/02_prod/sn_april_2021.xlsx"),
   sheet = "LA SN Groups",
   col_names = TRUE,
   skip = 2,
@@ -108,18 +108,18 @@ stat_n_raw <- readxl::read_xlsx(
 
 # Data dictionary
 metrics_raw <- read.csv(
-  here::here("01_data/02_prod/LAIT Data Dictionary.csv"),
+  here::here("01_data/02_prod/lait_data_dictionary.csv"),
   check.names = FALSE
 )
 
 # Development update log
 development_update_log <- readxl::read_xlsx(
-  here::here("01_data/02_prod/Development_update_log.xlsx")
+  here::here("01_data/02_prod/development_update_log.xlsx")
 )
 
 # Banner message
 banner_update <- read.csv(
-  here::here("01_data/02_prod/Banner_update.csv"),
+  here::here("01_data/02_prod/banner_update.csv"),
   check.names = FALSE
 )
 
