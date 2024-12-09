@@ -139,7 +139,7 @@ LatestDataUpdateUI <- function(id) {
     class = "govuk-notification-banner",
     style = "border-radius: 12px; overflow: hidden;", # Add curved corners
     bslib::card_body(
-      style = "gap: 0; padding: 0.5rem;",
+      style = "gap: 0; padding: 0.7rem;",
       div(
         class = "govuk-notification-banner__header",
         tags$h2(
@@ -384,17 +384,37 @@ UsefulLinksServer <- function(id, useful_links) {
           box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         ",
         # Group by 'Type' and render each group in a single card
-        purrr::map(unique(useful_links_formatted$Type), function(type) {
+        purrr::imap(unique(useful_links_formatted$Type), function(type, index) {
           # Subset links of the same type
           links_by_type <- useful_links_formatted |> dplyr::filter(Type == type)
 
           # Wrap the entire group in a card
           htmltools::tags$div(
-            # Type Header
-            htmltools::tags$h3(
-              type,
-              style = "margin-bottom: 15px; padding-top: 15px;"
-            ),
+            # Type Header with "Owner" inline for the first type
+            if (index == 1) {
+              htmltools::tags$div(
+                style = "
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 15px;
+                  padding-top: 15px;
+                ",
+                htmltools::tags$div(
+                  style = "flex: 2; font-weight: bold;",
+                  type
+                ),
+                htmltools::tags$div(
+                  style = "flex: 1; text-align: left; font-weight: bold;",
+                  "Owner"
+                )
+              )
+            } else {
+              htmltools::tags$h3(
+                type,
+                style = "margin-bottom: 15px; padding-top: 15px;"
+              )
+            },
             # List the links for the type
             htmltools::tags$div(
               purrr::map(1:nrow(links_by_type), function(i) {
