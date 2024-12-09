@@ -981,3 +981,9 @@ screen and (forced-colors:active) {
 .gov-tooltip[data-popper-placement^="left"] .tooltip-arrow::before {
   border-left-color: #5694ca !important;
 }
+
+
+/* Custom style for the News tag */
+#update-msg-banner .govuk-tag {
+  background-color: #f47738;
+}

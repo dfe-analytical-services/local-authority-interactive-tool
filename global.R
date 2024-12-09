@@ -119,10 +119,12 @@ development_update_log <- readxl::read_xlsx(
 )
 
 # Banner message
-banner_update <- read.csv(
+banner_update_msg <- read.csv(
   here::here("01_data/02_prod/banner_update.csv"),
   check.names = FALSE
-)
+) |>
+  dplyr::slice_head(n = 1) |>
+  dplyr::pull(var = 1)
 
 # Useful links
 useful_links <- read.csv(

@@ -81,16 +81,15 @@ ui <- function(input, output, session) {
     # Beta banner -------------------------------------------------------------
     shinyGovstyle::banner(
       "beta banner",
-      "beta",
-      paste0(
-        "This Dashboard is in beta phase and we are still reviewing performance
-        and reliability. ",
-        "In case of slowdown or connection issues due to high demand, we have
-        produced two instances of this site which can be accessed at the
-        following links: ",
-        "<a href=", site_primary, " id='link_site_1'>Site 1</a> and ",
-        "<a href=", site_overflow, " id='link_site_2'>Site 2</a>."
-      )
+      "Beta",
+      "This Dashboard is in beta phase and we are still reviewing performance
+      and reliability."
+    ),
+    # Update message banner ---------------------------------------------------
+    shinyGovstyle::banner(
+      inputId = "update-msg-banner",
+      type = "News",
+      label = banner_update_msg
     ),
 
     # Start of app ============================================================
