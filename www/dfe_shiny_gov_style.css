@@ -985,5 +985,10 @@ screen and (forced-colors:active) {
 
 /* Custom style for the News tag */
 #update-msg-banner .govuk-tag {
-  background-color: #f47738;
+  color: #6e3619;
+  background-color: #fcd6c3
+}
+
+#beta-banner-no-border {
+  border-bottom: none;
 }

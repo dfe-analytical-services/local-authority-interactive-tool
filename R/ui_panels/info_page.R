@@ -42,6 +42,46 @@ info_page_panel <- function() {
 }
 
 
+bannerModuleUI <- function(id) {
+  ns <- NS(id)
+
+  # Return a UI with two banners
+  tagList(
+    # Beta banner
+    uiOutput(ns("beta_banner")),
+    # Update message banner
+    uiOutput(ns("update_msg_banner"))
+  )
+}
+
+
+bannerModuleServer <- function(id, banner_update_msg) {
+  moduleServer(id, function(input, output, session) {
+    # Render beta banner with conditional bottom border
+    output$beta_banner <- renderUI({
+      shiny::tagList(
+        shinyGovstyle::banner(
+          ifelse(banner_update_msg == "", "beta-banner", "beta-banner-no-border"),
+          "Beta",
+          "This Dashboard is in beta phase and we are still reviewing performance and reliability."
+        )
+      )
+    })
+
+    # Render update message banner only if banner_update_msg is not empty
+    output$update_msg_banner <- renderUI({
+      if (banner_update_msg != "") {
+        shinyGovstyle::banner(
+          inputId = "update-msg-banner",
+          type = "News",
+          label = banner_update_msg
+        )
+      }
+    })
+  })
+}
+
+
 # Display Indicator Information table
 IndicatorInfoTableUI <- function(id) {
   ns <- NS(id)

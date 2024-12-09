@@ -79,18 +79,21 @@ ui <- function(input, output, session) {
     ),
 
     # Beta banner -------------------------------------------------------------
-    shinyGovstyle::banner(
-      "beta banner",
-      "Beta",
-      "This Dashboard is in beta phase and we are still reviewing performance
-      and reliability."
+    shiny::tagList(
+      shinyGovstyle::banner(
+        ifelse(banner_update_msg == "", "beta-banner", "beta-banner-no-border"),
+        "Beta",
+        "This Dashboard is in beta phase and we are still reviewing performance and reliability."
+      )
     ),
-    # Update message banner ---------------------------------------------------
-    shinyGovstyle::banner(
-      inputId = "update-msg-banner",
-      type = "News",
-      label = banner_update_msg
-    ),
+    # News banner --------------------------------------------------------------
+    if (banner_update_msg != "") {
+      shinyGovstyle::banner(
+        inputId = "update-msg-banner",
+        type = "News",
+        label = banner_update_msg
+      )
+    },
 
     # Start of app ============================================================
 
