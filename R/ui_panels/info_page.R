@@ -33,7 +33,7 @@ info_page_panel <- function() {
 
 
           # Guidance sources ===================================================
-          h2("Links to useful or related resources"),
+          h2("Links to useful or related resources (opens in new tab)"),
           UsefulLinksUI("useful_links")
         )
       )
@@ -139,8 +139,8 @@ LatestDataUpdateServer <- function(id, metrics_data) {
 LatestDevUpdateUI <- function(id) {
   ns <- NS(id)
 
-  # Use a styled card for a modern look with icons and animations
-  htmltools::tags$div(
+  # Use bslib::card() for a clean and modern collapsible card structure
+  bslib::card(
     class = "dev-update-card",
     style = "
       border: 1px solid #ccc;
@@ -150,55 +150,79 @@ LatestDevUpdateUI <- function(id) {
       background-color: #f9f9f9;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     ",
-    # Flex container for header and icon
-    htmltools::tags$div(
-      style = "
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-      ",
-      # Header section with bold title
-      htmltools::tags$h3(
-        "Latest Development Updates",
+    # Card header with title, spinning gear icon, and collapse toggle
+    bslib::card_header(
+      shiny::tags$div(
         style = "
-          margin: 0;
-          color: #1d70b8;
-          font-weight: bold;
-        "
-      ),
-      # Animated icon to the right
-      htmltools::tags$div(
-        style = "
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
           display: flex;
           align-items: center;
-          justify-content: center;
-          margin-left: 1rem;
+          justify-content: space-between;
         ",
-        htmltools::tags$i(
-          class = "fas fa-gear", # Font Awesome icon
-          style = "
-            color: #1d70b8;
-            font-size: 20px;
-            animation: rotateIcon 2s infinite linear;
-          "
+        # Title text
+        shiny::tags$div(
+          style = "display: flex; align-items: center;",
+          shiny::tags$h3(
+            "Latest Development Updates",
+            style = "
+              margin: 0;
+              color: #1d70b8;
+              font-weight: bold;
+            "
+          ),
+          # Spinning gear icon
+          shiny::tags$div(
+            style = "
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-left: 1rem;
+            ",
+            shiny::tags$i(
+              class = "fas fa-gear", # Font Awesome icon
+              style = "
+                color: #1d70b8;
+                font-size: 20px;
+                animation: rotateIcon 2s infinite linear;
+              "
+            )
+          )
+        ),
+        # Collapse toggle button
+        shiny::tags$button(
+          class = "btn btn-link",
+          type = "button",
+          `data-bs-toggle` = "collapse",
+          `data-bs-target` = paste0("#", ns("collapseBody")),
+          `aria-expanded` = "true",
+          `aria-controls` = ns("collapseBody"),
+          style = "font-size: 20px; color: #1d70b8;",
+          shiny::tags$i(class = "fas fa-chevron-down")
         )
       )
     ),
-    # Animated text for description
-    htmltools::tags$p(
-      "Below are the most recent development updates related to the tool:"
+    # Card body with collapsible content
+    shiny::tags$div(
+      id = ns("collapseBody"),
+      class = "collapse show", # Default to expanded
+      shiny::tags$div(
+        class = "card-body",
+        # Animated text for description
+        shiny::tags$p(
+          "Below are the most recent development updates related to the tool:"
+        ),
+        # Latest development details
+        shiny::tags$div(
+          style = "margin-bottom: 10px;",
+          shiny::uiOutput(ns("latest_update_table"))
+        )
+      )
     ),
-    # Latest development details
-    htmltools::tags$div(
-      style = "margin-bottom: 10px;",
-      shiny::uiOutput(ns("latest_update_table"))
-    ),
-    # Footer with an external link to LAIT GitHub
-    htmltools::tags$div(
-      style = "margin-top: 10px;",
+    # Card footer with external link to GitHub
+    bslib::card_footer(
+      style = "border: none;",
       shiny::HTML(paste0(
         "For more information, please visit the ",
         dfeshiny::external_link(
@@ -210,11 +234,14 @@ LatestDevUpdateUI <- function(id) {
       ))
     ),
     # Add the keyframe animation for spinning
-    htmltools::tags$style(
-      HTML("
+    shiny::tags$style(
+      shiny::HTML("
         @keyframes rotateIcon {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        .btn-link {
+          text-decoration: none;
         }
       ")
     )
