@@ -46,6 +46,8 @@ ui_dev <- function(input, output, session) {
 
     # Styling with CSS
     shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+    # Remove any gaps between elements
+    gap = 0,
 
     # Load javascript dependencies --------------------------------------------
     shinyWidgets::useShinydashboard(),
