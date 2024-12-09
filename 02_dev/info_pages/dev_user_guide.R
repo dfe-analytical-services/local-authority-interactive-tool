@@ -1,15 +1,15 @@
 source(here::here("global.R"))
 
-# # Load functions
-# list.files("R/", full.names = TRUE) |>
-#   (\(x) {
-#     x[grepl("fn_", x)]
-#   })() |>
-#   purrr::walk(source)
-#
-# # Load modules
-# list.files("R/lait_modules/", full.names = TRUE) |>
-#   purrr::walk(source)
+# Load functions
+list.files("R/", full.names = TRUE) |>
+  (\(x) {
+    x[grepl("fn_", x)]
+  })() |>
+  purrr::walk(source)
+
+# Load modules
+list.files("R/lait_modules/", full.names = TRUE) |>
+  purrr::walk(source)
 
 # Load ui panels
 list.files("R/ui_panels/", full.names = TRUE) |>

@@ -48,7 +48,9 @@ user_guide_panel <- function() {
               covering:"),
           tags$ul(
             tags$li("children’s health and wellbeing;"),
-            tags$li("children in need, child protection, children’s services workforce, and children looked after (inc. adoption);"),
+            tags$li("children in need, child protection,
+                    children’s services workforce,
+                    and children looked after (inc. adoption);"),
             tags$li("early years;"),
             tags$li("key stage attainment (inc. by age 19);"),
             tags$li("children with SEN;"),
