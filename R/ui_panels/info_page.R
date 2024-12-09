@@ -85,7 +85,9 @@ bannerModuleServer <- function(id, banner_update_msg) {
 # Display Indicator Information table
 IndicatorInfoTableUI <- function(id) {
   ns <- NS(id)
-  reactable::reactableOutput(ns("indicator_info_table"))
+  with_gov_spinner(
+    reactable::reactableOutput(ns("indicator_info_table"))
+  )
 }
 
 
@@ -129,23 +131,39 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
   })
 }
 
-
-
 LatestDataUpdateUI <- function(id) {
   ns <- NS(id)
 
-  shinyGovstyle::noti_banner(
-    inputId = ns("latest_update_indicator"),
-    title_txt = "Latest Updated Indicator(s)",
-    body_txt = as.character(
-      shiny::tagList(
-        shiny::p("These indicators were most recently updated:"),
-        # Adding reactableOutput for the table
-        reactable::reactableOutput(ns("latest_update_table"))
+  bslib::card(
+    full_screen = FALSE,
+    class = "govuk-notification-banner",
+    style = "border-radius: 12px; overflow: hidden;", # Add curved corners
+    bslib::card_body(
+      style = "gap: 0; padding: 0.5rem;",
+      div(
+        class = "govuk-notification-banner__header",
+        tags$h2(
+          class = "govuk-notification-banner__title",
+          id = ns("latest_update_indicator"),
+          "Latest Updated Indicator(s)"
+        )
+      ),
+      div(
+        class = "govuk-notification-banner__content",
+        style = "border-radius: 9px;",
+        tags$p(
+          class = "govuk-notification-banner__heading",
+          "These indicators were most recently updated:"
+        ),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("latest_update_table")),
+          size = 0.6
+        )
       )
     )
   )
 }
+
 
 
 LatestDataUpdateServer <- function(id, metrics_data) {
@@ -205,7 +223,6 @@ LatestDevUpdateUI <- function(id) {
             "Latest Development Updates",
             style = "
               margin: 0;
-              color: #1d70b8;
               font-weight: bold;
             "
           ),
@@ -256,7 +273,11 @@ LatestDevUpdateUI <- function(id) {
         # Latest development details
         shiny::tags$div(
           style = "margin-bottom: 10px;",
-          shiny::uiOutput(ns("latest_update_table"))
+          with_gov_spinner(
+            shiny::uiOutput(ns("latest_update_table")),
+            size = 0.7,
+            spinner_type = 7
+          )
         )
       )
     ),
@@ -327,7 +348,10 @@ UsefulLinksUI <- function(id) {
   ns <- NS(id)
 
   # UI container for useful links
-  shiny::uiOutput(ns("useful_links_lst"))
+  with_gov_spinner(
+    shiny::uiOutput(ns("useful_links_lst")),
+    spinner_type = 7
+  )
 }
 
 UsefulLinksServer <- function(id, useful_links) {
@@ -350,7 +374,6 @@ UsefulLinksServer <- function(id, useful_links) {
       htmltools::tags$div(
         style = "
           line-height: 1.6;
-          max-width: 800px;
           width: 100%;
           min-width: 400px;
           background-color: #f9f9f9;
