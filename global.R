@@ -99,7 +99,7 @@ bds <- arrow::read_parquet(
 
 # Statistical Neighbours
 stat_n_raw <- readxl::read_xlsx(
-  here::here("01_data/02_prod/SN_April 2021.xlsx"),
+  here::here("01_data/02_prod/sn_april_2021.xlsx"),
   sheet = "LA SN Groups",
   col_names = TRUE,
   skip = 2,
@@ -108,7 +108,27 @@ stat_n_raw <- readxl::read_xlsx(
 
 # Data dictionary
 metrics_raw <- read.csv(
-  here::here("01_data/02_prod/LAIT Data Dictionary.csv"),
+  here::here("01_data/02_prod/lait_data_dictionary.csv"),
+  check.names = FALSE
+)
+
+# For the Information page
+# Development update log
+development_update_log <- readxl::read_xlsx(
+  here::here("01_data/02_prod/development_update_log.xlsx")
+)
+
+# Banner message
+banner_update_msg <- read.csv(
+  here::here("01_data/02_prod/banner_update.csv"),
+  check.names = FALSE
+) |>
+  dplyr::slice_head(n = 1) |>
+  dplyr::pull(var = 1)
+
+# Useful links
+useful_links <- read.csv(
+  here::here("01_data/02_prod/useful_links.csv"),
   check.names = FALSE
 )
 
@@ -396,10 +416,7 @@ metric_names <- tibble::tibble(
   Measure = topic_indicator_full |>
     pull_uniques("Measure")
 ) |>
-  dplyr::arrange(
-    !grepl("^[A-Za-z]", Measure),
-    Measure
-  )
+  order_alphabetically(Measure)
 
 # All Years across string and num Years
 # (for Create Your Own year range choices - initially)

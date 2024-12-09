@@ -309,3 +309,14 @@ update_and_fetch_metadata <- function(input_indicator,
 
   return(metadata)
 }
+
+
+
+read_data_dict_shared_folder <- function(shared_folder, sheet_name) {
+  readxl::read_xlsx(
+    path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
+    sheet = sheet_name,
+    # Replace multi-space with single-space
+    .name_repair = clean_spaces
+  )
+}

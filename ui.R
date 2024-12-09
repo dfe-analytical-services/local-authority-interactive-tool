@@ -49,6 +49,8 @@ ui <- function(input, output, session) {
 
     # Styling with CSS
     set_css_style_sheet("dfe_shiny_gov_style.css"),
+    # Remove any gaps between elements
+    gap = 0,
 
     # Load javascript dependencies --------------------------------------------
     shinyWidgets::useShinydashboard(),
@@ -77,19 +79,21 @@ ui <- function(input, output, session) {
     ),
 
     # Beta banner -------------------------------------------------------------
-    shinyGovstyle::banner(
-      "beta banner",
-      "beta",
-      paste0(
-        "This Dashboard is in beta phase and we are still reviewing performance
-        and reliability. ",
-        "In case of slowdown or connection issues due to high demand, we have
-        produced two instances of this site which can be accessed at the
-        following links: ",
-        "<a href=", site_primary, " id='link_site_1'>Site 1</a> and ",
-        "<a href=", site_overflow, " id='link_site_2'>Site 2</a>."
+    shiny::tagList(
+      shinyGovstyle::banner(
+        ifelse(banner_update_msg == "", "beta-banner", "beta-banner-no-border"),
+        "Beta",
+        "This Dashboard is in beta phase and we are still reviewing performance and reliability."
       )
     ),
+    # News banner --------------------------------------------------------------
+    if (banner_update_msg != "") {
+      shinyGovstyle::banner(
+        inputId = "update-msg-banner",
+        type = "News",
+        label = banner_update_msg
+      )
+    },
 
     # Start of app ============================================================
 
@@ -277,6 +281,11 @@ ui <- function(input, output, session) {
       # User guide
       # =======================================================================
       user_guide_panel(),
+
+      # =======================================================================
+      # Information pages
+      # =======================================================================
+      info_page_panel(),
 
       # =======================================================================
       # Accessibility
