@@ -63,7 +63,7 @@ ui <- function(input, output, session) {
     # https://book.javascript-for-r.com/shiny-cookies.html
     dfeshiny::dfe_cookies_script(),
     dfeshiny::cookies_banner_ui(
-      site_title
+      name = site_title
     ),
 
     # Header ------------------------------------------------------------------
@@ -236,8 +236,8 @@ ui <- function(input, output, session) {
           )
         ),
         bslib::nav_panel("accessibility_statement", a11y_panel()),
-        shiny::tabPanel(
-          value = "cookies_panel_ui",
+        bslib::nav_panel(
+          value = "cookies_information",
           title = "Cookies",
           # Add backlink
           actionLink(
@@ -252,7 +252,7 @@ ui <- function(input, output, session) {
 
       # Footer
       dfe_footer(
-        links_list = c("Support", "Accessibility Statement", "Cookies Panel UI")
+        links_list = c("Support", "Accessibility Statement", "Cookies Information")
       )
     )
   )

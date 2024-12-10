@@ -43,15 +43,29 @@ server <- function(input, output, session) {
   })
 
   ## Footer links -------------------------------------------------------------
-  observeEvent(input$dashboard, bslib::nav_select("pages", "dashboard"))
-  observeEvent(input$support, bslib::nav_select("pages", "support"))
-  observeEvent(input$accessibility_statement, bslib::nav_select("pages", "accessibility_statement"))
-  observeEvent(input$cookies_panel_ui, bslib::nav_select("pages", "cookies_panel_ui"))
+  observeEvent(input$dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+  observeEvent(input$support, {
+    bslib::nav_select("pages", "support")
+  })
+  observeEvent(input$accessibility_statement, {
+    bslib::nav_select("pages", "accessibility_statement")
+  })
+  observeEvent(input$cookies_information, {
+    bslib::nav_select("pages", "cookies_information")
+  })
 
   ## Back links to main dashboard ---------------------------------------------
-  observeEvent(input$support_to_dashboard, bslib::nav_select("pages", "dashboard"))
-  observeEvent(input$cookies_to_dashboard, bslib::nav_select("pages", "dashboard"))
-  observeEvent(input$accessibility_to_dashboard, bslib::nav_select("pages", "dashboard"))
+  observeEvent(input$support_to_dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+  observeEvent(input$cookies_to_dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+  observeEvent(input$accessibility_to_dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
 
   # Bookmarking ===============================================================
   # This uses bookmarking to store input choices in the url.
@@ -104,9 +118,13 @@ server <- function(input, output, session) {
   # If on the main dashboard it uses the active tab from left_nav, else it uses the page input
   observe({
     if (input$pages == "dashboard") {
-      shinytitle::change_window_title(title = paste0(site_title, " - ", gsub("_", " ", input$left_nav)))
+      shinytitle::change_window_title(
+        title = paste0(site_title, " - ", gsub("_", " ", input$left_nav))
+      )
     } else {
-      shinytitle::change_window_title(title = paste0(site_title, " - ", gsub("_", " ", input$pages)))
+      shinytitle::change_window_title(
+        title = paste0(site_title, " - ", gsub("_", " ", input$pages))
+      )
     }
   })
 
@@ -114,12 +132,13 @@ server <- function(input, output, session) {
   output$cookies_status <- dfeshiny::cookies_banner_server(
     input_cookies = shiny::reactive(input$cookies),
     parent_session = session,
-    google_analytics_key = google_analytics_key
+    google_analytics_key = google_analytics_key,
+    cookies_link_panel = "cookies_information"
   )
 
   dfeshiny::cookies_panel_server(
     input_cookies = shiny::reactive(input$cookies),
-    google_analytics_key = google_analytics_key
+    google_analytics_key = google_analytics_key,
   )
 
   # ===========================================================================

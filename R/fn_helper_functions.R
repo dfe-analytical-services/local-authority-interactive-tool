@@ -791,3 +791,82 @@ order_alphabetically <- function(data, column) {
       {{ column }}
     )
 }
+
+
+
+cookies_banner_server_jt <- function(
+    id = "cookies_banner",
+    input_cookies,
+    parent_session,
+    google_analytics_key = NULL,
+    cookies_link_panel = "cookies_panel_ui") {
+  shiny::moduleServer(id, function(input, output, session) {
+    if (is.null(google_analytics_key)) {
+      warning("Please provide a valid Google Analytics key")
+    }
+    shiny::observeEvent(input_cookies(), {
+      if (!is.null(input_cookies())) {
+        if (!("dfe_analytics" %in% names(input_cookies()))) {
+          shinyjs::show(id = "cookies_main")
+        } else {
+          shinyjs::hide(id = "cookies_main")
+          msg <- list(name = "dfe_analytics", value = input_cookies()$dfe_analytics)
+          session$sendCustomMessage(
+            "analytics-consent",
+            msg
+          )
+          if ("cookies" %in% names(input)) {
+            if ("dfe_analytics" %in% names(input_cookies())) {
+              if (input_cookies()$dfe_analytics == "denied") {
+                ga_msg <- list(name = paste0(
+                  "_ga_",
+                  google_analytics_key
+                ))
+                session$sendCustomMessage(
+                  "cookie-clear",
+                  ga_msg
+                )
+              }
+            }
+          }
+        }
+      } else {
+        shinyjs::hide(id = "cookies_main", asis = TRUE)
+        shinyjs::toggle(id = "cookies_div", asis = TRUE)
+      }
+    })
+    shiny::observeEvent(input$cookies_accept, {
+      msg <- list(name = "dfe_analytics", value = "granted")
+      session$sendCustomMessage("cookie-set", msg)
+      session$sendCustomMessage("analytics-consent", msg)
+      shinyjs::hide(id = "cookies_main", asis = TRUE)
+    })
+    shiny::observeEvent(input$cookies_reject, {
+      msg <- list(name = "dfe_analytics", value = "denied")
+      session$sendCustomMessage("cookie-set", msg)
+      session$sendCustomMessage("analytics-consent", msg)
+      shinyjs::hide(id = "cookies_main", asis = TRUE)
+    })
+    shiny::observeEvent(input$cookies_link, {
+      bslib::nav_select(
+        "pages",
+        selected = cookies_link_panel
+      )
+    })
+    return(shiny::renderText({
+      cookies_text_stem <- "You have chosen to"
+      cookies_text_tail <- "the use of cookies on this website."
+      if (!is.null(input_cookies())) {
+        if ("dfe_analytics" %in% names(input_cookies())) {
+          if (input_cookies()$dfe_analytics == "granted") {
+            paste(cookies_text_stem, "accept", cookies_text_tail)
+          } else {
+            paste(cookies_text_stem, "reject", cookies_text_tail)
+          }
+        }
+      } else {
+        "Cookies consent has not been confirmed."
+      }
+    }))
+  })
+}
