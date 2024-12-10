@@ -106,6 +106,7 @@ a {
   text-underline-offset: .1578em;
   word-break: break-word;
   background-color: transparent;
+  color: #1d70b8;
 }
 
 a:visited {
