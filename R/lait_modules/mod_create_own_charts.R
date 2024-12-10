@@ -270,21 +270,24 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data
       if ("Message from tool" %in% colnames(create_own_data())) {
         ggiraph::girafe(
           ggobj = display_no_data_plot("No plot as not enough selections made."),
-          width_svg = 8.5
+          width_svg = 8.5,
+          options = generic_ggiraph_options()
         )
       } else if (
         chart_info$no_geogs() > 4
       ) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
-          width_svg = 8.5
+          width_svg = 8.5,
+          options = generic_ggiraph_options()
         )
       } else if (
         chart_info$no_indicators() > 3
       ) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
-          width_svg = 8.5
+          width_svg = 8.5,
+          options = generic_ggiraph_options()
         )
 
         # Plot line chart
@@ -527,21 +530,24 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_data)
       if ("Message from tool" %in% colnames(create_own_data())) {
         ggiraph::girafe(
           ggobj = display_no_data_plot("No plot as not enough selections made."),
-          width_svg = 8.5
+          width_svg = 8.5,
+          options = generic_ggiraph_options()
         )
       } else if (
         chart_info$no_geogs() > 4
       ) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
-          width_svg = 8.5
+          width_svg = 8.5,
+          options = generic_ggiraph_options()
         )
       } else if (
         chart_info$no_indicators() > 3
       ) {
         ggiraph::girafe(
           ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
-          width_svg = 8.5
+          width_svg = 8.5,
+          options = generic_ggiraph_options()
         )
 
         # Plot chart
