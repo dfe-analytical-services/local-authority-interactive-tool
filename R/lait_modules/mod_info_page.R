@@ -42,7 +42,6 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
         defaultPageSize = 5,
         showPageSizeOptions = TRUE,
         pageSizeOptions = c(5, 10, 25),
-        compact = TRUE,
         searchable = TRUE
       )
     })
@@ -102,7 +101,6 @@ LatestDataUpdateServer <- function(id, metrics_data) {
         pagination = FALSE,
         bordered = TRUE,
         striped = TRUE,
-        compact = TRUE,
         height = "220px",
         searchable = TRUE
       )
