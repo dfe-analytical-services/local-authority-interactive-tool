@@ -68,17 +68,12 @@ lapply(list.files(here::here("R/ui_panels/"), full.names = TRUE), source)
 # Set admin global variables ==================================================
 
 site_title <- "Local Authority Interactive Tool (LAIT)" # name of app
-parent_pub_name <- "LAIT publication" # name of source publication
+parent_pub_name <- "LAIT GitHub repository (files named bds_long)"
 # link to source publication
 parent_publication <- "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait"
 
 # Set the URLs that the site will be published to
 site_primary <- "https://department-for-education.shinyapps.io/local-authority-interactive-tool/"
-
-# Combine URLs into list for disconnect function
-# We can add further mirrors where necessary. Each one can generally handle
-# about 2,500 users simultaneously
-sites_list <- site_primary
 
 # Set the key for Google Analytics tracking
 google_analytics_key <- "Z967JJVQQX"

@@ -216,47 +216,6 @@ html {
 /* Card tabs CSS ----------------------------------------------------------- */
 /* TODO - fix the borders and margins on the tabs */
 
-/* Custom disconnect CSS --------------------------------------------------- */
-#ss-connect-dialog {
-  display: none !important;
-}
-
-#shiny-disconnected-overlay {
-  display: none !important;
-}
-
-#ss-overlay {
-  background-color: #000000 !important;
-  opacity: 0.6 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  z-index: 99998 !important;
-  overflow: hidden !important;
-  cursor: not-allowed !important;
-}
-
-#custom-disconnect-dialog {
-  background: #000000 !important;
-  color: #FFFFFF !important;
-  width: full !important;
-  transform: translateX(-50%) translateY(-50%) !important;
-  top: 50% !important;
-  position: fixed !important;
-  bottom: auto !important;
-  font-size: 1.188rem !important;
-  left: 50% !important;
-  padding: 0.8em 1.5em !important;
-  text-align: center !important;
-  height: auto !important;
-  opacity: 1 !important;
-  z-index: 99999 !important;
-  border-radius: 0.188rem !important;
-  box-shadow: rgba(0, 0, 0, 0.3) 0.188rem 0.188rem 0.625rem !important;
-}
-
 /* GOV.UK button copied in from shiny gov style ---------------------------- */
 .gov-uk-button {
     font-family: "Helvetica Neue", "Arial", sans-serif;

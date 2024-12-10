@@ -22,7 +22,7 @@ ui <- function(input, output, session) {
   bslib::page_fillable(
 
     # Set application metadata ------------------------------------------------
-    tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
+    tags$head(HTML(paste0("<title>", site_title, "</title>"))),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
     shinytitle::use_shiny_title(),
@@ -30,7 +30,7 @@ ui <- function(input, output, session) {
     # Add meta description for search engines
     metathis::meta() |>
       metathis::meta_general(
-        application_name = "Local Authority Interactive Tool (LAIT)",
+        application_name = site_title,
         description = "Local Authority Interactive Tool (LAIT)",
         robots = "index,follow",
         generator = "R-Shiny",
@@ -42,9 +42,8 @@ ui <- function(input, output, session) {
     # Custom disconnect function ----------------------------------------------
     # Variables used here are set in the global.R file
     dfeshiny::custom_disconnect_message(
-      links = sites_list,
-      publication_name = parent_pub_name,
-      publication_link = parent_publication
+      links = site_primary,
+      dashboard_title = site_title
     ),
 
     # Styling with CSS
@@ -64,11 +63,11 @@ ui <- function(input, output, session) {
     # https://book.javascript-for-r.com/shiny-cookies.html
     dfeshiny::dfe_cookies_script(),
     dfeshiny::cookies_banner_ui(
-      "Local Authority Interactive Tool (LAIT)"
+      site_title
     ),
 
     # Header ------------------------------------------------------------------
-    dfeshiny::header("Local Authority Interactive Tool (LAIT)"),
+    dfeshiny::header(site_title),
 
     # Beta banner -------------------------------------------------------------
     shiny::tagList(
@@ -237,7 +236,7 @@ ui <- function(input, output, session) {
           )
         ),
         bslib::nav_panel("accessibility_statement", a11y_panel()),
-        bslib::nav_panel(
+        shiny::tabPanel(
           value = "cookies_panel_ui",
           title = "Cookies",
           # Add backlink
