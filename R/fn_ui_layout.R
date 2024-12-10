@@ -157,7 +157,7 @@ full_data_on_github_noti <- function() {
     input_id = "full_data_on_github",
     title_txt = "Information",
     body_txt = shiny::HTML(paste0(
-      "The full dataset is available to download as a .csv on GitHub. ",
+      "The full dataset is available to download as a CSV on GitHub. ",
       "The file is ",
       dfeshiny::external_link(
         href = paste0(
