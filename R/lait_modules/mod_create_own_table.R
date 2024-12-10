@@ -249,21 +249,21 @@ StagingTableServer <- function(id,
     output$staging_table <- reactable::renderReactable({
       # Display messages if there are incorrect selections
       if (length(create_inputs$indicator()) == 0 && is.null(geog_groups())) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(
             `Message from tool` = "Please add selections (above).",
             check.names = FALSE
           )
         ))
       } else if (length(create_inputs$indicator()) == 0) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(
             `Message from tool` = "Please add an indicator selection (above).",
             check.names = FALSE
           )
         ))
       } else if (is.null(geog_groups())) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(
             `Message from tool` = "Please add a geography selection (above).",
             check.names = FALSE
@@ -531,7 +531,7 @@ QueryTableServer <- function(id, query) {
     output$query_table <- reactable::renderReactable({
       req(nrow(query$data))
       if (nrow(query$data) == 0) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(`Message from tool` = "No saved selections.", check.names = FALSE)
         ))
       }
