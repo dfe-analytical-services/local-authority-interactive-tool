@@ -68,14 +68,7 @@ ui <- function(input, output, session) {
     ),
 
     # Header ------------------------------------------------------------------
-    shinyGovstyle::header(
-      main_text = "",
-      main_link = "https://www.gov.uk/government/organisations/department-for-education",
-      secondary_text = "Local Authority Interactive Tool (LAIT)",
-      logo = "images/DfE_logo_landscape.png",
-      logo_width = 150,
-      logo_height = 32
-    ),
+    dfeshiny::header("Local Authority Interactive Tool (LAIT)"),
 
     # Beta banner -------------------------------------------------------------
     shiny::tagList(
