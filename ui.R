@@ -114,103 +114,15 @@ ui <- function(input, output, session) {
             bslib::navset_hidden(
               id = "left_nav",
               # LA Level
-              bslib::nav_panel(
-                "la_level",
-                PageHeaderUI("la_header"),
-                appInputsUI("la_inputs"),
-                LA_LevelTableUI("la_table"),
-                LA_StatsTableUI("la_stats"),
-                div(
-                  class = "well",
-                  style = "overflow-y: visible;",
-                  bslib::navset_card_underline(
-                    id = "la_charts",
-                    LA_LineChartUI("la_line_chart"),
-                    LA_BarChartUI("la_bar_chart")
-                  )
-                ),
-                LA_LevelMetaUI("la_meta")
-              ),
+              la_level_panel(),
               # Regional Level
-              bslib::nav_panel(
-                "regional_level",
-                PageHeaderUI("region_header"),
-                appInputsUI("region_inputs"),
-                RegionLevel_TableUI("region_tables"),
-                div(
-                  class = "well",
-                  style = "overflow-y: visible;",
-                  bslib::navset_card_underline(
-                    id = "region_charts",
-                    Region_FocusLineChartUI("region_focus_line"),
-                    Region_MultiLineChartUI("region_multi_line"),
-                    Region_FocusBarChartUI("region_focus_bar"),
-                    Region_MultiBarChartUI("region_multi_bar")
-                  )
-                ),
-                LA_LevelMetaUI("region_meta")
-              ),
+              region_level_panel(),
               # Statistical Neighbour Level
-              bslib::nav_panel(
-                "statistical_neighbour_level",
-                PageHeaderUI("stat_n_header"),
-                appInputsUI("stat_n_inputs"),
-                StatN_TablesUI("stat_n_tables"),
-                div(
-                  class = "well",
-                  style = "overflow-y: visible;",
-                  bslib::navset_card_underline(
-                    id = "stat_n_charts",
-                    StatN_FocusLineChartUI("stat_n_focus_line"),
-                    StatN_MultiLineChartUI("stat_n_multi_line"),
-                    StatN_FocusBarChartUI("stat_n_focus_bar"),
-                    StatN_MultiBarChartUI("stat_n_multi_bar")
-                  )
-                ),
-                LA_LevelMetaUI("stat_n_meta")
-              ),
+              stat_n_level_panel(),
               # All LA Level
-              bslib::nav_panel(
-                "all_la_level",
-                PageHeaderUI("all_la_header"),
-                appInputsUI("all_la_inputs"),
-                AllLA_TableUI("all_la_table"),
-                LA_LevelMetaUI("all_la_meta")
-              ),
+              all_la_level_panel(),
               # Create Your Own
-              bslib::nav_panel(
-                "create_your_own",
-                full_data_on_github_noti(),
-                div(
-                  class = "well",
-                  style = "overflow-y: visible; padding: 1rem;",
-                  bslib::layout_column_wrap(
-                    Create_MainInputsUI("create_inputs")["Main choices"]
-                  ),
-                  bslib::layout_column_wrap(
-                    Create_MainInputsUI("create_inputs")["LA grouping"],
-                    Create_MainInputsUI("create_inputs")["Other grouping"],
-                    YearRangeUI("year_range"),
-                    Create_MainInputsUI("create_inputs")["Clear all current selections"]
-                  )
-                ),
-                StagingTableUI("staging_table"),
-                QueryTableUI("query_table"),
-                CreateOwnTableUI("create_own_table"),
-                div(
-                  class = "well",
-                  style = "overflow-y: visible;",
-                  shiny::h3(
-                    "Output Charts",
-                    create_tooltip_icon("Charts showing data from all the saved selections")
-                  ),
-                  shiny::p("Note a maximum of 4 geographies and 3 indicators can be shown."),
-                  bslib::navset_tab(
-                    CreateOwnLineChartUI("create_own_line"),
-                    CreateOwnBarChartUI("create_own_bar")
-                  )
-                )
-              ),
+              create_your_own_panel(),
               # User Guide
               bslib::nav_panel("user_guide", user_guide_panel()),
               # Info Page
