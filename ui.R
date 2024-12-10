@@ -159,11 +159,14 @@ ui <- function(input, output, session) {
           ),
           dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
         )
-      ),
-
-      # Footer
-      dfe_footer(
-        links_list = c("Support", "Accessibility Statement", "Cookies Information")
+      )
+    ),
+    # Footer
+    dfe_footer(
+      links_list = c(
+        "Support",
+        "Accessibility Statement",
+        "Cookies Information"
       )
     )
   )
