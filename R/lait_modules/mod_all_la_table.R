@@ -262,7 +262,7 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_la_table, app_inputs$la())
+          highlight_selected_row(index, all_la_la_table, app_inputs$la(), "LA")
         },
         pagination = FALSE
       )
@@ -290,7 +290,8 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
         # Replace Rank with a blank col
         dplyr::mutate(Rank = "") |>
         dplyr::rename(` ` = "Rank") |>
-        dplyr::arrange(`LA Number`)
+        dplyr::arrange(`LA Number`) |>
+        dplyr::rename("Region" = `LA and Regions`)
 
       # Get region of LA
       all_la_region <- stat_n_la |>
@@ -312,7 +313,7 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_region_table, all_la_region)
+          highlight_selected_row(index, all_la_region_table, all_la_region, "Region")
         },
         pagination = FALSE
         # class = "hidden-column-headers"

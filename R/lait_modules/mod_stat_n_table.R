@@ -348,7 +348,8 @@ StatN_LASNsTableServer <- function(id,
     stat_n_sns_table <- reactive({
       stat_n_table() |>
         dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        dplyr::rename("LA" = `LA and Regions`)
     })
 
     # Download ----------------------------------------------------------------
@@ -373,7 +374,7 @@ StatN_LASNsTableServer <- function(id,
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la())
+          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la(), "LA")
         },
         pagination = FALSE
       )

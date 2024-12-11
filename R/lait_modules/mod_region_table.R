@@ -301,7 +301,8 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Pretty and order table ready for rendering
     region_la_table <- reactive({
       region_la_table_raw() |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        dplyr::rename("LA" = `LA and Regions`)
     })
 
     # Download ----------------------------------------------------------------
@@ -325,7 +326,7 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_la_table(), app_inputs$la())
+          highlight_selected_row(index, region_la_table(), app_inputs$la(), "LA")
         },
         pagination = FALSE
       )
@@ -508,7 +509,8 @@ Region_TableServer <- function(id,
           grepl("^England", `LA and Regions`), 1, 0
         )) |>
         dplyr::arrange(is_england, .by_group = FALSE) |>
-        dplyr::select(-is_england)
+        dplyr::select(-is_england) |>
+        dplyr::rename("Region" = `LA and Regions`)
     })
 
     # Get clean Regions
@@ -540,7 +542,7 @@ Region_TableServer <- function(id,
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_table(), region_clean())
+          highlight_selected_row(index, region_table(), region_clean(), "Region")
         },
         pagination = FALSE
       )

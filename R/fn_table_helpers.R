@@ -645,8 +645,8 @@ build_sn_stats_table <- function(
 #'   }
 #' )
 #' }
-highlight_selected_row <- function(index, data, selected_area = NULL) {
-  la_region <- data[index, "LA and Regions"]
+highlight_selected_row <- function(index, data, selected_area = NULL, geog_col = "LA and Regions") {
+  la_region <- data[index, geog_col]
 
   # Handle missing values first
   if (is.na(la_region)) {

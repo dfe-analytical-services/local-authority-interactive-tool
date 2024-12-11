@@ -148,7 +148,6 @@ LA_LevelTableUI <- function(id) {
       id = "la_lvl_table_tabs",
       bslib::nav_panel(
         "Table",
-        bslib::card_header("Local Authority, Region and England"),
         with_gov_spinner(
           reactable::reactableOutput(ns("la_table"))
         )
