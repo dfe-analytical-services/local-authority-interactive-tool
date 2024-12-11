@@ -154,7 +154,7 @@ LA_LevelTableUI <- function(id) {
       ),
       bslib::nav_panel(
         "Download data",
-        file_type_input_btn(ns("file_type")),
+        file_type_input_btn(ns("file_type"), ns("la_download")),
         Download_DataUI(ns("la_download"), "LA Table"),
       )
     )

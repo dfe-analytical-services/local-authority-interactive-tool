@@ -164,7 +164,7 @@ LA_LineChartServer <- function(id,
 
     # Line chart download ------------------------------------------------------
     # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Line")
+    DownloadChartBtnServer("download_btn", id, "Line", list("svg" = line_chart(), "html" = interactive_line_chart()))
 
     # Set up the download handlers for the chart
     Download_DataServer(
@@ -338,7 +338,7 @@ LA_BarChartServer <- function(id,
 
     # Bar chart download ------------------------------------------------------
     # Initialise server logic for download button and modal
-    DownloadChartBtnServer("download_btn", id, "Bar")
+    DownloadChartBtnServer("download_btn", id, "Bar", list("svg" = bar_chart(), "html" = interactive_bar_chart()))
 
     # Set up the download handlers for the chart
     Download_DataServer(

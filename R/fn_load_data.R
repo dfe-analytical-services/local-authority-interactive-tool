@@ -238,7 +238,59 @@ create_download_handler <- function(local) {
 #' file_type_input_btn("file_type", file_type = "plot")
 #' }
 #'
-file_type_input_btn <- function(input_id, file_type = "table") {
+file_type_input_btn <- function(input_id, data = NULL, file_type = "table") {
+  round_to_nearest_10 <- function(x) {
+    if (x < 5) {
+      return(10)
+    } else {
+      return(round(x / 10) * 10)
+    }
+  }
+
+  # Helper function to calculate actual file size
+  calculate_file_size <- function(file_type, data) {
+    # Create a temporary file
+    temp_file <- tempfile(fileext = paste0(".", tolower(file_type)))
+
+    # If data is reactive, access its values directly
+    if (file_type == "CSV") {
+      write.csv(data, temp_file, row.names = FALSE)
+    } else if (file_type == "XLSX") {
+      openxlsx::write.xlsx(data, temp_file)
+    } else if (file_type == "SVG") {
+      ggsave(
+        temp_file,
+        plot = data$svg, # Assuming data is a list or named vector with plot objects
+        width = 8.5,
+        height = 6
+      )
+    } else if (file_type == "HTML") {
+      htmlwidgets::saveWidget(data$html, temp_file)
+    }
+
+    # Get the file size in KB
+    file_size_kb <- file.info(temp_file)$size / 1024
+
+    # Round file size to nearest 10, while handling small sizes correctly
+    rounded_file_size <- round_to_nearest_10(file_size_kb)
+
+    unlink(temp_file) # Remove the temporary file
+    return(paste0(rounded_file_size, " KB"))
+  }
+
+  # Generate choices with actual file size
+  choices_with_size <- if (file_type == "table") {
+    c(
+      paste0("CSV (", calculate_file_size("CSV", data), ")"),
+      paste0("XLSX (", calculate_file_size("XLSX", data), ")")
+    )
+  } else {
+    c(
+      paste0("SVG (", calculate_file_size("SVG", data), ")"),
+      paste0("HTML (", calculate_file_size("HTML", data), ")")
+    )
+  }
+
   shinyGovstyle::radio_button_Input(
     inputId = input_id,
     label = h2("Choose download file format"),
@@ -253,12 +305,8 @@ file_type_input_btn <- function(input_id, file_type = "table") {
         " The HTML format contains the interactive element."
       )
     },
-    choices = if (file_type == "table") {
-      c("CSV", "XLSX")
-    } else {
-      c("SVG", "HTML")
-    },
-    selected = if (file_type == "table") "CSV" else "SVG"
+    choices = choices_with_size,
+    selected = choices_with_size[1]
   )
 }
 
