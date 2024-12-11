@@ -116,14 +116,52 @@ server <- function(input, output, session) {
   # Update title ==============================================================
   # This changes the title based on the tab selections and is important for accessibility
   # If on the main dashboard it uses the active tab from left_nav, else it uses the page input
-  observe({
+  # Define the lookup vector for titles
+  nav_titles <- c(
+    "la_level" = "LA Level",
+    "regional_level" = "Regional Level",
+    "statistical_neighbour_level" = "Statistical Neighbour Level",
+    "all_la_level" = "All LA Level",
+    "create_your_own" = "Create Your Own",
+    "user_guide" = "User Guide",
+    "information_page" = "Information Page",
+    "support" = "Support and Feedback",
+    "accessibility_statement" = "Accessibility Statement",
+    "cookies_information" = "Cookies Information",
+    "dashboard" = "Dashboard"
+  )
+
+  shiny::observe({
     if (input$pages == "dashboard") {
-      shinytitle::change_window_title(
-        title = paste0(site_title, " - ", gsub("_", " ", input$left_nav))
-      )
+      if (input$left_nav %in% c(
+        "la_level", "regional_level",
+        "statistical_neighbour_level", "all_la_level"
+      )) {
+        shinytitle::change_window_title(
+          title = paste0(
+            site_title,
+            " - ",
+            nav_titles[input$left_nav],
+            ": ",
+            la_app_inputs$la(),
+            ", ",
+            la_app_inputs$indicator()
+          )
+        )
+      } else {
+        shinytitle::change_window_title(
+          title = paste0(
+            site_title, " - ",
+            nav_titles[input$left_nav]
+          )
+        )
+      }
     } else {
       shinytitle::change_window_title(
-        title = paste0(site_title, " - ", gsub("_", " ", input$pages))
+        title = paste0(
+          site_title, " - ",
+          nav_titles[input$pages]
+        )
       )
     }
   })
