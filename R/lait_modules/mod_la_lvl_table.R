@@ -154,8 +154,8 @@ LA_LevelTableUI <- function(id) {
       ),
       bslib::nav_panel(
         "Download data",
-        file_type_input_btn(ns("file_type"), ns("la_download")),
-        Download_DataUI(ns("la_download"), "LA Table"),
+        shiny::uiOutput(ns("file_type")),
+        Download_DataUI(ns("la_download"), "LA Table")
       )
     )
   )
@@ -202,6 +202,13 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
 
     # LA table download -------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$file_type <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), la_table())
+    })
+
+    # Download dataset
     Download_DataServer(
       "la_download",
       reactive(input$file_type),

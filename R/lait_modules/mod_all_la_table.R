@@ -177,7 +177,7 @@ AllLA_TableUI <- function(id) {
       ),
       bslib::nav_panel(
         "Download data",
-        file_type_input_btn(ns("file_type")),
+        shiny::uiOutput(ns("file_type")),
         Download_DataUI(ns("all_download"), "All Geographies Table"),
         Download_DataUI(ns("la_download"), "LA Table"),
         Download_DataUI(ns("region_download"), "Region Table")
@@ -233,6 +233,13 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
     )
 
     # All geographies table download ------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$file_type <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), all_la_table())
+    })
+
+    # Download dataset
     Download_DataServer(
       "all_download",
       reactive(input$file_type),

@@ -246,7 +246,7 @@ RegionLevel_TableUI <- function(id) {
       bslib::nav_panel(
         title = "Download",
         div(
-          file_type_input_btn(ns("file_type")),
+          shiny::uiOutput(ns("file_type")),
           Download_DataUI(ns("la_download"), "LA Table"),
           Download_DataUI(ns("region_download"), "Region Table")
         )
@@ -308,6 +308,13 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     })
 
     # Download ----------------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$file_type <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), region_la_table_raw())
+    })
+
+    # Download dataset
     Download_DataServer(
       "la_download",
       reactive(input$file_type),

@@ -283,7 +283,7 @@ StatN_TablesUI <- function(id) {
       ),
       bslib::nav_panel(
         "Download",
-        file_type_input_btn(ns("file_type")),
+        shiny::uiOutput(ns("file_type")),
         Download_DataUI(ns("statn_download"), "Statistical Neighbour Table"),
         Download_DataUI(ns("geog_download"), "Other Geographies Table")
       )
@@ -354,6 +354,13 @@ StatN_LASNsTableServer <- function(id,
     })
 
     # Download ----------------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$file_type <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), stat_n_sns_table())
+    })
+
+    # Download dataset
     Download_DataServer(
       "statn_download",
       reactive(input$file_type),
