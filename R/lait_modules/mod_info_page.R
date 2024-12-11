@@ -154,7 +154,8 @@ LatestDevUpdateUI <- function(id) {
               margin-left: 1rem;
             ",
             shiny::tags$i(
-              class = "fas fa-gear", # Font Awesome icon
+              class = "fas fa-gear",
+              `aria-hidden` = "true",
               style = "
                 color: #1d70b8;
                 font-size: 20px;
