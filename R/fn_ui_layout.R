@@ -157,8 +157,8 @@ full_data_on_github_noti <- function() {
     input_id = "full_data_on_github",
     title_txt = "Information",
     body_txt = shiny::HTML(paste0(
-      "The full dataset is available to download as a CSV on GitHub. ",
-      "The file is ",
+      "The full dataset is available for download as a CSV on GitHub. ",
+      "You can access the file ",
       dfeshiny::external_link(
         href = paste0(
           "https://github.com/dfe-analytical-services/",
@@ -168,8 +168,8 @@ full_data_on_github_noti <- function() {
       ),
       ".<br>",
       "<span style='font-weight: normal;'>",
-      "This should be the preferred method for large data downloads ",
-      "especially for use with code.</span>"
+      "We recommend this method for downloading large datasets, ",
+      "especially if you plan to use the data in your code.</span>"
     )),
     type = "standard"
   )
