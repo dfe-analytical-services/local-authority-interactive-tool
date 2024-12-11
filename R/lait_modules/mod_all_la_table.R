@@ -285,9 +285,8 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
             # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
             rowSums(!is.na(dplyr::select(all_la_table(), -c(`LA Number`, `LA and Regions`)))) == 0)
         ) |>
-        # Replace Rank with a blank col
+        # Replace Rank
         dplyr::mutate(Rank = "") |>
-        dplyr::rename(` ` = "Rank") |>
         dplyr::arrange(`LA Number`) |>
         dplyr::rename("Region" = `LA and Regions`)
 
@@ -308,7 +307,16 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
             num_exclude = "LA Number",
             categorical = "Rank"
           ),
-          set_custom_default_col_widths()
+          list(
+            set_custom_default_col_widths(),
+            Rank = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Rank",
+                "Regions are not currently ranked",
+                placement = "top"
+              )
+            )
+          )
         ),
         rowStyle = function(index) {
           highlight_selected_row(index, all_la_region_table, all_la_region, "Region")
