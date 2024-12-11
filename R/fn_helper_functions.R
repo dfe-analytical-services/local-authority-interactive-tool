@@ -684,11 +684,11 @@ add_line_breaks <- function(text, max_length = 20) {
 #' # Wrap a plot with a larger spinner
 #' with_gov_spinner(plotOutput("la_plot"), size = 2)
 #'
-with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1) {
+with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1d70b8") {
   shinycssloaders::withSpinner(
     ui_element,
     type = spinner_type,
-    color = "#1d70b8",
+    color = color,
     size = size,
     proxy.height = paste0(250 * size, "px")
   )

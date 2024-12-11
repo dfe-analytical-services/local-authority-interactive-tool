@@ -191,6 +191,7 @@ LatestDevUpdateUI <- function(id) {
           style = "margin-bottom: 10px;",
           with_gov_spinner(
             shiny::uiOutput(ns("latest_update_table")),
+            color = "#0b0c0c",
             size = 0.7,
             spinner_type = 7
           )
@@ -266,7 +267,8 @@ UsefulLinksUI <- function(id) {
   # UI container for useful links
   with_gov_spinner(
     shiny::uiOutput(ns("useful_links_lst")),
-    spinner_type = 7
+    spinner_type = 7,
+    color = "#0b0c0c"
   )
 }
 
