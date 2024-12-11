@@ -943,17 +943,36 @@ screen and (forced-colors:active) {
 }
 
 
-/* Custom style for the News tag */
+/* Custom style for the News banner */
 #update-msg-banner .govuk-tag {
   color: #6e3619;
   background-color: #fcd6c3
 }
 
+/* Remove border for Beta banner when also New banner */
 #beta-banner-no-border {
   border-bottom: none;
 }
 
-
+/* Make tab names not bold */
 .nav-link, .nav-tabs>li>a, .nav-pills>li>a, :where(ul.nav.navbar-nav > li)>a {
   font-weight: normal;
+}
+
+/* Consisten text styling */
+/* Year range input */
+.filter-option-inner-inner {
+  font-size: 1.188rem;
+}
+
+/* Add selections button */
+#create_inputs-add_query {
+  font-size: 1.188rem;
+  font-weight: normal;
+  width: 90%;
+}
+
+/* Setting clear all selections button same width as add selections */
+#create_inputs-clear_all {
+  width: 90%;
 }
