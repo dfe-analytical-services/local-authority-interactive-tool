@@ -952,3 +952,8 @@ screen and (forced-colors:active) {
 #beta-banner-no-border {
   border-bottom: none;
 }
+
+
+.nav-link, .nav-tabs>li>a, .nav-pills>li>a, :where(ul.nav.navbar-nav > li)>a {
+  font-weight: normal;
+}

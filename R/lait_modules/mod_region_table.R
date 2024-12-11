@@ -215,39 +215,41 @@ RegionLevel_TableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_tab(
+    bslib::navset_card_tab(
       id = "region_table_tabs",
+      # Tables tab
       bslib::nav_panel(
         title = "Tables",
-        bslib::card(
-          bslib::card_body(
-            # Region LA Table -------------------------------------------------
-            bslib::card_header("Local Authorities"),
-            with_gov_spinner(
-              reactable::reactableOutput(ns("la_table")),
-              size = 2
-            ),
-            # Region Table ----------------------------------------------------
-            div(
-              # Add black border between the tables
-              style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-              bslib::card_header("Regions"),
-              with_gov_spinner(
-                reactable::reactableOutput(ns("region_table")),
-                size = 1.6
-              )
-            )
+        # Region LA Table -------------------------------------------------
+        bslib::card_header("Local Authorities"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table")),
+          size = 2
+        ),
+        # Region Table ----------------------------------------------------
+        div(
+          style = "overflow-y: visible; border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Regions"),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("region_table")),
+            size = 1.6
           )
         ),
-        br(),
-        # Region Stats Table --------------------------------------------------
-        Region_StatsTableUI("region_stats_mod")
+        div(
+          style = "overflow-y: visible; border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Summary"),
+          # Region Stats Table --------------------------------------------------
+          Region_StatsTableUI("region_stats_mod")
+        )
       ),
+      # Downloads tab
       bslib::nav_panel(
         title = "Download",
-        file_type_input_btn(ns("file_type")),
-        Download_DataUI(ns("la_download"), "LA Table"),
-        Download_DataUI(ns("region_download"), "Region Table")
+        div(
+          file_type_input_btn(ns("file_type")),
+          Download_DataUI(ns("la_download"), "LA Table"),
+          Download_DataUI(ns("region_download"), "Region Table")
+        )
       )
     )
   )
@@ -568,13 +570,9 @@ Region_TableServer <- function(id,
 Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
-  bslib::card(
-    bslib::card_body(
-      with_gov_spinner(
-        reactable::reactableOutput(ns("stats_table")),
-        size = 0.6
-      )
-    )
+  with_gov_spinner(
+    reactable::reactableOutput(ns("stats_table")),
+    size = 0.6
   )
 }
 

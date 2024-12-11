@@ -249,7 +249,7 @@ LA_StatsTableUI <- function(id) {
           max_width = "100%"
         ),
         div(
-          bslib::card_header("General Statistics", style = "color: #0000;"),
+          bslib::card_header("Summary"),
           with_gov_spinner(
             reactable::reactableOutput(ns("la_stats")),
             size = 0.4

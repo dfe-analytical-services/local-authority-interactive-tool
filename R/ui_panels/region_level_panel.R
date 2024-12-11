@@ -7,7 +7,7 @@ region_level_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
-      bslib::navset_card_underline(
+      bslib::navset_card_tab(
         id = "region_charts",
         Region_FocusLineChartUI("region_focus_line"),
         Region_MultiLineChartUI("region_multi_line"),

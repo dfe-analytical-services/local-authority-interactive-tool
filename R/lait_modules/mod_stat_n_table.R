@@ -254,31 +254,32 @@ StatN_TablesUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_tab(
+    bslib::navset_card_tab(
       id = "stat_n_tables_tabs",
       bslib::nav_panel(
         "Tables",
-        bslib::card(
-          # Statistical Neighbour LA SNs Table --------------------------------
-          bslib::card_header("Statistical Neighbours"),
+        # Statistical Neighbour LA SNs Table --------------------------------
+        bslib::card_header("Statistical Neighbours"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("statn_table")),
+          size = 1.6
+        ),
+        # Statistical Neighbour LA Geog Compare Table -----------------------
+        div(
+          # Add black border between the tables
+          style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Other Geographies"),
           with_gov_spinner(
-            reactable::reactableOutput(ns("statn_table")),
-            size = 1.6
-          ),
-          # Statistical Neighbour LA Geog Compare Table -----------------------
-          div(
-            # Add black border between the tables
-            style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-            bslib::card_header("Other Geographies"),
-            with_gov_spinner(
-              reactable::reactableOutput(ns("geog_table")),
-              size = 0.7
-            )
+            reactable::reactableOutput(ns("geog_table")),
+            size = 0.7
           )
         ),
-        br(),
         # Statistical Neighbour Statistics Table ------------------------------
-        StatN_StatsTableUI("stat_n_stats_mod")
+        div(
+          style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Summary"),
+          StatN_StatsTableUI("stat_n_stats_mod")
+        )
       ),
       bslib::nav_panel(
         "Download",

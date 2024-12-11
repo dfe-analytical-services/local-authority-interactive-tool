@@ -8,7 +8,7 @@ la_level_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
-      bslib::navset_card_underline(
+      bslib::navset_card_tab(
         id = "la_charts",
         LA_LineChartUI("la_line_chart"),
         LA_BarChartUI("la_bar_chart")

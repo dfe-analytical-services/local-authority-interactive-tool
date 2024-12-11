@@ -7,7 +7,7 @@ stat_n_level_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
-      bslib::navset_card_underline(
+      bslib::navset_card_tab(
         id = "stat_n_charts",
         StatN_FocusLineChartUI("stat_n_focus_line"),
         StatN_MultiLineChartUI("stat_n_multi_line"),

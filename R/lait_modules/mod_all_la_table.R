@@ -152,28 +152,26 @@ AllLA_TableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_tab(
+    bslib::navset_card_tab(
       id = "all_la_table_tabs",
       bslib::nav_panel(
         "Tables",
-        bslib::card(
-          bslib::card_header(
-            Get_AllLATableNameUI(ns("table_name")),
-            style = "text-align: center;"
-          ),
-          bslib::card_header("Local Authorities"),
+        bslib::card_header(
+          Get_AllLATableNameUI(ns("table_name")),
+          style = "text-align: center;"
+        ),
+        bslib::card_header("Local Authorities"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table")),
+          size = 3
+        ),
+        div(
+          # Add black border between the tables
+          style = "border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Regions"),
           with_gov_spinner(
-            reactable::reactableOutput(ns("la_table")),
-            size = 3
-          ),
-          div(
-            # Add black border between the tables
-            style = "border-top: 2px solid black; padding-top: 2.5rem;",
-            bslib::card_header("Regions"),
-            with_gov_spinner(
-              reactable::reactableOutput(ns("region_table")),
-              size = 1.6
-            )
+            reactable::reactableOutput(ns("region_table")),
+            size = 1.6
           )
         )
       ),

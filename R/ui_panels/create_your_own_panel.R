@@ -26,7 +26,7 @@ create_your_own_panel <- function() {
         create_tooltip_icon("Charts showing data from all the saved selections")
       ),
       shiny::p("Note a maximum of 4 geographies and 3 indicators can be shown."),
-      bslib::navset_tab(
+      bslib::navset_card_tab(
         CreateOwnLineChartUI("create_own_line"),
         CreateOwnBarChartUI("create_own_bar")
       )
