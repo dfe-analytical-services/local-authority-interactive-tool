@@ -146,6 +146,10 @@ ui <- function(input, output, session) {
         )
       )
     ),
+    tags$div(
+      style = "postion: relative; text-align: center; margin-bottom: 50px;",
+      tags$a(href = "#top", "Return to top of the page")
+    ),
     # Footer
     dfe_footer(
       links_list = c(
