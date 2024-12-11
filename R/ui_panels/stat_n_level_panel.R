@@ -7,6 +7,13 @@ stat_n_level_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
+      role = "region",
+      `aria-describedby` = "charts-description",
+      div(
+        id = "charts-description",
+        "This section contains line and bar charts created from the data in the above tables.
+         The selected Local Authority is compared against its statistical neighbours across different years."
+      ),
       bslib::navset_card_tab(
         id = "stat_n_charts",
         StatN_FocusLineChartUI("stat_n_focus_line"),

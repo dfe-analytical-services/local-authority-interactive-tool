@@ -7,6 +7,7 @@ region_level_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
+      `aria-hidden` = "true",
       bslib::navset_card_tab(
         id = "region_charts",
         Region_FocusLineChartUI("region_focus_line"),
