@@ -968,9 +968,9 @@ cookies_banner_server_jt <- function(
       shinyjs::hide(id = "cookies_main", asis = TRUE)
     })
     shiny::observeEvent(input$cookies_link, {
-      bslib::nav_select(
-        "pages",
-        selected = cookies_link_panel
+      shiny::updateTabsetPanel(
+        session = parent_session,
+        "pages", selected = cookies_link_panel
       )
     })
     return(shiny::renderText({
