@@ -773,7 +773,7 @@ CreateOwnTableUI <- function(id) {
       # Create Own Download ----------------------------------------------------
       bslib::nav_panel(
         title = "Download",
-        shiny::uiOutput(ns("file_type")),
+        shiny::uiOutput(ns("download_file_txt")),
         Download_DataUI(ns("table_download"), "Output Table")
       )
     )
@@ -844,7 +844,7 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
     # Download the output table ------------------------------------------------
     # File download text - calculates file size
     ns <- NS(id)
-    output$file_type <- shiny::renderUI({
+    output$download_file_txt <- shiny::renderUI({
       file_type_input_btn(ns("file_type"), replace_nan_with_empty(create_own_data()))
     })
 
