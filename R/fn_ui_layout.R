@@ -286,7 +286,7 @@ dfe_contents_links <- function(links_list) {
 
   # The HTML div to be returned
   tags$div(
-    style = "position: sticky; top: 0.5rem; padding: 0.25rem;",
+    style = "position: sticky; top: 0.5rem; padding: 0.25rem; word-break: break-word;",
     # Make it stick!
     h2("Contents"),
     # remove the circle bullets

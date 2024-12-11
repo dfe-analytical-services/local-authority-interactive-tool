@@ -20,7 +20,6 @@
 # -----------------------------------------------------------------------------
 ui <- function(input, output, session) {
   bslib::page_fillable(
-
     # Set application metadata ------------------------------------------------
     tags$head(HTML(paste0("<title>", site_title, "</title>"))),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
@@ -148,7 +147,7 @@ ui <- function(input, output, session) {
     ),
     tags$div(
       style = "postion: relative; text-align: center; margin-bottom: 50px;",
-      tags$a(href = "#top", "Return to top of the page")
+      tags$a(href = "#top", "Go to the top of the page")
     ),
     # Footer
     dfe_footer(
