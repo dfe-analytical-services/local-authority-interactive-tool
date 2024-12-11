@@ -2,6 +2,14 @@ create_your_own_panel <- function() {
   bslib::nav_panel(
     "create_your_own",
     full_data_on_github_noti(),
+    h1("Create Your Own"),
+    p(
+      "On this page you can create a custom data table by making selections
+        across various options. To download your table, add your selections
+        by clicking the green 'Add selections' button. This data will also be
+        displayed as line/bar chart (max of 4 geographies and 3 indicators).
+      "
+    ),
     div(
       class = "well",
       style = "overflow-y: visible; padding: 1rem;",

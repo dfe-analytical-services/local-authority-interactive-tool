@@ -976,3 +976,8 @@ screen and (forced-colors:active) {
 #create_inputs-clear_all {
   width: 90%;
 }
+
+/* Adding a margin to the bottom of the Create Your Own noti banner */
+#full_data_on_github {
+  margin: 1rem !important;
+}
