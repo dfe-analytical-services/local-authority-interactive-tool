@@ -82,6 +82,7 @@ server <- function(input, output, session) {
       "stat_n_inputs-indicator_name",
       "all_la_inputs-la_name",
       "all_la_inputs-indicator_name",
+      "pages",
       "left_nav",
       "create_inputs-geog_input",
       "create_inputs-indicator",
