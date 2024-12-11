@@ -252,20 +252,15 @@ file_type_input_btn <- function(input_id, data = NULL, file_type = "table") {
     # Create a temporary file
     temp_file <- tempfile(fileext = paste0(".", tolower(file_type)))
 
-    # If data is reactive, access its values directly
+    # Create file or return estimated size
     if (file_type == "CSV") {
       write.csv(data, temp_file, row.names = FALSE)
     } else if (file_type == "XLSX") {
       openxlsx::write.xlsx(data, temp_file)
     } else if (file_type == "SVG") {
-      ggsave(
-        temp_file,
-        plot = data$svg, # Assuming data is a list or named vector with plot objects
-        width = 8.5,
-        height = 6
-      )
+      return("usually no larger than 200 KB")
     } else if (file_type == "HTML") {
-      htmlwidgets::saveWidget(data$html, temp_file)
+      return("usually no larger than 500 KB")
     }
 
     # Get the file size in KB
@@ -281,8 +276,8 @@ file_type_input_btn <- function(input_id, data = NULL, file_type = "table") {
   # Generate choices with actual file size
   choices_with_size <- if (file_type == "table") {
     c(
-      paste0("CSV (", calculate_file_size("CSV", data), ")"),
-      paste0("XLSX (", calculate_file_size("XLSX", data), ")")
+      paste0("CSV (approximately ", calculate_file_size("CSV", data), ")"),
+      paste0("XLSX (approximately ", calculate_file_size("XLSX", data), ")")
     )
   } else {
     c(
