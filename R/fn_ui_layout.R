@@ -37,7 +37,7 @@ create_download_options_ui <- function(download_id, copy_clipboard_id) {
       actionButton(
         copy_clipboard_id,
         "Copy Chart to Clipboard",
-        icon = icon("copy"),
+        icon = icon("copy", `aria-hidden` = "true"),
         class = "gov-uk-button"
       ),
       style = "max-width: none;"
@@ -66,7 +66,8 @@ create_hidden_clipboard_plot <- function(clipboard_plot_id) {
   # Hidden static plot for copy-to-clipboard
   div(
     shiny::plotOutput(clipboard_plot_id),
-    style = "content-visibility: hidden;"
+    style = "content-visibility: hidden;",
+    `aria-hidden` = "true"
   )
 }
 
