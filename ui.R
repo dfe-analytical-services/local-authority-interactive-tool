@@ -130,22 +130,7 @@ ui <- function(input, output, session) {
           )
         ),
         # Footer pages
-        bslib::nav_panel(
-          value = "support",
-          # Add in back link
-          actionLink(
-            class = "govuk-back-link",
-            style = "margin-top: 0.2rem; margin-bottom: 1.2rem;",
-            "support_to_dashboard",
-            "Back to dashboard"
-          ),
-          title = shiny::HTML("Support and feedback<br>(Feedback form)"),
-          dfeshiny::support_panel(
-            team_email = "Darlington.BRIDGE@education.gov.uk",
-            repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-            form_url = "https://forms.office.com/e/gTNw1EBgsn"
-          )
-        ),
+        support_panel(),
         bslib::nav_panel("accessibility_statement", a11y_panel()),
         bslib::nav_panel(
           value = "cookies_information",
