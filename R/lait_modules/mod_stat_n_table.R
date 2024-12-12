@@ -254,35 +254,36 @@ StatN_TablesUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_tab(
+    bslib::navset_card_tab(
       id = "stat_n_tables_tabs",
       bslib::nav_panel(
         "Tables",
-        bslib::card(
-          # Statistical Neighbour LA SNs Table --------------------------------
-          bslib::card_header("Statistical Neighbours"),
+        # Statistical Neighbour LA SNs Table --------------------------------
+        bslib::card_header("Statistical Neighbours"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("statn_table")),
+          size = 1.6
+        ),
+        # Statistical Neighbour LA Geog Compare Table -----------------------
+        div(
+          # Add black border between the tables
+          style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Other Geographies"),
           with_gov_spinner(
-            reactable::reactableOutput(ns("statn_table")),
-            size = 1.6
-          ),
-          # Statistical Neighbour LA Geog Compare Table -----------------------
-          div(
-            # Add black border between the tables
-            style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-            bslib::card_header("Other Geographies"),
-            with_gov_spinner(
-              reactable::reactableOutput(ns("geog_table")),
-              size = 0.7
-            )
+            reactable::reactableOutput(ns("geog_table")),
+            size = 0.7
           )
         ),
-        br(),
         # Statistical Neighbour Statistics Table ------------------------------
-        StatN_StatsTableUI("stat_n_stats_mod")
+        div(
+          style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Summary"),
+          StatN_StatsTableUI("stat_n_stats_mod")
+        )
       ),
       bslib::nav_panel(
         "Download",
-        file_type_input_btn(ns("file_type")),
+        shiny::uiOutput(ns("download_file_txt")),
         Download_DataUI(ns("statn_download"), "Statistical Neighbour Table"),
         Download_DataUI(ns("geog_download"), "Other Geographies Table")
       )
@@ -348,10 +349,18 @@ StatN_LASNsTableServer <- function(id,
     stat_n_sns_table <- reactive({
       stat_n_table() |>
         dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        dplyr::rename("LA" = `LA and Regions`)
     })
 
     # Download ----------------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), stat_n_sns_table())
+    })
+
+    # Download dataset
     Download_DataServer(
       "statn_download",
       reactive(input$file_type),
@@ -373,7 +382,7 @@ StatN_LASNsTableServer <- function(id,
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la())
+          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la(), "LA")
         },
         pagination = FALSE
       )

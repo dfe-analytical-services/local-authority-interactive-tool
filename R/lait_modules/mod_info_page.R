@@ -42,7 +42,6 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
         defaultPageSize = 5,
         showPageSizeOptions = TRUE,
         pageSizeOptions = c(5, 10, 25),
-        compact = TRUE,
         searchable = TRUE
       )
     })
@@ -102,7 +101,6 @@ LatestDataUpdateServer <- function(id, metrics_data) {
         pagination = FALSE,
         bordered = TRUE,
         striped = TRUE,
-        compact = TRUE,
         height = "220px",
         searchable = TRUE
       )
@@ -156,7 +154,8 @@ LatestDevUpdateUI <- function(id) {
               margin-left: 1rem;
             ",
             shiny::tags$i(
-              class = "fas fa-gear", # Font Awesome icon
+              class = "fas fa-gear",
+              `aria-hidden` = "true",
               style = "
                 color: #1d70b8;
                 font-size: 20px;
@@ -193,6 +192,7 @@ LatestDevUpdateUI <- function(id) {
           style = "margin-bottom: 10px;",
           with_gov_spinner(
             shiny::uiOutput(ns("latest_update_table")),
+            color = "#0b0c0c",
             size = 0.7,
             spinner_type = 7
           )
@@ -268,7 +268,8 @@ UsefulLinksUI <- function(id) {
   # UI container for useful links
   with_gov_spinner(
     shiny::uiOutput(ns("useful_links_lst")),
-    spinner_type = 7
+    spinner_type = 7,
+    color = "#0b0c0c"
   )
 }
 

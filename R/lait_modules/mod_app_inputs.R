@@ -50,7 +50,7 @@ appInputsUI <- function(id) {
         options = list(
           placeholder = "Start typing or scroll to find an indicator...",
           plugins = list("clear_button")
-        )
+        ),
       )
     )
   )
@@ -80,7 +80,7 @@ appInputsServer <- function(id,
 
     # Debounce input values to prevent looping when inputs change quickly
     debounced_la_name <- shiny::debounce(reactive(input$la_name), 150)
-    debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 150)
+    debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 75)
     debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
 
     # Update Indicator dropdown for selected Topic

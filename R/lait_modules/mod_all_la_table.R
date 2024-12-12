@@ -152,34 +152,32 @@ AllLA_TableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_tab(
+    bslib::navset_card_tab(
       id = "all_la_table_tabs",
       bslib::nav_panel(
         "Tables",
-        bslib::card(
-          bslib::card_header(
-            Get_AllLATableNameUI(ns("table_name")),
-            style = "text-align: center;"
-          ),
-          bslib::card_header("Local Authorities"),
+        bslib::card_header(
+          Get_AllLATableNameUI(ns("table_name")),
+          style = "text-align: center;"
+        ),
+        bslib::card_header("Local Authorities"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table")),
+          size = 3
+        ),
+        div(
+          # Add black border between the tables
+          style = "border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Regions"),
           with_gov_spinner(
-            reactable::reactableOutput(ns("la_table")),
-            size = 3
-          ),
-          div(
-            # Add black border between the tables
-            style = "border-top: 2px solid black; padding-top: 2.5rem;",
-            bslib::card_header("Regions"),
-            with_gov_spinner(
-              reactable::reactableOutput(ns("region_table")),
-              size = 1.6
-            )
+            reactable::reactableOutput(ns("region_table")),
+            size = 1.6
           )
         )
       ),
       bslib::nav_panel(
         "Download data",
-        file_type_input_btn(ns("file_type")),
+        shiny::uiOutput(ns("download_file_txt")),
         Download_DataUI(ns("all_download"), "All Geographies Table"),
         Download_DataUI(ns("la_download"), "LA Table"),
         Download_DataUI(ns("region_download"), "Region Table")
@@ -235,6 +233,13 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
     )
 
     # All geographies table download ------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), all_la_table())
+    })
+
+    # Download dataset
     Download_DataServer(
       "all_download",
       reactive(input$file_type),
@@ -262,7 +267,7 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_la_table, app_inputs$la())
+          highlight_selected_row(index, all_la_la_table, app_inputs$la(), "LA")
         },
         pagination = FALSE
       )
@@ -287,10 +292,10 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
             # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
             rowSums(!is.na(dplyr::select(all_la_table(), -c(`LA Number`, `LA and Regions`)))) == 0)
         ) |>
-        # Replace Rank with a blank col
+        # Replace Rank
         dplyr::mutate(Rank = "") |>
-        dplyr::rename(` ` = "Rank") |>
-        dplyr::arrange(`LA Number`)
+        dplyr::arrange(`LA Number`) |>
+        dplyr::rename("Region" = `LA and Regions`)
 
       # Get region of LA
       all_la_region <- stat_n_la |>
@@ -309,10 +314,19 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
             num_exclude = "LA Number",
             categorical = "Rank"
           ),
-          set_custom_default_col_widths()
+          list(
+            set_custom_default_col_widths(),
+            Rank = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Rank",
+                "Regions are not currently ranked",
+                placement = "top"
+              )
+            )
+          )
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_region_table, all_la_region)
+          highlight_selected_row(index, all_la_region_table, all_la_region, "Region")
         },
         pagination = FALSE
         # class = "hidden-column-headers"

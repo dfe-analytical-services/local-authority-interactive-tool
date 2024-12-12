@@ -148,15 +148,14 @@ LA_LevelTableUI <- function(id) {
       id = "la_lvl_table_tabs",
       bslib::nav_panel(
         "Table",
-        bslib::card_header("Local Authority, Region and England"),
         with_gov_spinner(
           reactable::reactableOutput(ns("la_table"))
         )
       ),
       bslib::nav_panel(
         "Download data",
-        file_type_input_btn(ns("file_type")),
-        Download_DataUI(ns("la_download"), "LA Table"),
+        shiny::uiOutput(ns("download_file_txt")),
+        Download_DataUI(ns("la_download"), "LA Table")
       )
     )
   )
@@ -203,6 +202,13 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
 
     # LA table download -------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), la_table())
+    })
+
+    # Download dataset
     Download_DataServer(
       "la_download",
       reactive(input$file_type),
@@ -250,7 +256,7 @@ LA_StatsTableUI <- function(id) {
           max_width = "100%"
         ),
         div(
-          bslib::card_header("General Statistics", style = "color: #0000;"),
+          bslib::card_header("Summary"),
           with_gov_spinner(
             reactable::reactableOutput(ns("la_stats")),
             size = 0.4

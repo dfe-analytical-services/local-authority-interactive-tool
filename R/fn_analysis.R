@@ -269,10 +269,11 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
 #' # Assuming `df` is your data frame and `la_names_vec` is a vector of LA names
 #' filtered_data <- filter_la_data_all_la(df, la_names_vec)
 #'
-filter_la_data_all_la <- function(data, la_names) {
+filter_la_data_all_la <- function(data, la_names, geog_colname) {
   data |>
     dplyr::filter(`LA and Regions` %in% la_names) |>
-    dplyr::arrange(`LA and Regions`)
+    dplyr::arrange(`LA and Regions`) |>
+    dplyr::rename("LA" = `LA and Regions`)
 }
 
 
@@ -310,7 +311,8 @@ filter_region_data_all_la <- function(data, la_names) {
         ))) == 0)
     ) |>
     dplyr::mutate(Rank = "") |>
-    dplyr::arrange(`LA Number`)
+    dplyr::arrange(`LA Number`) |>
+    dplyr::rename("Region" = `LA and Regions`)
 }
 
 

@@ -19,7 +19,7 @@ PageHeaderUI <- function(id) {
     shinycssloaders::withSpinner(
       shiny::uiOutput(ns("page_header")),
       type = 7,
-      color = "#1d70b8",
+      color = "#0b0c0c",
       size = 1,
       proxy.height = paste0(250 * 0.25, "px")
     )
@@ -238,7 +238,8 @@ DownloadChartModalUI <- function(id, chart_type) {
     footer = shiny::tagAppendAttributes(
       shiny::modalButton("Close"),
       class = "govuk-button--secondary"
-    )
+    ),
+    size = "l"
   )
 }
 

@@ -18,6 +18,55 @@
 #
 # -----------------------------------------------------------------------------
 server <- function(input, output, session) {
+  # Navigation ================================================================
+  ## Main content left navigation ---------------------------------------------
+  observeEvent(input$la_level, {
+    bslib::nav_select("left_nav", selected = "la_level")
+  })
+  observeEvent(input$regional_level, {
+    bslib::nav_select("left_nav", selected = "regional_level")
+  })
+  observeEvent(input$statistical_neighbour_level, {
+    bslib::nav_select("left_nav", selected = "statistical_neighbour_level")
+  })
+  observeEvent(input$all_la_level, {
+    bslib::nav_select("left_nav", selected = "all_la_level")
+  })
+  observeEvent(input$create_your_own, {
+    bslib::nav_select("left_nav", selected = "create_your_own")
+  })
+  observeEvent(input$user_guide, {
+    bslib::nav_select("left_nav", selected = "user_guide")
+  })
+  observeEvent(input$information_page, {
+    bslib::nav_select("left_nav", selected = "information_page")
+  })
+
+  ## Footer links -------------------------------------------------------------
+  observeEvent(input$dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+  observeEvent(input$support, {
+    bslib::nav_select("pages", "support")
+  })
+  observeEvent(input$accessibility_statement, {
+    bslib::nav_select("pages", "accessibility_statement")
+  })
+  observeEvent(input$cookies_information, {
+    bslib::nav_select("pages", "cookies_information")
+  })
+
+  ## Back links to main dashboard ---------------------------------------------
+  observeEvent(input$support_to_dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+  observeEvent(input$cookies_to_dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+  observeEvent(input$accessibility_to_dashboard, {
+    bslib::nav_select("pages", "dashboard")
+  })
+
   # Bookmarking ===============================================================
   # This uses bookmarking to store input choices in the url.
   # All inputs are excluded by default, and inputs can be added explicitly
@@ -33,7 +82,8 @@ server <- function(input, output, session) {
       "stat_n_inputs-indicator_name",
       "all_la_inputs-la_name",
       "all_la_inputs-indicator_name",
-      "navsetpillslist",
+      "pages",
+      "left_nav",
       "create_inputs-geog_input",
       "create_inputs-indicator",
       "create_inputs-la_group",
@@ -64,43 +114,70 @@ server <- function(input, output, session) {
   })
 
 
-  # Dynamically changes window title to be LAIT - page - LA - indicator
-  # (Selected by user)
+  # Update title ==============================================================
+  # This changes the title based on the tab selections and is important for accessibility
+  # If on the main dashboard it uses the active tab from left_nav, else it uses the page input
+  # Define the lookup vector for titles
+  nav_titles <- c(
+    "la_level" = "LA Level",
+    "regional_level" = "Regional Level",
+    "statistical_neighbour_level" = "Statistical Neighbour Level",
+    "all_la_level" = "All LA Level",
+    "create_your_own" = "Create Your Own",
+    "user_guide" = "User Guide",
+    "information_page" = "Information Page",
+    "support" = "Support and Feedback",
+    "accessibility_statement" = "Accessibility Statement",
+    "cookies_information" = "Cookies Information",
+    "dashboard" = "Dashboard"
+  )
+
   shiny::observe({
-    if (input$navsetpillslist %in% c("LA Level", "Regional Level")) {
-      shinytitle::change_window_title(
-        session,
-        paste0(
-          site_title, " - ",
-          input$navsetpillslist, ": ",
-          la_app_inputs$la(), ", ",
-          la_app_inputs$indicator()
+    if (input$pages == "dashboard") {
+      if (input$left_nav %in% c(
+        "la_level", "regional_level",
+        "statistical_neighbour_level", "all_la_level"
+      )) {
+        shinytitle::change_window_title(
+          title = paste0(
+            site_title,
+            " - ",
+            nav_titles[input$left_nav],
+            ": ",
+            la_app_inputs$la(),
+            ", ",
+            la_app_inputs$indicator()
+          )
         )
-      )
+      } else {
+        shinytitle::change_window_title(
+          title = paste0(
+            site_title, " - ",
+            nav_titles[input$left_nav]
+          )
+        )
+      }
     } else {
       shinytitle::change_window_title(
-        session,
-        paste0(
+        title = paste0(
           site_title, " - ",
-          input$navsetpillslist
+          nav_titles[input$pages]
         )
       )
     }
   })
 
   # Cookies logic =============================================================
-  output$cookie_status <- dfeshiny::cookies_banner_server(
-    "cookie-banner",
+  output$cookies_status <- cookies_banner_server_jt(
     input_cookies = shiny::reactive(input$cookies),
     parent_session = session,
     google_analytics_key = google_analytics_key,
-    cookies_link_panel = "cookies_panel_ui"
+    cookies_link_panel = "cookies_information"
   )
 
   dfeshiny::cookies_panel_server(
-    id = "cookie-panel",
     input_cookies = shiny::reactive(input$cookies),
-    google_analytics_key = google_analytics_key
+    google_analytics_key = google_analytics_key,
   )
 
   # ===========================================================================

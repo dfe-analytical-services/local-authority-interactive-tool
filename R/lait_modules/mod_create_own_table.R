@@ -249,21 +249,21 @@ StagingTableServer <- function(id,
     output$staging_table <- reactable::renderReactable({
       # Display messages if there are incorrect selections
       if (length(create_inputs$indicator()) == 0 && is.null(geog_groups())) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(
             `Message from tool` = "Please add selections (above).",
             check.names = FALSE
           )
         ))
       } else if (length(create_inputs$indicator()) == 0) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(
             `Message from tool` = "Please add an indicator selection (above).",
             check.names = FALSE
           )
         ))
       } else if (is.null(geog_groups())) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(
             `Message from tool` = "Please add a geography selection (above).",
             check.names = FALSE
@@ -531,7 +531,7 @@ QueryTableServer <- function(id, query) {
     output$query_table <- reactable::renderReactable({
       req(nrow(query$data))
       if (nrow(query$data) == 0) {
-        return(reactable::reactable(
+        return(dfe_reactable(
           data.frame(`Message from tool` = "No saved selections.", check.names = FALSE)
         ))
       }
@@ -773,7 +773,7 @@ CreateOwnTableUI <- function(id) {
       # Create Own Download ----------------------------------------------------
       bslib::nav_panel(
         title = "Download",
-        file_type_input_btn(ns("file_type")),
+        shiny::uiOutput(ns("download_file_txt")),
         Download_DataUI(ns("table_download"), "Output Table")
       )
     )
@@ -842,6 +842,13 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
     })
 
     # Download the output table ------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), replace_nan_with_empty(create_own_data()))
+    })
+
+    # Download dataset
     Download_DataServer(
       "table_download",
       reactive(input$file_type),

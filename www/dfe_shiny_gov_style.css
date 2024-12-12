@@ -106,6 +106,7 @@ a {
   text-underline-offset: .1578em;
   word-break: break-word;
   background-color: transparent;
+  color: #1d70b8;
 }
 
 a:visited {
@@ -214,47 +215,6 @@ html {
 
 /* Card tabs CSS ----------------------------------------------------------- */
 /* TODO - fix the borders and margins on the tabs */
-
-/* Custom disconnect CSS --------------------------------------------------- */
-#ss-connect-dialog {
-  display: none !important;
-}
-
-#shiny-disconnected-overlay {
-  display: none !important;
-}
-
-#ss-overlay {
-  background-color: #000000 !important;
-  opacity: 0.6 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  z-index: 99998 !important;
-  overflow: hidden !important;
-  cursor: not-allowed !important;
-}
-
-#custom-disconnect-dialog {
-  background: #000000 !important;
-  color: #FFFFFF !important;
-  width: full !important;
-  transform: translateX(-50%) translateY(-50%) !important;
-  top: 50% !important;
-  position: fixed !important;
-  bottom: auto !important;
-  font-size: 1.188rem !important;
-  left: 50% !important;
-  padding: 0.8em 1.5em !important;
-  text-align: center !important;
-  height: auto !important;
-  opacity: 1 !important;
-  z-index: 99999 !important;
-  border-radius: 0.188rem !important;
-  box-shadow: rgba(0, 0, 0, 0.3) 0.188rem 0.188rem 0.625rem !important;
-}
 
 /* GOV.UK button copied in from shiny gov style ---------------------------- */
 .gov-uk-button {
@@ -983,12 +943,41 @@ screen and (forced-colors:active) {
 }
 
 
-/* Custom style for the News tag */
+/* Custom style for the News banner */
 #update-msg-banner .govuk-tag {
   color: #6e3619;
   background-color: #fcd6c3
 }
 
+/* Remove border for Beta banner when also New banner */
 #beta-banner-no-border {
   border-bottom: none;
+}
+
+/* Make tab names not bold */
+.nav-link, .nav-tabs>li>a, .nav-pills>li>a, :where(ul.nav.navbar-nav > li)>a {
+  font-weight: normal;
+}
+
+/* Consisten text styling */
+/* Year range input */
+.filter-option-inner-inner {
+  font-size: 1.188rem;
+}
+
+/* Add selections button */
+#create_inputs-add_query {
+  font-size: 1.188rem;
+  font-weight: normal;
+  width: 90%;
+}
+
+/* Setting clear all selections button same width as add selections */
+#create_inputs-clear_all {
+  width: 90%;
+}
+
+/* Adding a margin to the bottom of the Create Your Own noti banner */
+#full_data_on_github {
+  margin: 1rem !important;
 }

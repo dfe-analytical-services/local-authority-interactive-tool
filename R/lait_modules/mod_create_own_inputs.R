@@ -96,7 +96,12 @@ Create_MainInputsUI <- function(id) {
     ),
     # Add selection (query) button
     "Add selection" = div(
-      style = "height: 100%; display: flex; justify-content: center; align-items: flex-end;",
+      style = "
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+      ",
       shinyGovstyle::button_Input(
         inputId = ns("add_query"),
         label = "Add selections",
@@ -324,9 +329,9 @@ YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) 
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "year_range",
-          choices = "Please select an indicator first",
+          choices = "Select an indicator to see year range",
           options = shinyWidgets::pickerOptions(
-            noneSelectedText = "Select an indicator to see year range",
+            noneSelectedText = "Select an indicator...",
             maxOptions = 2,
             maxOptionsText = "Select and indicator",
             size = "auto"

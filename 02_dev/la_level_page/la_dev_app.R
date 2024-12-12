@@ -52,7 +52,6 @@ ui_dev <- bslib::page_fillable(
     class = "well",
     style = "overflow-y: visible;",
     bslib::card(
-      bslib::card_header("Local Authority, Region and England"),
       bslib::card_body(
         shinycssloaders::withSpinner(
           reactable::reactableOutput("la_table"),

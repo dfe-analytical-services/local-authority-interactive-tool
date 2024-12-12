@@ -215,39 +215,41 @@ RegionLevel_TableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    bslib::navset_tab(
+    bslib::navset_card_tab(
       id = "region_table_tabs",
+      # Tables tab
       bslib::nav_panel(
         title = "Tables",
-        bslib::card(
-          bslib::card_body(
-            # Region LA Table -------------------------------------------------
-            bslib::card_header("Local Authorities"),
-            with_gov_spinner(
-              reactable::reactableOutput(ns("la_table")),
-              size = 2
-            ),
-            # Region Table ----------------------------------------------------
-            div(
-              # Add black border between the tables
-              style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-              bslib::card_header("Regions"),
-              with_gov_spinner(
-                reactable::reactableOutput(ns("region_table")),
-                size = 1.6
-              )
-            )
+        # Region LA Table -------------------------------------------------
+        bslib::card_header("Local Authorities"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table")),
+          size = 2
+        ),
+        # Region Table ----------------------------------------------------
+        div(
+          style = "overflow-y: visible; border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Regions"),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("region_table")),
+            size = 1.6
           )
         ),
-        br(),
-        # Region Stats Table --------------------------------------------------
-        Region_StatsTableUI("region_stats_mod")
+        div(
+          style = "overflow-y: visible; border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Summary"),
+          # Region Stats Table --------------------------------------------------
+          Region_StatsTableUI("region_stats_mod")
+        )
       ),
+      # Downloads tab
       bslib::nav_panel(
         title = "Download",
-        file_type_input_btn(ns("file_type")),
-        Download_DataUI(ns("la_download"), "LA Table"),
-        Download_DataUI(ns("region_download"), "Region Table")
+        div(
+          shiny::uiOutput(ns("download_file_txt")),
+          Download_DataUI(ns("la_download"), "LA Table"),
+          Download_DataUI(ns("region_download"), "Region Table")
+        )
       )
     )
   )
@@ -301,13 +303,21 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Pretty and order table ready for rendering
     region_la_table <- reactive({
       region_la_table_raw() |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        dplyr::rename("LA" = `LA and Regions`)
     })
 
     # Download ----------------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$file_type <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), region_la_table_raw())
+    })
+
+    # Download dataset
     Download_DataServer(
       "la_download",
-      reactive(input$file_type),
+      reactive(input$download_file_txt),
       reactive(region_la_table_raw()),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Regional-Level"))
     )
@@ -325,7 +335,7 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_la_table(), app_inputs$la())
+          highlight_selected_row(index, region_la_table(), app_inputs$la(), "LA")
         },
         pagination = FALSE
       )
@@ -508,7 +518,8 @@ Region_TableServer <- function(id,
           grepl("^England", `LA and Regions`), 1, 0
         )) |>
         dplyr::arrange(is_england, .by_group = FALSE) |>
-        dplyr::select(-is_england)
+        dplyr::select(-is_england) |>
+        dplyr::rename("Region" = `LA and Regions`)
     })
 
     # Get clean Regions
@@ -540,7 +551,7 @@ Region_TableServer <- function(id,
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_table(), region_clean())
+          highlight_selected_row(index, region_table(), region_clean(), "Region")
         },
         pagination = FALSE
       )
@@ -566,13 +577,9 @@ Region_TableServer <- function(id,
 Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
-  bslib::card(
-    bslib::card_body(
-      with_gov_spinner(
-        reactable::reactableOutput(ns("stats_table")),
-        size = 0.6
-      )
-    )
+  with_gov_spinner(
+    reactable::reactableOutput(ns("stats_table")),
+    size = 0.6
   )
 }
 

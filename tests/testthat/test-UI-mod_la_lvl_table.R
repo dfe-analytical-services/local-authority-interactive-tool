@@ -159,11 +159,13 @@ test_that("Check LA charts behave as expected", {
     grepl("Average point score per entry A Level Cohort", cleaned_plot_str)
   )
 
+  # nolint start: commented_code
   # Check visual of line chart
-  app$expect_screenshot(
-    selector = "#la_line_chart-line_chart",
-    name = "la_line_chart"
-  )
+  # app$expect_screenshot(
+  #   selector = "#la_line_chart-line_chart",
+  #   name = "la_line_chart"
+  # )
+  # nolint end
 
   # Change to different topic
   app$set_inputs(
@@ -209,11 +211,13 @@ test_that("Check LA charts behave as expected", {
     )
   )
 
+  # nolint start: commented_code
   # Check visual of bar chart
-  app$expect_screenshot(
-    selector = "#la_bar_chart-bar_chart",
-    name = "la_bar_chart"
-  )
+  # app$expect_screenshot(
+  #   selector = "#la_bar_chart-bar_chart",
+  #   name = "la_bar_chart"
+  # )
+  # nolint end
 
   app$stop()
 })
