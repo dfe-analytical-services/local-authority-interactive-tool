@@ -51,6 +51,7 @@ ui <- function(input, output, session) {
     gap = 0,
 
     # Load javascript dependencies --------------------------------------------
+    shinyWidgets::useShinydashboard(),
     shinyjs::useShinyjs(),
     tags$head(htmltools::includeScript("www/custom_js.js")),
     reactable.extras::reactable_extras_dependency(),
