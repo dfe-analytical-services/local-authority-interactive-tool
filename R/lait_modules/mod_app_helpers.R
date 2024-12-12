@@ -238,7 +238,8 @@ DownloadChartModalUI <- function(id, chart_type) {
     footer = shiny::tagAppendAttributes(
       shiny::modalButton("Close"),
       class = "govuk-button--secondary"
-    )
+    ),
+    size = "l"
   )
 }
 
