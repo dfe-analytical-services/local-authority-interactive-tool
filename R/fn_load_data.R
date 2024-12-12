@@ -204,6 +204,33 @@ create_download_handler <- function(local) {
 }
 
 
+# Helper function to calculate actual file size
+calculate_file_size <- function(file_type, data) {
+  # Create a temporary file
+  temp_file <- tempfile(fileext = paste0(".", tolower(file_type)))
+
+  # Create file or return estimated size
+  if (file_type == "CSV") {
+    write.csv(data, temp_file, row.names = FALSE)
+  } else if (file_type == "XLSX") {
+    openxlsx::write.xlsx(data, temp_file, colWidths = "auto")
+  } else if (file_type == "SVG") {
+    return("usually 20 KB and no larger than 200 KB")
+  } else if (file_type == "HTML") {
+    return("usually 275 KB and no larger than 500 KB")
+  }
+
+  # Get the file size in KB
+  file_size_kb <- ceiling((file.size(temp_file) / 1024) / 5) * 5
+
+  # Round file size to nearest 10, while handling small sizes correctly
+  rounded_file_size <- round(file_size_kb, 2)
+
+  unlink(temp_file) # Remove the temporary file
+  return(paste0(rounded_file_size, " KB"))
+}
+
+
 #' Generate a Radio Button Input for File Type Selection
 #'
 #' This function creates a radio button input for selecting the download file
@@ -239,37 +266,6 @@ create_download_handler <- function(local) {
 #' }
 #'
 file_type_input_btn <- function(input_id, data = NULL, file_type = "table") {
-  round_up_to_nearest_5 <- function(x) {
-
-  }
-
-
-  # Helper function to calculate actual file size
-  calculate_file_size <- function(file_type, data) {
-    # Create a temporary file
-    temp_file <- tempfile(fileext = paste0(".", tolower(file_type)))
-
-    # Create file or return estimated size
-    if (file_type == "CSV") {
-      write.csv(data, temp_file, row.names = FALSE)
-    } else if (file_type == "XLSX") {
-      openxlsx::write.xlsx(data, temp_file, colWidths = "auto")
-    } else if (file_type == "SVG") {
-      return("usually 20 KB and no larger than 200 KB")
-    } else if (file_type == "HTML") {
-      return("usually 275 KB and no larger than 500 KB")
-    }
-
-    # Get the file size in KB
-    file_size_kb <- ceiling((file.size(temp_file) / 1024) / 5) * 5
-
-    # Round file size to nearest 10, while handling small sizes correctly
-    rounded_file_size <- round(file_size_kb, 2)
-
-    unlink(temp_file) # Remove the temporary file
-    return(paste0(rounded_file_size, " KB"))
-  }
-
   # Generate choices with actual file size
   choices_with_size <- if (file_type == "table") {
     c(
