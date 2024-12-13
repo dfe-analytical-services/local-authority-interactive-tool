@@ -138,7 +138,7 @@ ui <- function(input, output, session) {
         )
       ),
       tags$div(
-        style = "text-align: center; margin-bottom: 50px;",
+        style = "text-align: center; margin-top: 50px; margin-bottom: 15px;",
         tags$a(href = "#top", "Go to the top of the page")
       )
     ),
