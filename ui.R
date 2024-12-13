@@ -125,7 +125,7 @@ ui <- function(input, output, session) {
           )
         ),
         support_panel(),
-        bslib::nav_panel("accessibility_statement", a11y_panel()),
+        bslib::nav_panel("accessibility_statement", accessibility_panel()),
         bslib::nav_panel(
           value = "cookies_information",
           title = "Cookies",

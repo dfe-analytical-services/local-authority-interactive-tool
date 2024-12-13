@@ -565,19 +565,21 @@
     },
     "dfeshiny": {
       "Package": "dfeshiny",
-      "Version": "0.5.2",
+      "Version": "0.5.3",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "dfeshiny",
       "RemoteUsername": "dfe-analytical-services",
-      "RemoteSha": "91f1eb3cbac6e1d2ba64300e22a36c95a73dda25",
+      "RemoteRepo": "dfeshiny",
+      "RemoteRef": "main",
+      "RemoteSha": "8c345bf079b6a5b4d93d2c5ca1be077d21fd761a",
       "Requirements": [
         "R",
         "RCurl",
         "checkmate",
         "glue",
         "htmltools",
+        "lubridate",
         "magrittr",
         "shiny",
         "shinyGovstyle",
@@ -585,7 +587,7 @@
         "stringr",
         "styler"
       ],
-      "Hash": "e85991bf935df775e1caae6d0367f8d3"
+      "Hash": "9967c01468b897c3da0530f2688fd5f6"
     },
     "diffobj": {
       "Package": "diffobj",
@@ -1205,6 +1207,19 @@
         "xmlparsedata"
       ],
       "Hash": "08cff46381a242d44c0d8dd0aabd9f71"
+    },
+    "lubridate": {
+      "Package": "lubridate",
+      "Version": "1.9.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "generics",
+        "methods",
+        "timechange"
+      ],
+      "Hash": "be38bc740fc51783a78edb5a157e4104"
     },
     "magrittr": {
       "Package": "magrittr",
@@ -2199,6 +2214,17 @@
         "withr"
       ],
       "Hash": "829f27b9c4919c16b593794a6344d6c0"
+    },
+    "timechange": {
+      "Package": "timechange",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "cpp11"
+      ],
+      "Hash": "c5f3c201b931cd6474d17d8700ccb1c8"
     },
     "tinytex": {
       "Package": "tinytex",
