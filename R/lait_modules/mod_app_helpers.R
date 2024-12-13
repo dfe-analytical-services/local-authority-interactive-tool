@@ -211,7 +211,6 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
 }
 
 
-
 #' Download Chart Modal UI Module
 #'
 #' Creates a modal dialog for downloading a chart in different formats.

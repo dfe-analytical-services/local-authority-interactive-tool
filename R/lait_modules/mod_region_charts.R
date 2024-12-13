@@ -362,9 +362,30 @@ Region_FocusLineChartServer <- function(id,
 }
 
 
-
-
-
+#' Region Focus Bar Chart UI Module
+#'
+#' Creates a user interface (UI) for displaying a bar chart focused on regions.
+#' The chart is interactive and includes download options. It also provides
+#' a hidden plot for copying the chart to the clipboard.
+#'
+#' @param id The unique module ID for this UI element. It is used to namespace
+#'   input and output elements for this specific instance of the module.
+#'
+#' @return A `bslib::nav_panel` containing:
+#'   - A bar chart with interactive features.
+#'   - Download options for the chart.
+#'   - A hidden static plot for copying the chart to the clipboard.
+#'
+#' @details This function uses `bslib::nav_panel()` to display a panel containing:
+#'   - A bar chart created using `create_chart_card_ui()`, which includes a
+#'     downloadable chart and interactive elements.
+#'   - A `create_download_options_ui()` UI for download and copy functionalities.
+#'   - A hidden static plot for copying the chart to the clipboard.
+#'
+#' @examples
+#' \dontrun{
+#' Region_FocusBarChartUI("focus_bar_chart")
+#' }
 Region_FocusBarChartUI <- function(id) {
   ns <- NS(id)
 
@@ -389,7 +410,44 @@ Region_FocusBarChartUI <- function(id) {
 }
 
 
-
+#' Region Focus Bar Chart Server Module
+#'
+#' A server-side module that generates and manages the logic for rendering a
+#' region-focused bar chart. The chart is interactive, and it includes download
+#' options for saving the chart as either SVG or HTML. The module handles data
+#' filtering, processing, and plotting based on user inputs.
+#'
+#' @param id The unique module ID used to namespace input and output elements
+#'   for this specific instance of the module.
+#' @param app_inputs A list of inputs from the Shiny app used for filtering and
+#'   plotting the data.
+#' @param bds_metrics A dataset containing the relevant metrics for the chart.
+#' @param stat_n_geog A dataset used for cleaning and processing region data.
+#' @param region_names_bds A dataset containing the region names.
+#' @param covid_affected_data A dataset that contains information about the
+#'   impact of COVID-19, used for generating the COVID-related chart elements.
+#'
+#' @return This function does not return a value directly. It renders an interactive
+#'   bar chart using `ggiraph::girafe()` and provides a download feature via
+#'   `Download_DataServer`. It also provides a static plot for clipboard copying.
+#'
+#' @details The module performs the following steps:
+#'   - Retrieves and filters the data based on selected inputs using various
+#'     server-side modules (e.g., `Region_LongPlotServer`, `Clean_RegionServer`).
+#'   - Prepares and processes the data to ensure the selected region appears first
+#'     on the bar chart.
+#'   - Uses `ggplot2` and `ggiraph` to generate an interactive bar chart, with
+#'     optional COVID-related data if relevant.
+#'   - Provides download options for saving the chart in different formats.
+#'   - Generates a hidden static chart for copying the plot to the clipboard.
+#'
+#' @examples
+#' \dontrun{
+#' Region_FocusBarChartServer(
+#'   "focus_bar_chart", app_inputs, bds_metrics, stat_n_geog, region_names_bds,
+#'   covid_affected_data
+#' )
+#' }
 Region_FocusBarChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
@@ -509,16 +567,28 @@ Region_FocusBarChartServer <- function(id,
 }
 
 
-
-
-
-
-
-
-
-
-
-
+#' Region Multi-Chart Input UI Module
+#'
+#' Creates a user interface (UI) for selecting regions to compare across multiple
+#' charts (line and bar). The UI includes two `selectizeInput` elements that allow
+#' users to select up to three regions for comparison.
+#'
+#' @param id The unique module ID for this UI element. It is used to namespace
+#'   input and output elements for this specific instance of the module.
+#'
+#' @return A `tagList` containing two `selectizeInput` elements:
+#'   - A `selectizeInput` for selecting up to three regions for the line chart.
+#'   - A `selectizeInput` for selecting up to three regions for the bar chart.
+#'
+#' @details This function creates two `selectizeInput` elements:
+#'   - One for selecting regions to be compared in a line chart.
+#'   - One for selecting regions to be compared in a bar chart.
+#' The maximum number of selected regions is limited to three for each chart.
+#'
+#' @examples
+#' \dontrun{
+#' Region_MultiChartInputUI("multi_chart_input")
+#' }
 Region_MultiChartInputUI <- function(id) {
   ns <- NS(id)
 
@@ -550,6 +620,44 @@ Region_MultiChartInputUI <- function(id) {
   )
 }
 
+
+#' Region Multi-Chart Input Server Module
+#'
+#' A server-side module that handles the selection and synchronization of regions
+#' for comparing multiple charts (line and bar). It ensures that the selected regions
+#' for both charts are valid and synchronized. The module also retains the user’s
+#' previous selections and updates the UI accordingly.
+#'
+#' @param id The unique module ID used to namespace input and output elements
+#'   for this specific instance of the module.
+#' @param app_inputs A list of inputs from the Shiny app used for filtering and
+#'   plotting the data.
+#' @param stat_n_geog A dataset used for cleaning and processing region data.
+#' @param bds_metrics A dataset containing the relevant metrics for the chart.
+#' @param region_names_bds A dataset containing the region names.
+#' @param shared_values A reactive object used to store and share selections
+#'   between the line and bar chart inputs.
+#'
+#' @return This function does not return a value directly. It renders the user
+#'   interface elements and ensures that the inputs for the line and bar charts
+#'   are synchronized, valid, and updated based on user selection.
+#'
+#' @details The module performs the following tasks:
+#'   - Ensures that only valid region selections (those not equal to the selected
+#'     local authority) are allowed for the line and bar charts.
+#'   - Retains previous selections for both charts and updates the inputs with
+#'     valid options when the user changes the main LA or indicator.
+#'   - Synchronizes the line and bar chart inputs so that they both reflect the
+#'     same selected regions, with a maximum of three regions selected for each chart.
+#'   - Returns the selected regions for both the line and bar charts as reactive values
+#'     for use in other parts of the app.
+#'
+#' @examples
+#' \dontrun{
+#' Region_MultiChartInputServer(
+#'   "multi_chart_input", app_inputs, stat_n_geog, bds_metrics, region_names_bds, shared_values
+#' )
+#' }
 Region_MultiChartInputServer <- function(id,
                                          app_inputs,
                                          stat_n_geog,
@@ -681,9 +789,6 @@ Region_MultiChartInputServer <- function(id,
     )
   })
 }
-
-
-
 
 
 # Region multi-choice line chart module =======================================
@@ -940,7 +1045,32 @@ Region_MultiLineChartServer <- function(id,
 }
 
 
-
+#' Region Multi Bar Chart UI Module
+#'
+#' Creates the user interface (UI) for displaying a multi-region bar chart. The UI
+#' includes a sidebar layout with filter options, a section for rendering the bar
+#' chart, and options for downloading or copying the chart. Users can select multiple
+#' regions to compare in the bar chart.
+#'
+#' @param id The unique module ID for this UI element. It is used to namespace
+#'   input and output elements for this specific instance of the module.
+#'
+#' @return A `bslib::nav_panel` containing the following elements:
+#'   - A sidebar with filtering options for selecting regions to compare in the bar chart.
+#'   - A chart output section to display the interactive bar chart.
+#'   - Download and copy options for the chart.
+#'
+#' @details This function constructs the UI for the multi-region bar chart, which
+#'   includes:
+#'   - A sidebar for filtering and selecting up to three regions to be displayed on
+#'     the bar chart.
+#'   - An interactive chart area using `ggiraph` for interactivity (e.g., hover effects).
+#'   - Download and copy options for saving or copying the chart.
+#'
+#' @examples
+#' \dontrun{
+#' Region_MultiBarChartUI("multi_bar_chart")
+#' }
 Region_MultiBarChartUI <- function(id) {
   ns <- NS(id)
 
@@ -983,7 +1113,45 @@ Region_MultiBarChartUI <- function(id) {
 }
 
 
-
+#' Region Multi Bar Chart Server Module
+#'
+#' A server-side module that handles the rendering and interaction of the multi-region
+#' bar chart. This module filters and processes the selected regions, builds the plot,
+#' and enables functionality for downloading and copying the chart.
+#'
+#' @param id The unique module ID used to namespace input and output elements
+#'   for this specific instance of the module.
+#' @param app_inputs A list of inputs from the Shiny app used for filtering and
+#'   processing data for the chart.
+#' @param bds_metrics A dataset containing the relevant metrics for the chart.
+#' @param stat_n_geog A dataset for cleaning and processing region data.
+#' @param region_names_bds A dataset containing the names of regions.
+#' @param shared_values A reactive object used to store and share selections
+#'   between the regions for the multi-region chart.
+#' @param covid_affected_data A dataset containing COVID-related data for adjusting
+#'   the bar chart with COVID-related visual elements.
+#'
+#' @return This function does not return a value directly. It processes the input data
+#'   and renders the multi-region bar chart, making it available as an interactive plot.
+#'   Additionally, it supports downloading the plot in various formats and copying it
+#'   to the clipboard.
+#'
+#' @details The module performs the following tasks:
+#'   - Filters the data to include only the selected regions, ensuring the chart displays
+#'     valid data for comparison.
+#'   - Constructs a static bar chart using `ggplot2` and adds interactivity with `ggiraph`.
+#'   - Adds a COVID-19 adjustment layer to the plot if applicable.
+#'   - Provides download functionality for the chart in `SVG` and `HTML` formats.
+#'   - Provides a copy-to-clipboard functionality for users to copy the plot image.
+#'   - Returns the rendered interactive plot for use in the UI.
+#'
+#' @examples
+#' \dontrun{
+#' Region_MultiBarChartServer(
+#'   "multi_bar_chart", app_inputs, bds_metrics, stat_n_geog, region_names_bds,
+#'   shared_values, covid_affected_data
+#' )
+#' }
 Region_MultiBarChartServer <- function(id,
                                        app_inputs,
                                        bds_metrics,
