@@ -11,6 +11,7 @@ stat_n_level_panel <- function() {
       `aria-describedby` = "charts-description",
       div(
         id = "charts-description",
+        style = "position: absolute; clip: rect(0 0 0 0); width: 1px; height: 1px; overflow: hidden;",
         "This section contains line and bar charts created from the data in the above tables.
          The selected Local Authority is compared against its statistical neighbours across different years."
       ),
