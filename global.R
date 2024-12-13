@@ -108,8 +108,8 @@ metrics_raw <- read.csv(
 
 # For the Information page
 # Development update log
-development_update_log <- readxl::read_xlsx(
-  here::here("01_data/02_prod/development_update_log.xlsx")
+development_update_log <- read.csv(
+  here::here("01_data/02_prod/development_update_log.csv")
 )
 
 # Banner message

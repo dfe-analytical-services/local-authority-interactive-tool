@@ -51,10 +51,7 @@ MetadataServer <- function(id, indicator_input, data_metrics, metadata_type) {
 
       # Collapse multiple newlines and limit <br> tags
       if (is.character(metadata)) {
-        metadata <- gsub("\r\n|\n", "\n", metadata) # Normalize newlines
-        metadata <- gsub("\n{2,}", "<br><br>", metadata) # Replace multiple newlines with a single <br><br>
-        metadata <- gsub("\n", "", metadata) # Remove stray newlines
-        metadata <- HTML(metadata)
+        metadata <- format_text(metadata)
       }
 
       # Update the previous metadata value

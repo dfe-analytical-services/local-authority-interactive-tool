@@ -231,7 +231,7 @@ LatestDevUpdateUI <- function(id) {
 LatestDevUpdateServer <- function(id, dev_update_log) {
   moduleServer(id, function(input, output, session) {
     # Extract the most recent development update
-    latest_dev_update <- dev_update_log |>
+    latest_dev_update <- development_update_log |>
       dplyr::filter(Date == max(Date)) |>
       dplyr::slice_min(1)
 
@@ -241,20 +241,20 @@ LatestDevUpdateServer <- function(id, dev_update_log) {
         style = "line-height: 1.6;",
         htmltools::tags$p(
           htmltools::tags$b("Type:"),
-          paste(latest_dev_update$Type)
+          latest_dev_update$Type
         ),
         htmltools::tags$p(
           htmltools::tags$b("Summary:"),
-          paste(latest_dev_update$Summary)
+          latest_dev_update$Summary
         ),
         htmltools::tags$p(
           htmltools::tags$b("Details:"),
           shiny::br(),
-          paste(latest_dev_update$Details)
+          format_text(latest_dev_update$Details)
         ),
         htmltools::tags$p(
           htmltools::tags$b("Date Updated:"),
-          paste(latest_dev_update$Date)
+          latest_dev_update$Date
         )
       )
     })
