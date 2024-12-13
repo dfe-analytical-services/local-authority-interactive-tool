@@ -981,3 +981,35 @@ screen and (forced-colors:active) {
 #full_data_on_github {
   margin: 1rem !important;
 }
+
+
+
+
+/* Custom CSS for main layout */
+.dashboard-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.navigation-panel {
+  max-width: 300px;
+}
+
+.main-content {
+  flex: 3 1 600px;
+  max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navigation-panel {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .main-content {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}

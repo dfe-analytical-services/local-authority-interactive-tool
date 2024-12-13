@@ -291,7 +291,7 @@ dfe_contents_links <- function(links_list) {
     h2("Contents"),
     # remove the circle bullets
     tags$ol(
-      style = "list-style-type: none; padding-left: 0; font-size: 1rem;",
+      style = "list-style-type: none; padding-left: 0; font-size: 1.188rem;",
       lapply(links_list, create_sidelink)
     )
   )

@@ -791,3 +791,55 @@ order_alphabetically <- function(data, column) {
       {{ column }}
     )
 }
+
+
+
+format_text <- function(text) {
+  # Normalize newlines
+  text <- gsub("\r\n|\n", "\n", text)
+
+  # Replace lines starting with "- " with bullet point HTML <li> tags
+  text <- gsub("(?<=\n)-\\s+", "<li>", text, perl = TRUE)
+
+  # Add closing </li> tags for bullet points
+  text <- gsub("(<li>.*?)(?=\n|$)", "\\1</li>", text, perl = TRUE)
+
+  # Wrap all <li> items in <ul> tags
+  if (grepl("<li>", text)) {
+    text <- gsub("(.*?)(<li>.*?</li>)+", "\\1<ul>\\2</ul>", text, perl = TRUE)
+  }
+
+  # Replace double newlines with <br><br> only outside bullet points
+  text <- gsub("(?<!</li>)\n{2,}", "<br><br>", text, perl = TRUE)
+
+  # Remove stray single newlines outside of bullet points
+  text <- gsub("(?<!</li>)\n", " ", text, perl = TRUE)
+
+  # Remove spaces before and after bullet points
+  text <- gsub("<br><br><ul><li>", "<br><ul><li>", text, perl = TRUE)
+  text <- gsub("</li></ul><br><br>", "</li></ul><br>", text, perl = TRUE)
+
+  # Replace markdown-style links with HTML links
+  text <- stringr::str_replace_all(text, "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)", function(match) {
+    # Extract the link text and URL using captured groups
+    matches <- stringr::str_match_all(match, "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)")
+
+    link_text <- matches[[1]][2] # Captured group 1: link text
+    href <- matches[[1]][3] # Captured group 2: URL
+
+    # Generate HTML link using dfeshiny::external_link(), convert to character
+    as.character(dfeshiny::external_link(
+      href = href,
+      link_text = link_text,
+      add_warning = TRUE
+    ))
+  })
+
+  # Trim any leading or trailing spaces
+  text <- trimws(text)
+
+  # Convert to HTML
+  text <- HTML(text)
+
+  return(text)
+}

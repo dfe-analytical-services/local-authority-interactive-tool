@@ -49,7 +49,7 @@ banner_update <- read_data_dict_shared_folder(shared_folder, "Banner_updates") |
   )
 ```
 
-Load latest update banner
+Load useful links
 
 ```{r write-banner}
 # Load raw Data Dict from shared folder
@@ -59,6 +59,20 @@ useful_links <- read_data_dict_shared_folder(shared_folder, "Other Tools")
 write.csv(
   useful_links,
   here::here("01_data/02_prod/useful_links.csv"),
+  row.names = FALSE
+)
+```
+
+Load development update log
+
+```{r write-banner}
+# Load raw Data Dict from shared folder
+useful_links <- read_data_dict_shared_folder(shared_folder, "Development_log")
+
+# Write .csv version
+write.csv(
+  useful_links,
+  here::here("01_data/02_prod/development_update_log.csv"),
   row.names = FALSE
 )
 ```

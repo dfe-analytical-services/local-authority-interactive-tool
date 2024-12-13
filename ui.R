@@ -89,67 +89,59 @@ ui <- function(input, output, session) {
     shinyGovstyle::gov_main_layout(
       bslib::navset_hidden(
         id = "pages",
-        # Main dashboard content
         bslib::nav_panel(
           "dashboard",
-          bslib::layout_columns(
-            col_widths = bslib::breakpoints(sm = c(2, 10), md = c(2, 10), lg = c(2, 10)),
-
+          div(
+            class = "dashboard-container",
             # Left navigation
-            dfe_contents_links(
-              links_list = c(
-                "LA Level",
-                "Regional Level",
-                "Statistical Neighbour Level",
-                "All LA Level",
-                "Create Your Own",
-                "User Guide",
-                "Information Page"
+            div(
+              class = "navigation-panel",
+              dfe_contents_links(
+                links_list = c(
+                  "LA Level",
+                  "Regional Level",
+                  "Statistical Neighbour Level",
+                  "All LA Level",
+                  "Create Your Own",
+                  "User Guide",
+                  "Information Page"
+                )
               )
             ),
-
-            # Hidden dashboard panels
-            bslib::navset_hidden(
-              id = "left_nav",
-              # LA Level
-              la_level_panel(),
-              # Regional Level
-              region_level_panel(),
-              # Statistical Neighbour Level
-              stat_n_level_panel(),
-              # All LA Level
-              all_la_level_panel(),
-              # Create Your Own
-              create_your_own_panel(),
-              # User Guide
-              bslib::nav_panel("user_guide", user_guide_panel()),
-              # Info Page
-              bslib::nav_panel("information_page", info_page_panel())
+            # Main content area
+            div(
+              class = "main-content",
+              bslib::navset_hidden(
+                id = "left_nav",
+                la_level_panel(),
+                region_level_panel(),
+                stat_n_level_panel(),
+                all_la_level_panel(),
+                create_your_own_panel(),
+                bslib::nav_panel("user_guide", user_guide_panel()),
+                bslib::nav_panel("information_page", info_page_panel())
+              )
             )
           )
         ),
-        # Footer pages
         support_panel(),
-        bslib::nav_panel("accessibility_statement", a11y_panel()),
+        bslib::nav_panel("accessibility_statement", accessibility_panel()),
         bslib::nav_panel(
           value = "cookies_information",
           title = "Cookies",
-          # Add backlink
           actionLink(
             class = "govuk-back-link",
-            style = "margin-top: 0.2rem; margin-bottom: 1.2rem;",
             "cookies_to_dashboard",
             "Back to dashboard"
           ),
           dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
         )
+      ),
+      tags$div(
+        style = "text-align: center; margin-bottom: 50px;",
+        tags$a(href = "#top", "Go to the top of the page")
       )
     ),
-    tags$div(
-      style = "postion: relative; text-align: center; margin-bottom: 50px;",
-      tags$a(href = "#top", "Go to the top of the page")
-    ),
-    # Footer
     dfe_footer(
       links_list = c(
         "Support",
