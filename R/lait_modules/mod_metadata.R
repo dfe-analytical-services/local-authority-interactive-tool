@@ -77,28 +77,28 @@ LA_LevelMetaUI <- function(id) {
     style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
-        h3("Description:"),
+        h2("Description:"),
         MetadataUI(ns("description")),
-        h3("Methodology:"),
+        h2("Methodology:"),
         MetadataUI(ns("methodology")),
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
-          h3("Last Updated:",
+          h2("Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           MetadataUI(ns("last_update"))
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Next Updated:",
+          h2("Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           MetadataUI(ns("next_update"))
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Source:",
+          h2("Source:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           MetadataUI(ns("source"))
