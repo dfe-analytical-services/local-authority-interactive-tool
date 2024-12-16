@@ -480,3 +480,44 @@ cookies_banner_server_jt <- function(id = "cookies_banner",
     }))
   })
 }
+
+
+#' Internal Navigation Link UI
+#'
+#' Creates an internal navigation link in a Shiny app that switches tabs and
+#' scrolls to a specific section of the page.
+#'
+#' This function generates a hyperlink that, when clicked, switches to the
+#' specified tab and scrolls smoothly to the specified section within that tab.
+#' It is especially useful for navigating long pages or multi-tab Shiny
+#' applications.
+#'
+#' @param id A character string to namespace the module. Ensures the link
+#' is unique within the Shiny app.
+#' @param link_text A character string specifying the text displayed for the
+#' hyperlink.
+#' @param target_tab A character string representing the value of the tab to
+#' switch to. The `data-target-tab` attribute is used to define the target tab.
+#' @param target_id A character string specifying the `id` of the section to
+#' scroll to within the target tab.
+#'
+#' @return An HTML `<a>` tag for the internal navigation link.
+#'
+#' @examples
+#' internal_nav_link(
+#'   id = "example_link",
+#'   link_text = "Go to section",
+#'   target_tab = "info_tab",
+#'   target_id = "target_section"
+#' )
+#'
+internal_nav_link <- function(id, link_text, target_tab, target_id) {
+  ns <- NS(id) # Namespace the module
+  tags$a(
+    id = ns("internal_link"),
+    href = "#", # Prevent default anchor behavior
+    `data-target-tab` = target_tab, # Tab to switch to
+    `data-target-id` = target_id, # ID of the section to scroll to
+    link_text
+  )
+}

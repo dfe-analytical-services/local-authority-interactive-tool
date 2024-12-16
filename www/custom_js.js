@@ -51,3 +51,27 @@ $(document).ready(function () {
     });
   });
 });
+
+
+$(document).on('click', 'a[data-target-tab]', function(e) {
+  e.preventDefault(); // Prevent default anchor behavior
+
+  // Get the tab and target ID
+  const tabId = $(this).attr('data-target-tab');
+  const targetId = $(this).attr('data-target-id');
+
+  // Switch to the specified tab
+  $('[data-bs-toggle=\"tab\"][data-value=\"' + tabId + '\"]').tab('show');
+
+  // Scroll to the section after a short delay
+  setTimeout(function() {
+    const target = document.getElementById(targetId);
+    if (target) {
+      // Scroll to the target's position at the top of the screen
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.scrollY - 10,
+        behavior: 'smooth'
+      });
+    }
+  }, 300); // Adjust delay if necessary
+});

@@ -415,8 +415,14 @@ user_guide_panel <- function() {
           # Guidance sources ===================================================
           h2("Guidance sources"),
           p(
-            "Follow this link to find links to resources you may find useful ",
-            InternalLinkUI("resources_link", "useful or related resources"), "."
+            "Follow this link to find a list of ",
+            internal_nav_link(
+              id = "info_page_useful_resources",
+              link_text = "links to useful or related resources",
+              target_tab = "information_page",
+              target_id = "useful_links_link"
+            ),
+            "."
           )
         )
       )
