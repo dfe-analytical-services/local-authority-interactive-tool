@@ -824,7 +824,7 @@ Region_MultiLineChartUI <- function(id) {
 
   # Create a navigation panel for the multi-line chart
   bslib::nav_panel(
-    title = "Line chart - user selection",
+    title = "Line chart - User selection",
     # Main UI layout with chart and modal trigger button
     div(
       style = "display: flex;
@@ -1097,7 +1097,7 @@ Region_MultiBarChartUI <- function(id) {
   ns <- NS(id)
 
   bslib::nav_panel(
-    title = "Bar chart - user selection",
+    title = "Bar chart - User selection",
     div(
       style = "display: flex;
              justify-content: space-between;
@@ -1105,7 +1105,7 @@ Region_MultiBarChartUI <- function(id) {
              background: white;",
       bslib::card(
         id = "region_multi_line",
-        title = "Line chart - user selection",
+        title = "Line chart - User selection",
         bslib::card_body(
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
