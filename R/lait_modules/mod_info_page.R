@@ -163,7 +163,7 @@ LatestDevUpdateUI <- function(id) {
         # Title text
         shiny::tags$div(
           style = "display: flex; align-items: center;",
-          shiny::tags$h3(
+          shiny::tags$h2(
             "Latest Development Updates",
             style = "
               margin: 0;
