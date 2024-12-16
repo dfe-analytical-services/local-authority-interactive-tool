@@ -5,11 +5,13 @@
 #' @param output_id The Shiny output ID for the chart.
 #' @return A card UI component with predefined styling.
 #'
-create_chart_card_ui <- function(output_id) {
+create_chart_card_ui <- function(output_id, aria_label) {
   bslib::card(
     bslib::card_body(
-      with_gov_spinner(
-        ggiraph::girafeOutput(output_id)
+      div(
+        with_gov_spinner(ggiraph::girafeOutput(output_id)),
+        role = "img",
+        `aria-label` = aria_label
       )
     ),
     full_screen = TRUE,
