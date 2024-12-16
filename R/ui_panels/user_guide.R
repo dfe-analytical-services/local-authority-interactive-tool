@@ -174,14 +174,14 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                   Beneath the chart, the metadata of the indicator item is provided.
-                   This includes a description and metho
-                    (figure 5), as well as an indication of last and next update
-                    dates, alongside a hyperlink to the data source (if clicked,
+                   Beneath the chart, the metadata of the indicator is provided
+                    (figure ). This includes a description and methodology,
+                    as well as an indication of last and next update
+                    dates. Finally, a hyperlink to the data source (if clicked,
                     the source will open in new tab).
                    <br>
                    <br>
-                   <b>Figure 5: Data Description</b>
+                   <b>Figure : Metadata</b>
                    <br>"
                 ),
                 tags$img(
@@ -193,14 +193,14 @@ user_guide_panel <- function() {
               # Regional View ==================================================
               shiny::tagList(
                 HTML(
-                  "This presents the selected authority’s data alongside its
-                    Regional local authority neighbours and the selected
-                    authority’s region data against other regional data (and
-                    England).  The selected authority and region are highlighted
-                    in light blue.
+                  "This presents the selected local authority’s data alongside its
+                    Regional local authority neighbours. Then the selected local
+                    authority’s region's data against other regions data (and
+                    England). The selected local authority and region are highlighted
+                    in orange (figure ).
                    <br>
                    <br>
-                   <b>Figure 6: Regional Level View</b>
+                   <b>Figure : Regional Level View</b>
                    <br>"
                 ),
                 tags$img(
@@ -212,13 +212,26 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                   Following the similar pattern as the Local Authority view, a
-                    chart is displayed which presents each region’s data. The
-                    selected authority’s region is highlighted in blue, whilst
-                    other regions are coloured grey.
+                   Differing to the Local Authority view, the charts are split
+                    into two types, 'Focus' and 'User selection' (figure ).
+                    There are line and bar charts for each of these types.
                    <br>
                    <br>
-                   <b>Figure 7: Regional Level Charting</b>
+                   The 'Focus' chart presents each regions' data (figure ).
+                    The selected local authority’s region is highlighted in blue,
+                    whilst other regions are coloured grey. This is to give a clear
+                    contrast of how the region of interest compares to other
+                    regions.
+                   <br>
+                   <br>
+                   The 'User selection' chart displays the same data but its default
+                    is to only show the selected local authority's region's data
+                    (figure ). Users can then add up to three other regions
+                    (or England). This allows users to make more specific
+                    comparisons between regions.
+                   <br>
+                   <br>
+                   <b>Figure : Regional Level Charting</b>
                    <br>"
                 ),
                 tags$img(
@@ -230,12 +243,12 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                  The chart is again interactive and includes an option to
+                  The chart area is again interactive and includes an option to
                    create a ‘mini’ chart with a max of three regions of your
-                   choice presented alongside the selected LA’s region.
+                   choice presented alongside the selected LA’s region. ###### BIN
                    <br>
                    <br>
-                   <b>Figure 8: User choice regional chart</b>
+                   <b>Figure : User choice regional chart</b>
                    <br>"
                 ),
                 tags$img(
@@ -255,15 +268,21 @@ user_guide_panel <- function() {
                     Educational Research (NFER) was commissioned in 2007 by the
                     Department to identify and group similar LAs in terms of
                     the socio-economic characteristics, each LA was assigned 10
-                    such neighbours.  See [link on gov.uk] for further details.
+                    such neighbours. See ",
+                  dfeshiny::external_link(
+                    href = "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait",
+                    link_text = "Local Authority interactive tool (LAIT) GOV.UK",
+                    add_warning = TRUE
+                  ),
+                  " ladning page for further details.
                   <br>
                   <br>
                   These neighbour groupings are used in this tool to allow
-                   comparison of the selected authority with the authorities in
-                   its Statistical Neighbour group.
+                   comparison of the selected local authority alongside the
+                   local authorities in it's statistical neighbour group.
                   <br>
                   <br>
-                  <b>Figure 9: Statistical Neighbour View</b>
+                  <b>Figure : Statistical Neighbour View</b>
                   <br>"
                 ),
                 tags$img(
@@ -275,12 +294,18 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                   Following the data tables is a chart that presents the data
-                    for the selected authority (highlighted in blue) alongside
-                    its Statistical Neighbours (grey) (figure 10).
+                   Following the data tables are 'Focus' and 'User selection'
+                    charts that present the statistical neighbour data. There
+                    are line and bar charts for each of these types.
                    <br>
                    <br>
-                   <b>Figure 10: Statistical Neighbour Charting</b>
+                    The 'Focus' charts show the selected local authority
+                     (highlighted in blue) alongside its statistical neighbours
+                     (grey) (figure ). This is to give a clear contrast of how
+                     the selected local authoity compares to it's neighbours.
+                   <br>
+                   <br>
+                   <b>Figure : Statistical Neighbour Charting</b>
                    <br>"
                 ),
                 tags$img(
@@ -289,10 +314,15 @@ user_guide_panel <- function() {
                   style = "width:100%; max-width:600px; margin-top:10px;"
                 ),
                 HTML(
-                  "The chart is interactive and although set by default as a
-                    line chart, it can be changed to a bar chart and/or altered
-                    to display the selected authority against a maximum of
-                    three if its statistical neighbours."
+                  "<br>
+                   <br>
+                   <br>
+                   The 'User selection' chart displays the same data but its default
+                    is to only show the selected local authority's data
+                    (figure ). Users can then add up to three other statistical
+                    neighbours (or the selected local authority's region or England).
+                    This allows users to make more specific comparisons between
+                    the geographies."
                 )
               ),
               # All LA View ====================================================
@@ -301,10 +331,10 @@ user_guide_panel <- function() {
                   "The All LAs view presents all 153 Local Authorities, in
                     alphabetical order, plus previous authorities for those that
                     have recently undergone a local government reorganisation,
-                    (figure 11). The table is downloadable.
+                    (figure ). Each of the tables are downloadable.
                    <br>
                    <br>
-                   <b>Figure 11: The view of all England's upper tier Local
+                   <b>Figure : The view of all England's upper tier Local
                        Authorities</b>
                    <br>"
                 ),
@@ -317,11 +347,11 @@ user_guide_panel <- function() {
               # Create Your Own ================================================
               shiny::tagList(
                 HTML(
-                  "Provides functionality to create your own data table/s and
-                    associated chart/s.
+                  "The Create Your Own page provides functionality to create
+                    your own data table(s) and associated chart(s).
                    <br>
                    <br>
-                   <b>Figure 12: Overview of create your own table and charts</b>
+                   <b>Figure : Overview of create your own table and charts</b>
                    <br>"
                 ),
                 tags$img(
@@ -334,16 +364,16 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    There are a few simple steps you need to take to choose and
-                    extract the information required."
+                    extract the data you would like."
                 ),
                 tagList(
                   tags$ol(
                     tags$li("Using the dropdown menus, choose the level of data
-                              i.e., LA/s, Region/s, England, or combinations
-                              thereof."),
+                              i.e., LA(s), Region(s), England, or combinations
+                              of these."),
                     tags$br(),
                     tags$li(tagList(
-                      "Choose measure/s. You can choose multiple measures
+                      "Choose measure(s). You can choose multiple measures
                         from any topic area or combination of topics.",
                       tags$br(),
                       tags$img(
@@ -354,18 +384,8 @@ user_guide_panel <- function() {
                     )),
                     tags$br(),
                     tags$li(tagList(
-                      "The choices made will appear in a ‘staging area’:",
-                      tags$br(),
-                      tags$img(
-                        src = "images/user_guide/Create_Own_appear_staging.png",
-                        alt = "Create Own Page: The Staging Table",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
-                      )
-                    )),
-                    tags$br(),
-                    tags$li(tagList(
-                      "There are also a few pre-set selections for ease. Simply
-                        choose the option/s, and the information will appear in
+                      "There are also a few pre-set selections for easy use. Simply
+                        choose the option(s), and the data will appear in
                         the staging area.",
                       tags$br(),
                       tags$img(
@@ -376,10 +396,21 @@ user_guide_panel <- function() {
                     )),
                     tags$br(),
                     tags$li(tagList(
-                      "Once content with your choices, click the green ‘Add
-                        Selections’ button. Your choices will now appear as a
-                        query in a summary of selections section and an
-                        associated output table, which can be downloaded.",
+                      "The choices made will appear in a ‘Staging Table’:",
+                      tags$br(),
+                      tags$img(
+                        src = "images/user_guide/Create_Own_appear_staging.png",
+                        alt = "Create Own Page: The Staging Table",
+                        style = "width:100%; max-width:600px; margin-top:10px;"
+                      )
+                    )),
+                    tags$br(),
+                    tags$li(tagList(
+                      "Once you have made your selections, click the green ‘Add
+                        Selections’ button (to the righ of the Staging Table header).
+                        Your choices will now appear in the 'Summary of Selections'
+                        table and the resulting data will be added to the
+                        'Output Table', which can be downloaded.",
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_summary_selections.png",
@@ -395,9 +426,16 @@ user_guide_panel <- function() {
                     )),
                     tags$br(),
                     tags$li(tagList(
-                      "You can create numerous queries but please note that
-                        these can not be stored in the tool and can only be used
-                        during your live session.",
+                      "You can create and add numerous series of selections but
+                        please note that if you are downloading lots of data
+                        this may take some time to load. Also, you can download
+                        the full dataset (in long format) from the ",
+                      dfeshiny::external_link(
+                        href = "https://github.com/dfe-analytical-services/local-authority-interactive-tool/tree/main/01_data/02_prod",
+                        link_text = "data folder in the LAIT GitHub",
+                        add_warning = TRUE
+                      ),
+                      " in the files which names start with 'bds_long'.",
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_store_selections.png",
@@ -407,10 +445,50 @@ user_guide_panel <- function() {
                     )),
                     tags$br(),
                     tags$li(tagList(
-                      "Finally, queries can be output to a chart (line and/or
-                        bar), downloaded, or copied to the clipboard. However,
-                        note restrictions: charts can only be generated for a
-                        maximum of four geographies and three measures/indicators.",
+                      "Selections can be saved so that on entering the tool
+                       your selections are pre-populated. Then all you need to
+                       do is click 'Add Selections'. To do this you must first
+                       make the selections you want to save. Then copy the
+                       URL (webpage link in the search bar usually at the top
+                       of your screen) and keep this somewhere safe. If you
+                       use this link to open the app, your selections will load in
+                       automatically. Here is an example:<br>",
+                      dfeshiny::external_link(
+                        href = paste0(
+                          "https://department-for-education.shinyapps.io/",
+                          "local-authority-interactive-tool/?_inputs_&year_range-",
+                          "year_range=null&pages=%22dashboard%22&left_nav=%22create_your_own",
+                          "%22&la_inputs-la_name=%22Barking%20and%20Dagenham%22&la_inputs-",
+                          "indicator_name=%22A%20level%20cohort%20Average%20point%20score%20",
+                          "per%20entry%22&region_inputs-la_name=%22Barking%20and%20Dagenham%22",
+                          "&region_inputs-indicator_name=%22A%20level%20cohort%20Average%20point%20",
+                          "score%20per%20entry%22&stat_n_inputs-la_name=%22Barking%20and%20",
+                          "Dagenham%22&stat_n_inputs-indicator_name=%22A%20level%20cohort%20",
+                          "Average%20point%20score%20per%20entry%22&all_la_inputs-la_name=%22",
+                          "Barking%20and%20Dagenham%22&all_la_inputs-indicator_name=%22A%20level",
+                          "%20cohort%20Average%20point%20score%20per%20entry%22&create_inputs-",
+                          "geog_input=%5B%22Barking%20and%20Dagenham%22%2C%22Barnsley%22%5D&create_inputs",
+                          "-indicator=%5B%22A%20levels%203%2B%20A%20grades%20%2F%20Double%20awards%22%2C%22A%20",
+                          "levels%20AAB%20grades%20%2F%20Applied%20%2F%20Double%20awards%22%5D&create_inputs-",
+                          "la_group=%22all_las%22&create_inputs-inc_regions=false&create_inputs-inc_england=true"
+                        ),
+                        link_text = "Test link to show Create Your Own pre-populated",
+                        add_warning = TRUE
+                      ),
+                      ".",
+                      tags$br(),
+                      tags$img(
+                        src = "images/user_guide/Create_Own_store_selections.png",
+                        alt = "Create Own Page: Can add multiple sets of selections",
+                        style = "width:100%; max-width:600px; margin-top:10px;"
+                      )
+                    )),
+                    tags$br(),
+                    tags$li(tagList(
+                      "Finally, saved selections will be displayed as a chart
+                        (line and bar). These can be downloaded. However, note
+                        the restrictions are that charts can only be generated
+                        for a maximum of four geographies and three indicators.",
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_output_charts.png",
@@ -421,7 +499,8 @@ user_guide_panel <- function() {
                   ),
                   tags$div(
                     style = "margin-left: 1.5em; margin-top: 10px;",
-                    "Message will be displayed if chart cannot be generated:"
+                    "A message will display when these retrictions and breached
+                      and so the charts do not appear."
                   ),
                   tags$img(
                     src = "images/user_guide/Create_Own_output_charts_error.png",
