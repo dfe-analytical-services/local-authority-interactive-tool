@@ -106,8 +106,12 @@ CreateOwnLineChartUI <- function(id) {
                align-items: center;
                background: white;",
       # Line chart
-      # Line chart
-      create_chart_card_ui(ns("line_chart")),
+      create_chart_card_ui(
+        ns("line_chart"),
+        "Line chart displaying the data in the Output Table above.
+          The chart will not display data if there are more than 4 geographies
+          or 3 indicators selected."
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),
@@ -345,7 +349,12 @@ CreateOwnBarChartUI <- function(id) {
                    align-items: center;
                    background: white;",
       # Bar chart
-      create_chart_card_ui(ns("bar_chart")),
+      create_chart_card_ui(
+        ns("bar_chart"),
+        "Bar chart displaying the data in the Output Table above.
+          The chart will not display data if there are more than 4 geographies
+          or 3 indicators selected."
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),

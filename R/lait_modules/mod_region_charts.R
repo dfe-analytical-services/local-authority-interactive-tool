@@ -158,7 +158,14 @@ Region_FocusLineChartUI <- function(id) {
                align-items: center;
                background: white;",
       # Focus line chart
-      create_chart_card_ui(ns("output_chart")),
+      create_chart_card_ui(
+        ns("output_chart"),
+        paste0(
+          "Line chart displaying the data in the Regions table above.",
+          "This is a focus chart, which displays the selected local authority's",
+          "Region in blue and all other regions in grey."
+        )
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),
@@ -396,8 +403,15 @@ Region_FocusBarChartUI <- function(id) {
                justify-content: space-between;
                align-items: center;
                background: white;",
-      # Focus line chart
-      create_chart_card_ui(ns("output_chart")),
+      # Focus bar chart
+      create_chart_card_ui(
+        ns("output_chart"),
+        paste(
+          "Bar chart displaying the data in the Regions table above.",
+          "This is a focus chart, which displays the selected local authority's",
+          "Region in blue and all other regions in grey."
+        )
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),
@@ -833,7 +847,15 @@ Region_MultiLineChartUI <- function(id) {
               )[[1]]
             ),
             # Chart display area
-            ggiraph::girafeOutput(ns("output_chart"))
+            shiny::div(
+              with_gov_spinner(ggiraph::girafeOutput(ns("output_chart"))),
+              role = "img",
+              `aria-label` = paste(
+                "Line chart displaying the data in the Regions table above.",
+                "The default chart shows just data for the selected local authority's region.",
+                "Users can add up to 3 other Regions and England to this chart."
+              )
+            )
           )
         ),
         full_screen = TRUE,
@@ -1095,7 +1117,15 @@ Region_MultiBarChartUI <- function(id) {
                 ns("chart_bar_input") # Line chart input only
               )[[2]]
             ),
-            ggiraph::girafeOutput(ns("output_chart"))
+            shiny::div(
+              with_gov_spinner(ggiraph::girafeOutput(ns("output_chart"))),
+              role = "img",
+              `aria-label` = paste(
+                "Bar chart displaying the data in the Regions table above.",
+                "The default chart shows just data for the selected local authority's region.",
+                "Users can add up to 3 other Regions and England to this chart."
+              )
+            )
           )
         ),
         full_screen = TRUE,

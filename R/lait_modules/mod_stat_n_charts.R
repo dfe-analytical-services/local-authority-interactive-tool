@@ -24,7 +24,14 @@ StatN_FocusLineChartUI <- function(id) {
                align-items: center;
                background: white;",
       # Focus line chart
-      create_chart_card_ui(ns("output_chart")),
+      create_chart_card_ui(
+        ns("output_chart"),
+        paste(
+          "Line chart displaying the data in the Statistical Neighbours table above.",
+          "This is a focus chart, which displays the selected local authority",
+          "in blue and all other statistical neighbour local authorities in grey."
+        )
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),
@@ -249,7 +256,14 @@ StatN_FocusBarChartUI <- function(id) {
                align-items: center;
                background: white;",
       # Focus line chart
-      create_chart_card_ui(ns("output_chart")),
+      create_chart_card_ui(
+        ns("output_chart"),
+        paste(
+          "Bar chart displaying the data in the Statistical Neighbours table above.",
+          "This is a focus chart, which displays the selected local authority",
+          "in blue and all other statistical neighbour local authorities in grey."
+        )
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),
@@ -651,7 +665,16 @@ StatN_MultiLineChartUI <- function(id) {
                 ns("chart_line_input") # Line chart input only
               )[[1]]
             ),
-            ggiraph::girafeOutput(ns("output_chart"))
+            shiny::div(
+              with_gov_spinner(ggiraph::girafeOutput(ns("output_chart"))),
+              role = "img",
+              `aria-label` = paste(
+                "Line chart displaying the data in the Statistical Neighbour table above.",
+                "The default chart shows just data for the selected local authority.",
+                "Users can add up to 3 other statistical neighbour local",
+                "authorities, the selected local authority's region or England to this chart."
+              )
+            )
           )
         ),
         full_screen = TRUE,
@@ -898,7 +921,16 @@ StatN_MultiBarChartUI <- function(id) {
                 ns("chart_bar_input") # Line chart input only
               )[[2]]
             ),
-            ggiraph::girafeOutput(ns("output_chart"))
+            shiny::div(
+              with_gov_spinner(ggiraph::girafeOutput(ns("output_chart"))),
+              role = "img",
+              `aria-label` = paste(
+                "Bar chart displaying the data in the Statistical Neighbour table above.",
+                "The default chart shows just data for the selected local authority.",
+                "Users can add up to 3 other statistical neighbour local",
+                "authorities, the selected local authority's region or England to this chart."
+              )
+            )
           )
         ),
         full_screen = TRUE,
