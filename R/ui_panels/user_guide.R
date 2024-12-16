@@ -5,17 +5,8 @@ user_guide_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           12,
-          shinyGovstyle::banner(
-            "beta banner",
-            "beta",
-            paste0(
-              "This page is in beta phase and we are still reviewing the content.
-               We will provide a much more detailed user guide when the tool is
-               published."
-            )
-          ),
           shiny::br(),
-          h1("Local Authority Interactive Tool"),
+          h1("LAIT User Guide"),
 
 
           # Introduction =======================================================
@@ -29,7 +20,7 @@ user_guide_panel <- function() {
             "We might want to add some brief introductory text here alongside
               some links to different tabs within your dashboard. Here's an
               example of a link working:",
-            InternalLinkUI("la_level_link")
+            InternalLinkUI("la_level_link", "LA Level page")
           ),
 
 
@@ -423,8 +414,10 @@ user_guide_panel <- function() {
 
           # Guidance sources ===================================================
           h2("Guidance sources"),
-          p("For example, here we'll add some of the key resources we draw
-                  on to guide styling and visualisation...")
+          p(
+            "Follow this link to find links to resources you may find useful ",
+            InternalLinkUI("resources_link", "useful or related resources"), "."
+          )
         )
       )
     )

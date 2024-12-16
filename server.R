@@ -473,14 +473,6 @@ server <- function(input, output, session) {
     metrics_clean
   )
 
-  # User guide ================================================================
-  InternalLinkServer(
-    "la_level_link",
-    "LA Level",
-    session
-  )
-
-
   # ===========================================================================
   # Create Your Own Page
   # ===========================================================================
@@ -582,7 +574,20 @@ server <- function(input, output, session) {
     covid_affected_data
   )
 
-  # Information pages =========================================================
+
+  # User guide ================================================================
+  InternalLinkServer(
+    "la_level_link",
+    "la_level",
+    session
+  )
+  InternalLinkServer(
+    "resources_link",
+    "information_page",
+    session
+  )
+
+  # Information page ==========================================================
   # Latest indicator update notification
   LatestDataUpdateServer(
     "latest_indicator_update",
