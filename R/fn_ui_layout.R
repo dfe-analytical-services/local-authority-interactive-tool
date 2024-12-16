@@ -351,7 +351,7 @@ dfe_contents_links <- function(links_list) {
 
   # The HTML div to be returned
   tags$div(
-    style = "position: sticky; top: 0.5rem; padding: 0.25rem; word-break: break-word;",
+    style = "position: sticky; top: 0.5rem; padding: 0.25rem;",
     # Make it stick!
     h2("Contents"),
     # remove the circle bullets
@@ -513,13 +513,13 @@ cookies_banner_server_jt <- function(id = "cookies_banner",
 #'   target_id = "target_section"
 #' )
 #'
-internal_nav_link <- function(id, link_text, target_tab, target_id) {
+internal_nav_link <- function(id, link_text, target_tab, target_id, add_warning = TRUE) {
   ns <- NS(id) # Namespace the module
   tags$a(
     id = ns("internal_link"),
     href = "#", # Prevent default anchor behavior
     `data-target-tab` = target_tab, # Tab to switch to
     `data-target-id` = target_id, # ID of the section to scroll to
-    link_text
+    paste(link_text, "(element will be at top of the screen)")
   )
 }

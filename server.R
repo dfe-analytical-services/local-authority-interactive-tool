@@ -575,13 +575,6 @@ server <- function(input, output, session) {
   )
 
 
-  # User guide ================================================================
-  InternalLinkServer(
-    "la_level_link",
-    "la_level",
-    session
-  )
-
   # Information page ==========================================================
   # Latest indicator update notification
   LatestDataUpdateServer(

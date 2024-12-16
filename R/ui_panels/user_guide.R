@@ -16,12 +16,6 @@ user_guide_panel <- function() {
               children and young people sourced from various departments across
               government.The app is designed and maintained by the DFE's Regions
               Group LA Performance & Data (LAPD) Team."),
-          p(
-            "We might want to add some brief introductory text here alongside
-              some links to different tabs within your dashboard. Here's an
-              example of a link working:",
-            InternalLinkUI("la_level_link", "LA Level page")
-          ),
 
 
           # Context and Purpose ================================================
@@ -60,10 +54,11 @@ user_guide_panel <- function() {
           p("Below provides some guidance on how to use the LAIT app.
               The tool should be easy to use and consulting this guidance
               is not necessarily required. However it does given written detail
-              on the functionality which may be of use."),
-          p("The Hints and Tips section will be of most interest as here it is
-              explained how to harness the full features of the app. For
-              example, how to save your selections on the Create Your Own page."),
+              and screenshots of the app to describe the functionality, which
+              may give further clarity."),
+          p("The Hints and Tips section explains how to harness the full
+              features of the app. For example, how to save your selections
+              on the Create Your Own page."),
           shinyGovstyle::accordion(
             inputId = "user-guide-how-to",
             titles = c(
@@ -120,17 +115,24 @@ user_guide_panel <- function() {
                     excluded from the mean calculation.
                    <br>
                    <br>
-                   <b>Figure : Data Table for Chosen Authority/Data Item</b>
+                   <b>Figure : Main Data Table for Local Authority View</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/LA_view_main_table.png",
-                  alt = "Figure 2: Data Table for Chosen Authority/Data Item",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  alt = "Figure 2: Main Data Table for Local Authority View",
+                  class = "user-guide-image"
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "la_level_link",
+                  link_text = "Link to the LA Level main data table",
+                  target_tab = "la_level",
+                  target_id = "la_table-la_table"
                 ),
                 HTML(
                   "<br>
-                   <br>
                    <br>
                    Beneath this is a sub-table showing latest year on year
                     trend, change from previous year and the latest year's

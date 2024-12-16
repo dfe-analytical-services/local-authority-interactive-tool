@@ -70,7 +70,6 @@ $(document).on('click', 'a[data-target-tab]', function(e) {
     if (target) {
       target.scrollIntoView({
         behavior: 'smooth', // Smooth scroll
-        block: 'start'      // Align the target to the top of the viewport
       });
     }
   }, 300); // Adjust delay if necessary
