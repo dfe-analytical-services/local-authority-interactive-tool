@@ -30,19 +30,6 @@ support_panel <- function() {
         ". The files beginning with 'bds_long' store the main dataset for the tool. ",
         "You will also find several other datasets here. ",
         "These help build the tool, feel free to check them out."
-      ),
-      extra_text = c(
-        section_tags(
-          heading = "Heading",
-          body = shiny::tagList(
-            "Please email results to ",
-            external_link(
-              href = paste0("mailto:", "team@education.gov.uk"),
-              link_text = "team@education.gov.uk",
-              add_warning = FALSE
-            )
-          )
-        )
       )
     )
   )
