@@ -69,9 +69,10 @@ label {
   font-size: 1.188rem;
 }
 
-/* bslib card text */
-.bslib-card .card-header, .bslib-card .card-footer {
-    font-size: 1.188rem;
+/* making bslib header h3  */
+.bslib-card .card-header{
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .bslib-card {
