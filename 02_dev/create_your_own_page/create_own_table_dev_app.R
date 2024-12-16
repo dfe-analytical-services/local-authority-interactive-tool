@@ -97,7 +97,7 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Staging Table (View of current selections)"),
+    h2("Staging Table (View of current selections)"),
     bslib::card(
       reactable::reactableOutput("staging_table")
     )
@@ -107,7 +107,7 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Summary of Selections"),
+    h2("Summary of Selections"),
     bslib::card(
       reactable::reactableOutput("query_table")
     )
@@ -117,7 +117,7 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Output Table (View of all saved selections)"),
+    h2("Output Table (View of all saved selections)"),
     bslib::navset_card_tab(
       bslib::nav_panel(
         title = "Output Table",
@@ -136,7 +136,7 @@ ui <- bslib::page_fillable(
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Output Charts (Charts showing data from saved selections)"),
+    h2("Output Charts (Charts showing data from saved selections)"),
     p("Note a maximum of 4 geographies and 3 indicators can be shown."),
 
     # Line chart ---------------------------------------------------------------

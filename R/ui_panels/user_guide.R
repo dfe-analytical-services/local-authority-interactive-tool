@@ -5,17 +5,8 @@ user_guide_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           12,
-          shinyGovstyle::banner(
-            "beta banner",
-            "beta",
-            paste0(
-              "This page is in beta phase and we are still reviewing the content.
-               We will provide a much more detailed user guide when the tool is
-               published."
-            )
-          ),
           shiny::br(),
-          h1("Local Authority Interactive Tool"),
+          h1("LAIT User Guide"),
 
 
           # Introduction =======================================================
@@ -29,7 +20,7 @@ user_guide_panel <- function() {
             "We might want to add some brief introductory text here alongside
               some links to different tabs within your dashboard. Here's an
               example of a link working:",
-            InternalLinkUI("la_level_link")
+            InternalLinkUI("la_level_link", "LA Level page")
           ),
 
 
@@ -66,12 +57,17 @@ user_guide_panel <- function() {
 
           # Using the app ======================================================
           h2("Using the app"),
-          p("Here we will add detailed instructions of how to use the LAIT app.
-              This will include screenshots and guidance. For example, how to
-              investigate an indicator using the Regional Level page."),
+          p("Below provides some guidance on how to use the LAIT app.
+              The tool should be easy to use and consulting this guidance
+              is not necessarily required. However it does given written detail
+              on the functionality which may be of use."),
+          p("The Hints and Tips section will be of most interest as here it is
+              explained how to harness the full features of the app. For
+              example, how to save your selections on the Create Your Own page."),
           shinyGovstyle::accordion(
             inputId = "user-guide-how-to",
             titles = c(
+              "Hints and Tips",
               "Local Authority View",
               "Regional View",
               "Statistical Neighbour View",
@@ -79,39 +75,52 @@ user_guide_panel <- function() {
               "Create Your Own"
             ),
             descriptions = list(
+              # Hints and Tips =================================================
+              shiny::tagList(
+                HTML(
+                  "Statistical Neighbour Averages: the figures presented are
+                    simple averages for the selected LA’s 10 statistical
+                    neighbours (SNs). They provide a simple comparator of the
+                    measure without placing too much emphasis on any one
+                    authority. Where data does not exist for one or more of the
+                    selected LA’s SN group, the information is excluded from the
+                    mean calculation.
+                  "
+                )
+              ),
               # LA Level View ==================================================
               tagList(
                 HTML(
-                  "This view begins with a choose local authority (LA), topic
-                    and indicator section.  Use the three dropdowns to select a
-                    LA and measure of choice.
+                  "Use the three dropdowns to select a local authority (LA)
+                    and measure.
                    <br>
                    <br>
-                   As this is an interactive system, the tables and chart (and
+                   As this is an interactive tool, the tables and chart (and
                     relevant titling) change automatically depending on the
                     indicator chosen.
                    <br>
                    <br>
-                   The table beneath the dropdowns will show time series data
+                   The table displays time series data
                     for the chosen indicator in respect of the LA, its Region,
                     Statistical Neighbours and England averages - for
-                    comparison/benchmarking purposes (figure 2).
+                    comparison/benchmarking purposes (figure ).
                    <br>
                    <br>
-                   Note that your selected LA is highlighted in light blue
+                   Note that the selected LA is highlighted in orange
                     within the data table, and that there is an option to
-                    download the data.
+                    download the data as a CSV or XLSX file type.
                    <br>
                    <br>
-                   The figures presented are simple averages for the selected
-                    LA’s 10 statistical neighbours (SNs).  They provide a simple
+                   For the Statistical Neighbour values, the
+                    figures presented are simple averages for the selected
+                    LA’s 10 statistical neighbours (SNs). They provide a simple
                     comparator of the measure without placing too much emphasis
-                    on any one authority.  Where data does not exist for one or
+                    on any one authority. Where data does not exist for one or
                     more of the selected LA’s SN group, the information is
                     excluded from the mean calculation.
                    <br>
                    <br>
-                   <b>Figure 2: Data Table for Chosen Authority/Data Item</b>
+                   <b>Figure : Data Table for Chosen Authority/Data Item</b>
                    <br>"
                 ),
                 tags$img(
@@ -124,13 +133,15 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    Beneath this is a sub-table showing latest year on year
-                    trend, change from previous year and national rank.
+                    trend, change from previous year and the latest year's
+                    national rank (figure ).
                     If applicable the authority is placed into a quartile
-                    banding and formatting will flag up upper (A) and Lower (D)
+                    banding (based on the latest year's data)
+                    and colour formatting will flag up upper (A) and Lower (D)
                     quartiles for clarity.
                    <br>
                    <br>
-                   <b>Figure 3: Trends and Quartile bandings</b>
+                   <b>Figure : Trends and Quartile bandings</b>
                    <br>"
                 ),
                 tags$img(
@@ -142,15 +153,16 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                   This table is followed by a chart (figure 4), which plots the
-                    authority, national, region and statistical neighbour
-                    average data over the same period as the data table,
-                    providing an interactive visual representation. The data is
-                    displayed as a line chart by default but can be changed to
-                    a bar chart, both are downloadable.
+                   This table is followed by a chart (figure ), which plots the
+                    local authority, national, region and statistical neighbour
+                    average data over the same period as the data table.
+                    The data is displayed as a line chart by default but can be
+                    changed to a bar chart by switching to the bar chart tab.
+                    Both charts are downloadable (as SVG or HTML) or can be
+                    copied to your clipboard.
                    <br>
                    <br>
-                   <b>Figure 4: Charting the Data</b>
+                   <b>Figure : Charting the Data</b>
                    <br>"
                 ),
                 tags$img(
@@ -162,7 +174,8 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                   Beneath the chart a description of the data item is provided
+                   Beneath the chart, the metadata of the indicator item is provided.
+                   This includes a description and metho
                     (figure 5), as well as an indication of last and next update
                     dates, alongside a hyperlink to the data source (if clicked,
                     the source will open in new tab).
@@ -423,8 +436,16 @@ user_guide_panel <- function() {
 
           # Guidance sources ===================================================
           h2("Guidance sources"),
-          p("For example, here we'll add some of the key resources we draw
-                  on to guide styling and visualisation...")
+          p(
+            "Follow this link to find a list of ",
+            internal_nav_link(
+              id = "info_page_useful_resources",
+              link_text = "links to useful or related resources",
+              target_tab = "information_page",
+              target_id = "useful_links_link"
+            ),
+            "."
+          )
         )
       )
     )

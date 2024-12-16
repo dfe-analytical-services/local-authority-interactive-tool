@@ -77,9 +77,10 @@ LA_LevelMetaUI <- function(id) {
     style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
-        h3("Description:"),
+        h2("Metadata", style = "margin-bottom: 0;"),
+        h3("Description:", style = "margin-bottom: -1rem;"),
         MetadataUI(ns("description")),
-        h3("Methodology:"),
+        h3("Methodology:", style = "margin-bottom: -1rem;"),
         MetadataUI(ns("methodology")),
         div(
           # Creates a flex container where the items are centered vertically

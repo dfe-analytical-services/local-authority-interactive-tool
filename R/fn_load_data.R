@@ -204,7 +204,51 @@ create_download_handler <- function(local) {
 }
 
 
-# Helper function to calculate actual file size
+#' Calculate File Size
+#'
+#' This helper function calculates the approximate file size of a dataset when
+#' saved in a specific file format. The size is rounded to the nearest 5 KB
+#' and returned as a string.
+#'
+#' @param file_type A string specifying the file format. Supported formats are:
+#'   - `"CSV"`: Comma-separated values.
+#'   - `"XLSX"`: Microsoft Excel file.
+#'   - `"SVG"`: Scalable Vector Graphics (estimated size returned).
+#'   - `"HTML"`: HTML document (estimated size returned).
+#' @param data A data frame or similar object to save to the file.
+#'
+#' @return A string describing the file size in KB, e.g., `"25 KB"`. For `SVG`
+#'   and `HTML` types, a predefined size range is returned.
+#'
+#' @details
+#' The function performs the following steps:
+#' 1. Creates a temporary file for the specified file type.
+#' 2. Writes the provided dataset to the temporary file:
+#'    - For `CSV`, it uses `write.csv()`.
+#'    - For `XLSX`, it uses `openxlsx::write.xlsx()` with automatic column
+#'      width adjustment.
+#' 3. Returns an estimated size for `SVG` and `HTML` formats instead of
+#'    generating a file.
+#' 4. Measures the file size in KB and rounds it to the nearest 5 KB for
+#'    readability.
+#' 5. Deletes the temporary file after calculation.
+#'
+#' @examples
+#' # Example dataset
+#' data <- data.frame(x = 1:10, y = letters[1:10])
+#'
+#' # Calculate file sizes for different formats
+#' csv_size <- calculate_file_size("CSV", data)
+#' xlsx_size <- calculate_file_size("XLSX", data)
+#' svg_size <- calculate_file_size("SVG", data)
+#' html_size <- calculate_file_size("HTML", data)
+#'
+#' # Print results
+#' print(csv_size) # e.g., "15 KB"
+#' print(xlsx_size) # e.g., "20 KB"
+#' print(svg_size) # "usually 20 KB and no larger than 200 KB"
+#' print(html_size) # "usually 275 KB and no larger than 500 KB"
+#'
 calculate_file_size <- function(file_type, data) {
   # Create a temporary file
   temp_file <- tempfile(fileext = paste0(".", tolower(file_type)))
@@ -347,7 +391,39 @@ update_and_fetch_metadata <- function(input_indicator,
 }
 
 
-
+#' Read Data Dictionary from Shared Folder
+#'
+#' This function reads a specific sheet from the LAIT Data Dictionary stored
+#' in a shared folder. It cleans column names by replacing multiple spaces
+#' with a single space.
+#'
+#' @param shared_folder A string specifying the path to the shared folder
+#'   where the data dictionary file is stored.
+#' @param sheet_name A string specifying the name of the sheet to read
+#'   from the data dictionary file.
+#'
+#' @return A data frame containing the contents of the specified sheet
+#'   from the data dictionary.
+#'
+#' @details
+#' - The data dictionary file is assumed to be located in a specific relative
+#'   path: `"../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"`.
+#' - The `.name_repair` argument is set to a custom function, `clean_spaces`,
+#'   which replaces multiple spaces in column names with single spaces.
+#'
+#' @examples
+#' # Specify the path to the shared folder
+#' shared_folder <- "/path/to/shared/folder"
+#'
+#' # Specify the sheet name
+#' sheet_name <- "Indicators"
+#'
+#' # Read the data dictionary
+#' data_dict <- read_data_dict_shared_folder(shared_folder, sheet_name)
+#'
+#' # Print the first few rows
+#' head(data_dict)
+#'
 read_data_dict_shared_folder <- function(shared_folder, sheet_name) {
   readxl::read_xlsx(
     path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),

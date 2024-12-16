@@ -33,7 +33,10 @@ info_page_panel <- function() {
 
 
           # Guidance sources ===================================================
-          h2("Links to useful or related resources (opens in new tab)"),
+          h2(
+            id = "useful_links_link",
+            "Links to useful or related resources (opens in new tab)"
+          ),
           UsefulLinksUI("useful_links")
         )
       )
