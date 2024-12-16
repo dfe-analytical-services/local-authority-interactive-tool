@@ -581,11 +581,6 @@ server <- function(input, output, session) {
     "la_level",
     session
   )
-  InternalLinkServer(
-    "resources_link",
-    "information_page",
-    session
-  )
 
   # Information page ==========================================================
   # Latest indicator update notification
