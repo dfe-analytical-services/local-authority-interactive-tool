@@ -67,9 +67,9 @@ PageHeaderServer <- function(id, app_inputs, page_title) {
 #'
 #' @return A UI element (action link) that can be clicked to switch tabs.
 #'
-InternalLinkUI <- function(id) {
+InternalLinkUI <- function(id, link_text) {
   ns <- shiny::NS(id) # Namespace the module
-  actionLink(ns("internal_link"), "LA Level page")
+  actionLink(ns("internal_link"), link_text)
 }
 
 
@@ -92,7 +92,7 @@ InternalLinkUI <- function(id) {
 InternalLinkServer <- function(id,
                                tab_value,
                                parent_session,
-                               tabset_id = "navsetpillslist") {
+                               tabset_id = "left_nav") {
   moduleServer(id, function(input, output, session) {
     observeEvent(input$internal_link, {
       # Switch to the specified tab
@@ -209,7 +209,6 @@ Download_DataServer <- function(id, file_type_input, data_for_download, download
     )
   })
 }
-
 
 
 #' Download Chart Modal UI Module

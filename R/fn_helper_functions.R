@@ -793,7 +793,44 @@ order_alphabetically <- function(data, column) {
 }
 
 
-
+#' Format Text into HTML
+#'
+#' This function formats plain text into HTML, applying several transformations:
+#' - Converts markdown-style bullet points (`- `) into HTML `<ul>` and `<li>` tags.
+#' - Replaces markdown-style links (`[text](url)`) with HTML `<a>` links using
+#'   `dfeshiny::external_link`.
+#' - Normalises newlines and adjusts spacing for better HTML rendering.
+#'
+#' @param text A character string containing the input text to be formatted.
+#'
+#' @return An HTML object (`shiny::HTML`) containing the formatted text.
+#'
+#' @details
+#' The function performs the following steps:
+#' 1. Normalises newlines to `\n`.
+#' 2. Converts lines starting with `- ` into `<li>` tags, and wraps all list
+#'    items in `<ul>` tags.
+#' 3. Replaces double newlines outside of bullet points with `<br><br>` for
+#'    paragraph separation.
+#' 4. Removes stray single newlines outside bullet points for cleaner HTML
+#'    rendering.
+#' 5. Strips unnecessary spaces before and after bullet points.
+#' 6. Transforms markdown-style links into HTML links using
+#'    `dfeshiny::external_link`.
+#' 7. Trims leading and trailing whitespace.
+#' 8. Converts the final text into an HTML object using `shiny::HTML`.
+#'
+#' @examples
+#' # Example input text with bullet points and a link
+#' input_text <- "- First item\n- Second item\n\nThis is a paragraph.\n\n"
+#' input_text <- paste0(input_text, "See [example](https://example.com) for more info.")
+#'
+#' # Format the text
+#' formatted_html <- format_text(input_text)
+#'
+#' # Use the result in a Shiny app
+#' shiny::div(formatted_html)
+#'
 format_text <- function(text) {
   # Normalize newlines
   text <- gsub("\r\n|\n", "\n", text)

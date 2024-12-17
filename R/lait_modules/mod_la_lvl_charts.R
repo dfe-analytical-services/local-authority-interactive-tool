@@ -34,7 +34,14 @@ LA_LineChartUI <- function(id) {
     div(
       style = "display: flex; justify-content: space-between; align-items: center; background: white;",
       # Line chart
-      create_chart_card_ui(ns("line_chart")),
+      create_chart_card_ui(
+        ns("line_chart"),
+        paste(
+          "Line chart displaying the data in the first table on the LA page.",
+          "This includes the selected Local Authority, its Region, Statistical",
+          "Neighbour average and England."
+        )
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),
@@ -226,7 +233,14 @@ LA_BarChartUI <- function(id) {
     div(
       style = "display: flex; justify-content: space-between; align-items: center; background: white;",
       # Bar chart
-      create_chart_card_ui(ns("bar_chart")),
+      create_chart_card_ui(
+        ns("bar_chart"),
+        paste(
+          "Bar chart displaying the data in the first table on the LA page.",
+          "This includes the selected Local Authority, its Region, Statistical",
+          "Neighbour average and England."
+        )
+      ),
       # Download options
       create_download_options_ui(
         ns("download_btn"),

@@ -29,7 +29,7 @@ create_your_own_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
-      shiny::h3(
+      shiny::h2(
         "Output Charts",
         create_tooltip_icon("Charts showing data from all the saved selections")
       ),

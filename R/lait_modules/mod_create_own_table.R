@@ -192,7 +192,7 @@ StagingTableUI <- function(id) {
     class = "well",
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
-      h3(
+      h2(
         "Staging Table",
         create_tooltip_icon("Showing data from current selections")
       ),
@@ -500,7 +500,7 @@ QueryTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3("Summary of Selections"),
+    h2("Summary of Selections"),
     bslib::card(
       with_gov_spinner(
         reactable::reactableOutput(ns("query_table")),
@@ -751,7 +751,7 @@ CreateOwnTableUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
-    h3(
+    h2(
       "Output Table",
       create_tooltip_icon(
         '<ul style="text-align: left; margin-left: 0; padding-left: 20px;">

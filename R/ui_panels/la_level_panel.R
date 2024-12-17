@@ -8,9 +8,6 @@ la_level_panel <- function() {
     div(
       class = "well",
       style = "overflow-y: visible;",
-      role = "presentation",
-      `aria-label` = "Line and bar charts showing data from the first table including the
-                        selected Local Authority, Region, Statistical Neighbour and England.",
       bslib::navset_card_tab(
         id = "la_charts",
         LA_LineChartUI("la_line_chart"),
