@@ -339,6 +339,7 @@ dfe_footer <- function(links_list) {
 #' shiny::div(sidebar)
 #'
 dfe_contents_links <- function(links_list) {
+  # Add the HTML around the link and make an id by snake casing
   create_sidelink <- function(link_text) {
     tags$li(
       "—",
@@ -348,7 +349,9 @@ dfe_contents_links <- function(links_list) {
     )
   }
 
+  # The HTML div to be returned
   tags$div(
+    # Make it stick!
     style = "
      position: sticky;
      top: 0.5rem;
@@ -362,6 +365,7 @@ dfe_contents_links <- function(links_list) {
       style = "list-style-type: none; padding-left: 0; font-size: 1.188rem;",
       lapply(links_list, create_sidelink),
       tags$li(
+        # remove the circle bullets
         style = "list-style-type: none;",
         tags$i(class = "fas fa-chevron-down"),
         tags$a(
@@ -532,7 +536,7 @@ cookies_banner_server_jt <- function(id = "cookies_banner",
 #'   target_id = "target_section"
 #' )
 #'
-internal_nav_link <- function(id, link_text, target_tab, target_id, add_warning = TRUE) {
+internal_nav_link <- function(id, link_text, target_tab, target_id) {
   ns <- NS(id) # Namespace the module
   tags$a(
     id = ns("internal_link"),
