@@ -59,7 +59,8 @@ user_guide_panel <- function() {
               may give further clarity."),
           p("The Hints and Tips section explains how to harness the full
               features of the app. For example, how to save your selections
-              on the Create Your Own page."),
+              on the Create Your Own page and the statistical neighbour average
+              calculation explanation."),
           shinyGovstyle::accordion(
             inputId = "user-guide-how-to",
             titles = c(
@@ -74,18 +75,184 @@ user_guide_panel <- function() {
               # Hints and Tips =================================================
               shiny::tagList(
                 HTML(
-                  "Statistical Neighbour Averages: the figures presented are
-                    simple averages for the selected LA’s 10 statistical
-                    neighbours (SNs). They provide a simple comparator of the
-                    measure without placing too much emphasis on any one
-                    authority. Where data does not exist for one or more of the
-                    selected LA’s SN group, the information is excluded from the
-                    mean calculation.
                   "
-                )
+                   <b>Statistical Neighbour Averages:</b>
+                   <br>
+                   <br>
+                   The figures presented are simple averages for the selected
+                    LA’s 10 statistical neighbours.
+                   <br>
+                   <br>
+                   They provide a simple comparator of the measure without
+                    placing too much emphasis on any one authority. Where data
+                    does not exist for one or more of the selected LA’s SN
+                    group, the information is excluded from the mean calculation.
+                  <br>
+                  <br>
+                  <br>
+                  <b>Save selections on the Create Your own page:</b>
+                  <br>
+                  <br>
+                  Selections can be saved so that on entering the tool
+                   your selections are pre-populated. Then all you need to
+                   do is click 'Add Selections'.
+                  <br>
+                  <br>
+                  To do this you must first make the selections you want to save.
+                   Then copy the URL (webpage link in the search bar usually at the top
+                   of your screen - figure ) and keep this somewhere safe.
+                  <br>
+                  <br>
+                  Now, if you use this link to open the app, your selections
+                  will load in automatically! Simply click 'Add Selections' and
+                  download or view your data.
+                  <br>
+                  <br>
+                  Below is an example link which has the following selections:"
+                ),
+                tags$ul(
+                  tags$li("Geographies: Barking and Dagenham, Barnsley"),
+                  tags$li("Indicators: A levels 3+ A grades / Double awards, A levels AAB grades / Applied / Double awards"),
+                  tags$li("LA Groupings: Include All LAs"),
+                  tags$li("Other Groupings: England")
+                ),
+                HTML("<br>Try the link out and see the selections prepopulate!"),
+                tags$br(),
+                dfeshiny::external_link(
+                  href = paste0(
+                    "https://department-for-education.shinyapps.io/",
+                    "local-authority-interactive-tool/?_inputs_&year_range-",
+                    "year_range=null&pages=%22dashboard%22&left_nav=%22create_your_own",
+                    "%22&la_inputs-la_name=%22Barking%20and%20Dagenham%22&la_inputs-",
+                    "indicator_name=%22A%20level%20cohort%20Average%20point%20score%20",
+                    "per%20entry%22&region_inputs-la_name=%22Barking%20and%20Dagenham%22",
+                    "&region_inputs-indicator_name=%22A%20level%20cohort%20Average%20point%20",
+                    "score%20per%20entry%22&stat_n_inputs-la_name=%22Barking%20and%20",
+                    "Dagenham%22&stat_n_inputs-indicator_name=%22A%20level%20cohort%20",
+                    "Average%20point%20score%20per%20entry%22&all_la_inputs-la_name=%22",
+                    "Barking%20and%20Dagenham%22&all_la_inputs-indicator_name=%22A%20level",
+                    "%20cohort%20Average%20point%20score%20per%20entry%22&create_inputs-",
+                    "geog_input=%5B%22Barking%20and%20Dagenham%22%2C%22Barnsley%22%5D&create_inputs",
+                    "-indicator=%5B%22A%20levels%203%2B%20A%20grades%20%2F%20Double%20awards%22%2C%22A%20",
+                    "levels%20AAB%20grades%20%2F%20Applied%20%2F%20Double%20awards%22%5D&create_inputs-",
+                    "la_group=%22all_las%22&create_inputs-inc_regions=false&create_inputs-inc_england=true"
+                  ),
+                  link_text = "Test link to show Create Your Own pre-populated",
+                  add_warning = TRUE
+                ),
+                tags$br(),
+                tags$br(),
+                tags$img(
+                  src = "images/user_guide/Create_Own_save_selections.png",
+                  alt = "Create Own Page: Can add multiple sets of selections",
+                  class = "user-guide-image"
+                ),
+                HTML(
+                  "
+                   <br>
+                   <br>
+                   <br>
+                   <b>General tips:</b>
+                   <br>
+                   <br>
+                   <b>Missing data</b>
+                   <br>
+                   <br>
+                   NA - Data is missing or supressed.
+                   <br>
+                   <br>
+                   Blank cells in tables - Data does not exist (only the case
+                    on the Create Your Own page where indicators can be mixed,
+                    causing extra year columns to be added).
+                   <br>
+                   <br>
+                   - (dash) - Ranking and/or quartile banding is not applicable
+                    to this indicator.
+                   <br>
+                   <br>
+                   <br>
+                   <b>Downloading Data</b>
+                   <br>
+                   <br>
+                   Most of the data in the tool has been rounded for ease of
+                    display. However, you can access the raw values by downloading
+                    the datasets (as CSV or XLSX).
+                   <br>
+                   <br>
+                   If you want to download the interactive part of the
+                    charts you should use the HTML datatype. Although this is
+                    a sligthly larger filetype (no bigger than 500 KB).
+                   <br>
+                   <br>
+                   Finally, the copy-to-clipbaord functionality is relatively
+                    innovative feature and is still in development. It should
+                    work well on laptops but is not currently supported on
+                    mobile devices. But, you can still download the charts as SVG
+                    or HTML.
+                   <br>
+                   <br>
+                   <br>
+                   <b>Functionality Hints</b>
+                   <br>
+                   <br>
+                  "
+                ),
+                tags$img(
+                  src = "images/user_guide/tooltip_hint.png",
+                  alt = "Create Own Page: Can add multiple sets of selections",
+                  class = "user-guide-image",
+                  style = "width: auto;"
+                ),
+                HTML(
+                  "
+                   - A tooltip that provides further information.
+                   <br>
+                   <br>
+                  "
+                ),
+                tags$img(
+                  src = "images/user_guide/expand_button_hint.png",
+                  alt = "Create Own Page: Can add multiple sets of selections",
+                  class = "user-guide-image",
+                  style = "width: auto;"
+                ),
+                HTML(
+                  "
+                   - Expands the chart to full-screen for better visability.
+                   <br>
+                   <br>
+                   (The button can be found by hovering over the bottom-right of
+                   the chart cards.)
+                   <br>
+                   <br>
+                  "
+                ),
+                tags$img(
+                  src = "images/user_guide/x_button_hint.png",
+                  alt = "Create Own Page: Can add multiple sets of selections",
+                  class = "user-guide-image",
+                  style = "width: auto;"
+                ),
+                HTML(
+                  "
+                  - Click 'x' symbol to remove/delete selections.
+                  <br>
+                  <br>
+                  <br>
+                  If there is anything you think we have missed, please let us
+                   know by emailing Darlington.BRIDGE@education.gov.uk or
+                   explore.statistics@education.gov.uk, or by
+                 "
+                ),
+                internal_nav_link(
+                  id = "support_link",
+                  link_text = "filling out the feedback form",
+                  target_tab = "support", # This corresponds to the tab's `value`
+                  target_id = "support_to_dashboard" # ID of the section to scroll to
+                ),
+                HTML(".")
               ),
               # LA Level View ==================================================
-
               tagList(
                 HTML(
                   "Use the three dropdowns to select a local authority (LA)
