@@ -351,21 +351,21 @@ dfe_contents_links <- function(links_list) {
 
   # The HTML div to be returned
   tags$div(
-    # Make it stick!
+    # Add a custom class for CSS control
+    class = "dfe-contents-links",
     style = "
-     position: sticky;
-     top: 0.5rem;
-     padding: 0.25rem;
-     display: flex;
-     flex-direction:
-     column; height: 96vh;
+      position: sticky;
+      top: 0.5rem;
+      padding: 0.25rem;
+      display: flex;
+      flex-direction: column;
     ",
     h2("Contents"),
     tags$ol(
       style = "list-style-type: none; padding-left: 0; font-size: 1.188rem;",
       lapply(links_list, create_sidelink),
       tags$li(
-        # remove the circle bullets
+        # Remove the circle bullets
         style = "list-style-type: none;",
         tags$i(class = "fas fa-chevron-down"),
         tags$a(
@@ -376,6 +376,7 @@ dfe_contents_links <- function(links_list) {
       )
     ),
     tags$div(
+      class = "return-to-top",
       style = "list-style-type: none; margin-top: auto;",
       tags$li(
         shiny::tags$i(class = "fas fa-chevron-up"),
