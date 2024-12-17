@@ -24,7 +24,7 @@ user_guide_panel <- function() {
           p("The tool facilitates local authority ‘benchmarking’ and trend
               analysis by allowing users to compare individual local authority
               (LA) data alongside national, regional and Statistical Neighbour
-              (SN) groupings over time (up to 10 years)."),
+              groupings over time (up to 10 years)."),
           p("The tool consists of five data views which present data items
               largely in the form of tables and charts, which can be downloaded
               and used elsewhere.  Rank and quartile positions are also included
@@ -33,18 +33,18 @@ user_guide_panel <- function() {
           p("The tool holds in the region of 400 children's services measures
               covering:"),
           tags$ul(
-            tags$li("children’s health and wellbeing;"),
-            tags$li("children in need, child protection,
-                    children’s services workforce,
-                    and children looked after (inc. adoption);"),
-            tags$li("early years;"),
-            tags$li("key stage attainment (inc. by age 19);"),
-            tags$li("children with SEN;"),
-            tags$li("further and higher education;"),
-            tags$li("behaviour and attendance;"),
-            tags$li("economic factors;"),
-            tags$li("youth offending;"),
-            tags$li("children’s services finance.")
+            tags$li("Children’s health and wellbeing;"),
+            tags$li("Children in need, Child protection,
+                    Children’s services workforce,
+                    and Children looked after (inc. adoption);"),
+            tags$li("Early years;"),
+            tags$li("Key stage attainment (inc. by age 19);"),
+            tags$li("Children with SEN;"),
+            tags$li("Further and higher education;"),
+            tags$li("Behaviour and attendance;"),
+            tags$li("Economic factors;"),
+            tags$li("Youth offending;"),
+            tags$li("Children’s services finance.")
           ),
           p("We will add some relevant background information here. For example
               some useful LAIT resources."),
@@ -59,8 +59,8 @@ user_guide_panel <- function() {
               may give further clarity."),
           p("The Hints and Tips section explains how to harness the full
               features of the app. For example, how to save your selections
-              on the Create Your Own page and the statistical neighbour average
-              calculation explanation."),
+              on the Create Your Own page and the statsitical neighbour
+              average calculation explanation."),
           shinyGovstyle::accordion(
             inputId = "user-guide-how-to",
             titles = c(
@@ -85,8 +85,9 @@ user_guide_panel <- function() {
                    <br>
                    They provide a simple comparator of the measure without
                     placing too much emphasis on any one authority. Where data
-                    does not exist for one or more of the selected LA’s SN
-                    group, the information is excluded from the mean calculation.
+                    does not exist for one or more of the selected LA’s statistical
+                    neighbour group, the information is excluded from the mean
+                    calculation.
                   <br>
                   <br>
                   <br>
@@ -95,7 +96,7 @@ user_guide_panel <- function() {
                   <br>
                   Selections can be saved so that on entering the tool
                    your selections are pre-populated. Then all you need to
-                   do is click 'Add Selections'.
+                   do is click 'Add selections'.
                   <br>
                   <br>
                   To do this you must first make the selections you want to save.
@@ -104,7 +105,7 @@ user_guide_panel <- function() {
                   <br>
                   <br>
                   Now, if you use this link to open the app, your selections
-                  will load in automatically! Simply click 'Add Selections' and
+                  will load in automatically! Simply click 'Add selections' and
                   download or view your data.
                   <br>
                   <br>
@@ -277,11 +278,11 @@ user_guide_panel <- function() {
                    <br>
                    For the Statistical Neighbour values, the
                     figures presented are simple averages for the selected
-                    LA’s 10 statistical neighbours (SNs). They provide a simple
+                    LA’s 10 statistical neighbours. They provide a simple
                     comparator of the measure without placing too much emphasis
                     on any one authority. Where data does not exist for one or
-                    more of the selected LA’s SN group, the information is
-                    excluded from the mean calculation.
+                    more of the selected LA’s statistical neighbour group,
+                    the information is excluded from the mean calculation.
                    <br>
                    <br>
                    <b>Figure : Main Data Table for Local Authority View</b>
@@ -325,7 +326,7 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    This table is followed by a chart (figure ), which plots the
-                    local authority, national, region and statistical neighbour
+                    LA, national, region and statistical neighbour
                     average data over the same period as the data table.
                     The data is displayed as a line chart by default but can be
                     changed to a bar chart by switching to the bar chart tab.
@@ -365,10 +366,10 @@ user_guide_panel <- function() {
               # Regional View ==================================================
               shiny::tagList(
                 HTML(
-                  "This presents the selected local authority’s data alongside its
-                    Regional local authority neighbours. Then the selected local
+                  "This presents the selected LA’s data alongside its
+                    Regional LA neighbours. Then the selected local
                     authority’s region's data against other regions data (and
-                    England). The selected local authority and region are highlighted
+                    England). The selected LA and region are highlighted
                     in orange (figure ).
                    <br>
                    <br>
@@ -390,7 +391,7 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    The 'Focus' chart presents each regions' data (figure ).
-                    The selected local authority’s region is highlighted in blue,
+                    The selected LA’s region is highlighted in blue,
                     whilst other regions are coloured grey. This is to give a clear
                     contrast of how the region of interest compares to other
                     regions.
@@ -409,7 +410,7 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    The 'User selection' chart displays the same data but its default
-                    is to only show the selected local authority's region's data
+                    is to only show the selected LA's region's data
                     (figure ). Users can then add up to three other regions
                     (or England). This allows users to make more specific
                     comparisons between regions.
@@ -427,7 +428,7 @@ user_guide_panel <- function() {
               # Statistical Neighbour View =====================================
               shiny::tagList(
                 "Statistical neighbours provide a method for benchmarking
-                 progress. For each local authority (LA), these models
+                 progress. For each LA, these models
                  designate several other LAs deemed to have similar
                  characteristics. These designated LAs are known as
                  statistical neighbours.  The National Foundation for
@@ -445,8 +446,8 @@ user_guide_panel <- function() {
                   <br>
                   <br>
                   These neighbour groupings are used in this tool to allow
-                   comparison of the selected local authority alongside the
-                   local authorities in it's statistical neighbour group.
+                   comparison of the selected LA alongside the
+                   LAs in it's statistical neighbour group.
                   <br>
                   <br>
                   <b>Figure : Statistical Neighbour View</b>
@@ -466,10 +467,10 @@ user_guide_panel <- function() {
                     are line and bar charts for each of these types.
                    <br>
                    <br>
-                    The 'Focus' charts show the selected local authority
+                    The 'Focus' charts show the selected LA
                      (highlighted in blue) alongside its statistical neighbours
                      (grey) (figure ). This is to give a clear contrast of how
-                     the selected local authoity compares to it's neighbours.
+                     the selected LA compares to it's neighbours.
                    <br>
                    <br>
                    <b>Figure : Statistical Neighbour 'Focus' Bar Chart</b>
@@ -485,9 +486,9 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    The 'User selection' chart displays the same data but its default
-                    is to only show the selected local authority's data
+                    is to only show the selected LA's data
                     (figure ). Users can then add up to three other statistical
-                    neighbours (or the selected local authority's region or England).
+                    neighbours (or the selected LA's region or England).
                     This allows users to make more specific comparisons between
                     the geographies.
                    <br>
@@ -623,7 +624,7 @@ user_guide_panel <- function() {
                     tags$li(tagList(
                       "Selections can be saved so that on entering the tool
                        your selections are pre-populated. Then all you need to
-                       do is click 'Add Selections'. To do this you must first
+                       do is click 'Add selections'. To do this you must first
                        make the selections you want to save. Then copy the
                        URL (webpage link in the search bar usually at the top
                        of your screen) and keep this somewhere safe. If you
