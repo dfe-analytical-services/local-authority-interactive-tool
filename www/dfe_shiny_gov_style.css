@@ -1017,7 +1017,8 @@ screen and (forced-colors:active) {
 
 /* User guide images */
 .user-guide-image {
-  width:100%;
-  margin-top:10px;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 10px;
   border: #b1b4b6 solid 2px;
 }

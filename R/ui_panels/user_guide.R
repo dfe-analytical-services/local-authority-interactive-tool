@@ -5,6 +5,7 @@ user_guide_panel <- function() {
       shinyGovstyle::gov_row(
         shiny::column(
           12,
+          style = "max-width: 1200px",
           shiny::br(),
           h1("LAIT User Guide"),
 
@@ -84,6 +85,7 @@ user_guide_panel <- function() {
                 )
               ),
               # LA Level View ==================================================
+
               tagList(
                 HTML(
                   "Use the three dropdowns to select a local authority (LA)
@@ -209,7 +211,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/Region_view_main_table.png",
                   alt = "Figure 6: Regional Level View",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 ),
                 HTML(
                   "<br>
@@ -227,6 +229,18 @@ user_guide_panel <- function() {
                     regions.
                    <br>
                    <br>
+                   <b>Figure : Region Level 'Focus' Line Chart</b>
+                   <br>"
+                ),
+                tags$img(
+                  src = "images/user_guide/Region_view_focus_chart.png",
+                  alt = "Figure 7: Regional Level Charting",
+                  class = "user-guide-image"
+                ),
+                HTML(
+                  "<br>
+                   <br>
+                   <br>
                    The 'User selection' chart displays the same data but its default
                     is to only show the selected local authority's region's data
                     (figure ). Users can then add up to three other regions
@@ -234,50 +248,33 @@ user_guide_panel <- function() {
                     comparisons between regions.
                    <br>
                    <br>
-                   <b>Figure : Regional Level Charting</b>
-                   <br>"
-                ),
-                tags$img(
-                  src = "images/user_guide/Region_view_focus_chart.png",
-                  alt = "Figure 7: Regional Level Charting",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
-                ),
-                HTML(
-                  "<br>
-                   <br>
-                   <br>
-                  The chart area is again interactive and includes an option to
-                   create a ‘mini’ chart with a max of three regions of your
-                   choice presented alongside the selected LA’s region. ###### BIN
-                   <br>
-                   <br>
-                   <b>Figure : User choice regional chart</b>
+                   <b>Figure : Region Level 'User selection' Line Chart</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Region_view_multi_chart.png",
                   alt = "Figure 8: User choice regional chart",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 )
               ),
               # Statistical Neighbour View =====================================
               shiny::tagList(
+                "Statistical neighbours provide a method for benchmarking
+                 progress. For each local authority (LA), these models
+                 designate several other LAs deemed to have similar
+                 characteristics. These designated LAs are known as
+                 statistical neighbours.  The National Foundation for
+                 Educational Research (NFER) was commissioned in 2007 by the
+                 Department to identify and group similar LAs in terms of
+                 the socio-economic characteristics, each LA was assigned 10
+                 such neighbours. See ",
+                dfeshiny::external_link(
+                  href = "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait",
+                  link_text = "Local Authority interactive tool (LAIT) GOV.UK",
+                  add_warning = TRUE
+                ),
                 HTML(
-                  "Statistical neighbours provide a method for benchmarking
-                    progress. For each local authority (LA), these models
-                    designate several other LAs deemed to have similar
-                    characteristics. These designated LAs are known as
-                    statistical neighbours.  The National Foundation for
-                    Educational Research (NFER) was commissioned in 2007 by the
-                    Department to identify and group similar LAs in terms of
-                    the socio-economic characteristics, each LA was assigned 10
-                    such neighbours. See ",
-                  dfeshiny::external_link(
-                    href = "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait",
-                    link_text = "Local Authority interactive tool (LAIT) GOV.UK",
-                    add_warning = TRUE
-                  ),
-                  " ladning page for further details.
+                  " landing page for further details.
                   <br>
                   <br>
                   These neighbour groupings are used in this tool to allow
@@ -291,7 +288,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/Stat_N_view_main_table.png",
                   alt = "Figure 9: Statistical Neighbour View",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 ),
                 HTML(
                   "<br>
@@ -308,13 +305,13 @@ user_guide_panel <- function() {
                      the selected local authoity compares to it's neighbours.
                    <br>
                    <br>
-                   <b>Figure : Statistical Neighbour Charting</b>
+                   <b>Figure : Statistical Neighbour 'Focus' Bar Chart</b>
                    <br>"
                 ),
                 tags$img(
-                  src = "images/user_guide/Stat_N_view_charts.png",
+                  src = "images/user_guide/Stat_N_view_focus_bar_chart.png",
                   alt = "Figure 10: Statistical Neighbour Charting",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 ),
                 HTML(
                   "<br>
@@ -325,7 +322,16 @@ user_guide_panel <- function() {
                     (figure ). Users can then add up to three other statistical
                     neighbours (or the selected local authority's region or England).
                     This allows users to make more specific comparisons between
-                    the geographies."
+                    the geographies.
+                   <br>
+                   <br>
+                   <b>Figure : Statistical Neighbour 'User selection' Bar Chart</b>
+                   <br>"
+                ),
+                tags$img(
+                  src = "images/user_guide/Stat_N_view_multi_bar_chart.png",
+                  alt = "Create Own Page: Can add multiple sets of selections",
+                  class = "user-guide-image"
                 )
               ),
               # All LA View ====================================================
@@ -344,7 +350,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/All_LAs_view_top_table.png",
                   alt = "Figure 11: The view of all England's upper tier Local Authorities",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 )
               ),
               # Create Your Own ================================================
@@ -360,7 +366,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/Create_Own_overview.png",
                   alt = "Figure 12: Overview of create your own table and charts",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 ),
                 HTML(
                   "<br>
@@ -382,7 +388,7 @@ user_guide_panel <- function() {
                       tags$img(
                         src = "images/user_guide/Create_Own_choose_measure.png",
                         alt = "Create Own Page: Select inputs to build table and charts",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       )
                     )),
                     tags$br(),
@@ -394,7 +400,7 @@ user_guide_panel <- function() {
                       tags$img(
                         src = "images/user_guide/Create_Own_pre_set_groups.png",
                         alt = "Create Own Page: Pre-set selections",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       )
                     )),
                     tags$br(),
@@ -404,7 +410,7 @@ user_guide_panel <- function() {
                       tags$img(
                         src = "images/user_guide/Create_Own_appear_staging.png",
                         alt = "Create Own Page: The Staging Table",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       )
                     )),
                     tags$br(),
@@ -418,13 +424,13 @@ user_guide_panel <- function() {
                       tags$img(
                         src = "images/user_guide/Create_Own_summary_selections.png",
                         alt = "Create Own Page: Summary of Selections Table",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       ),
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_output_table.png",
                         alt = "Create Own Page: Output Table containing all selections",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       )
                     )),
                     tags$br(),
@@ -443,7 +449,7 @@ user_guide_panel <- function() {
                       tags$img(
                         src = "images/user_guide/Create_Own_store_selections.png",
                         alt = "Create Own Page: Can add multiple sets of selections",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       )
                     )),
                     tags$br(),
@@ -455,7 +461,8 @@ user_guide_panel <- function() {
                        URL (webpage link in the search bar usually at the top
                        of your screen) and keep this somewhere safe. If you
                        use this link to open the app, your selections will load in
-                       automatically. Here is an example:<br>",
+                       automatically. Here is an example:",
+                      tags$br(),
                       dfeshiny::external_link(
                         href = paste0(
                           "https://department-for-education.shinyapps.io/",
@@ -480,10 +487,11 @@ user_guide_panel <- function() {
                       ),
                       ".",
                       tags$br(),
+                      tags$br(),
                       tags$img(
-                        src = "images/user_guide/Create_Own_store_selections.png",
+                        src = "images/user_guide/Create_Own_save_selections.png",
                         alt = "Create Own Page: Can add multiple sets of selections",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
                       )
                     )),
                     tags$br(),
@@ -496,19 +504,20 @@ user_guide_panel <- function() {
                       tags$img(
                         src = "images/user_guide/Create_Own_output_charts.png",
                         alt = "Create Own Page: Output charts",
-                        style = "width:100%; max-width:600px; margin-top:10px;"
+                        class = "user-guide-image"
+                      )
+                    )),
+                    tags$br(),
+                    tags$li(tagList(
+                      "A message will display when these retrictions and breached
+                        and so the charts do not appear.",
+                      tags$br(),
+                      tags$img(
+                        src = "images/user_guide/Create_Own_output_charts_error.png",
+                        alt = "Create Own Page: Erro message for output charts",
+                        class = "user-guide-image"
                       )
                     ))
-                  ),
-                  tags$div(
-                    style = "margin-left: 1.5em; margin-top: 10px;",
-                    "A message will display when these retrictions and breached
-                      and so the charts do not appear."
-                  ),
-                  tags$img(
-                    src = "images/user_guide/Create_Own_output_charts_error.png",
-                    alt = "Create Own Page: Erro message for output charts",
-                    style = "width:100%; max-width:600px; margin-left: 1.5em; margin-top:10px;"
                   )
                 )
               )
