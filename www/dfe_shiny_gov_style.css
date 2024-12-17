@@ -1015,25 +1015,6 @@ screen and (forced-colors:active) {
   }
 }
 
-/* Default behavior: height is 96vh, "Return to top" visible */
-.dfe-contents-links {
-  height: 96vh;
-}
-
-.return-to-top {
-  display: block; /* Default visibility */
-}
-
-/* Media query: At widths 1017px or less */
-@media (max-width: 1017px) {
-  .dfe-contents-links {
-    height: auto; /* Reset height to normal */
-  }
-  .return-to-top {
-    display: none; /* Hide the "Return to top" link */
-  }
-}
-
 /* Adjusting top and bottom page links so that the go to top dissapears
 from left nevigation when the screen shrinks (and no extra space between
 go to bottom link and start of the content) */
@@ -1047,7 +1028,7 @@ go to bottom link and start of the content) */
 }
 
 /* Media query: At widths 1017px or less */
-@media (max-width: 1033px) {
+@media (max-width: 1035px) {
   .dfe-contents-links {
     height: auto; /* Reset height to normal */
   }
