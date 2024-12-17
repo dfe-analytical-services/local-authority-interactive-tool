@@ -157,6 +157,7 @@ Region_FocusLineChartUI <- function(id) {
                justify-content: space-between;
                align-items: center;
                background: white;",
+      id = id,
       # Focus line chart
       create_chart_card_ui(
         ns("output_chart"),

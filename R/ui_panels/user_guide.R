@@ -148,6 +148,14 @@ user_guide_panel <- function() {
                   alt = "Create Own Page: Can add multiple sets of selections",
                   class = "user-guide-image"
                 ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "hint_create_own_link",
+                  link_text = "(Link to the Create Your Own page)",
+                  target_tab = "create_your_own",
+                  target_id = "create_own-page_anchor"
+                ),
                 HTML(
                   "
                    <br>
@@ -265,7 +273,7 @@ user_guide_panel <- function() {
                     indicator chosen.
                    <br>
                    <br>
-                   The table displays time series data
+                   The main table displays time series data
                     for the chosen indicator in respect of the LA, its Region,
                     Statistical Neighbours and England averages - for
                     comparison/benchmarking purposes (figure ).
@@ -296,10 +304,10 @@ user_guide_panel <- function() {
                 tags$br(),
                 tags$br(),
                 internal_nav_link(
-                  id = "la_level_link",
-                  link_text = "Link to the LA Level main data table",
+                  id = "user_guide_la_level_link",
+                  link_text = "(Link to the LA Level main data table)",
                   target_tab = "la_level",
-                  target_id = "la_table-la_table"
+                  target_id = "la_header-page_anchor"
                 ),
                 HTML(
                   "<br>
@@ -322,6 +330,14 @@ user_guide_panel <- function() {
                   alt = "Figure 3: Trends and Quartile bandings",
                   class = "user-guide-image"
                 ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_la_level_summary_link",
+                  link_text = "(Link to the LA Level Summary data table)",
+                  target_tab = "la_level",
+                  target_id = "la_table-la_table"
+                ),
                 HTML(
                   "<br>
                    <br>
@@ -343,6 +359,14 @@ user_guide_panel <- function() {
                   alt = "Figure 4: Charting the Data",
                   class = "user-guide-image"
                 ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_la_level_charts_link",
+                  link_text = "(Link to the LA Level charts)",
+                  target_tab = "la_level",
+                  target_id = "la_stats-la_stats"
+                ),
                 HTML(
                   "<br>
                    <br>
@@ -362,6 +386,14 @@ user_guide_panel <- function() {
                   src = "images/user_guide/LA_view_metadata.png",
                   alt = "Figure 5: Data Description",
                   class = "user-guide-image"
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_la_level_metadata_link",
+                  link_text = "(Link to the LA Level metadata)",
+                  target_tab = "la_level",
+                  target_id = "la_meta-metadata"
                 )
               ),
               # Regional View ==================================================
@@ -381,6 +413,14 @@ user_guide_panel <- function() {
                   src = "images/user_guide/Region_view_main_table.png",
                   alt = "Figure 6: Regional Level View",
                   class = "user-guide-image"
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_region_view_link",
+                  link_text = "(Link to the Regional Level View)",
+                  target_tab = "regional_level",
+                  target_id = "region_header-page_anchor"
                 ),
                 HTML(
                   "<br>
@@ -406,6 +446,14 @@ user_guide_panel <- function() {
                   alt = "Figure 7: Regional Level Charting",
                   class = "user-guide-image"
                 ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_region_focus_link",
+                  link_text = "(Link to the Regional Level Charts)",
+                  target_tab = "regional_level",
+                  target_id = "region_stats_mod-stats_table"
+                ),
                 HTML(
                   "<br>
                    <br>
@@ -424,7 +472,15 @@ user_guide_panel <- function() {
                   src = "images/user_guide/Region_view_multi_chart.png",
                   alt = "Figure 8: User choice regional chart",
                   class = "user-guide-image"
-                )
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_region_multi_link",
+                  link_text = "(Link to the Regional Level Charts)",
+                  target_tab = "regional_level",
+                  target_id = "region_stats_mod-stats_table"
+                ),
               ),
               # Statistical Neighbour View =====================================
               shiny::tagList(
@@ -459,6 +515,14 @@ user_guide_panel <- function() {
                   alt = "Figure 9: Statistical Neighbour View",
                   class = "user-guide-image"
                 ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_sn_view_link",
+                  link_text = "(Link to the Statistical Neighbour View)",
+                  target_tab = "statistical_neighbour_level",
+                  target_id = "stat_n_header-page_anchor"
+                ),
                 HTML(
                   "<br>
                    <br>
@@ -482,6 +546,14 @@ user_guide_panel <- function() {
                   alt = "Figure 10: Statistical Neighbour Charting",
                   class = "user-guide-image"
                 ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_sn_focus_link",
+                  link_text = "(Link to the Statistical Neighbour Charts)",
+                  target_tab = "statistical_neighbour_level",
+                  target_id = "stat_n_stats_mod-output_table"
+                ),
                 HTML(
                   "<br>
                    <br>
@@ -501,6 +573,14 @@ user_guide_panel <- function() {
                   src = "images/user_guide/Stat_N_view_multi_bar_chart.png",
                   alt = "Create Own Page: Can add multiple sets of selections",
                   class = "user-guide-image"
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_sn_multi_link",
+                  link_text = "(Link to the Statistical Neighbour Charts)",
+                  target_tab = "statistical_neighbour_level",
+                  target_id = "stat_n_stats_mod-output_table"
                 )
               ),
               # All LA View ====================================================
@@ -520,6 +600,14 @@ user_guide_panel <- function() {
                   src = "images/user_guide/All_LAs_view_top_table.png",
                   alt = "Figure 11: The view of all England's upper tier Local Authorities",
                   class = "user-guide-image"
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_all_la_view_link",
+                  link_text = "(Link to the All LA view)",
+                  target_tab = "all_la_level",
+                  target_id = "all_la_header-page_anchor"
                 )
               ),
               # Create Your Own ================================================
@@ -536,6 +624,14 @@ user_guide_panel <- function() {
                   src = "images/user_guide/Create_Own_overview.png",
                   alt = "Figure 12: Overview of create your own table and charts",
                   class = "user-guide-image"
+                ),
+                tags$br(),
+                tags$br(),
+                internal_nav_link(
+                  id = "user_guide_create_own_link",
+                  link_text = "(Link to the Create Your Own page)",
+                  target_tab = "create_your_own",
+                  target_id = "create_own-page_anchor"
                 ),
                 HTML(
                   "<br>

@@ -524,6 +524,6 @@ internal_nav_link <- function(id, link_text, target_tab, target_id, add_warning 
     href = "#", # Prevent default anchor behavior
     `data-target-tab` = target_tab, # Tab to switch to
     `data-target-id` = target_id, # ID of the section to scroll to
-    paste(link_text, "(element will be at top of the screen)")
+    link_text
   )
 }

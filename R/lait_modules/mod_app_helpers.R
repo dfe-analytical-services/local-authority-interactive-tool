@@ -15,13 +15,16 @@ PageHeaderUI <- function(id) {
   ns <- shiny::NS(id)
 
   div(
-    id = "page_header_spinner",
-    shinycssloaders::withSpinner(
-      shiny::uiOutput(ns("page_header")),
-      type = 7,
-      color = "#0b0c0c",
-      size = 1,
-      proxy.height = paste0(250 * 0.25, "px")
+    id = ns("page_anchor"),
+    div(
+      id = "page_header_spinner",
+      shinycssloaders::withSpinner(
+        shiny::uiOutput(ns("page_header")),
+        type = 7,
+        color = "#0b0c0c",
+        size = 1,
+        proxy.height = paste0(250 * 0.25, "px")
+      )
     )
   )
 }
