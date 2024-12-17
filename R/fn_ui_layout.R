@@ -339,7 +339,6 @@ dfe_footer <- function(links_list) {
 #' shiny::div(sidebar)
 #'
 dfe_contents_links <- function(links_list) {
-  # Add the HTML around the link and make an id by snake casing
   create_sidelink <- function(link_text) {
     tags$li(
       "—",
@@ -349,15 +348,31 @@ dfe_contents_links <- function(links_list) {
     )
   }
 
-  # The HTML div to be returned
   tags$div(
-    style = "position: sticky; top: 0.5rem; padding: 0.25rem;",
-    # Make it stick!
+    style = "
+     position: sticky;
+     top: 0.5rem;
+     padding: 0.25rem;
+     display: flex;
+     flex-direction:
+     column; height: 96vh;
+    ",
     h2("Contents"),
-    # remove the circle bullets
     tags$ol(
       style = "list-style-type: none; padding-left: 0; font-size: 1.188rem;",
       lapply(links_list, create_sidelink),
+      tags$li(
+        style = "list-style-type: none;",
+        tags$i(class = "fas fa-chevron-down"),
+        tags$a(
+          href = "javascript:void(0);", # Prevents the default anchor behavior
+          onclick = "window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });",
+          "Go to bottom of page"
+        )
+      )
+    ),
+    tags$div(
+      style = "list-style-type: none; margin-top: auto;",
       tags$li(
         shiny::tags$i(class = "fas fa-chevron-up"),
         tags$a(href = "#top", "Return to top of page")
