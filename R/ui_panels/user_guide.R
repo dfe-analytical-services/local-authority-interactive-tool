@@ -149,7 +149,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/LA_view_stats_table.png",
                   alt = "Figure 3: Trends and Quartile bandings",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 ),
                 HTML(
                   "<br>
@@ -170,7 +170,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/LA_view_charts.png",
                   alt = "Figure 4: Charting the Data",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 ),
                 HTML(
                   "<br>
@@ -180,7 +180,8 @@ user_guide_panel <- function() {
                     (figure ). This includes a description and methodology,
                     as well as an indication of last and next update
                     dates. Finally, a hyperlink to the data source (if clicked,
-                    the source will open in new tab).
+                    the source will open in new tab). The metadata is the same
+                    for each indicator across the different views.
                    <br>
                    <br>
                    <b>Figure : Metadata</b>
@@ -189,7 +190,7 @@ user_guide_panel <- function() {
                 tags$img(
                   src = "images/user_guide/LA_view_metadata.png",
                   alt = "Figure 5: Data Description",
-                  style = "width:100%; max-width:600px; margin-top:10px;"
+                  class = "user-guide-image"
                 )
               ),
               # Regional View ==================================================
