@@ -101,7 +101,7 @@ user_guide_panel <- function() {
                   <br>
                   To do this you must first make the selections you want to save.
                    Then copy the URL (webpage link in the search bar usually at the top
-                   of your screen - figure ) and keep this somewhere safe.
+                   of your screen - figure 1.01) and keep this somewhere safe.
                   <br>
                   <br>
                   Now, if you use this link to open the app, your selections
@@ -113,7 +113,10 @@ user_guide_panel <- function() {
                 ),
                 tags$ul(
                   tags$li("Geographies: Barking and Dagenham, Barnsley"),
-                  tags$li("Indicators: A levels 3+ A grades / Double awards, A levels AAB grades / Applied / Double awards"),
+                  tags$li(paste(
+                    "Indicators: A levels 3+ A grades / Double awards,",
+                    "A levels AAB grades / Applied / Double awards"
+                  )),
                   tags$li("LA Groupings: Include All LAs"),
                   tags$li("Other Groupings: England")
                 ),
@@ -143,9 +146,17 @@ user_guide_panel <- function() {
                 ),
                 tags$br(),
                 tags$br(),
+                HTML(
+                  "<b>Figure 1.01: Copy the URL to save selections on Create Your Own</b>
+                   <br>"
+                ),
                 tags$img(
                   src = "images/user_guide/Create_Own_save_selections.png",
-                  alt = "Create Own Page: Can add multiple sets of selections",
+                  alt = paste(
+                    "A screenshot showing the Create Your Own page. The webpage URL",
+                    "is highlighted and an arrow points at it to emphasize where to",
+                    "copy the URL from."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -208,7 +219,7 @@ user_guide_panel <- function() {
                 ),
                 tags$img(
                   src = "images/user_guide/tooltip_hint.png",
-                  alt = "Create Own Page: Can add multiple sets of selections",
+                  alt = "Screenshot of the tooltip icon.",
                   class = "user-guide-image",
                   style = "width: auto;"
                 ),
@@ -221,7 +232,10 @@ user_guide_panel <- function() {
                 ),
                 tags$img(
                   src = "images/user_guide/expand_button_hint.png",
-                  alt = "Create Own Page: Can add multiple sets of selections",
+                  alt = paste(
+                    "Screenshot of the expand button found when hovering the mouse",
+                    "over the bottom right of a chart card."
+                  ),
                   class = "user-guide-image",
                   style = "width: auto;"
                 ),
@@ -238,7 +252,11 @@ user_guide_panel <- function() {
                 ),
                 tags$img(
                   src = "images/user_guide/x_button_hint.png",
-                  alt = "Create Own Page: Can add multiple sets of selections",
+                  alt = paste(
+                    "Screenshot of the Local Authority input box,",
+                    "showing the small x button found to the right of the selected",
+                    "LA."
+                  ),
                   class = "user-guide-image",
                   style = "width: auto;"
                 ),
@@ -276,7 +294,7 @@ user_guide_panel <- function() {
                    The main table displays time series data
                     for the chosen indicator in respect of the LA, its Region,
                     Statistical Neighbours and England averages - for
-                    comparison/benchmarking purposes (figure ).
+                    comparison/benchmarking purposes (figure 2.01).
                    <br>
                    <br>
                    Note that the selected LA is highlighted in orange
@@ -293,12 +311,12 @@ user_guide_panel <- function() {
                     the information is excluded from the mean calculation.
                    <br>
                    <br>
-                   <b>Figure : Main Data Table for Local Authority View</b>
+                   <b>Figure 2.01: LA Level View</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/LA_view_main_table.png",
-                  alt = "Figure 2: Main Data Table for Local Authority View",
+                  alt = "Screenshot of the header and first table of the LA Level view.",
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -315,19 +333,19 @@ user_guide_panel <- function() {
                    <br>
                    Beneath this is a sub-table showing latest year on year
                     trend, change from previous year and the latest year's
-                    national rank (figure ).
+                    national rank (figure 2.02).
                     If applicable the authority is placed into a quartile
                     banding (based on the latest year's data)
                     and colour formatting will flag up upper (A) and Lower (D)
                     quartiles for clarity.
                    <br>
                    <br>
-                   <b>Figure : Trends and Quartile bandings</b>
+                   <b>Figure 2.02: LA Level Summary Table</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/LA_view_stats_table.png",
-                  alt = "Figure 3: Trends and Quartile bandings",
+                  alt = "Screenshot of the summary table of the LA Level view.",
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -342,7 +360,7 @@ user_guide_panel <- function() {
                   "<br>
                    <br>
                    <br>
-                   This table is followed by a chart (figure ), which plots the
+                   This table is followed by a chart (figure 2.03), which plots the
                     LA, national, region and statistical neighbour
                     average data over the same period as the data table.
                     The data is displayed as a line chart by default but can be
@@ -351,12 +369,12 @@ user_guide_panel <- function() {
                     copied to your clipboard.
                    <br>
                    <br>
-                   <b>Figure : Charting the Data</b>
+                   <b>Figure 2.03: LA Level Charts</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/LA_view_charts.png",
-                  alt = "Figure 4: Charting the Data",
+                  alt = "Screenshot of the line chart on the LA Level view.",
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -372,19 +390,19 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    Beneath the chart, the metadata of the indicator is provided
-                    (figure ). This includes a description and methodology,
+                    (figure 2.04). This includes a description and methodology,
                     as well as an indication of last and next update
                     dates. Finally, a hyperlink to the data source (if clicked,
                     the source will open in new tab). The metadata is the same
                     for each indicator across the different views.
                    <br>
                    <br>
-                   <b>Figure : Metadata</b>
+                   <b>Figure 2.04: Metadata</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/LA_view_metadata.png",
-                  alt = "Figure 5: Data Description",
+                  alt = "Screenshot of the metatdata on the LA Level view.",
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -403,15 +421,18 @@ user_guide_panel <- function() {
                     Regional LA neighbours. Then the selected local
                     authority’s region's data against other regions data (and
                     England). The selected LA and region are highlighted
-                    in orange (figure ).
+                    in orange (figure 3.01).
                    <br>
                    <br>
-                   <b>Figure : Regional Level View</b>
+                   <b>Figure 3.01: Regional Level View</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Region_view_main_table.png",
-                  alt = "Figure 6: Regional Level View",
+                  alt = paste(
+                    "Screenshot of the first two tables (LAs and Regions)",
+                    "on the Regional Level view."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -427,23 +448,26 @@ user_guide_panel <- function() {
                    <br>
                    <br>
                    Differing to the Local Authority view, the charts are split
-                    into two types, 'Focus' and 'User selection' (figure ).
+                    into two types, 'Focus' and 'User selection'.
                     There are line and bar charts for each of these types.
                    <br>
                    <br>
-                   The 'Focus' chart presents each regions' data (figure ).
+                   The 'Focus' chart presents each regions' data (figure 3.02).
                     The selected LA’s region is highlighted in blue,
                     whilst other regions are coloured grey. This is to give a clear
                     contrast of how the region of interest compares to other
                     regions.
                    <br>
                    <br>
-                   <b>Figure : Region Level 'Focus' Line Chart</b>
+                   <b>Figure 3.02: Regional Level 'Focus' Line Chart</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Region_view_focus_chart.png",
-                  alt = "Figure 7: Regional Level Charting",
+                  alt = paste(
+                    "Screenshot of the focus line chart",
+                    "on the Regional Level view."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -460,17 +484,20 @@ user_guide_panel <- function() {
                    <br>
                    The 'User selection' chart displays the same data but its default
                     is to only show the selected LA's region's data
-                    (figure ). Users can then add up to three other regions
+                    (figure 3.03). Users can then add up to three other regions
                     (or England). This allows users to make more specific
                     comparisons between regions.
                    <br>
                    <br>
-                   <b>Figure : Region Level 'User selection' Line Chart</b>
+                   <b>Figure 3.03: Regional Level 'User selection' Line Chart</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Region_view_multi_chart.png",
-                  alt = "Figure 8: User choice regional chart",
+                  alt = paste(
+                    "Screenshot of the User selection line chart",
+                    "on the Regional Level view."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -504,15 +531,18 @@ user_guide_panel <- function() {
                   <br>
                   These neighbour groupings are used in this tool to allow
                    comparison of the selected LA alongside the
-                   LAs in it's statistical neighbour group.
+                   LAs in it's statistical neighbour group (figure 4.01).
                   <br>
                   <br>
-                  <b>Figure : Statistical Neighbour View</b>
+                  <b>Figure 4.01: Statistical Neighbour View</b>
                   <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Stat_N_view_main_table.png",
-                  alt = "Figure 9: Statistical Neighbour View",
+                  alt = paste(
+                    "Screenshot of the tables (Statistical Neighbours, Other",
+                    " Geographies, SUmmary) on the Statistical Neighbour view."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -534,16 +564,19 @@ user_guide_panel <- function() {
                    <br>
                     The 'Focus' charts show the selected LA
                      (highlighted in blue) alongside its statistical neighbours
-                     (grey) (figure ). This is to give a clear contrast of how
+                     (grey) (figure 4.02). This is to give a clear contrast of how
                      the selected LA compares to it's neighbours.
                    <br>
                    <br>
-                   <b>Figure : Statistical Neighbour 'Focus' Bar Chart</b>
+                   <b>Figure 4.02: Statistical Neighbour 'Focus' Bar Chart</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Stat_N_view_focus_bar_chart.png",
-                  alt = "Figure 10: Statistical Neighbour Charting",
+                  alt = paste(
+                    "Screenshot of the focus bar chart",
+                    "on the Statistical Neighbour view."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -560,18 +593,21 @@ user_guide_panel <- function() {
                    <br>
                    The 'User selection' chart displays the same data but its default
                     is to only show the selected LA's data
-                    (figure ). Users can then add up to three other statistical
+                    (figure 4.03). Users can then add up to three other statistical
                     neighbours (or the selected LA's region or England).
                     This allows users to make more specific comparisons between
                     the geographies.
                    <br>
                    <br>
-                   <b>Figure : Statistical Neighbour 'User selection' Bar Chart</b>
+                   <b>Figure 4.03: Statistical Neighbour 'User selection' Bar Chart</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Stat_N_view_multi_bar_chart.png",
-                  alt = "Create Own Page: Can add multiple sets of selections",
+                  alt = paste(
+                    "Screenshot of the User selection bar chart",
+                    "on the Statistical Neighbour view."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -589,16 +625,18 @@ user_guide_panel <- function() {
                   "The All LAs view presents all 153 Local Authorities, in
                     alphabetical order, plus previous authorities for those that
                     have recently undergone a local government reorganisation,
-                    (figure ). Each of the tables are downloadable.
+                    (figure 5.01). Each of the tables are downloadable.
                    <br>
                    <br>
-                   <b>Figure : The view of all England's upper tier Local
-                       Authorities</b>
+                   <b>Figure 5.01: All LA Level View</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/All_LAs_view_top_table.png",
-                  alt = "Figure 11: The view of all England's upper tier Local Authorities",
+                  alt = paste(
+                    "Screenshot of the top of the All LA view, showing the",
+                    "first several rows of the LA table."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -614,15 +652,20 @@ user_guide_panel <- function() {
               shiny::tagList(
                 HTML(
                   "The Create Your Own page provides functionality to create
-                    your own data table(s) and associated chart(s).
+                    your own data table(s) and associated chart(s) (figure 6.01).
                    <br>
                    <br>
-                   <b>Figure : Overview of create your own table and charts</b>
+                   <b>Figure 6.01: Overview of Create Your Own page</b>
                    <br>"
                 ),
                 tags$img(
                   src = "images/user_guide/Create_Own_overview.png",
-                  alt = "Figure 12: Overview of create your own table and charts",
+                  alt = paste(
+                    "Screenshot of the top of the Create Your Own page.",
+                    "Shows the notification banner pointing towards GitHub for",
+                    "bigger data downloads, the selection choices, the Staging Table,",
+                    "Summary of Selections table and the Output Table."
+                  ),
                   class = "user-guide-image"
                 ),
                 tags$br(),
@@ -652,7 +695,11 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_choose_measure.png",
-                        alt = "Create Own Page: Select inputs to build table and charts",
+                        alt = paste(
+                          "Screenshot of the main selections available to build the",
+                          "Create Your Own table/charts. These are Geographies (LA",
+                          "Regions, England), Topic and Indicator."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -664,7 +711,13 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_pre_set_groups.png",
-                        alt = "Create Own Page: Pre-set selections",
+                        alt = paste(
+                          "Screenshot of pre-set selections available.",
+                          "These are geographies (include all LAs, LAs in the selected",
+                          "LA regions, LAs that are statistical neighbours. Add England",
+                          "or Regions. Choose the year range. Finally, a button to clear",
+                          "all selections."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -674,7 +727,10 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_appear_staging.png",
-                        alt = "Create Own Page: The Staging Table",
+                        alt = paste(
+                          "Screenshot of the Staging Table populated with a few",
+                          "selections."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -688,13 +744,19 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_summary_selections.png",
-                        alt = "Create Own Page: Summary of Selections Table",
+                        alt = paste(
+                          "Screenshot of the Summary of Selections table,",
+                          "showing a row of selections that have been added."
+                        ),
                         class = "user-guide-image"
                       ),
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_output_table.png",
-                        alt = "Create Own Page: Output Table containing all selections",
+                        alt = paste(
+                          "Screenshot of the Output Table showing the",
+                          "data that has been added from the saved selections."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -705,7 +767,10 @@ user_guide_panel <- function() {
                         this may take some time to load. Also, you can download
                         the full dataset (in long format) from the ",
                       dfeshiny::external_link(
-                        href = "https://github.com/dfe-analytical-services/local-authority-interactive-tool/tree/main/01_data/02_prod",
+                        href = paste(
+                          "https://github.com/dfe-analytical-services/",
+                          "local-authority-interactive-tool/tree/main/01_data/02_prod"
+                        ),
                         link_text = "data folder in the LAIT GitHub",
                         add_warning = TRUE
                       ),
@@ -713,7 +778,10 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_store_selections.png",
-                        alt = "Create Own Page: Can add multiple sets of selections",
+                        alt = paste(
+                          "Screenshot of the Summary of Selections Table showing",
+                          "several rows of saved selections."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -755,7 +823,11 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_save_selections.png",
-                        alt = "Create Own Page: Can add multiple sets of selections",
+                        alt = paste(
+                          "A screenshot showing the Create Your Own page. The webpage URL",
+                          "is highlighted and an arrow points at it to emphasize where to",
+                          "copy the URL from."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -768,7 +840,11 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_output_charts.png",
-                        alt = "Create Own Page: Output charts",
+                        alt = paste(
+                          "A screenshot showing the Create Your Own page line chart.",
+                          "It displays the data added to the Output Table in the first",
+                          "row of saved selections."
+                        ),
                         class = "user-guide-image"
                       )
                     )),
@@ -779,7 +855,11 @@ user_guide_panel <- function() {
                       tags$br(),
                       tags$img(
                         src = "images/user_guide/Create_Own_output_charts_error.png",
-                        alt = "Create Own Page: Erro message for output charts",
+                        alt = paste(
+                          "A screenshot showing the Create Your Own page line chart with",
+                          "an error message saying 'No plot as too many Geographies selected",
+                          "If you think this is incorrect, please report so in the feedback form'."
+                        ),
                         class = "user-guide-image"
                       )
                     ))
