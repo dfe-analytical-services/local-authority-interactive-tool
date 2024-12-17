@@ -246,12 +246,12 @@ user_guide_panel <- function() {
                  "
                 ),
                 internal_nav_link(
-                  id = "support_link",
+                  id = "hint_feedback_link",
                   link_text = "filling out the feedback form",
-                  target_tab = "support", # This corresponds to the tab's `value`
-                  target_id = "support_to_dashboard" # ID of the section to scroll to
+                  target_tab = "support",
+                  target_id = "support_to_dashboard"
                 ),
-                HTML(".")
+                "."
               ),
               # LA Level View ==================================================
               tagList(
@@ -303,6 +303,7 @@ user_guide_panel <- function() {
                 ),
                 HTML(
                   "<br>
+                   <br>
                    <br>
                    Beneath this is a sub-table showing latest year on year
                     trend, change from previous year and the latest year's
@@ -435,7 +436,7 @@ user_guide_panel <- function() {
                  Educational Research (NFER) was commissioned in 2007 by the
                  Department to identify and group similar LAs in terms of
                  the socio-economic characteristics, each LA was assigned 10
-                 such neighbours. See ",
+                 such neighbours. See the ",
                 dfeshiny::external_link(
                   href = "https://www.gov.uk/government/publications/local-authority-interactive-tool-lait",
                   link_text = "Local Authority interactive tool (LAIT) GOV.UK",
@@ -691,8 +692,19 @@ user_guide_panel <- function() {
               )
             )
           ),
-
-
+          # Feedback wanted ====================================================
+          h2("Feedback"),
+          p(
+            "If you think something is unclear or would benefit from having
+              extra guidance then please let us know by ",
+            internal_nav_link(
+              id = "user_guide_feedback_link",
+              link_text = "filling out the feedback form",
+              target_tab = "support",
+              target_id = "support_to_dashboard"
+            ),
+            ". Thanks in advance!"
+          ),
           # Guidance sources ===================================================
           h2("Guidance sources"),
           p(
