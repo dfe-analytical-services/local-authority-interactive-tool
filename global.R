@@ -76,7 +76,7 @@ parent_publication <- "https://www.gov.uk/government/publications/local-authorit
 site_primary <- "https://department-for-education.shinyapps.io/local-authority-interactive-tool/"
 
 # Set the key for Google Analytics tracking
-google_analytics_key <- "Z967JJVQQX"
+google_analytics_key <- "4VMNMFG2R3"
 
 # Enable bookmarking so that input choices are shown in the url ---------------
 shiny::enableBookmarking("url")
