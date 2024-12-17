@@ -12,27 +12,21 @@ gtag('consent', 'default', {
 </script>
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src='https://www.googletagmanager.com/gtag/js?id=G-ABCDE12345'></script>
+  <script async src='https://www.googletagmanager.com/gtag/js?id=G-4VMNMFG2R3'></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
 
     gtag('js', new Date());
 
-  gtag('config', 'G-ABCDE12345');
+  gtag('config', 'G-4VMNMFG2R3');
 
 /*
 The custom trackers below can be tailored to match the inputs used in your
 dashboard.
 */
 
-  $(document).on('change', 'select#selectPhase', function(e) {
-    gtag('event', 'select phase', {'event_category' : 'choose Phase',
-    'event_label' : document.querySelector('select#selectPhase').value
-    });
-  });
-
-  $(document).on('change', 'select#selectArea', function(e) {
+  $(document).on('change', 'select#la_name', function(e) {
     gtag('event', 'select area', {'event_category' : 'choose Area',
     'event_label' : document.querySelector('select#selectArea').value
     });
@@ -41,18 +35,6 @@ dashboard.
   $(document).on('click', 'ul#navlistPanel', function(e) {
     gtag('event', 'navlistPanel', {'event_category' : 'navbar click',
     'event_label' : document.querySelector('ul#navlistPanel > li.active > a').getAttribute('data-value')
-    });
-  });
-
-  $(document).on('click', 'ul#tabsetpanels', function(e) {
-    gtag('event', 'tab panels', {'event_category' : 'tab panel clicks',
-    'event_label' : document.querySelector('ul#tabsetpanels > li.active > a').getAttribute('data-value')
-    });
-  });
-
-
-  $(document).on('click', 'a#download_data', function(e) {
-    gtag('event', 'Download button', {'event_category' : 'Download button click'
     });
   });
 
