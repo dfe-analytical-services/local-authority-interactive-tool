@@ -357,7 +357,11 @@ dfe_contents_links <- function(links_list) {
     # remove the circle bullets
     tags$ol(
       style = "list-style-type: none; padding-left: 0; font-size: 1.188rem;",
-      lapply(links_list, create_sidelink)
+      lapply(links_list, create_sidelink),
+      tags$li(
+        shiny::tags$i(class = "fas fa-chevron-up"),
+        tags$a(href = "#top", "Return to top of page")
+      )
     )
   )
 }
