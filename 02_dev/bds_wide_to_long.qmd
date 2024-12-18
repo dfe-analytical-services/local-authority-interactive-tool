@@ -40,13 +40,13 @@ Load latest update banner
 
 ```{r write-banner}
 # Load raw Data Dict from shared folder
-banner_update <- read_data_dict_shared_folder(shared_folder, "Banner_updates") |>
-  # Write .csv version
-  write.csv(
-    banner_update,
-    here::here("01_data/02_prod/banner_update.csv"),
-    row.names = FALSE
-  )
+banner_update <- read_data_dict_shared_folder(shared_folder, "Banner_updates")
+# Write .csv version
+write.csv(
+  banner_update,
+  here::here("01_data/02_prod/banner_update.csv"),
+  row.names = FALSE
+)
 ```
 
 Load useful links
