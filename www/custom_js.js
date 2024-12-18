@@ -53,6 +53,7 @@ $(document).ready(function () {
 });
 
 
+// Logic to link to specific internal page (and scroll to the top of that id)
 $(document).on('click', 'a[data-target-tab]', function(e) {
   e.preventDefault(); // Prevent default anchor behavior
 
@@ -61,17 +62,16 @@ $(document).on('click', 'a[data-target-tab]', function(e) {
   const targetId = $(this).attr('data-target-id');
 
   // Switch to the specified tab
-  $('[data-bs-toggle=\"tab\"][data-value=\"' + tabId + '\"]').tab('show');
+  $('[data-bs-toggle="tab"][data-value="' + tabId + '"]').tab('show');
 
   // Scroll to the section after a short delay
   setTimeout(function() {
     const target = document.getElementById(targetId);
     if (target) {
-      // Scroll to the target's position at the top of the screen
-      window.scrollTo({
-        top: target.getBoundingClientRect().top + window.scrollY - 10,
-        behavior: 'smooth'
+      target.scrollIntoView({
+        behavior: 'smooth', // Smooth scroll
       });
     }
   }, 300); // Adjust delay if necessary
 });
+

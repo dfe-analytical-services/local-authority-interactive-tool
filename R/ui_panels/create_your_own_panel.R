@@ -2,7 +2,7 @@ create_your_own_panel <- function() {
   bslib::nav_panel(
     "create_your_own",
     full_data_on_github_noti(),
-    h1("Create Your Own"),
+    h1("Create Your Own", id = "create_own-page_anchor"),
     p(
       "On this page you can create a custom data table by making selections
         across various options. To download your table, add your selections

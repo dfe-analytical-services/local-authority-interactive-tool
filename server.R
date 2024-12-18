@@ -38,8 +38,8 @@ server <- function(input, output, session) {
   observeEvent(input$user_guide, {
     bslib::nav_select("left_nav", selected = "user_guide")
   })
-  observeEvent(input$information_page, {
-    bslib::nav_select("left_nav", selected = "information_page")
+  observeEvent(input$updates_and_sources, {
+    bslib::nav_select("left_nav", selected = "updates_and_sources")
   })
 
   ## Footer links -------------------------------------------------------------
@@ -125,7 +125,7 @@ server <- function(input, output, session) {
     "all_la_level" = "All LA Level",
     "create_your_own" = "Create Your Own",
     "user_guide" = "User Guide",
-    "information_page" = "Information Page",
+    "updates_and_sources" = "Updates and Data Sources",
     "support" = "Support and Feedback",
     "accessibility_statement" = "Accessibility Statement",
     "cookies_information" = "Cookies Information",
@@ -575,14 +575,7 @@ server <- function(input, output, session) {
   )
 
 
-  # User guide ================================================================
-  InternalLinkServer(
-    "la_level_link",
-    "la_level",
-    session
-  )
-
-  # Information page ==========================================================
+  # Updates and Data Sources ==================================================
   # Latest indicator update notification
   LatestDataUpdateServer(
     "latest_indicator_update",

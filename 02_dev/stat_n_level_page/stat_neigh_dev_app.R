@@ -80,7 +80,7 @@ ui_dev <- bslib::page_fillable(
         ),
       ),
       bslib::nav_panel(
-        title = "Line chart - user selection",
+        title = "Line chart - User selection",
         bslib::card(
           id = "region_multi_line",
           bslib::card_body(
@@ -118,7 +118,7 @@ ui_dev <- bslib::page_fillable(
         ),
       ),
       bslib::nav_panel(
-        title = "Bar chart - user selection",
+        title = "Bar chart - User selection",
         bslib::card(
           id = "region_multi_bar",
           bslib::card_body(

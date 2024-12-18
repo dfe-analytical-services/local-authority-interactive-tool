@@ -646,7 +646,7 @@ StatN_MultiLineChartUI <- function(id) {
   ns <- NS(id)
 
   bslib::nav_panel(
-    title = "Line chart - user selection",
+    title = "Line chart - User selection",
     div(
       style = "display: flex;
                justify-content: space-between;
@@ -901,7 +901,7 @@ StatN_MultiBarChartUI <- function(id) {
   ns <- NS(id)
 
   bslib::nav_panel(
-    title = "Bar chart - user selection",
+    title = "Bar chart - User selection",
     div(
       style = "display: flex;
              justify-content: space-between;
@@ -909,7 +909,7 @@ StatN_MultiBarChartUI <- function(id) {
              background: white;",
       bslib::card(
         id = "stat_n_multi_line",
-        title = "Line chart - user selection",
+        title = "Line chart - User selection",
         bslib::card_body(
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(

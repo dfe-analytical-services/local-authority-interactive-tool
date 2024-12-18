@@ -1,5 +1,5 @@
 # nolint start: object_name
-# Modules to produce the information page
+# Modules to produce the Updates and Data Sources page
 #
 #' Latest Data Update UI
 #'

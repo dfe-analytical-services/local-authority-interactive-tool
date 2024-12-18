@@ -75,6 +75,7 @@ LA_LevelMetaUI <- function(id) {
   div(
     class = "well",
     style = "overflow-y: visible;",
+    id = ns("metadata"),
     bslib::card(
       bslib::card_body(
         h2("Metadata", style = "margin-bottom: 0;"),
