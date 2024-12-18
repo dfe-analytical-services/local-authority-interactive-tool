@@ -101,7 +101,9 @@ user_guide_panel <- function() {
                   <br>
                   To do this you must first make the selections you want to save.
                    Then copy the URL (webpage link in the search bar usually at the top
-                   of your screen - figure 1.01) and keep this somewhere safe.
+                   of your screen - figure 1.01) and keep this somewhere you can
+                   easily return to. This could be saving it to favourites in your
+                   web browser.
                   <br>
                   <br>
                   Now, if you use this link to open the app, your selections
@@ -787,14 +789,20 @@ user_guide_panel <- function() {
                     )),
                     tags$br(),
                     tags$li(tagList(
-                      "Selections can be saved so that on entering the tool
-                       your selections are pre-populated. Then all you need to
-                       do is click 'Add selections'. To do this you must first
-                       make the selections you want to save. Then copy the
-                       URL (webpage link in the search bar usually at the top
-                       of your screen) and keep this somewhere safe. If you
-                       use this link to open the app, your selections will load in
-                       automatically. Here is an example:",
+                      HTML(
+                        "Selections can be saved so that on entering the tool
+                         your selections are pre-populated. Then all you need to
+                         do is click 'Add selections'. To do this you must first
+                         make the selections you want to save. Then copy the
+                         URL (webpage link in the search bar usually at the top
+                         of your screen) and keep this somewhere you can easily
+                         return to. This could be saving it to favourites in your
+                         web browser.
+                        <br>
+                        <br>
+                        If you use this link to open the app, your selections
+                         will load in automatically. Here is an example:"
+                      ),
                       tags$br(),
                       dfeshiny::external_link(
                         href = paste0(
