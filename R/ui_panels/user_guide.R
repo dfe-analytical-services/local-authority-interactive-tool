@@ -12,10 +12,10 @@ user_guide_panel <- function() {
 
           # Introduction =======================================================
           h2("Introduction"),
-          p("The Department has developed the Local Authority Interactive Tool
+          p("The Department for Education (DfE) has developed the Local Authority Interactive Tool
               (LAIT) to provide easy access to a wide range of data related to
               children and young people sourced from various departments across
-              government.The app is designed and maintained by the DFE's Regions
+              government.The app is designed and maintained by the DfE's Regions
               Group LA Performance & Data (LAPD) Team."),
 
 
@@ -517,7 +517,7 @@ user_guide_panel <- function() {
                  characteristics. These designated LAs are known as
                  statistical neighbours.  The National Foundation for
                  Educational Research (NFER) was commissioned in 2007 by the
-                 Department to identify and group similar LAs in terms of
+                 DfE to identify and group similar LAs in terms of
                  the socio-economic characteristics, each LA was assigned 10
                  such neighbours. See the ",
                 dfeshiny::external_link(
