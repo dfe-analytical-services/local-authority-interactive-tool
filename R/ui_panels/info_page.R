@@ -1,11 +1,11 @@
 info_page_panel <- function() {
   shiny::tabPanel(
-    "Information Page",
+    "Updates and Sources",
     shinyGovstyle::gov_main_layout(
       shinyGovstyle::gov_row(
         shiny::column(
           12,
-          h1("Information Page"),
+          h1("Updates and Data Sources"),
 
           # Latest Updates =====================================================
           h2("Latest Updates"),

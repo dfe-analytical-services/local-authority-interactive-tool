@@ -104,7 +104,7 @@ ui <- function(input, output, session) {
                   "All LA Level",
                   "Create Your Own",
                   "User Guide",
-                  "Information Page"
+                  "Updates and Sources"
                 )
               )
             ),
@@ -119,7 +119,7 @@ ui <- function(input, output, session) {
                 all_la_level_panel(),
                 create_your_own_panel(),
                 bslib::nav_panel("user_guide", user_guide_panel()),
-                bslib::nav_panel("information_page", info_page_panel())
+                bslib::nav_panel("updates_and_sources", info_page_panel())
               )
             )
           )
@@ -139,7 +139,7 @@ ui <- function(input, output, session) {
       ),
       tags$div(
         style = "text-align: center; margin-top: 50px; margin-bottom: 15px;",
-        tags$a(href = "#top", "Go to the top of the page")
+        tags$a(href = "#top", "Go to the top of page")
       )
     ),
     dfe_footer(

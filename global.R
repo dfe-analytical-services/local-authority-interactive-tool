@@ -106,7 +106,7 @@ metrics_raw <- read.csv(
   check.names = FALSE
 )
 
-# For the Information page
+# For the Updates and Data Sources page
 # Development update log
 development_update_log <- read.csv(
   here::here("01_data/02_prod/development_update_log.csv")

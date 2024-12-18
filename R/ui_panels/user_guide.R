@@ -888,7 +888,7 @@ user_guide_panel <- function() {
             internal_nav_link(
               id = "info_page_useful_resources",
               link_text = "links to useful or related resources",
-              target_tab = "information_page",
+              target_tab = "updates_and_sources",
               target_id = "useful_links_link"
             ),
             "."
