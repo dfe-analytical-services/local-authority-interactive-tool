@@ -225,7 +225,7 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
 #' Year Range Input UI
 #'
 #' This function creates a user interface component for selecting a range
-#' of years. It utilizes a picker input to allow users to select one
+#' of years. It utilises a picker input to allow users to select one
 #' or more years from the available options.
 #'
 #' @param id A unique identifier for the Shiny module.

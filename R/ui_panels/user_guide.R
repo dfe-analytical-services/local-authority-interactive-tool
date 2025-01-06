@@ -156,7 +156,7 @@ user_guide_panel <- function() {
                   src = "images/user_guide/Create_Own_save_selections.png",
                   alt = paste(
                     "A screenshot showing the Create Your Own page. The webpage URL",
-                    "is highlighted and an arrow points at it to emphasize where to",
+                    "is highlighted and an arrow points at it to emphasise where to",
                     "copy the URL from."
                   ),
                   class = "user-guide-image"
@@ -833,7 +833,7 @@ user_guide_panel <- function() {
                         src = "images/user_guide/Create_Own_save_selections.png",
                         alt = paste(
                           "A screenshot showing the Create Your Own page. The webpage URL",
-                          "is highlighted and an arrow points at it to emphasize where to",
+                          "is highlighted and an arrow points at it to emphasise where to",
                           "copy the URL from."
                         ),
                         class = "user-guide-image"

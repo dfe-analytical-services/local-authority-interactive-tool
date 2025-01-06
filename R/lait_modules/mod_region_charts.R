@@ -638,9 +638,9 @@ Region_MultiChartInputUI <- function(id) {
 
 #' Region Multi-Chart Input Server Module
 #'
-#' A server-side module that handles the selection and synchronization of regions
+#' A server-side module that handles the selection and synchronisation of regions
 #' for comparing multiple charts (line and bar). It ensures that the selected regions
-#' for both charts are valid and synchronized. The module also retains the user’s
+#' for both charts are valid and synchronised. The module also retains the user’s
 #' previous selections and updates the UI accordingly.
 #'
 #' @param id The unique module ID used to namespace input and output elements
@@ -655,14 +655,14 @@ Region_MultiChartInputUI <- function(id) {
 #'
 #' @return This function does not return a value directly. It renders the user
 #'   interface elements and ensures that the inputs for the line and bar charts
-#'   are synchronized, valid, and updated based on user selection.
+#'   are synchronised, valid, and updated based on user selection.
 #'
 #' @details The module performs the following tasks:
 #'   - Ensures that only valid region selections (those not equal to the selected
 #'     local authority) are allowed for the line and bar charts.
 #'   - Retains previous selections for both charts and updates the inputs with
 #'     valid options when the user changes the main LA or indicator.
-#'   - Synchronizes the line and bar chart inputs so that they both reflect the
+#'   - Synchronises the line and bar chart inputs so that they both reflect the
 #'     same selected regions, with a maximum of three regions selected for each chart.
 #'   - Returns the selected regions for both the line and bar charts as reactive values
 #'     for use in other parts of the app.

@@ -321,7 +321,7 @@ filter_region_data_all_la <- function(data, la_names) {
 #' This function filters a given BDS dataset to include only the rows that
 #' match the specified indicators. It removes any rows where the year value
 #' is missing (NA). The filtered dataset can be used for further analysis
-#' or visualization of selected indicators.
+#' or visualisation of selected indicators.
 #'
 #' @param bds_data A data frame containing BDS data, including a column
 #'                 for indicators (`Measure`) and years (`Years`).
