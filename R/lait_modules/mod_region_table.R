@@ -310,14 +310,14 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Download ----------------------------------------------------------------
     # File download text - calculates file size
     ns <- NS(id)
-    output$file_type <- shiny::renderUI({
+    output$download_file_txt <- shiny::renderUI({
       file_type_input_btn(ns("file_type"), region_la_table_raw())
     })
 
     # Download dataset
     Download_DataServer(
       "la_download",
-      reactive(input$download_file_txt),
+      reactive(input$file_type),
       reactive(region_la_table_raw()),
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Regional-Level"))
     )
