@@ -168,7 +168,6 @@ server <- function(input, output, session) {
   })
 
   # Cookies logic =============================================================
-  # TODO: Delete cookies_banner_server_jt() when dfeshiny corrected
   output$cookies_status <- dfeshiny::cookies_banner_server(
     input_cookies = shiny::reactive(input$cookies),
     parent_session = session,
