@@ -285,7 +285,7 @@ calculate_y_range <- function(data_long) {
 #'
 #' @return A numeric vector of 'pretty' breaks for y-gridlines, ensuring
 #'   that gridlines extend beyond the minimum and maximum values for better
-#'   visualization.
+#'   visualisation.
 #'
 #' @examples
 #' # Example usage:
