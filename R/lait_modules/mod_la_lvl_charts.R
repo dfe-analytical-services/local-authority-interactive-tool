@@ -1,62 +1,55 @@
 # nolint start: object_name
 #
-#' Local Authority Chart UI Module
+#' Line Chart UI Module
 #'
-#' This module creates the UI elements for displaying Local Authority
-#' (LA) charts.
-#' It provides a container with navigation tabs to toggle between a line
-#' chart and a bar chart.
+#' Creates a user interface component for displaying a line chart with
+#' download options. This UI module is designed to be used within a Shiny
+#' application and provides a structured layout for presenting a line chart
+#' alongside relevant download buttons.
 #'
-#' @param id A unique identifier for the module instance.
+#' @param id A unique identifier for the module. This is used for namespacing
+#'   the UI elements within the Shiny app.
 #'
-#' @return A `div` containing the UI elements for the Local Authority charts.
+#' @return A `shiny::tagList` containing a navigation panel with a line chart
+#'   display, download options, and a hidden static plot for copy-to-clipboard
+#'   functionality.
 #'
 #' @details
-#' This UI module creates a well-styled container that includes a
-#' tabbed interface.
-#' The tabs allow users to switch between a line chart and a bar chart,
-#' both rendered using the `ggiraph::girafeOutput` for interactive plotting.
+#' The UI includes:
+#' - A navigation panel titled "Line chart".
+#' - A flexbox layout that contains the line chart and download options,
+#'   styled for a cohesive appearance.
+#' - A hidden plot used for copying the chart to the clipboard, ensuring
+#'   users can easily export the chart without additional steps.
 #'
-#' The UI components are wrapped in `bslib::navset_card_underline`,
-#' which provides the tabbed navigation.
-#' Each tab contains a `bslib::card` with a `bslib::card_body` that
-#' holds the chart output.
-#' The charts are named as `line_chart` and `bar_chart`,
-#' and are dynamically rendered based on the inputs and server logic.
+#' @examples
+#' # Example usage in UI
+#' LA_LineChartUI("line_chart_ui")
 #'
-LA_ChartUI <- function(id) {
+LA_LineChartUI <- function(id) {
   ns <- NS(id)
 
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::navset_card_underline(
-      id = "la_charts",
-      bslib::nav_panel(
-        title = "Line chart",
-        bslib::card(
-          bslib::card_body(
-            ggiraph::girafeOutput(ns("line_chart"))
-          ),
-          full_screen = TRUE
-        ),
-      ),
-      bslib::nav_panel(
-        title = "Bar chart",
-        bslib::card(
-          bslib::card_body(
-            ggiraph::girafeOutput(ns("bar_chart"))
-          ),
-          full_screen = TRUE
+  bslib::nav_panel(
+    title = "Line chart",
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center; background: white;",
+      # Line chart
+      create_chart_card_ui(
+        ns("line_chart"),
+        paste(
+          "Line chart displaying the data in the first table on the LA page.",
+          "This includes the selected Local Authority, its Region, Statistical",
+          "Neighbour average and England."
         )
       ),
-      bslib::nav_panel(
-        "Download",
-        file_type_input_btn(ns("file_type"), file_type = "chart"),
-        Download_DataUI(ns("line_download"), "Line chart"),
-        Download_DataUI(ns("bar_download"), "Bar chart")
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
       )
-    )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
   )
 }
 
@@ -91,7 +84,11 @@ LA_ChartUI <- function(id) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
+LA_LineChartServer <- function(id,
+                               app_inputs,
+                               bds_metrics,
+                               stat_n_la,
+                               covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -103,19 +100,20 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     )
 
     # Build main static plot
-    la_line_chart <- reactive({
+    line_chart <- reactive({
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(
+        la_long(),
+        covid_affected_data,
+        app_inputs$indicator(),
+        "line"
+      )
+
+      # Build plot
       la_long() |>
+        # Set geog orders so selected LA is on top of plot
+        reorder_la_regions(reverse = TRUE) |>
         ggplot2::ggplot() +
-        ggiraph::geom_point_interactive(
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`,
-            shape = `LA and Regions`,
-            data_id = `LA and Regions`
-          ),
-          na.rm = TRUE
-        ) +
         ggiraph::geom_line_interactive(
           ggplot2::aes(
             x = Years_num,
@@ -123,12 +121,28 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
             color = `LA and Regions`,
             data_id = `LA and Regions`
           ),
+          na.rm = TRUE,
+          linewidth = 1
+        ) +
+        # Only show point data where line won't appear (NAs)
+        ggplot2::geom_point(
+          data = subset(
+            create_show_point(la_long(), covid_affected_data, app_inputs$indicator()),
+            show_point
+          ),
+          ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
+          shape = 15,
+          size = 1,
           na.rm = TRUE
         ) +
+        # Add COVID plot if indicator affected
+        add_covid_elements(covid_plot) +
         format_axes(la_long()) +
-        set_plot_colours(la_long()) +
+        set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
-        custom_theme()
+        custom_theme() +
+        # Revert order of the legend so goes from right to left
+        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
     })
 
     # Build interactive line chart
@@ -138,12 +152,13 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         get_years(la_long()),
         tooltip_vlines,
         la_long(),
-        get_indicator_dps(filtered_bds())
+        get_indicator_dps(filtered_bds()),
+        app_inputs$la()
       )
 
       # Plotting interactive graph
       ggiraph::girafe(
-        ggobj = (la_line_chart() + vertical_hover),
+        ggobj = (line_chart() + vertical_hover),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -154,19 +169,87 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       )
     })
 
+    # Line chart download ------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Line")
+
+    # Set up the download handlers for the chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = line_chart(), "html" = interactive_line_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        line_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
+
     # LA Level line chart plot ------------------------------------------------
     output$line_chart <- ggiraph::renderGirafe({
       interactive_line_chart()
     })
-
-    # Download handler for the line chart
-    Download_DataServer(
-      "line_download",
-      reactive(input$file_type),
-      reactive(list("png" = la_line_chart(), "html" = interactive_line_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
-    )
   })
+}
+
+
+#' Bar Chart UI Module
+#'
+#' Creates a user interface component for displaying a bar chart with
+#' download options. This UI module is intended for use within a Shiny
+#' application and provides a structured layout for presenting a bar chart
+#' alongside relevant download buttons.
+#'
+#' @param id A unique identifier for the module. This is used for namespacing
+#'   the UI elements within the Shiny app.
+#'
+#' @return A `shiny::tagList` containing a navigation panel with a bar chart
+#'   display, download options, and a hidden static plot for copy-to-clipboard
+#'   functionality.
+#'
+#' @details
+#' The UI includes:
+#' - A navigation panel titled "Bar chart".
+#' - A flexbox layout that contains the bar chart and download options,
+#'   styled for a cohesive appearance.
+#' - A hidden plot used for copying the chart to the clipboard, allowing
+#'   users to easily export the chart without additional steps.
+#'
+#' @examples
+#' # Example usage in UI
+#' LA_BarChartUI("bar_chart_ui")
+#'
+LA_BarChartUI <- function(id) {
+  ns <- NS(id)
+
+  bslib::nav_panel(
+    title = "Bar chart",
+    div(
+      style = "display: flex; justify-content: space-between; align-items: center; background: white;",
+      # Bar chart
+      create_chart_card_ui(
+        ns("bar_chart"),
+        paste(
+          "Bar chart displaying the data in the first table on the LA page.",
+          "This includes the selected Local Authority, its Region, Statistical",
+          "Neighbour average and England."
+        )
+      ),
+      # Download options
+      create_download_options_ui(
+        ns("download_btn"),
+        ns("copybtn")
+      )
+    ),
+    # Hidden static plot for copy-to-clipboard
+    create_hidden_clipboard_plot(ns("copy_plot"))
+  )
 }
 
 
@@ -200,7 +283,11 @@ LA_LineChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
+LA_BarChartServer <- function(id,
+                              app_inputs,
+                              bds_metrics,
+                              stat_n_la,
+                              covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -213,21 +300,26 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
 
     # Build main static plot
     bar_chart <- reactive({
+      # Generate the covid plot data if add_covid_plot is TRUE
+      covid_plot <- calculate_covid_plot(
+        la_long(),
+        covid_affected_data,
+        app_inputs$indicator(),
+        "bar"
+      )
+
       # Build plot
-      la_bar_chart <- la_long() |>
+      la_long() |>
         ggplot2::ggplot() +
         ggiraph::geom_col_interactive(
           ggplot2::aes(
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = glue::glue_data(
-              la_long() |>
-                pretty_num_table(
-                  include_columns = "values_num",
-                  dp = get_indicator_dps(filtered_bds())
-                ),
-              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            tooltip = tooltip_bar(
+              la_long(),
+              get_indicator_dps(filtered_bds()),
+              app_inputs$la()
             ),
             data_id = `LA and Regions`
           ),
@@ -236,8 +328,10 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
           na.rm = TRUE,
           colour = "black"
         ) +
+        # Add COVID plot if indicator affected
+        add_covid_elements(covid_plot) +
         format_axes(la_long()) +
-        set_plot_colours(la_long(), "fill") +
+        set_plot_colours(la_long(), "fill", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
         custom_theme()
     })
@@ -247,23 +341,41 @@ LA_BarChartServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       ggiraph::girafe(
         ggobj = bar_chart(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     })
+
+    # Bar chart download ------------------------------------------------------
+    # Initialise server logic for download button and modal
+    DownloadChartBtnServer("download_btn", id, "Bar")
+
+    # Set up the download handlers for the chart
+    Download_DataServer(
+      "chart_download",
+      reactive(input$file_type),
+      reactive(list("svg" = bar_chart(), "html" = interactive_bar_chart())),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
+    )
+
+    # Plot used for copy to clipboard (hidden)
+    output$copy_plot <- shiny::renderPlot(
+      {
+        bar_chart()
+      },
+      res = 200,
+      width = 24 * 96,
+      height = 12 * 96
+    )
 
     # LA Level bar chart plot -------------------------------------------------
     output$bar_chart <- ggiraph::renderGirafe({
       interactive_bar_chart()
     })
-
-    # Download handler for the bar chart
-    Download_DataServer(
-      "bar_download",
-      reactive(input$file_type),
-      reactive(list("png" = bar_chart(), "html" = interactive_bar_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Bar-Chart"))
-    )
   })
 }
 

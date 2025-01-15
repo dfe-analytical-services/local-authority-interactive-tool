@@ -81,7 +81,7 @@ Get_LACleanRegionServer <- function(id, la_input, filtered_bds, stat_n_la) {
 #' @details The module makes use of two helper server modules:
 #' \code{\link{Get_LAStatNsServer}} to obtain the LA's statistical neighbours
 #' and \code{\link{Get_LACleanRegionServer}} to retrieve the LA's region with
-#' cleaning applied. The output is suitable for visualization in a time series
+#' cleaning applied. The output is suitable for visualisation in a time series
 #' format or for further analysis.
 #'
 StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
@@ -102,11 +102,12 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
     )
 
     reactive({
+      req(filtered_bds(), la_input(), stat_n_region())
       # Calculate SN average
       stat_n_sn_avg <- filtered_bds() |>
         dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
         dplyr::summarise(
-          values_num = mean(values_num, na.rm = TRUE),
+          values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
           .by = c("Years", "Years_num")
         ) |>
         dplyr::mutate(
@@ -218,17 +219,14 @@ StatN_DataServer <- function(id, la_input, filtered_bds, stat_n_la) {
 
     # Build main Statistical Neighbour formatted table (used to create the others)
     shiny::reactive({
+      req(stat_n_long(), stat_n_diff())
       # Join difference and pivot wider
       stat_n_long() |>
         dplyr::bind_rows(stat_n_diff()) |>
         tidyr::pivot_wider(
           id_cols = c("LA Number", "LA and Regions"),
           names_from = Years,
-          values_from = values_num,
-        ) |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
+          values_from = values_num
         )
     })
   })
@@ -249,6 +247,48 @@ StatN_LASNsTableUI <- function(id) {
   ns <- NS(id)
 
   reactable::reactableOutput(ns("output_table"))
+}
+StatN_TablesUI <- function(id) {
+  ns <- NS(id)
+
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_tab(
+      id = "stat_n_tables_tabs",
+      bslib::nav_panel(
+        "Tables",
+        # Statistical Neighbour LA SNs Table --------------------------------
+        bslib::card_header("Statistical Neighbours"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("statn_table")),
+          size = 1.6
+        ),
+        # Statistical Neighbour LA Geog Compare Table -----------------------
+        div(
+          # Add black border between the tables
+          style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Other Geographies"),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("geog_table")),
+            size = 0.7
+          )
+        ),
+        # Statistical Neighbour Statistics Table ------------------------------
+        div(
+          style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Summary"),
+          StatN_StatsTableUI("stat_n_stats_mod")
+        )
+      ),
+      bslib::nav_panel(
+        "Download",
+        shiny::uiOutput(ns("download_file_txt")),
+        Download_DataUI(ns("statn_download"), "Statistical Neighbour Table"),
+        Download_DataUI(ns("geog_download"), "Other Geographies Table")
+      )
+    )
+  )
 }
 
 
@@ -305,22 +345,44 @@ StatN_LASNsTableServer <- function(id,
     # Current year
     current_year <- Current_YearServer("current_year", stat_n_table, "wide")
 
-    # Table output
-    output$output_table <- reactable::renderReactable({
-      # Filter to LA and SNs
-      stat_n_sns_table <- stat_n_table() |>
+    # Filter for selected LA and its SNs - ready for table output
+    stat_n_sns_table <- reactive({
+      stat_n_table() |>
         dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        dplyr::rename("LA" = `LA and Regions`)
+    })
 
+    # Download ----------------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), stat_n_sns_table())
+    })
+
+    # Download dataset
+    Download_DataServer(
+      "statn_download",
+      reactive(input$file_type),
+      reactive(stat_n_sns_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "SN-Stat-Neighbour-Level"))
+    )
+
+    # Table output ------------------------------------------------------------
+    output$statn_table <- reactable::renderReactable({
       # Create table with correct formatting
       dfe_reactable(
-        stat_n_sns_table,
-        columns = align_reactable_cols(
-          stat_n_sns_table,
-          num_exclude = "LA Number"
+        stat_n_sns_table(),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            stat_n_sns_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_sns_table, app_inputs$la())
+          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la(), "LA")
         },
         pagination = FALSE
       )
@@ -331,6 +393,7 @@ StatN_LASNsTableServer <- function(id,
 
 # LA Statistical Neighbour Geographic comparison table ========================
 #' Statistical Neighbour Geographic Comparison Table UI Module
+#' NOT CURRENTLY IN USE (DUE TO SHARING DATA DOWNLOAD)
 #'
 #' This UI module generates a table for comparing the selected Local Authority
 #' (LA) with its statistical neighbours, region, and England.
@@ -347,7 +410,10 @@ StatN_GeogCompTableUI <- function(id) {
   div(
     # Add black border between the tables
     style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    reactable::reactableOutput(ns("output_table"))
+    with_gov_spinner(
+      reactable::reactableOutput(ns("output_table")),
+      size = 0.8
+    )
   )
 }
 
@@ -372,7 +438,7 @@ StatN_GeogCompTableUI <- function(id) {
 #' @details The module uses \code{\link{StatN_DataServer}} to fetch the formatted
 #' statistical data and \code{\link{Get_LACleanRegionServer}} to retrieve the
 #' LA's cleaned region. The table compares values across geographic areas,
-#' and column alignments are handled using a custom \code{align_reactable_cols}
+#' and column alignments are handled using a custom \code{format_num_reactable_cols}
 #' function.
 #'
 StatN_GeogCompTableServer <- function(id,
@@ -403,22 +469,42 @@ StatN_GeogCompTableServer <- function(id,
       stat_n_la
     )
 
-    # Table output
-    output$output_table <- reactable::renderReactable({
-      # Keep LA geographic comparison areas
-      stat_n_comp_table <- stat_n_table() |>
+    # Keep LA geographic comparison areas
+    stat_n_geog_table <- reactive({
+      stat_n_table() |>
         dplyr::filter(`LA and Regions` %in% c(
           "Statistical Neighbours",
           stat_n_region(),
           "England"
         )) |>
         dplyr::arrange(`LA and Regions`)
+    })
 
+    # Download ----------------------------------------------------------------
+    Download_DataServer(
+      "geog_download",
+      reactive(input$file_type),
+      reactive(stat_n_geog_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Geog-Stat-Neighbour-Level"))
+    )
+
+    # Table output ------------------------------------------------------------
+    output$geog_table <- reactable::renderReactable({
       # Output table
       dfe_reactable(
-        stat_n_comp_table,
+        stat_n_geog_table(),
         # Create the reactable with specific column alignments
-        columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            stat_n_geog_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
+        ),
+        rowStyle = function(index) {
+          highlight_selected_row(index, stat_n_geog_table())
+        },
         pagination = FALSE
       )
     })
@@ -445,12 +531,13 @@ StatN_StatsTableUI <- function(id) {
   ns <- NS(id)
 
   div(
-    class = "well",
-    style = "overflow-y: visible;",
     bslib::card(
       # bslib::card_header(""),
       bslib::card_body(
-        reactable::reactableOutput(ns("output_table"))
+        with_gov_spinner(
+          reactable::reactableOutput(ns("output_table")),
+          size = 1
+        )
       )
     )
   )
@@ -486,7 +573,8 @@ StatN_StatsTableServer <- function(id,
                                    app_inputs,
                                    bds_metrics,
                                    stat_n_la,
-                                   la_names_bds) {
+                                   la_names_bds,
+                                   no_qb_indicators) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -532,15 +620,7 @@ StatN_StatsTableServer <- function(id,
       # Get latest rank, ties are set to min & NA vals to NA rank
       stat_n_rank <- filtered_bds() |>
         filter_la_regions(la_names_bds, latest = TRUE) |>
-        dplyr::mutate(
-          rank = dplyr::case_when(
-            is.na(values_num) ~ NA,
-            # Rank in descending order
-            stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-            # Rank in ascending order
-            stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-          )
-        ) |>
+        calculate_rank(stat_n_indicator_polarity) |>
         filter_la_regions(app_inputs$la(), pull_col = "rank")
 
 
@@ -553,60 +633,77 @@ StatN_StatsTableServer <- function(id,
       stat_n_indicator_val <- filtered_bds() |>
         filter_la_regions(app_inputs$la(), latest = TRUE, pull_col = "values_num")
 
+      # Boolean as to whether to include Quartile Banding
+      no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
+
       # Calculating which quartile this value sits in
       stat_n_quartile <- calculate_quartile_band(
         stat_n_indicator_val,
         stat_n_quartile_bands,
-        stat_n_indicator_polarity
+        stat_n_indicator_polarity,
+        no_show_qb
       )
 
       # SN stats table
-      data.frame(
-        "LA Number" = stat_n_diff() |>
-          filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
-        "LA and Regions" = stat_n_stats_geog,
-        "Trend" = stat_n_trend,
-        "Change from previous year" = stat_n_change_prev,
-        "National Rank" = c(stat_n_rank, NA, NA),
-        "Quartile Banding" = c(stat_n_quartile, NA, NA),
-        "Polarity" = stat_n_indicator_polarity,
-        check.names = FALSE
+      stat_n_stats_table <- build_sn_stats_table(
+        stat_n_diff(),
+        stat_n_stats_geog,
+        stat_n_trend,
+        stat_n_change_prev,
+        stat_n_rank,
+        stat_n_quartile,
+        stat_n_indicator_polarity
       )
     })
 
     # Main stats table
     output$output_table <- reactable::renderReactable({
-      stat_n_stats_output <- stat_n_stats_table() |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          include_columns = c("Change from previous year")
-        )
+      stat_n_stats_output <- stat_n_stats_table()
 
       dfe_reactable(
-        stat_n_stats_output |>
-          dplyr::select(-Polarity),
+        stat_n_stats_output,
+        rowStyle = function(index) {
+          highlight_selected_row(index, stat_n_stats_output, app_inputs$la())
+        },
         columns = modifyList(
           # Create the reactable with specific column alignments
-          align_reactable_cols(
+          format_num_reactable_cols(
             stat_n_stats_output,
+            get_indicator_dps(filtered_bds()),
             num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding")
+            categorical = c("Trend", "Quartile Banding", "Latest National Rank")
           ),
           # Define specific formatting for the Trend and Quartile Banding columns
           list(
+            set_custom_default_col_widths(),
             Trend = reactable::colDef(
-              cell = trend_icon_renderer
+              header = add_tooltip_to_reactcol(
+                "Trend",
+                "Based on change from previous year",
+                placement = "top"
+              ),
+              cell = trend_icon_renderer,
+              style = function(value) {
+                get_trend_colour(value, stat_n_stats_output$Polarity[1])
+              }
             ),
-            `National Rank` = reactable::colDef(na = ""),
             `Quartile Banding` = reactable::colDef(
-              style = quartile_banding_col_def(stat_n_stats_output),
-              na = ""
-            )
+              style = function(value, index) {
+                quartile_banding_col_def(
+                  stat_n_stats_output[index, ]
+                )
+              }
+            ),
+            `Latest National Rank` = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Latest National Rank",
+                "Rank 1 is always best/top",
+                placement = "right"
+              )
+            ),
+            Polarity = reactable::colDef(show = FALSE)
           )
-        ),
-        rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_stats_output, app_inputs$la())
-        }
+        )
       )
     })
   })

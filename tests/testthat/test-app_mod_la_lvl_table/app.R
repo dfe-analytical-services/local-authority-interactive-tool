@@ -2,6 +2,8 @@
 shinytest2::load_app_env(app_dir = here::here())
 source(here::here("global.R"))
 
+options(shiny.testmode = TRUE)
+
 # Create minimal app
 minimal_ui <- shiny::fluidRow(
   title = "Minimal app",
@@ -20,7 +22,11 @@ minimal_server <- function(input, output, session) {
     topic = NULL,
     indicator = NULL
   )
-  app_inputs <- appInputsServer("la_level", shared_values)
+  app_inputs <- appInputsServer(
+    "la_level",
+    shared_values,
+    topic_indicator_full
+  )
 
   # Main table
   la_main_tbl <- LA_LevelTableServer(

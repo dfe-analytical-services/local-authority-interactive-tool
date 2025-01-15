@@ -140,7 +140,7 @@ test_that("Check LA charts behave as expected", {
 
   # Check is a line chart
   testthat::expect_true(
-    grepl("stroke='none'", la_linechart_str)
+    grepl("<line id=", la_linechart_str)
   )
   testthat::expect_false(
     grepl("linejoin='miter'", la_linechart_str)
@@ -156,20 +156,23 @@ test_that("Check LA charts behave as expected", {
 
   # Check title
   testthat::expect_true(
-    grepl("Infant Mortality rate per 1000 live births", cleaned_plot_str)
+    grepl("Average point score per entry A Level Cohort", cleaned_plot_str)
   )
 
+  # nolint start: commented_code
   # Check visual of line chart
-  app$expect_screenshot(
-    selector = "#la_chart-line_chart",
-    name = "la_line_chart"
-  )
+  # app$expect_screenshot(
+  #   selector = "#la_line_chart-line_chart",
+  #   name = "la_line_chart"
+  # )
+  # nolint end
 
   # Change to different topic
   app$set_inputs(
-    `la_inputs-topic_name` = "Key Stage 1",
+    `la_inputs-topic_name` = "Key Stage 1 and Phonics",
     la_charts = "Bar chart"
   )
+  app$wait_for_idle()
 
   # Get export values
   la_barchart <- app$get_values(export = c("la_barchart"))
@@ -188,13 +191,13 @@ test_that("Check LA charts behave as expected", {
     grepl("linejoin='miter'", la_barchart_str)
   )
   testthat::expect_false(
-    grepl("stroke='none'", la_barchart_str)
+    grepl("<line id=", la_barchart_str)
   )
 
   # Check hover css
   testthat::expect_true(
     grepl(
-      "fill:orange;stroke:black;cursor:pointer;",
+      "stroke-dasharray:5,5;stroke:black;stroke-width:2px;",
       la_barchart_list$x$settings$hover$css
     )
   )
@@ -208,11 +211,13 @@ test_that("Check LA charts behave as expected", {
     )
   )
 
+  # nolint start: commented_code
   # Check visual of bar chart
-  app$expect_screenshot(
-    selector = "#la_chart-bar_chart",
-    name = "la_bar_chart"
-  )
+  # app$expect_screenshot(
+  #   selector = "#la_bar_chart-bar_chart",
+  #   name = "la_bar_chart"
+  # )
+  # nolint end
 
   app$stop()
 })

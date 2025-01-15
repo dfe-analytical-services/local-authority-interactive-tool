@@ -69,9 +69,10 @@ label {
   font-size: 1.188rem;
 }
 
-/* bslib card text */
-.bslib-card .card-header, .bslib-card .card-footer {
-    font-size: 1.188rem;
+/* making bslib header h3  */
+.bslib-card .card-header{
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .bslib-card {
@@ -106,6 +107,7 @@ a {
   text-underline-offset: .1578em;
   word-break: break-word;
   background-color: transparent;
+  color: #1d70b8;
 }
 
 a:visited {
@@ -214,47 +216,6 @@ html {
 
 /* Card tabs CSS ----------------------------------------------------------- */
 /* TODO - fix the borders and margins on the tabs */
-
-/* Custom disconnect CSS --------------------------------------------------- */
-#ss-connect-dialog {
-  display: none !important;
-}
-
-#shiny-disconnected-overlay {
-  display: none !important;
-}
-
-#ss-overlay {
-  background-color: #000000 !important;
-  opacity: 0.6 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  z-index: 99998 !important;
-  overflow: hidden !important;
-  cursor: not-allowed !important;
-}
-
-#custom-disconnect-dialog {
-  background: #000000 !important;
-  color: #FFFFFF !important;
-  width: full !important;
-  transform: translateX(-50%) translateY(-50%) !important;
-  top: 50% !important;
-  position: fixed !important;
-  bottom: auto !important;
-  font-size: 1.188rem !important;
-  left: 50% !important;
-  padding: 0.8em 1.5em !important;
-  text-align: center !important;
-  height: auto !important;
-  opacity: 1 !important;
-  z-index: 99999 !important;
-  border-radius: 0.188rem !important;
-  box-shadow: rgba(0, 0, 0, 0.3) 0.188rem 0.188rem 0.625rem !important;
-}
 
 /* GOV.UK button copied in from shiny gov style ---------------------------- */
 .gov-uk-button {
@@ -383,15 +344,21 @@ html {
 
 
 /* Make full-screen bslib cards aesthetic */
-/* Set the SVG to fill the available space within the card */
-.ggiraph-svg {
-  max-height: 80vh !important;
+/* Set card size when not expanded */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
+  align-self: center;
 }
 
-/* Target the specific card using classes */
-.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] {
-  width: 50vw !important;
-  align-self: center;
+/* Set the ggiraph SVG to fill the available space within the card */
+/* When the card is in full-screen mode */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="true"] .ggiraph-svg {
+  height: 80vh !important;
+  max-height: none !important;
+}
+
+/* When the card is not in full-screen mode */
+.card.bslib-card.bslib-mb-spacing.html-fill-item.html-fill-container[data-full-screen="false"] .ggiraph-svg {
+  height: 50vh !important;
 }
 
 /* Set default reactable styles */
@@ -550,4 +517,573 @@ html {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* shinyGovstyle secondary button */
+.govuk-button--secondary {
+    background-color: #f3f2f1;
+    box-shadow: 0 2px 0 #929191
+}
+
+.govuk-button--secondary,
+.govuk-button--secondary:active,
+.govuk-button--secondary:hover,
+.govuk-button--secondary:link,
+.govuk-button--secondary:visited {
+    color: #0b0c0c
+}
+
+.govuk-button--secondary:hover {
+    background-color: #dbdad9
+}
+
+.govuk-button--secondary:hover[disabled] {
+    background-color: #f3f2f1
+}
+
+/* shinyGovstyle warning button */
+.govuk-button--warning {
+    background-color: #d4351c;
+    box-shadow: 0 2px 0 #55150b
+}
+
+.govuk-button--warning,
+.govuk-button--warning:active,
+.govuk-button--warning:hover,
+.govuk-button--warning:link,
+.govuk-button--warning:visited {
+    color: #fff
+}
+
+.govuk-button--warning:hover {
+    background-color: #aa2a16
+}
+
+.govuk-button--warning:hover[disabled] {
+    background-color: #d4351c
+}
+
+
+/* Gives pickerInput defaultlook */
+.bootstrap-select .dropdown-toggle {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #ced4da; /* matches the default border color of selectInput */
+  border-radius: 4px; /* gives a slight rounded corner */
+  padding: 5px 10px; /* add padding for a similar appearance */
+  box-shadow: none; /* remove any default shadow */
+}
+
+/* shinyGovstyle notification banner styling */
+.govuk-notification-banner {
+  font-family: GDS Transport, arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.25;
+  margin-bottom: 0 !important;
+  border: 5px solid #1d70b8;
+  background-color: #1d70b8
+}
+
+@media print {
+  .govuk-notification-banner {
+      font-family: sans-serif
+  }
+}
+
+@media (min-width:40.0625em) {
+  .govuk-notification-banner {
+      font-size: 1.1875rem;
+      line-height: 1.3157894737
+  }
+}
+
+@media print {
+  .govuk-notification-banner {
+      font-size: 14pt;
+      line-height: 1.15
+    }
+}
+
+@media (min-width:40.0625em) {
+  .govuk-notification-banner {
+     margin-bottom: 0 !important
+  }
+}
+
+.govuk-notification-banner:focus {
+  outline: 3px solid #fd0
+}
+
+.govuk-notification-banner__header {
+  padding: 2px 15px 5px;
+  border-bottom: 1px solid transparent
+}
+
+@media (min-width:40.0625em) {
+  .govuk-notification-banner__header {
+      padding: 2px 20px 5px
+  }
+}
+
+.govuk-notification-banner__title {
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+  color: #fff
+}
+
+@media (min-width:40.0625em) {
+  .govuk-notification-banner__title {
+      font-size: 1.1875rem;
+      line-height: 1.3157894737
+  }
+}
+
+@media print {
+  .govuk-notification-banner__title {
+      font-size: 14pt;
+      line-height: 1.15
+  }
+}
+
+.govuk-notification-banner__content {
+  color: #0b0c0c;
+  padding: 15px;
+  background-color: #fff
+}
+
+@media print {
+  .govuk-notification-banner__content {
+      color: #000
+  }
+}
+
+@media (min-width:40.0625em) {
+  .govuk-notification-banner__content {
+      padding: 20px
+  }
+}
+
+.govuk-notification-banner__content>* {
+  box-sizing: border-box;
+  max-width: none;
+}
+
+.govuk-notification-banner__content>:last-child {
+  margin-bottom: 0
+}
+
+.govuk-notification-banner__heading {
+  font-size: 1.125rem;
+  line-height: 1.1111111111;
+  font-weight: 700;
+  margin: 0 0 15px;
+  padding: 0
+}
+
+@media (min-width:40.0625em) {
+  .govuk-notification-banner__heading {
+      font-size: 1.2rem; /* Changed from 1.5 */
+      line-height: 1.25
+  }
+}
+
+@media print {
+  .govuk-notification-banner__heading {
+      font-size: 18pt;
+      line-height: 1.15
+  }
+}
+
+.govuk-notification-banner__link {
+  font-family: GDS Transport, arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-decoration: underline;
+  text-decoration-thickness: max(1px, .0625rem);
+  text-underline-offset: .1578em
+}
+
+@media print {
+  .govuk-notification-banner__link {
+      font-family: sans-serif
+  }
+}
+
+.govuk-notification-banner__link:hover {
+  text-decoration-thickness: max(3px, .1875rem, .12em);
+  -webkit-text-decoration-skip-ink: none;
+  text-decoration-skip-ink: none;
+  -webkit-text-decoration-skip: none;
+  text-decoration-skip: none
+}
+
+.govuk-notification-banner__link:focus {
+  outline: 3px solid transparent;
+  background-color: #fd0;
+  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+  text-decoration: none;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone
+}
+
+.govuk-notification-banner__link:link,
+.govuk-notification-banner__link:visited {
+  color: #1d70b8
+}
+
+.govuk-notification-banner__link:hover {
+  color: #003078
+}
+
+.govuk-notification-banner__link:active,
+.govuk-notification-banner__link:focus {
+  color: #0b0c0c
+}
+
+/* Aligning page header spinner to left top and nice size */
+#page_header_spinner .load-container {
+  transform: translateX(-40%) !important;
+  top: 0 !important;
+}
+
+#page_header_spinner .shiny-spinner-placeholder {
+  min-height: 62.5px !important;
+  height: fit-content !important;
+}
+
+/* shinyGovstyle radio buttons */
+.govuk-radios__item {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    margin-bottom: 10px
+}
+
+.govuk-radios__item:last-child,
+.govuk-radios__item:last-of-type {
+    margin-bottom: 0
+}
+
+.govuk-radios__input {
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    opacity: 0;
+    vertical-align: middle;
+    cursor: pointer
+}
+
+.govuk-radios__label {
+    align-self: center;
+    max-width: none !important; /* Too narrow*/
+    display: inline-block;
+    padding: 7px 15px;
+    cursor: pointer;
+    touch-action: manipulation
+}
+
+.govuk-radios__label:before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 40px;
+    height: 40px;
+    border: 2px solid;
+    border-radius: 50%;
+    background: transparent
+}
+
+.govuk-radios__label:after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 0;
+    height: 0;
+    border: 10px solid;
+    border-radius: 50%;
+    opacity: 0;
+    background: currentcolor
+}
+
+.govuk-radios__hint {
+    display: block;
+    width: 100%;
+    margin-top: -5px;
+    padding-right: 15px;
+    padding-left: 59px
+}
+
+.govuk-label:not(.govuk-label--m):not(.govuk-label--l):not(.govuk-label--xl)+.govuk-radios__hint {
+    margin-bottom: 0
+}
+
+.govuk-radios__input:focus+.govuk-radios__label:before {
+    border-width: 4px;
+    outline: 3px solid transparent;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 4px #fd0
+}
+
+@media (-ms-high-contrast:active),
+screen and (forced-colors:active) {
+    .govuk-radios__input:focus+.govuk-radios__label:before {
+        outline-color: Highlight
+    }
+}
+
+.govuk-radios__input:checked+.govuk-radios__label:after {
+    opacity: 1
+}
+
+.govuk-radios__input:disabled,
+.govuk-radios__input:disabled+.govuk-radios__label {
+    cursor: not-allowed
+}
+
+.govuk-radios__input:disabled+.govuk-radios__label,
+.govuk-radios__input:disabled~.govuk-hint {
+    opacity: .5
+}
+
+@media (min-width:40.0625em) {
+    .govuk-radios--inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start
+    }
+
+    .govuk-radios--inline .govuk-radios__item {
+        margin-right: 20px
+    }
+}
+
+.govuk-radios__divider {
+    font-family: GDS Transport, arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.25;
+    color: #0b0c0c;
+    width: 40px;
+    margin-bottom: 10px;
+    text-align: center
+}
+
+@media print {
+    .govuk-radios__divider {
+        font-family: sans-serif
+    }
+}
+
+@media (min-width:40.0625em) {
+    .govuk-radios__divider {
+        font-size: 1.1875rem;
+        line-height: 1.3157894737
+    }
+}
+
+@media print {
+    .govuk-radios__divider {
+        font-size: 14pt;
+        line-height: 1.15;
+        color: #000
+    }
+}
+
+.govuk-radios__conditional {
+    margin-bottom: 15px;
+    margin-left: 18px;
+    padding-left: 33px;
+    border-left: 4px solid #b1b4b6
+}
+
+@media (min-width:40.0625em) {
+    .govuk-radios__conditional {
+        margin-bottom: 20px
+    }
+}
+
+.govuk-frontend-supported .govuk-radios__conditional--hidden {
+    display: none
+}
+
+/* Styling bslib tooltip with gov colour */
+.gov-tooltip .tooltip-inner {
+  background-color: #5694ca !important;
+  color: #fff !important;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+/* Applying gov colour to the arrow */
+.gov-tooltip[data-popper-placement^="top"] .tooltip-arrow::before {
+  border-top-color: #5694ca !important;
+}
+
+.gov-tooltip[data-popper-placement^="right"] .tooltip-arrow::before {
+  border-right-color: #5694ca !important;
+}
+
+.gov-tooltip[data-popper-placement^="bottom"] .tooltip-arrow::before {
+  border-bottom-color: #5694ca !important;
+}
+
+.gov-tooltip[data-popper-placement^="left"] .tooltip-arrow::before {
+  border-left-color: #5694ca !important;
+}
+
+
+/* Custom style for the News banner */
+#update-msg-banner .govuk-tag {
+  color: #6e3619;
+  background-color: #fcd6c3
+}
+
+/* Remove border for Beta banner when also New banner */
+#beta-banner-no-border {
+  border-bottom: none;
+}
+
+/* Make tab names not bold */
+.nav-link, .nav-tabs>li>a, .nav-pills>li>a, :where(ul.nav.navbar-nav > li)>a {
+  font-weight: normal;
+}
+
+/* Consisten text styling */
+/* Year range input */
+.filter-option-inner-inner {
+  font-size: 1.188rem;
+}
+
+/* Add selections button */
+#create_inputs-add_query {
+  font-size: 1.188rem;
+  font-weight: normal;
+  width: 90%;
+}
+
+/* Setting clear all selections button same width as add selections */
+#create_inputs-clear_all {
+  width: 90%;
+}
+
+/* Adding a margin to the bottom of the Create Your Own noti banner */
+#full_data_on_github {
+  margin: 1rem !important;
+}
+
+
+
+
+/* Custom CSS for main layout */
+.dashboard-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.main-content {
+  flex: 3 1 600px;
+  max-width: 100%;
+}
+
+.navigation-panel {
+  flex: 100px;
+  max-width: 260px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navigation-panel {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .main-content {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+/* Adjusting top and bottom page links so that the go to top dissapears
+from left nevigation when the screen shrinks (and no extra space between
+go to bottom link and start of the content) */
+/* Default behavior: height is 96vh, "Return to top" visible */
+.dfe-contents-links {
+  height: 96vh;
+}
+
+.return-to-top {
+  display: block; /* Default visibility */
+}
+
+/* Media query: At widths 1017px or less */
+@media (max-width: 1035px) {
+  .dfe-contents-links {
+    height: auto; /* Reset height to normal */
+  }
+  .return-to-top {
+    display: none; /* Hide the "Return to top" link */
+  }
+}
+
+
+/* User guide images */
+.user-guide-image {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 10px;
+  border: #b1b4b6 solid 2px;
+}
+
+/* Center the app title */
+.govuk-width-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.govuk-header__content,
+.govuk-header__logo {
+    box-sizing: border-box
+}
+
+.govuk-header__logo {
+    margin-bottom: 10px;
+    padding-right: 50px
+}
+
+@media (min-width:40.0625em) {
+    .govuk-header__logo {
+        margin-bottom: 10px
+    }
+}
+
+@media (min-width:48.0625em) {
+    .govuk-header__logo {
+  width: 15% !important;
+  margin-left: 15px !important;
+        padding-right: 15px !important;
+        float: left !important;
+        vertical-align: top !important;
+    }
+}
+
+@media (min-width:48.0625em) {
+    .govuk-header__content {
+  width: 64% !important;
+  text-align: center !important;
+        padding-left: 15px !important;
+        float: left !important;
+        vertical-align: top !important;
+    }
 }

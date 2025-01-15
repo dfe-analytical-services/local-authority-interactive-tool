@@ -20,9 +20,8 @@
 # -----------------------------------------------------------------------------
 ui <- function(input, output, session) {
   bslib::page_fillable(
-
     # Set application metadata ------------------------------------------------
-    tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
+    tags$head(HTML(paste0("<title>", site_title, "</title>"))),
     tags$head(tags$link(rel = "shortcut icon", href = "dfefavicon.png")),
     tags$head(includeHTML(("google-analytics.html"))),
     shinytitle::use_shiny_title(),
@@ -30,7 +29,7 @@ ui <- function(input, output, session) {
     # Add meta description for search engines
     metathis::meta() |>
       metathis::meta_general(
-        application_name = "Local Authority Interactive Tool (LAIT)",
+        application_name = site_title,
         description = "Local Authority Interactive Tool (LAIT)",
         robots = "index,follow",
         generator = "R-Shiny",
@@ -42,226 +41,113 @@ ui <- function(input, output, session) {
     # Custom disconnect function ----------------------------------------------
     # Variables used here are set in the global.R file
     dfeshiny::custom_disconnect_message(
-      links = sites_list,
-      publication_name = parent_pub_name,
-      publication_link = parent_publication
+      links = site_primary,
+      dashboard_title = site_title
     ),
 
     # Styling with CSS
     set_css_style_sheet("dfe_shiny_gov_style.css"),
+    # Remove any gaps between elements
+    gap = 0,
 
     # Load javascript dependencies --------------------------------------------
-    shinyWidgets::useShinydashboard(),
     shinyjs::useShinyjs(),
+    tags$head(htmltools::includeScript("www/custom_js.js")),
+    reactable.extras::reactable_extras_dependency(),
+    shinyToastify::useShinyToastify(),
 
     # Cookies -----------------------------------------------------------------
     # Setting up cookie consent based on a cookie recording the consent:
     # https://book.javascript-for-r.com/shiny-cookies.html
     dfeshiny::dfe_cookies_script(),
     dfeshiny::cookies_banner_ui(
-      "cookie-banner",
-      "Local Authority Interactive Tool (LAIT)"
+      name = site_title
     ),
 
     # Header ------------------------------------------------------------------
-    shinyGovstyle::header(
-      main_text = "",
-      main_link = "https://www.gov.uk/government/organisations/department-for-education",
-      secondary_text = "Local Authority Interactive Tool (LAIT)",
-      logo = "images/DfE_logo_landscape.png",
-      logo_width = 150,
-      logo_height = 32
-    ),
+    dfeshiny::header(site_title),
 
     # Beta banner -------------------------------------------------------------
-    shinyGovstyle::banner(
-      "beta banner",
-      "beta",
-      paste0(
-        "This Dashboard is in beta phase and we are still reviewing performance
-        and reliability. ",
-        "In case of slowdown or connection issues due to high demand, we have
-        produced two instances of this site which can be accessed at the
-        following links: ",
-        "<a href=", site_primary, " id='link_site_1'>Site 1</a> and ",
-        "<a href=", site_overflow, " id='link_site_2'>Site 2</a>."
+    shiny::tagList(
+      shinyGovstyle::banner(
+        ifelse(banner_update_msg == "", "beta-banner", "beta-banner-no-border"),
+        "Beta",
+        "This Dashboard is in beta phase and we are still reviewing performance and reliability."
       )
     ),
+    # News banner --------------------------------------------------------------
+    if (banner_update_msg != "") {
+      shinyGovstyle::banner(
+        inputId = "update-msg-banner",
+        type = "News",
+        label = banner_update_msg
+      )
+    },
 
     # Start of app ============================================================
-
-    # Nav panels --------------------------------------------------------------
-    bslib::navset_pill_list(
-      "",
-      id = "navsetpillslist",
-      widths = c(2, 10),
-      well = FALSE,
-      # Content for these panels is defined in the R/ui_panels/ folder
-      bslib::nav_panel(
-        shiny::hr(class = "mobile-only-hr"),
-        title = "LA Level",
-        value = "LA Level",
-
-        # Tab header ==========================================================
-        PageHeaderUI("la_header"),
-
-        # User Inputs =========================================================
-        appInputsUI("la_inputs"),
-
-        # LA Tables ===========================================================
-        # Main table
-        LA_LevelTableUI("la_table"),
-
-        # Stats table
-        LA_StatsTableUI("la_stats"),
-
-        # LA Charts ===========================================================
-        LA_ChartUI("la_chart"),
-
-        # LA Metadata =========================================================
-        LA_LevelMetaUI("la_meta")
-      ),
-      bslib::nav_panel(
-        shiny::hr(class = "mobile-only-hr"),
-        title = "Regional Level",
-        value = "Regional Level",
-
-        # Tab header ==========================================================
-        PageHeaderUI("region_header"),
-
-        # User Inputs =========================================================
-        appInputsUI("region_inputs"),
-
-        # Region tables =======================================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Regional Authorities"),
-            bslib::card_body(
-              # Region LA Table -----------------------------------------------
-              RegionLA_TableUI("region_la_table"),
-              # Region Table --------------------------------------------------
-              Region_TableUI("region_table")
-            )
-          )
-        ),
-        # Region Stats Table --------------------------------------------
-        Region_StatsTableUI("stats_table"),
-
-        # Region charts =======================================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::navset_card_underline(
-            id = "region_charts",
-            Region_FocusLine_chartUI("region_focus_line"),
-            Region_Multi_chartUI("region_multi_line")
-          )
-        ),
-
-        # Region Metadata =====================================================
-        LA_LevelMetaUI("region_meta")
-      ),
-      bslib::nav_panel(
-        shiny::hr(class = "mobile-only-hr"),
-        title = "Statsitical Neighbour Level",
-        value = "Statsitical Neighbour Level",
-
-        # Tab header ==========================================================
-        PageHeaderUI("stat_n_header"),
-
-        # User Inputs =========================================================
-        appInputsUI("stat_n_inputs"),
-
-        # Statistical Neighbour tables ========================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::card(
-            bslib::card_header("Statistical Neighbours"),
-            bslib::card_body(
-              # Statistical Neighbour LA SNs Table ------------------------------
-              StatN_LASNsTableUI("stat_n_sns_table"),
-              # Statistical Neighbour LA Geog Compare Table ---------------------
-              StatN_GeogCompTableUI("stat_n_comp_table")
-            )
-          )
-        ),
-        # Statistical Neighbour Statistics Table ----------------------------
-        StatN_StatsTableUI("stat_n_stats_table"),
-
-        # Statistical Neighbour charts ========================================
-        div(
-          class = "well",
-          style = "overflow-y: visible;",
-          bslib::navset_card_underline(
-            id = "stat_n_charts",
-            StatN_FocusLineChartUI("stat_n_focus_line"),
-            StatN_MultiLineChartUI("stat_n_multi_line"),
-            StatN_FocusBarChartUI("stat_n_focus_bar"),
-            StatN_MultiBarChartUI("stat_n_multi_bar")
-          )
-        ),
-
-        # Statistical Neighbour Metadata ======================================
-        LA_LevelMetaUI("stat_n_meta")
-      ),
-      bslib::nav_panel(
-        shiny::hr(class = "mobile-only-hr"),
-        title = "All LA Level",
-        value = "All LA Level",
-
-        # Tab header ==========================================================
-        PageHeaderUI("all_la_header"),
-
-        # User Inputs =========================================================
-        appInputsUI("all_la_inputs"),
-
-        # All LA Tables =======================================================
-        AllLA_TableUI("all_la_table"),
-
-        # LA Metadata =========================================================
-        LA_LevelMetaUI("all_la_meta")
-      ),
-      # User guide ============================================================
-      user_guide_panel(),
-      # Accessibility =========================================================
-      a11y_panel(),
-      # Support and feedback ==================================================
-      bslib::nav_panel(
-        value = "support_panel",
-        shinyGovstyle::banner(
-          "beta banner",
-          "beta",
-          paste0(
-            "This page is in beta phase and we are still reviewing the content.
-             We are aware the links in <b>Find more information on the data</b>
-             section are currently incorrect. Please see the ",
-            dfeshiny::external_link(
-              href = parent_publication,
-              link_text = "LAIT website"
+    # Define the main layout with hidden navigation
+    shinyGovstyle::gov_main_layout(
+      bslib::navset_hidden(
+        id = "pages",
+        bslib::nav_panel(
+          "dashboard",
+          div(
+            class = "dashboard-container",
+            # Left navigation
+            div(
+              class = "navigation-panel",
+              dfe_contents_links(
+                links_list = c(
+                  "LA Level",
+                  "Regional Level",
+                  "Statistical Neighbour Level",
+                  "All LA Level",
+                  "Create Your Own",
+                  "User Guide",
+                  "Updates and Sources"
+                )
+              )
             ),
-            " for more information."
+            # Main content area
+            div(
+              class = "main-content",
+              bslib::navset_hidden(
+                id = "left_nav",
+                la_level_panel(),
+                region_level_panel(),
+                stat_n_level_panel(),
+                all_la_level_panel(),
+                create_your_own_panel(),
+                bslib::nav_panel("user_guide", user_guide_panel()),
+                bslib::nav_panel("updates_and_sources", info_page_panel())
+              )
+            )
           )
         ),
-        shiny::br(),
-        title = shiny::HTML("Support and feedback<br>(Feedback form)"),
-        dfeshiny::support_panel(
-          team_email = "jake.tufts@education.gov.uk",
-          repo_name = "https://github.com/dfe-analytical-services/local-authority-interactive-tool",
-          form_url = "https://forms.office.com/e/gTNw1EBgsn"
+        support_panel(),
+        bslib::nav_panel("accessibility_statement", accessibility_panel()),
+        bslib::nav_panel(
+          value = "cookies_information",
+          title = "Cookies",
+          actionLink(
+            class = "govuk-back-link",
+            "cookies_to_dashboard",
+            "Back to dashboard"
+          ),
+          dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
         )
       ),
-      # Cookies info ==========================================================
-      bslib::nav_panel(
-        value = "cookies_panel_ui",
-        title = "Cookies",
-        dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
+      tags$div(
+        style = "text-align: center; margin-top: 50px; margin-bottom: 15px;",
+        tags$a(href = "#top", "Go to the top of page")
       )
     ),
-
-    # Footer ==================================================================
-    shinyGovstyle::footer(full = TRUE)
+    dfe_footer(
+      links_list = c(
+        "Support",
+        "Accessibility Statement",
+        "Cookies Information"
+      )
+    )
   )
 }

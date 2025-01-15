@@ -12,16 +12,15 @@ list.files("R/", full.names = TRUE) |>
 # LAIT Regional Level LA table ------------------------------------------------
 # - Regional Authorities
 # Set user inputs
-selected_topic <- "Foundation Stage"
-selected_indicator <- "Foundation Stage - % achieving a good level of development"
+selected_topic <- "Health and Wellbeing" # "Children's Service Finance"
+selected_indicator <- "Infant Mortality" # "Total Services for Young People  (finance) - Gross"
 selected_la <- "Barking and Dagenham"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic == selected_topic,
-    Measure == selected_indicator,
-    !is.na(Years)
+    Measure == selected_indicator
   )
 
 # Decimal point setting
@@ -32,6 +31,10 @@ indicator_dps <- filtered_bds |>
 region_la <- stat_n_geog |>
   dplyr::filter(`LA Name` == selected_la) |>
   dplyr::pull(GOReg)
+
+# Determines which London to use
+# Some indicators are not provided at (Inner)/ (Outer) level
+region_clean <- clean_ldn_region(region_la, filtered_bds)
 
 # Get other LAs in the region
 region_la_la <- stat_n_geog |>
@@ -76,16 +79,20 @@ region_la_table <- region_la_long |>
     names_from = Years,
     values_from = values_num
   ) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = "LA Number"
-  ) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`)
 
 # Render reactable table
 dfe_reactable(
   region_la_table,
-  columns = align_reactable_cols(region_la_table, num_exclude = "LA Number"),
+  columns = modifyList(
+    # Create the reactable with specific column alignments
+    format_num_reactable_cols(
+      region_la_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number",
+    ),
+    set_custom_default_col_widths()
+  ),
   rowStyle = function(index) {
     highlight_selected_row(index, region_la_table, selected_la)
   }
@@ -131,10 +138,6 @@ region_table <- region_long |>
     names_from = Years,
     values_from = values_num
   ) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = "LA Number"
-  ) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`) |>
   # Places England row at the bottom of the table
   dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
@@ -142,11 +145,24 @@ region_table <- region_long |>
   dplyr::select(-is_england)
 
 
-# Regional Level Stats table --------------------------------------------------
-# Determines which London to use
-# Some indicators are not provided at (Inner)/ (Outer) level
-region_la_ldn_clean <- clean_ldn_region(region_la, filtered_bds)
+dfe_reactable(
+  region_table,
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      region_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number",
+    ),
+    set_custom_default_col_widths()
+  ),
+  rowStyle = function(index) {
+    highlight_selected_row(index, region_table, region_clean)
+  },
+  pagination = FALSE
+)
 
+
+# Regional Level Stats table --------------------------------------------------
 # Get LA numbers
 # Selected LA
 region_la_la_num <- region_la_table |>
@@ -154,7 +170,7 @@ region_la_la_num <- region_la_table |>
 
 # Region and England
 region_la_num <- region_table |>
-  filter_la_regions(c(region_la_ldn_clean, "England"), pull_col = "LA Number")
+  filter_la_regions(c(region_clean, "England"), pull_col = "LA Number")
 
 # Get change in previous year
 # Selected LA
@@ -165,13 +181,15 @@ region_la_change_prev <- region_la_diff |>
 
 # Region and England
 region_change_prev <- region_diff |>
-  filter_la_regions(c(region_la_ldn_clean, "England"),
+  filter_la_regions(c(region_clean, "England"),
     pull_col = "values_num"
   )
 
+
+
 # Creating the stats table cols
 region_stats_la_num <- c(region_la_la_num, region_la_num)
-region_stats_name <- c(selected_la, region_la_ldn_clean, "England")
+region_stats_name <- c(selected_la, region_clean, "England")
 region_stats_change <- c(region_la_change_prev, region_change_prev)
 
 # Creating the trend descriptions
@@ -192,16 +210,21 @@ dfe_reactable(
   region_stats_table,
   columns = modifyList(
     # Create the reactable with specific column alignments
-    align_reactable_cols(
+    format_num_reactable_cols(
       region_stats_table,
-      num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding")
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number"
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
+      set_custom_default_col_widths(),
       Trend = reactable::colDef(
-        cell = trend_icon_renderer
-      )
+        cell = trend_icon_renderer,
+        style = function(value) {
+          get_trend_colour(value, region_stats_table$Polarity[1])
+        }
+      ),
+      Polarity = reactable::colDef(show = FALSE)
     )
   ),
   rowStyle = function(index) {
@@ -232,10 +255,10 @@ region_line_chart_data <- region_long_plot |>
   # Filter for random Regions - simulate user choosing up to 6 regions
   dplyr::filter(
     (`LA and Regions` %in% region_random_selection) |
-      (`LA and Regions` %in% region_la_ldn_clean)
+      (`LA and Regions` %in% region_clean)
   ) |>
   # Set region orders so selection order starts on top of plot
-  reorder_la_regions(rev(c(region_la_ldn_clean, region_random_selection)), after = Inf)
+  reorder_la_regions(rev(c(region_clean, region_random_selection)), after = Inf)
 
 # Plot - selected Regions
 region_line_chart <- region_line_chart_data |>
@@ -259,10 +282,7 @@ region_line_chart <- region_line_chart_data |>
     na.rm = TRUE
   ) +
   format_axes(region_line_chart_data) +
-  manual_colour_mapping(
-    c(region_la_ldn_clean, region_random_selection),
-    type = "line"
-  ) +
+  set_plot_colours(region_line_chart_data, "colour", region_clean) +
   set_plot_labs(filtered_bds) +
   custom_theme() +
   # Revert order of the legend so goes from right to left
@@ -274,7 +294,8 @@ vertical_hover <- lapply(
   get_years(region_line_chart_data),
   tooltip_vlines,
   region_line_chart_data,
-  indicator_dps
+  indicator_dps,
+  region_clean
 )
 
 # Plotting interactive graph
@@ -292,7 +313,7 @@ ggiraph::girafe(
 # Focus plot
 # Set selected region to last level so appears at front of plot
 focus_line_data <- region_long_plot |>
-  reorder_la_regions(region_la_ldn_clean, after = Inf)
+  reorder_la_regions(region_clean, after = Inf)
 
 region_line_chart <- focus_line_data |>
   ggplot2::ggplot() +
@@ -307,7 +328,7 @@ region_line_chart <- focus_line_data |>
     na.rm = TRUE
   ) +
   format_axes(focus_line_data) +
-  set_plot_colours(focus_line_data, colour_type = "focus", focus_group = region_la_ldn_clean) +
+  set_plot_colours(focus_line_data, colour_type = "focus", focus_group = region_clean) +
   set_plot_labs(filtered_bds) +
   ggrepel::geom_label_repel(
     data = subset(focus_line_data, Years == current_year),
@@ -337,11 +358,13 @@ vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
   focus_line_data,
-  indicator_dps
+  indicator_dps,
+  region_clean,
+  "#12436D"
 )
 
 # Plotting interactive graph
-ggiraph::girafe(
+test <- ggiraph::girafe(
   ggobj = (region_line_chart + vertical_hover),
   width_svg = 12,
   options = generic_ggiraph_options(
@@ -356,7 +379,7 @@ ggiraph::girafe(
 # Region bar plot -----------------------------------------------------------------
 # Focus plot
 focus_bar_data <- region_long_plot |>
-  reorder_la_regions(region_la_ldn_clean)
+  reorder_la_regions(region_clean)
 
 la_bar_chart <- focus_bar_data |>
   ggplot2::ggplot() +
@@ -365,10 +388,11 @@ la_bar_chart <- focus_bar_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        focus_bar_data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      tooltip = tooltip_bar(
+        focus_bar_data,
+        indicator_dps,
+        region_clean,
+        "#12436D"
       ),
       data_id = `LA and Regions`
     ),
@@ -378,7 +402,7 @@ la_bar_chart <- focus_bar_data |>
     colour = "black"
   ) +
   format_axes(focus_bar_data) +
-  set_plot_colours(focus_bar_data, "focus-fill", region_la_ldn_clean) +
+  set_plot_colours(focus_bar_data, "focus-fill", region_clean) +
   set_plot_labs(filtered_bds) +
   custom_theme() +
   guides(fill = "none")

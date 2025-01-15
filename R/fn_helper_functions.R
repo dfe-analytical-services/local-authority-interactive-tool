@@ -292,15 +292,20 @@ get_metadata <- function(data, input_indicator, metadata) {
     metadata_output <- "No matching metadata"
   }
 
-  if (grepl("^[0-9]+$", metadata_output)) {
-    metadata_output |>
+  # Warning if any entry in metadata_output appears to be a 5-digit number
+  if (any(grepl("^\\d{5}$", metadata_output))) {
+    warning("Detected a 5-digit numeric entry in metadata_output,
+            which may represent a misformatted date (e.g., Excel numeric).")
+
+    # Convert 5-digit number to Date if it matches the Excel date format
+    metadata_output <- metadata_output |>
       as.numeric() |>
       as.Date(origin = "1899-12-30") |>
       format("%B %Y") |>
       as.character()
-  } else {
-    metadata_output
   }
+
+  metadata_output
 }
 
 
@@ -373,6 +378,91 @@ clean_ldn_region <- function(region, filtered_bds) {
 }
 
 
+#' Retrieve AF Colours Without Warning Message
+#'
+#' Retrieves AF colours while suppressing a specific warning message about
+#' limiting categories when using the categorical palette.
+#'
+#' @return A vector of colours from the `afcolours` package.
+#'
+#' @details This function retrieves the colour palette from `afcolours::af_colours`
+#' while silencing the message advising to limit categories to four. The
+#' message is suppressed using `withCallingHandlers` to improve usability
+#' without affecting the palette content.
+#'
+#' @examples
+#' colours <- get_af_colours()
+#'
+get_af_colours <- function() {
+  withCallingHandlers(
+    afcolours::af_colours(),
+    message = function(m) {
+      if (grepl(
+        paste0(
+          "It is best practice to limit to four categories when using the ",
+          "categorical palette so the chart does not become too cluttered."
+        ),
+        m$message
+      )) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+}
+
+
+#' Get Colour for Local Authority Focus
+#'
+#' Returns a hex colour for highlighting the selected local authority in
+#' tables or plots.
+#'
+#' @return A character string with the hex colour code for LA focus.
+#' @examples
+#' get_la_focus_colour()
+#' @export
+get_la_focus_colour <- function() {
+  get_af_colours()[4] # "#5694ca"
+}
+
+
+#' Get Colour for England Highlight
+#'
+#' Retrieves a colour from the afcolours package palette for highlighting
+#' "England" rows in tables or plots.
+#'
+#' @return A character string with the hex colour code for England highlight.
+#' @examples
+#' get_england_colour()
+#' @export
+get_england_colour <- function() {
+  get_af_colours()[3]
+}
+
+
+#' Retrieve Available Colours for Plotting
+#'
+#' This function provides a filtered set of colours from the AF colours palette,
+#' excluding the specific colours reserved for the focus group and "England."
+#'
+#' @return A vector of hex colour codes from the AF colours palette, with
+#'   colours reserved for the focus group and "England" removed.
+#' @seealso [get_af_colours()] for the original AF colour palette,
+#'   [get_la_focus_colour()] for the focus group colour, and
+#'   [get_england_colour()] for the "England" colour.
+#' @examples
+#' clean_colours <- get_clean_af_colours()
+#'
+#' # Use clean_colours for general plotting, excluding reserved colours
+#'
+get_clean_af_colours <- function() {
+  setdiff(get_af_colours(), c(
+    get_la_focus_colour(),
+    get_england_colour(),
+    "#3D3D3D"
+  ))
+}
+
+
 #' Retrieve AF Colours without Warning Message
 #'
 #' This function retrieves the "focus" color palette from the
@@ -409,93 +499,384 @@ af_colours_focus <- function() {
 }
 
 
-# Temp function to replace the dfeR::pretty_num()
-# Extra functionality means that it can be specified the decimal places to
-# show, e.g., instead of 3.00 getting rounded to 3, if nsmall = 2 then
-# it wil appear as 3.00, useful for table formatting in Shiny
-pretty_num <- function(
-    value,
-    prefix = "",
-    gbp = FALSE,
-    suffix = "",
-    dp = 2,
-    ignore_na = FALSE,
-    alt_na = FALSE,
-    nsmall = NULL) { # Add nsmall argument
-  # Check we're only trying to prettify a single value
-  if (length(value) > 1) {
-    stop("value must be a single value, multiple values were detected")
-  }
+#' Get Minimum and Maximum Years from Data
+#'
+#' This function extracts the minimum and maximum years from a specified
+#' numeric column of year values within a data frame. It handles
+#' missing values appropriately and returns the results in a list for
+#' easy access.
+#'
+#' @param data A data frame that contains a numeric column representing
+#'              year values, typically labeled as "Years_num".
+#' @return A list containing two elements: `min_year`, the minimum year
+#'         value found in the data, and `max_year`, the maximum year
+#'         value. Both values are numeric and NA is handled appropriately.
+#'
+get_min_max_years <- function(data) {
+  query_num_years <- data |>
+    dplyr::pull(Years_num)
 
-  # Force to numeric
-  num_value <- suppressWarnings(as.numeric(value))
+  max_year <- query_num_years |> max(na.rm = TRUE)
+  min_year <- query_num_years |> min(na.rm = TRUE)
 
-  # Check if should skip function
-  if (is.na(num_value)) {
-    if (ignore_na == TRUE) {
-      return(value) # return original value
-    } else if (alt_na != FALSE) {
-      return(alt_na) # return custom NA value
+  list(min_year = min_year, max_year = max_year)
+}
+
+
+#' Create Data Frame for All Years
+#'
+#' This function generates a data frame containing a sequence of year
+#' values from a specified minimum year to a maximum year. The resulting
+#' data frame includes a single column named "Years_num" that holds
+#' the year values in order.
+#'
+#' @param min_year The starting year of the sequence, which should be
+#'                 numeric.
+#' @param max_year The ending year of the sequence, which should also be
+#'                 numeric.
+#' @return A data frame with one column, `Years_num`, containing all
+#'         year values from `min_year` to `max_year`, inclusive.
+#'
+create_years_df <- function(min_year, max_year) {
+  data.frame(Years_num = seq(min_year, max_year))
+}
+
+
+#' Check Year Suffix Consistency
+#'
+#' This function verifies whether all entries in the specified dataset have
+#' consistent suffixes for each year. It extracts the first four characters
+#' from the year strings to identify the year and the remaining characters
+#' as the suffix. The function ensures that for each unique year, there is
+#' only one unique suffix present.
+#'
+#' @param data A data frame containing a column `Years`, which includes year
+#'              values with potential suffixes.
+#' @return A logical value indicating whether all years have consistent
+#'         suffixes (`TRUE`) or not (`FALSE`).
+#'
+check_year_suffix_consistency <- function(data) {
+  data |>
+    pull_uniques("Years") |>
+    (\(years_list) {
+      # Extract the first four characters as the year and remaining as the suffix
+      years <- substring(years_list, 1, 4)
+      suffixes <- substring(years_list, 5)
+
+      # For each unique year, check if there is more than one unique suffix
+      all(
+        sapply(unique(years), function(year) {
+          # Get the suffixes for the current year and check for consistency
+          unique_suffixes <- unique(suffixes[years == year])
+          length(unique_suffixes) <= 1
+        })
+      )
+    })()
+}
+
+
+#' Sort Year Columns
+#'
+#' This function identifies and sorts the columns of a data frame that
+#' represent years, while preserving their full names. It searches for
+#' column names that start with a four-digit year (e.g., 2020) and
+#' returns them in ascending order based on the year, maintaining
+#' their original names in the process.
+#'
+#' @param full_query_data A data frame that may contain year columns
+#'                        named with the format of four-digit years.
+#' @return A character vector of sorted column names representing years,
+#'         preserving the original names.
+#'
+sort_year_columns <- function(full_query_data) {
+  full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
+
+  full_query_year_cols |>
+    purrr::set_names() |>
+    purrr::map_chr(~ stringr::str_sub(.x, 1, 4)) |>
+    sort() |>
+    names()
+}
+
+
+#' Rename Columns with Year
+#'
+#' This function renames the columns of a data frame by extracting the
+#' first four digits from the column names if they start with a four-digit
+#' year. If a column name does not begin with four digits, it retains
+#' its original name. This is useful for simplifying column names in
+#' data frames that contain year-based columns while keeping other
+#' column names intact.
+#'
+#' @param df A data frame whose column names may include four-digit years
+#'            at the start.
+#' @return A data frame with renamed columns where applicable, with four-digit
+#'         years extracted as the new column names.
+#'
+rename_columns_with_year <- function(df) {
+  # Use `gsub` to extract the first 4 digits if they start the column name
+  new_names <- sapply(names(df), function(col) {
+    if (grepl("^\\d{4}", col)) {
+      # Extract the first 4 digits
+      return(substr(col, start = 1, stop = 4))
     } else {
-      return(num_value) # return NA
+      # Return the original name if it doesn't start with 4 digits
+      return(col)
+    }
+  })
+
+  # Rename columns with the modified names
+  colnames(df) <- new_names
+  df
+}
+
+
+#' @title Insert Line Breaks at Full Words
+#' @description Adds line breaks to a string after full words to ensure that
+#' each line stays within a specified maximum length.
+#' @param text A character string to insert line breaks into.
+#' @param max_length Maximum length of each line in characters. Default is 20.
+#' @return A character string with line breaks after full words.
+#' @details The function splits the input string into words, then builds each
+#' line by appending words until the maximum length is reached. If adding a word
+#' would exceed the line length, a line break is added before that word.
+#' @examples
+#' add_line_breaks("This is an example of a long text that needs breaks.", 15)
+#'
+add_line_breaks <- function(text, max_length = 20) {
+  words <- strsplit(text, " ")[[1]]
+  lines <- c()
+  current_line <- ""
+
+  for (word in words) {
+    if (nchar(current_line) + nchar(word) + 1 <= max_length) {
+      current_line <- paste(current_line,
+        word,
+        sep = if (nchar(current_line) > 0) " " else ""
+      )
+    } else {
+      lines <- c(lines, current_line)
+      current_line <- word
     }
   }
+  c(lines, current_line) |> paste(collapse = "\n")
+}
 
-  # Convert GBP to pound symbol
-  if (gbp == TRUE) {
-    currency <- "\U00a3"
-  } else {
-    currency <- ""
-  }
 
-  # Add + / - symbols depending on size of value
-  if (prefix == "+/-") {
-    if (value >= 0) {
-      prefix <- "+"
-    } else {
-      prefix <- "-"
+#' Add a GOV.UK styled spinner to a UI element
+#'
+#' This function wraps a UI element with a spinner from the `shinycssloaders`
+#' package, with a GOV.UK style and custom size. The spinner is displayed
+#' while the UI element is loading, and its height is adjusted dynamically
+#' based on the size parameter.
+#'
+#' @param ui_element A UI element (e.g., `reactableOutput`, `plotOutput`, etc.)
+#'   to be wrapped with a spinner.
+#' @param size A numeric value (default is 1) to specify the size of the spinner.
+#'   The height of the spinner will scale based on this value (multiplied by 250px).
+#'
+#' @return A UI element wrapped in a spinner.
+#'
+#' @examples
+#' # Wrap a reactable table with a spinner
+#' with_gov_spinner(reactable::reactableOutput("la_table"))
+#'
+#' # Wrap a plot with a larger spinner
+#' with_gov_spinner(plotOutput("la_plot"), size = 2)
+#'
+with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1d70b8") {
+  shinycssloaders::withSpinner(
+    ui_element,
+    type = spinner_type,
+    color = color,
+    size = size,
+    proxy.height = paste0(250 * size, "px")
+  )
+}
+
+
+#' Update Topic Label Dynamically
+#'
+#' Dynamically updates a topic label in the user interface based on the selected
+#' indicator and topic inputs. If no topic is selected or "All Topics" is
+#' chosen, the label reflects the related topic(s) of the selected indicator.
+#'
+#' @param indicator_input A reactive expression that returns the selected
+#'   indicator input value.
+#' @param topic_input A reactive expression that returns the selected topic
+#'   input value.
+#' @param topic_indicator_data A data frame containing `Topic` and `Measure`
+#'   columns, used to identify related topics for a given indicator.
+#' @param topic_label_id A string specifying the ID of the HTML element where
+#'   the topic label will be updated. Defaults to `"topic_label"`.
+#'
+#' @details
+#' This function listens for changes in the provided `indicator_input` and
+#' `topic_input`. If the topic is not selected or is set to "All Topics", the
+#' label is updated to include the topic(s) related to the selected indicator.
+#' Multiple topics are combined with a " / " separator.
+#'
+#' @return None. The function operates for its side effects of updating the UI.
+#'
+#' @examples
+#' # In a Shiny server function
+#' update_topic_label(
+#'   indicator_input = reactive(input$indicator),
+#'   topic_input = reactive(input$topic_input),
+#'   topic_indicator_data = topic_indicator_full,
+#'   topic_label_id = "topic_label"
+#' )
+#'
+update_topic_label <- function(
+    indicator_input,
+    topic_input,
+    topic_indicator_data,
+    topic_label_id = "topic_label") {
+  shiny::observeEvent(c(indicator_input(), topic_input()), {
+    indicator <- indicator_input()
+    topic <- topic_input()
+
+    # Default topic label
+    label <- "Topic:"
+
+    # Update label if conditions are met
+    if (!is.null(indicator) && indicator != "" && (topic %in% c("", "All Topics"))) {
+      # Get related topic(s)
+      related_topics <- topic_indicator_data |>
+        dplyr::filter(.data$Measure == indicator) |>
+        pull_uniques("Topic")
+
+      # Create label, combining topics if multiple exist
+      if (length(related_topics) > 0) {
+        label <- paste0(
+          "Topic:&nbsp;&nbsp;(",
+          paste0(related_topics, collapse = " / "),
+          ")"
+        )
+      }
     }
-    # Add in negative symbol if appropriate and not auto added with +/-
-  } else if (value < 0) {
-    prefix <- paste0("-", prefix)
+
+    # Update the HTML element with the new label
+    shinyjs::html(topic_label_id, label)
+  })
+}
+
+
+#' Order data alphabetically with non-alphabetical entries at the top
+#'
+#' This function orders a dataset based on the values of a specified column.
+#' Entries that do not start with a letter (A-Z, a-z) are placed at the top,
+#' followed by the remaining entries sorted alphabetically.
+#'
+#' @param data A data frame or tibble to be sorted.
+#' @param column The column to be used for sorting. This should be provided
+#' as an unquoted column name.
+#'
+#' @return A data frame or tibble sorted by the specified column.
+#'
+#' @examples
+#' \dontrun{
+#' # Example dataset
+#' df <- data.frame(Measure = c("Zebra", "1234", "Apple", "Cat"))
+#'
+#' # Order by the 'Measure' column
+#' ordered_df <- order_alphabetically(df, Measure)
+#' print(ordered_df)
+#' }
+#'
+order_alphabetically <- function(data, column) {
+  data |>
+    dplyr::arrange(
+      !grepl("^[A-Za-z]", {{ column }}),
+      {{ column }}
+    )
+}
+
+
+#' Format Text into HTML
+#'
+#' This function formats plain text into HTML, applying several transformations:
+#' - Converts markdown-style bullet points (`- `) into HTML `<ul>` and `<li>` tags.
+#' - Replaces markdown-style links (`[text](url)`) with HTML `<a>` links using
+#'   `dfeshiny::external_link`.
+#' - Normalises newlines and adjusts spacing for better HTML rendering.
+#'
+#' @param text A character string containing the input text to be formatted.
+#'
+#' @return An HTML object (`shiny::HTML`) containing the formatted text.
+#'
+#' @details
+#' The function performs the following steps:
+#' 1. Normalises newlines to `\n`.
+#' 2. Converts lines starting with `- ` into `<li>` tags, and wraps all list
+#'    items in `<ul>` tags.
+#' 3. Replaces double newlines outside of bullet points with `<br><br>` for
+#'    paragraph separation.
+#' 4. Removes stray single newlines outside bullet points for cleaner HTML
+#'    rendering.
+#' 5. Strips unnecessary spaces before and after bullet points.
+#' 6. Transforms markdown-style links into HTML links using
+#'    `dfeshiny::external_link`.
+#' 7. Trims leading and trailing whitespace.
+#' 8. Converts the final text into an HTML object using `shiny::HTML`.
+#'
+#' @examples
+#' # Example input text with bullet points and a link
+#' input_text <- "- First item\n- Second item\n\nThis is a paragraph.\n\n"
+#' input_text <- paste0(input_text, "See [example](https://example.com) for more info.")
+#'
+#' # Format the text
+#' formatted_html <- format_text(input_text)
+#'
+#' # Use the result in a Shiny app
+#' shiny::div(formatted_html)
+#'
+format_text <- function(text) {
+  # Normalize newlines
+  text <- gsub("\r\n|\n", "\n", text)
+
+  # Replace lines starting with "- " with bullet point HTML <li> tags
+  text <- gsub("(?<=\n)-\\s+", "<li>", text, perl = TRUE)
+
+  # Add closing </li> tags for bullet points
+  text <- gsub("(<li>.*?)(?=\n|$)", "\\1</li>", text, perl = TRUE)
+
+  # Wrap all <li> items in <ul> tags
+  if (grepl("<li>", text)) {
+    text <- gsub("(.*?)(<li>.*?</li>)+", "\\1<ul>\\2</ul>", text, perl = TRUE)
   }
 
-  # If nsmall is not given, make same value as dp
-  if (is.null(nsmall)) {
-    nsmall <- dp
-  }
+  # Replace double newlines with <br><br> only outside bullet points
+  text <- gsub("(?<!</li>)\n{2,}", "<br><br>", text, perl = TRUE)
 
-  # Format the number with rounding and minimum decimal places
-  format_num <- function(num, dp, nsmall) {
-    # Round the number
-    rounded_num <- dfeR::round_five_up(num, dp = dp)
-    # Format the number with the specified minimum decimal places
-    format(rounded_num, nsmall = nsmall, big.mark = ",")
-  }
+  # Remove stray single newlines outside of bullet points
+  text <- gsub("(?<!</li>)\n", " ", text, perl = TRUE)
 
-  # Add suffix and prefix, plus convert to million or billion
-  if (abs(num_value) >= 1.e9) {
-    paste0(
-      prefix,
-      currency,
-      format_num(abs(num_value) / 1.e9, dp = dp, nsmall = nsmall),
-      " billion",
-      suffix
-    )
-  } else if (abs(num_value) >= 1.e6) {
-    paste0(
-      prefix,
-      currency,
-      format_num(abs(num_value) / 1.e6, dp = dp, nsmall = nsmall),
-      " million",
-      suffix
-    )
-  } else {
-    paste0(
-      prefix,
-      currency,
-      format_num(abs(num_value), dp = dp, nsmall = nsmall),
-      suffix
-    )
-  }
+  # Remove spaces before and after bullet points
+  text <- gsub("<br><br><ul><li>", "<br><ul><li>", text, perl = TRUE)
+  text <- gsub("</li></ul><br><br>", "</li></ul><br>", text, perl = TRUE)
+
+  # Replace markdown-style links with HTML links
+  text <- stringr::str_replace_all(text, "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)", function(match) {
+    # Extract the link text and URL using captured groups
+    matches <- stringr::str_match_all(match, "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)")
+
+    link_text <- matches[[1]][2] # Captured group 1: link text
+    href <- matches[[1]][3] # Captured group 2: URL
+
+    # Generate HTML link using dfeshiny::external_link(), convert to character
+    as.character(dfeshiny::external_link(
+      href = href,
+      link_text = link_text,
+      add_warning = TRUE
+    ))
+  })
+
+  # Trim any leading or trailing spaces
+  text <- trimws(text)
+
+  # Convert to HTML
+  text <- HTML(text)
+
+  return(text)
 }

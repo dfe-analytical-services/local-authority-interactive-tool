@@ -128,11 +128,11 @@ create_measure_key <- function(data) {
 #' generate_download_file(plot_data, "png")
 #' }
 #'
-generate_download_file <- function(data, file_type) {
+generate_download_file <- function(data, file_type, svg_width = 8.5) {
   out <- tempfile(fileext = dplyr::case_when(
     grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
     grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
-    grepl("png", file_type, ignore.case = TRUE) ~ ".png",
+    grepl("svg", file_type, ignore.case = TRUE) ~ ".svg",
     grepl("html", file_type, ignore.case = TRUE) ~ ".html",
     TRUE ~ "Error"
   ))
@@ -141,8 +141,8 @@ generate_download_file <- function(data, file_type) {
     write.csv(data, file = out, row.names = FALSE)
   } else if (grepl("xlsx", file_type, ignore.case = TRUE)) {
     openxlsx::write.xlsx(data, file = out, colWidths = "Auto")
-  } else if (grepl("png", file_type, ignore.case = TRUE)) {
-    ggplot2::ggsave(filename = out, plot = data, width = 8.5, height = 6)
+  } else if (grepl("svg", file_type, ignore.case = TRUE)) {
+    ggplot2::ggsave(filename = out, plot = data, width = svg_width, height = 6)
   } else if (grepl("html", file_type, ignore.case = TRUE)) {
     htmlwidgets::saveWidget(widget = data, file = out)
   }
@@ -189,7 +189,7 @@ create_download_handler <- function(local) {
       file_ext <- dplyr::case_when(
         grepl("xlsx", local$file_type, ignore.case = TRUE) ~ ".xlsx",
         grepl("csv", local$file_type, ignore.case = TRUE) ~ ".csv",
-        grepl("png", local$file_type, ignore.case = TRUE) ~ ".png",
+        grepl("svg", local$file_type, ignore.case = TRUE) ~ ".svg",
         grepl("html", local$file_type, ignore.case = TRUE) ~ ".html",
         TRUE ~ "Error"
       )
@@ -201,6 +201,77 @@ create_download_handler <- function(local) {
       on.exit(shiny::removeNotification(pop_up), add = TRUE)
     }
   )
+}
+
+
+#' Calculate File Size
+#'
+#' This helper function calculates the approximate file size of a dataset when
+#' saved in a specific file format. The size is rounded to the nearest 5 KB
+#' and returned as a string.
+#'
+#' @param file_type A string specifying the file format. Supported formats are:
+#'   - `"CSV"`: Comma-separated values.
+#'   - `"XLSX"`: Microsoft Excel file.
+#'   - `"SVG"`: Scalable Vector Graphics (estimated size returned).
+#'   - `"HTML"`: HTML document (estimated size returned).
+#' @param data A data frame or similar object to save to the file.
+#'
+#' @return A string describing the file size in KB, e.g., `"25 KB"`. For `SVG`
+#'   and `HTML` types, a predefined size range is returned.
+#'
+#' @details
+#' The function performs the following steps:
+#' 1. Creates a temporary file for the specified file type.
+#' 2. Writes the provided dataset to the temporary file:
+#'    - For `CSV`, it uses `write.csv()`.
+#'    - For `XLSX`, it uses `openxlsx::write.xlsx()` with automatic column
+#'      width adjustment.
+#' 3. Returns an estimated size for `SVG` and `HTML` formats instead of
+#'    generating a file.
+#' 4. Measures the file size in KB and rounds it to the nearest 5 KB for
+#'    readability.
+#' 5. Deletes the temporary file after calculation.
+#'
+#' @examples
+#' # Example dataset
+#' data <- data.frame(x = 1:10, y = letters[1:10])
+#'
+#' # Calculate file sizes for different formats
+#' csv_size <- calculate_file_size("CSV", data)
+#' xlsx_size <- calculate_file_size("XLSX", data)
+#' svg_size <- calculate_file_size("SVG", data)
+#' html_size <- calculate_file_size("HTML", data)
+#'
+#' # Print results
+#' print(csv_size) # e.g., "15 KB"
+#' print(xlsx_size) # e.g., "20 KB"
+#' print(svg_size) # "usually 20 KB and no larger than 200 KB"
+#' print(html_size) # "usually 275 KB and no larger than 500 KB"
+#'
+calculate_file_size <- function(file_type, data) {
+  # Create a temporary file
+  temp_file <- tempfile(fileext = paste0(".", tolower(file_type)))
+
+  # Create file or return estimated size
+  if (file_type == "CSV") {
+    write.csv(data, temp_file, row.names = FALSE)
+  } else if (file_type == "XLSX") {
+    openxlsx::write.xlsx(data, temp_file, colWidths = "auto")
+  } else if (file_type == "SVG") {
+    return("usually 20 KB and no larger than 200 KB")
+  } else if (file_type == "HTML") {
+    return("usually 275 KB and no larger than 500 KB")
+  }
+
+  # Get the file size in KB
+  file_size_kb <- ceiling((file.size(temp_file) / 1024) / 5) * 5
+
+  # Round file size to nearest 10, while handling small sizes correctly
+  rounded_file_size <- round(file_size_kb, 2)
+
+  unlink(temp_file) # Remove the temporary file
+  return(paste0(rounded_file_size, " KB"))
 }
 
 
@@ -238,7 +309,20 @@ create_download_handler <- function(local) {
 #' file_type_input_btn("file_type", file_type = "plot")
 #' }
 #'
-file_type_input_btn <- function(input_id, file_type = "table") {
+file_type_input_btn <- function(input_id, data = NULL, file_type = "table") {
+  # Generate choices with actual file size
+  choices_with_size <- if (file_type == "table") {
+    c(
+      paste0("CSV (less than ", calculate_file_size("CSV", data), ")"),
+      paste0("XLSX (less than ", calculate_file_size("XLSX", data), ")")
+    )
+  } else {
+    c(
+      paste0("SVG (", calculate_file_size("SVG", data), ")"),
+      paste0("HTML (", calculate_file_size("HTML", data), ")")
+    )
+  }
+
   shinyGovstyle::radio_button_Input(
     inputId = input_id,
     label = h2("Choose download file format"),
@@ -253,11 +337,98 @@ file_type_input_btn <- function(input_id, file_type = "table") {
         " The HTML format contains the interactive element."
       )
     },
-    choices = if (file_type == "table") {
-      c("CSV", "XLSX")
-    } else {
-      c("PNG", "HTML")
-    },
-    selected = if (file_type == "table") "CSV" else "PNG"
+    choices = choices_with_size,
+    selected = choices_with_size[1]
+  )
+}
+
+
+#' Update and fetch metadata for a given indicator
+#'
+#' This function retrieves the metadata for a specified indicator and updates
+#' the associated reactive storage. If the indicator is empty, the previously
+#' stored value is returned.
+#'
+#' @param input_indicator A string representing the selected indicator. If
+#'   empty, the function returns the previously stored value.
+#' @param metadata_type A string specifying the type of metadata to fetch (e.g.,
+#'   "Description", "Methodology").
+#' @param reactive_storage A `reactiveValues` object where the metadata is
+#'   stored and updated.
+#' @param key A string representing the key in `reactive_storage` corresponding
+#'   to the metadata type.
+#'
+#' @return The metadata associated with the specified indicator and metadata
+#'   type. If the indicator is empty, the previously stored value is returned.
+#'
+#' @examples
+#' \dontrun{
+#' previous_metadata <- reactiveValues(description = NULL)
+#' update_and_fetch_metadata(
+#'   input_indicator = "Indicator A",
+#'   metadata_type = "Description",
+#'   reactive_storage = previous_metadata,
+#'   key = "description"
+#' )
+#' }
+#'
+update_and_fetch_metadata <- function(input_indicator,
+                                      metadata_type,
+                                      reactive_storage,
+                                      key) {
+  if (input_indicator == "") {
+    return(reactive_storage[[key]])
+  }
+
+  # Fetch the metadata for the selected indicator
+  metadata <- metrics_clean |>
+    get_metadata(input_indicator, metadata_type)
+
+  # Update the previous value in the reactive storage
+  reactive_storage[[key]] <- metadata
+
+  return(metadata)
+}
+
+
+#' Read Data Dictionary from Shared Folder
+#'
+#' This function reads a specific sheet from the LAIT Data Dictionary stored
+#' in a shared folder. It cleans column names by replacing multiple spaces
+#' with a single space.
+#'
+#' @param shared_folder A string specifying the path to the shared folder
+#'   where the data dictionary file is stored.
+#' @param sheet_name A string specifying the name of the sheet to read
+#'   from the data dictionary file.
+#'
+#' @return A data frame containing the contents of the specified sheet
+#'   from the data dictionary.
+#'
+#' @details
+#' - The data dictionary file is assumed to be located in a specific relative
+#'   path: `"../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"`.
+#' - The `.name_repair` argument is set to a custom function, `clean_spaces`,
+#'   which replaces multiple spaces in column names with single spaces.
+#'
+#' @examples
+#' # Specify the path to the shared folder
+#' shared_folder <- "/path/to/shared/folder"
+#'
+#' # Specify the sheet name
+#' sheet_name <- "Indicators"
+#'
+#' # Read the data dictionary
+#' data_dict <- read_data_dict_shared_folder(shared_folder, sheet_name)
+#'
+#' # Print the first few rows
+#' head(data_dict)
+#'
+read_data_dict_shared_folder <- function(shared_folder, sheet_name) {
+  readxl::read_xlsx(
+    path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
+    sheet = sheet_name,
+    # Replace multi-space with single-space
+    .name_repair = clean_spaces
   )
 }

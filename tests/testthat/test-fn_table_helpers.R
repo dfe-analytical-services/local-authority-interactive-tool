@@ -141,7 +141,7 @@ pretty_tbl_data <- data.frame(
 
 test_that("1. pretty_num_table formats all numeric cols when no include/ exclude cols", {
   # Apply pretty_num_table
-  result <- pretty_num_table(pretty_tbl_data)
+  result <- pretty_num_table(pretty_tbl_data, dp = 2)
 
   # Expected result
   expected <- data.frame(
@@ -156,7 +156,7 @@ test_that("1. pretty_num_table formats all numeric cols when no include/ exclude
 
 test_that("2. pretty_num_table processes only the specified columns with include_columns", {
   # Apply pretty_num_table
-  result <- pretty_num_table(pretty_tbl_data, include_columns = c("A"))
+  result <- pretty_num_table(pretty_tbl_data, include_columns = c("A"), dp = 2)
 
   # Expected result
   expected <- data.frame(
@@ -172,7 +172,8 @@ test_that("2. pretty_num_table processes only the specified columns with include
 test_that("3. pretty_num_table excludes specified columns with exclude_columns", {
   # Apply pretty_num_table
   result <- pretty_num_table(pretty_tbl_data,
-    exclude_columns = c("A")
+    exclude_columns = c("A"),
+    dp = 2
   )
 
   # Expected result
@@ -200,7 +201,8 @@ test_that("4. pretty_num_table handles both include_columns and exclude_columns"
   # Apply pretty_num_table
   result <- pretty_num_table(data,
     include_columns = c("A", "D"),
-    exclude_columns = c("B")
+    exclude_columns = c("B"),
+    dp = 2
   )
 
   # Expected result
@@ -328,8 +330,10 @@ test_that("1. build_la_stats_table works with standard inputs", {
   change_since_prev <- 5.2
   rank <- 1
   quartile <- "A"
-  quartile_bands <- c("25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
+  quartile_bands <- c("0%" = 0, "25%" = 10, "50%" = 20, "75%" = 30, "100%" = 40)
+  indicator_dps <- 1
   indicator_polarity <- "High"
+  no_show_qb <- FALSE
 
   result <- build_la_stats_table(
     main_table,
@@ -339,7 +343,9 @@ test_that("1. build_la_stats_table works with standard inputs", {
     rank,
     quartile,
     quartile_bands,
-    indicator_polarity
+    indicator_dps,
+    indicator_polarity,
+    no_show_qb
   )
 
   expected <- data.frame(
@@ -350,10 +356,10 @@ test_that("1. build_la_stats_table works with standard inputs", {
     "Polarity" = "High",
     "Latest National Rank" = 1,
     "Quartile Banding" = "A",
-    "(D) Up to and including" = 10,
-    "(C) Up to and including" = 20,
-    "(B) Up to and including" = 30,
-    "(A) Up to and including" = 40,
+    "A" = "40 to 30.1",
+    "B" = "30 to 20.1",
+    "C" = "20 to 10.1",
+    "D" = "10 to 0",
     check.names = FALSE
   )
 
@@ -372,7 +378,9 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
   rank <- numeric(0)
   quartile <- character(0)
   quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_dps <- 1
   indicator_polarity <- character(0)
+  no_show_qb <- FALSE
 
   expect_warning(
     expect_error(
@@ -384,7 +392,9 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
         rank,
         quartile,
         quartile_bands,
-        indicator_polarity
+        indicator_dps,
+        indicator_polarity,
+        no_show_qb
       ),
       "argument is of length zero"
     ),
@@ -403,8 +413,10 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
   change_since_prev <- NA
   rank <- NA
   quartile <- NA
-  quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_dps <- 1
   indicator_polarity <- NA
+  no_show_qb <- FALSE
 
   expected <- data.frame(
     "LA Number" = NA,
@@ -412,12 +424,9 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
     "Trend" = NA,
     "Change from previous year" = NA,
     "Polarity" = NA,
-    "Latest National Rank" = "Not applicable",
-    "Quartile Banding" = "Not applicable",
-    "(A) Up to and including" = "-",
-    "(B) Up to and including" = "-",
-    "(C) Up to and including" = "-",
-    "(D) Up to and including" = "-",
+    "Latest National Rank" = "-",
+    "Quartile Banding" = "-",
+    "No Quartiles" = "-",
     check.names = FALSE
   )
 
@@ -431,7 +440,9 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
         rank,
         quartile,
         quartile_bands,
-        indicator_polarity
+        indicator_dps,
+        indicator_polarity,
+        no_show_qb
       ),
       expected
     ),
@@ -450,8 +461,10 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
   change_since_prev <- NA
   rank <- NA
   quartile <- NA
-  quartile_bands <- c("25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  quartile_bands <- c("0%" = 0, "25%" = 0, "50%" = 0, "75%" = 0, "100%" = 0)
+  indicator_dps <- 1
   indicator_polarity <- "Low"
+  no_show_qb <- FALSE
 
   expected <- data.frame(
     "LA Number" = NA,
@@ -461,10 +474,10 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
     "Polarity" = "Low",
     "Latest National Rank" = NA,
     "Quartile Banding" = NA,
-    "(A) Up to and including" = 0,
-    "(B) Up to and including" = 0,
-    "(C) Up to and including" = 0,
-    "(D) Up to and including" = 0,
+    "A" = "0 to 0",
+    "B" = "0.1 to 0",
+    "C" = "0.1 to 0",
+    "D" = "0.1 to 0",
     check.names = FALSE
   )
 
@@ -478,7 +491,9 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
         rank,
         quartile,
         quartile_bands,
-        indicator_polarity
+        indicator_dps,
+        indicator_polarity,
+        no_show_qb
       ),
       expected
     ),

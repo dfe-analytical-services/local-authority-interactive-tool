@@ -135,7 +135,7 @@ You should also run `lintr::lint_dir()` regularly as lintr will check all pull r
 
 We welcome all suggestions and contributions to this template, and recommend [raising an issue in GitHub](https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues/new/choose) to start discussions around potential additions or changes with the maintaining team.
 
-Get in contact with jake.tufts@education.gov.uk to discuss contributions outside of GitHub.
+Get in contact with jake.tufts@education.gov.uk (app designer) to discuss contributions outside of GitHub.
 
 ### Flagging issues
 
@@ -153,6 +153,6 @@ Include as much detail on why you're making the suggestion and any thinking towa
 
 <!-- Add contact details of how to get in touch with your team. The team mailbox is usually enough -->
 
-Email app designer, Jake Tufts: jake.tufts@education.gov.uk
+Email app owners, VCU Data team (Regions Group - Data Analysis Unit): Darlington.BRIDGE@education.gov.uk
 
 Email the Explore Education Statistics team: explore.statistics@education.gov.uk

@@ -15,23 +15,42 @@ appInputsUI <- function(id) {
 
   div(
     class = "well",
-    style = "overflow-y: visible;",
+    style = "overflow-y: visible; position: relative;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = ns("la_name"),
-        label = "LA:",
-        choices = la_names_bds
+        label = tags$label(
+          "Local Authority:",
+          create_tooltip_icon("Change selection by scrolling or typing")
+        ),
+        choices = la_names_bds,
+        options = list(
+          placeholder = "Start typing or scroll to find a Local Authority...",
+          plugins = list("clear_button")
+        )
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = ns("topic_name"),
-        label = "Topic:",
-        choices = metric_topics
+        label = tags$label(
+          id = ns("topic_label"),
+          "Topic:"
+        ),
+        choices = c("All Topics", metric_topics),
+        selected = "All Topics",
+        options = list(
+          placeholder = "No topic selected, showing all indicators...",
+          plugins = list("clear_button")
+        )
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = ns("indicator_name"),
         label = "Indicator:",
-        choices = metric_names
+        choices = metric_names,
+        options = list(
+          placeholder = "Start typing or scroll to find an indicator...",
+          plugins = list("clear_button")
+        ),
       )
     )
   )
@@ -52,60 +71,107 @@ appInputsUI <- function(id) {
 #' @return A list of reactive expressions for the app inputs, including
 #' the selected LA name, topic name, and indicator name.
 #'
-appInputsServer <- function(id, shared_values) {
+appInputsServer <- function(id,
+                            shared_values,
+                            topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
-    # Observe and synchronise LA input across pages
-    observe({
-      updateSelectInput(session, "la_name", selected = shared_values$la)
-    })
+    # Reactive value to store the previous LA name
+    previous_la_name <- reactiveVal(NULL)
 
-    observe({
-      updateSelectInput(session, "topic_name", selected = shared_values$topic)
-    })
-
-    observe({
-      updateSelectInput(session, "indicator_name", selected = shared_values$indicator)
-    })
+    # Debounce input values to prevent looping when inputs change quickly
+    debounced_la_name <- shiny::debounce(reactive(input$la_name), 150)
+    debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 75)
+    debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
 
     # Update Indicator dropdown for selected Topic
-    shiny::observeEvent(input$topic_name, {
-      # Get indicator choices for selected topic
-      filtered_topic_bds <- bds_metrics |>
-        dplyr::filter(.data$Topic == input$topic_name) |>
-        pull_uniques("Measure")
+    shiny::observeEvent(debounced_topic_name(),
+      {
+        # Save the currently selected indicator
+        current_indicator <- debounced_indicator_name()
 
-      # Update the Indicator dropdown based on selected Topic
-      updateSelectInput(
-        session = session,
-        inputId = "indicator_name",
-        label = "Indicator:",
-        choices = filtered_topic_bds
-      )
+        # Determine the filter condition for Topic
+        topic_filter <- debounced_topic_name()
 
-      # Update the shared reactive value for the topic
-      shared_values$topic <- input$topic_name
+        # Get indicator choices for selected topic
+        # Include all rows if no topic is selected or "All Topics" is selected
+        filtered_topic_bds <- topic_indicator_full |>
+          filter_by_topic("Topic", topic_filter) |>
+          pull_uniques("Measure")
+
+        # Ensure the current indicator stays selected
+        # Default to the first topic indicator if the current is not valid
+        selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+          current_indicator
+        } else {
+          filtered_topic_bds[1]
+        }
+
+        # Update the Indicator dropdown based on selected Topic
+        shiny::updateSelectizeInput(
+          session = session,
+          inputId = "indicator_name",
+          choices = filtered_topic_bds,
+          selected = selected_indicator
+        )
+
+        # Update the shared reactive value for the topic
+        shared_values$topic <- debounced_topic_name()
+      },
+      ignoreNULL = FALSE
+    )
+
+    # Prevent LA input from being empty by storing its previous value
+    shiny::observeEvent(debounced_la_name(), {
+      # Check if the LA name is NULL or empty
+      la_name <- debounced_la_name()
+
+      if ("" %notin% la_name && !is.null(la_name)) {
+        # Update the reactive value with the current valid input
+        previous_la_name(la_name)
+
+        # Synchronise the shared reactive value
+        shared_values$la <- la_name
+      }
     })
 
-    # Observe and synchronise LA input changes
-    observeEvent(input$la_name, {
-      shared_values$la <- input$la_name
-    })
+    # Set dynamic topic label
+    # (to display topic when not selected or all topics selected)
+    update_topic_label(
+      indicator_input = debounced_indicator_name,
+      topic_input = debounced_topic_name,
+      topic_indicator_data = topic_indicator_full,
+      topic_label_id = "topic_label"
+    )
 
     # Observe and synchronise Indicator input changes
-    observeEvent(input$indicator_name, {
-      shared_values$indicator <- input$indicator_name
+    observeEvent(debounced_indicator_name(), {
+      shared_values$indicator <- debounced_indicator_name()
+    })
+
+    # Synchronise inputs across pages:
+    # LA
+    observe({
+      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
+    })
+    # Topic
+    observe({
+      shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
+    })
+    # Indicator
+    observe({
+      shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
     })
 
     # Return reactive settings
     app_settings <- list(
       la = reactive({
-        input$la_name
+        previous_la_name()
       }),
       topic = reactive({
-        input$topic_name
+        debounced_topic_name()
       }),
       indicator = reactive({
-        input$indicator_name
+        debounced_indicator_name()
       })
     )
 

@@ -15,7 +15,7 @@ ui_dev <- bslib::page_fillable(
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
   # Tab header ==============================================================
-  h1("Regional Level"),
+  h1("Statistical Neighbour Level"),
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -80,7 +80,7 @@ ui_dev <- bslib::page_fillable(
         ),
       ),
       bslib::nav_panel(
-        title = "Line chart - user selection",
+        title = "Line chart - User selection",
         bslib::card(
           id = "region_multi_line",
           bslib::card_body(
@@ -118,7 +118,7 @@ ui_dev <- bslib::page_fillable(
         ),
       ),
       bslib::nav_panel(
-        title = "Bar chart - user selection",
+        title = "Bar chart - User selection",
         bslib::card(
           id = "region_multi_bar",
           bslib::card_body(
@@ -179,8 +179,7 @@ server_dev <- function(input, output, session) {
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
         Topic == input$topic_input,
-        Measure == input$indicator,
-        !is.na(Years)
+        Measure == input$indicator
       )
   })
 
@@ -211,7 +210,7 @@ server_dev <- function(input, output, session) {
     stat_n_sn_avg <- filtered_bds$data |>
       dplyr::filter(`LA and Regions` %in% stat_n_sns()) |>
       dplyr::summarise(
-        values_num = mean(values_num, na.rm = TRUE),
+        values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
         .by = c("Years", "Years_num")
       ) |>
       dplyr::mutate(
@@ -257,11 +256,7 @@ server_dev <- function(input, output, session) {
       tidyr::pivot_wider(
         id_cols = c("LA Number", "LA and Regions"),
         names_from = Years,
-        values_from = values_num,
-      ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = "LA Number"
+        values_from = values_num
       )
   })
 
@@ -272,9 +267,13 @@ server_dev <- function(input, output, session) {
 
     dfe_reactable(
       stat_n_sns_table,
-      columns = align_reactable_cols(
-        stat_n_sns_table,
-        num_exclude = "LA Number"
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          stat_n_sns_table,
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, stat_n_sns_table, input$la_input)
@@ -297,7 +296,17 @@ server_dev <- function(input, output, session) {
     dfe_reactable(
       stat_n_comp_table,
       # Create the reactable with specific column alignments
-      columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
+      columns = utils::modifyList(
+        format_num_reactable_cols(
+          stat_n_comp_table,
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
+      ),
+      rowStyle = function(index) {
+        highlight_selected_row(index, stat_n_comp_table)
+      },
       pagination = FALSE
     )
   })
@@ -323,15 +332,7 @@ server_dev <- function(input, output, session) {
     # Get latest rank, ties are set to min & NA vals to NA rank
     stat_n_rank <- filtered_bds$data |>
       filter_la_regions(la_names_bds, latest = TRUE) |>
-      dplyr::mutate(
-        rank = dplyr::case_when(
-          is.na(values_num) ~ NA,
-          # Rank in descending order
-          stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-          # Rank in ascending order
-          stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-        )
-      ) |>
+      calculate_rank(stat_n_indicator_polarity) |>
       filter_la_regions(input$la_input, pull_col = "rank")
 
 
@@ -344,60 +345,73 @@ server_dev <- function(input, output, session) {
     stat_n_indicator_val <- filtered_bds$data |>
       filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
 
+    # Boolean as to whether to include Quartile Banding
+    no_show_qb <- input$indicator %in% no_qb_indicators
+
     # Calculating which quartile this value sits in
     stat_n_quartile <- calculate_quartile_band(
       stat_n_indicator_val,
       stat_n_quartile_bands,
-      stat_n_indicator_polarity
+      stat_n_indicator_polarity,
+      no_show_qb
     )
 
     # SN stats table
-    data.frame(
-      "LA Number" = stat_n_diff() |>
-        filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
-      "LA and Regions" = stat_n_stats_geog,
-      "Trend" = stat_n_trend,
-      "Change from previous year" = stat_n_change_prev,
-      "National Rank" = c(stat_n_rank, NA, NA),
-      "Quartile Banding" = c(stat_n_quartile, NA, NA),
-      "Polarity" = stat_n_indicator_polarity,
-      check.names = FALSE
+    build_sn_stats_table(
+      stat_n_diff(),
+      stat_n_stats_geog,
+      stat_n_trend,
+      stat_n_change_prev,
+      stat_n_rank,
+      stat_n_quartile,
+      stat_n_indicator_polarity
     )
   })
 
   # Main stats table
   output$stat_n_stats_table <- reactable::renderReactable({
-    stat_n_stats_output <- stat_n_stats_table() |>
-      pretty_num_table(
-        dp = get_indicator_dps(filtered_bds$data),
-        include_columns = c("Change from previous year")
-      )
+    stat_n_stats_output <- stat_n_stats_table()
 
     dfe_reactable(
-      stat_n_stats_output |>
-        dplyr::select(-Polarity),
+      stat_n_stats_output,
+      rowStyle = function(index) {
+        highlight_selected_row(index, stat_n_stats_output, input$la_input)
+      },
       columns = modifyList(
         # Create the reactable with specific column alignments
-        align_reactable_cols(
+        format_num_reactable_cols(
           stat_n_stats_output,
+          get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding")
+          categorical = c("Trend", "Quartile Banding", "Latest National Rank")
         ),
         # Define specific formatting for the Trend and Quartile Banding columns
         list(
+          set_custom_default_col_widths(),
           Trend = reactable::colDef(
-            cell = trend_icon_renderer
+            cell = trend_icon_renderer,
+            style = function(value) {
+              get_trend_colour(value, stat_n_stats_output$Polarity[1])
+            }
           ),
-          `National Rank` = reactable::colDef(na = ""),
           `Quartile Banding` = reactable::colDef(
-            style = quartile_banding_col_def(stat_n_stats_output),
-            na = ""
-          )
+            style = function(value, index) {
+              color <- get_quartile_band_cell_colour(
+                stat_n_stats_output[index, "Polarity"],
+                stat_n_stats_output[index, "Quartile Banding"]
+              )
+              list(background = color)
+            }
+          ),
+          `Latest National Rank` = reactable::colDef(
+            header = add_tooltip_to_reactcol(
+              "Latest National Rank",
+              "Rank 1 is always best/top"
+            )
+          ),
+          Polarity = reactable::colDef(show = FALSE)
         )
-      ),
-      rowStyle = function(index) {
-        highlight_selected_row(index, stat_n_stats_output, input$la_input)
-      }
+      )
     )
   })
 
@@ -450,7 +464,7 @@ server_dev <- function(input, output, session) {
     bar_chart = NULL
   )
 
-  # Keep line and bar inputs synchronized without resetting selections
+  # Keep line and bar inputs synchronised without resetting selections
   observeEvent(input$chart_line_input,
     {
       # Capture the current reactive values
@@ -528,7 +542,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -575,7 +593,9 @@ server_dev <- function(input, output, session) {
         get_years(focus_line_data),
         tooltip_vlines,
         focus_line_data,
-        indicator_dps()
+        indicator_dps(),
+        input$la_input,
+        "#12436D"
       )
 
       # Plotting interactive graph
@@ -615,7 +635,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -641,9 +665,13 @@ server_dev <- function(input, output, session) {
           na.rm = TRUE
         ) +
         format_axes(stat_n_line_chart_data) +
-        manual_colour_mapping(
-          c(input$la_input, input$chart_line_input),
-          type = "line"
+        set_plot_colours(
+          data.frame(
+            `LA and Regions` = c(input$la_input, input$chart_line_input),
+            check.names = FALSE
+          ),
+          "colour",
+          input$la_input
         ) +
         set_plot_labs(filtered_bds$data) +
         custom_theme() +
@@ -656,7 +684,8 @@ server_dev <- function(input, output, session) {
         get_years(stat_n_line_chart_data),
         tooltip_vlines,
         stat_n_line_chart_data,
-        indicator_dps()
+        indicator_dps(),
+        input$la_input
       )
 
       # Plotting interactive graph
@@ -684,7 +713,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -695,10 +728,11 @@ server_dev <- function(input, output, session) {
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = glue::glue_data(
-              focus_bar_data |>
-                pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            tooltip = tooltip_bar(
+              focus_bar_data,
+              indicator_dps(),
+              input$la_input,
+              "#12436D"
             ),
             data_id = `LA and Regions`
           ),
@@ -717,7 +751,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = stat_n_focus_bar_chart,
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     }
@@ -744,7 +782,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = display_no_data_plot(),
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     } else {
@@ -755,10 +797,10 @@ server_dev <- function(input, output, session) {
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = glue::glue_data(
-              stat_n_bar_multi_data |>
-                pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-              "Year: {Years}\n{`LA and Regions`}: {values_num}"
+            tooltip = tooltip_bar(
+              stat_n_bar_multi_data,
+              indicator_dps(),
+              input$la_input
             ),
             data_id = `LA and Regions`
           ),
@@ -768,10 +810,7 @@ server_dev <- function(input, output, session) {
           colour = "black"
         ) +
         format_axes(stat_n_bar_multi_data) +
-        manual_colour_mapping(
-          c(input$la_input, input$chart_bar_input),
-          type = "bar"
-        ) +
+        set_plot_colours(stat_n_bar_multi_data, "fill", input$la_input) +
         set_plot_labs(filtered_bds$data) +
         custom_theme()
 
@@ -779,7 +818,11 @@ server_dev <- function(input, output, session) {
       ggiraph::girafe(
         ggobj = stat_n_multi_bar_chart,
         width_svg = 8.5,
-        options = generic_ggiraph_options(),
+        options = generic_ggiraph_options(
+          opts_hover(
+            css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+          )
+        ),
         fonts = list(sans = "Arial")
       )
     }

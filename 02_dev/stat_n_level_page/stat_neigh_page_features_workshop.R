@@ -13,15 +13,14 @@ list.files("R/", full.names = TRUE) |>
 # - Regional Authorities
 # Set user inputs
 selected_topic <- "Health and Wellbeing"
-selected_indicator <- "Infant Mortality"
-selected_la <- "Cumberland"
+selected_indicator <- "Low birth weight"
+selected_la <- "Barnet"
 
 # Filter BDS for topic and indicator
 filtered_bds <- bds_metrics |>
   dplyr::filter(
     Topic == selected_topic,
-    Measure == selected_indicator,
-    !is.na(Years)
+    Measure == selected_indicator
   )
 
 # Decimal point setting
@@ -50,7 +49,7 @@ stat_n_filtered_bds <- filtered_bds |>
 stat_n_sn_avg <- stat_n_filtered_bds |>
   dplyr::filter(`LA and Regions` %in% stat_n_sns) |>
   dplyr::summarise(
-    values_num = mean(values_num, na.rm = TRUE),
+    values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
     .by = c("Years", "Years_num")
   ) |>
   dplyr::mutate(
@@ -89,10 +88,6 @@ stat_n_table <- stat_n_long |>
     id_cols = c("LA Number", "LA and Regions"),
     names_from = Years,
     values_from = values_num,
-  ) |>
-  pretty_num_table(
-    dp = indicator_dps,
-    exclude_columns = "LA Number"
   )
 
 # Statistical Neighbour Level SN table ----------------------------------------
@@ -104,7 +99,14 @@ stat_n_sn_table <- stat_n_table |>
 dfe_reactable(
   stat_n_sn_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(stat_n_sn_table, num_exclude = "LA Number"),
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      stat_n_sn_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number"
+    ),
+    set_custom_default_col_widths()
+  ),
   rowStyle = function(index) {
     highlight_selected_row(index, stat_n_sn_table, selected_la)
   },
@@ -125,7 +127,17 @@ stat_n_comp_table <- stat_n_table |>
 dfe_reactable(
   stat_n_comp_table,
   # Create the reactable with specific column alignments
-  columns = align_reactable_cols(stat_n_comp_table, num_exclude = "LA Number"),
+  columns = utils::modifyList(
+    format_num_reactable_cols(
+      stat_n_comp_table,
+      get_indicator_dps(filtered_bds),
+      num_exclude = "LA Number"
+    ),
+    set_custom_default_col_widths()
+  ),
+  rowStyle = function(index) {
+    highlight_selected_row(index, stat_n_comp_table)
+  },
   pagination = FALSE
 )
 
@@ -149,15 +161,7 @@ stat_n_trend <- as.numeric(stat_n_change_prev)
 # Get latest rank, ties are set to min & NA vals to NA rank
 stat_n_rank <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
-  dplyr::mutate(
-    rank = dplyr::case_when(
-      is.na(values_num) ~ NA,
-      # Rank in descending order
-      stat_n_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
-      # Rank in ascending order
-      stat_n_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
-    )
-  ) |>
+  calculate_rank(stat_n_indicator_polarity) |>
   filter_la_regions(selected_la, pull_col = "rank")
 
 # Calculate quartile bands for indicator
@@ -169,56 +173,59 @@ stat_n_quartile_bands <- filtered_bds |>
 stat_n_indicator_val <- filtered_bds |>
   filter_la_regions(selected_la, latest = TRUE, pull_col = "values_num")
 
+# Boolean as to whether to include Quartile Banding
+no_show_qb <- selected_indicator %in% no_qb_indicators
+
 # Calculating which quartile this value sits in
 stat_n_quartile <- calculate_quartile_band(
   stat_n_indicator_val,
   stat_n_quartile_bands,
-  stat_n_indicator_polarity
+  stat_n_indicator_polarity,
+  no_show_qb
 )
 
 # SN stats table
-stat_n_stats_table <- data.frame(
-  "LA Number" = stat_n_diff |>
-    filter_la_regions(stat_n_stats_geog, pull_col = "LA Number"),
-  "LA and Regions" = stat_n_stats_geog,
-  "Trend" = stat_n_trend,
-  "Change from previous year" = stat_n_change_prev,
-  "National Rank" = c(stat_n_rank, NA, NA),
-  "Quartile Banding" = c(stat_n_quartile, NA, NA),
-  "Polarity" = stat_n_indicator_polarity,
-  check.names = FALSE
-) |>
-  pretty_num_table(
-    dp = get_indicator_dps(filtered_bds),
-    include_columns = c("Change from previous year")
-  )
+stat_n_stats_table <- build_sn_stats_table(
+  stat_n_diff,
+  stat_n_stats_geog,
+  stat_n_trend,
+  stat_n_change_prev,
+  stat_n_rank,
+  stat_n_quartile,
+  stat_n_indicator_polarity
+)
 
 # Output stats table
 dfe_reactable(
-  stat_n_stats_table |>
-    dplyr::select(-Polarity),
+  stat_n_stats_table,
+  rowStyle = function(index) {
+    highlight_selected_row(index, stat_n_stats_table, selected_la)
+  },
   columns = modifyList(
-    # Create the reactable with specific column alignments
-    align_reactable_cols(
+    format_num_reactable_cols(
       stat_n_stats_table,
+      get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding")
+      categorical = c("Trend", "Quartile Banding", "National Rank")
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
+      set_custom_default_col_widths(),
       Trend = reactable::colDef(
-        cell = trend_icon_renderer
+        cell = trend_icon_renderer,
+        style = function(value) {
+          get_trend_colour(value, stat_n_stats_table$Polarity[1])
+        }
       ),
-      `National Rank` = reactable::colDef(na = ""),
+      # Just colour the QB cell
       `Quartile Banding` = reactable::colDef(
-        style = quartile_banding_col_def(stat_n_stats_table),
-        na = ""
-      )
+        style = function(value, index) {
+          quartile_banding_col_def(stat_n_stats_table[index, ])
+        }
+      ),
+      Polarity = reactable::colDef(show = FALSE)
     )
-  ),
-  rowStyle = function(index) {
-    highlight_selected_row(index, stat_n_stats_table, selected_la)
-  }
+  )
 )
 
 
@@ -271,7 +278,9 @@ vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
   focus_line_data,
-  indicator_dps
+  indicator_dps,
+  selected_la,
+  "#12436D"
 )
 
 # Plotting interactive graph
@@ -326,10 +335,13 @@ region_line_chart <- stat_n_line_chart_data |>
     ),
     na.rm = TRUE
   ) +
-  format_axes(stat_n_line_chart_data) +
-  manual_colour_mapping(
-    c(selected_la, stat_n_random_selection),
-    type = "line"
+  set_plot_colours(
+    data.frame(
+      `LA and Regions` = c(selected_la, stat_n_random_selection),
+      check.names = FALSE
+    ),
+    "colour",
+    selected_la
   ) +
   set_plot_labs(filtered_bds) +
   custom_theme() +
@@ -342,7 +354,8 @@ vertical_hover <- lapply(
   get_years(stat_n_line_chart_data),
   tooltip_vlines,
   stat_n_line_chart_data,
-  indicator_dps
+  indicator_dps,
+  selected_la
 )
 
 # Plotting interactive graph
@@ -369,10 +382,11 @@ stat_n_focus_bar_chart <- focus_bar_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        focus_bar_data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
+      tooltip = tooltip_bar(
+        focus_bar_data,
+        stat_n_indicator_polarity,
+        selected_la,
+        "#12436D"
       ),
       data_id = `LA and Regions`
     ),
@@ -391,7 +405,11 @@ stat_n_focus_bar_chart <- focus_bar_data |>
 ggiraph::girafe(
   ggobj = stat_n_focus_bar_chart,
   width_svg = 8.5,
-  options = generic_ggiraph_options(),
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  ),
   fonts = list(sans = "Arial")
 )
 
@@ -407,11 +425,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = glue::glue_data(
-        stat_n_bar_multi_data |>
-          pretty_num_table(include_columns = "values_num", dp = indicator_dps),
-        "Year: {Years}\n{`LA and Regions`}: {values_num}"
-      ),
+      tooltip = tooltip_bar(stat_n_bar_multi_data, stat_n_indicator_polarity, selected_la),
       data_id = `LA and Regions`
     ),
     position = "dodge",
@@ -420,10 +434,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
     colour = "black"
   ) +
   format_axes(stat_n_bar_multi_data) +
-  manual_colour_mapping(
-    c(selected_la, stat_n_random_selection),
-    type = "bar"
-  ) +
+  set_plot_colours(stat_n_bar_multi_data, "fill", selected_la) +
   set_plot_labs(filtered_bds) +
   custom_theme()
 
@@ -431,6 +442,10 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
 ggiraph::girafe(
   ggobj = stat_n_multi_bar_chart,
   width_svg = 8.5,
-  options = generic_ggiraph_options(),
+  options = generic_ggiraph_options(
+    opts_hover(
+      css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+    )
+  ),
   fonts = list(sans = "Arial")
 )

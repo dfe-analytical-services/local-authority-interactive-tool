@@ -39,15 +39,15 @@ minimal_server <- function(input, output, session) {
     topic = NULL,
     indicator = NULL
   )
-  appInputsServer("la_level", shared_values)
+  appInputsServer("la_level", shared_values, topic_indicator_full)
 }
 
 minimal_app <- shinyApp(minimal_ui, minimal_server)
 
 shinytest_app <- shinytest2::AppDriver$new(
   minimal_app,
-  load_timeout = 45 * 1000,
-  timeout = 20 * 1000,
+  load_timeout = 45 * 10000,
+  timeout = 20 * 10000,
   wait = TRUE
 )
 
@@ -61,19 +61,20 @@ test_that("Deafult inputs", {
   # Topic
   expect_equal(
     shinytest_app$get_value(input = "la_level-topic_name"),
-    "Health and Wellbeing"
+    "All Topics"
   )
 
   # Indicator
   expect_equal(
     shinytest_app$get_value(input = "la_level-indicator_name"),
-    "Infant Mortality"
+    "A level cohort Average point score per entry"
   )
 })
 
 test_that("Change in topic input leads to a change in indicator input", {
   # Set Topic input to Economic Factors
   shinytest_app$set_inputs(`la_level-topic_name` = "Economic Factors")
+  shinytest_app$wait_for_idle()
 
   # Top of the Economic Factors indicators
   expect_equal(

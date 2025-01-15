@@ -17,6 +17,8 @@ list.files("R/lait_modules/", full.names = TRUE) |>
 ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+  tags$head(htmltools::includeScript("www/custom_js.js")),
+  shinyToastify::useShinyToastify(),
 
   # Tab header ================================================================
   h1("Statistical Neighbour Level"),
@@ -26,22 +28,7 @@ ui_mod <- bslib::page_fillable(
   appInputsUI("stat_n_inputs"),
 
   # Region tables =============================================================
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_header("Statistical Neighbours"),
-      # Statistical Neighbour LA SNs Table ----------------------------------
-      StatN_LASNsTableUI("stat_n_sns_table"),
-      # Statistical Neighbour LA Geog Compare Table -------------------------
-      StatN_GeogCompTableUI("stat_n_comp_table")
-    )
-  ),
-  div(
-    class = "well",
-    # Statistical Neighbour Statistics Table ------------------------------
-    StatN_StatsTableUI("stat_n_stats_table")
-  ),
+  StatN_TablesUI("stat_n_tables"),
   div(
     class = "well",
     style = "overflow-y: visible;",
@@ -69,12 +56,12 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("stat_n_inputs", shared_values)
+  app_inputs <- appInputsServer("stat_n_inputs", shared_values, topic_indicator_full)
 
   # Statistical Neighbour tables ==============================================
   # LA statistical neighbours table -------------------------------------------
   StatN_LASNsTableServer(
-    "stat_n_sns_table",
+    "stat_n_tables",
     app_inputs,
     bds_metrics,
     stat_n_la
@@ -82,7 +69,7 @@ server_mod <- function(input, output, session) {
 
   # LA geographic comparison table --------------------------------------------
   StatN_GeogCompTableServer(
-    "stat_n_comp_table",
+    "stat_n_tables",
     app_inputs,
     bds_metrics,
     stat_n_la
@@ -90,11 +77,12 @@ server_mod <- function(input, output, session) {
 
   # Statistics Table ----------------------------------------------------------
   StatN_StatsTableServer(
-    "stat_n_stats_table",
+    "stat_n_stats_mod",
     app_inputs,
     bds_metrics,
     stat_n_la,
-    la_names_bds
+    la_names_bds,
+    no_qb_indicators
   )
 
   # Statistical Neighbour charts ==============================================
@@ -103,7 +91,8 @@ server_mod <- function(input, output, session) {
     "stat_n_focus_line",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_data
   )
 
   # Multi-choice line chart ---------------------------------------------------
@@ -112,7 +101,8 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    shared_values
+    shared_values,
+    covid_affected_data
   )
 
   # Focus bar chart -----------------------------------------------------------
@@ -120,7 +110,8 @@ server_mod <- function(input, output, session) {
     "stat_n_focus_bar",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_data
   )
 
   # Multi-choice bar chart ----------------------------------------------------
@@ -129,8 +120,11 @@ server_mod <- function(input, output, session) {
     app_inputs,
     bds_metrics,
     stat_n_la,
-    shared_values
+    shared_values,
+    covid_affected_data
   )
+
+  CopyToClipboardPopUpServer("copy-to-clipboard")
 }
 
 

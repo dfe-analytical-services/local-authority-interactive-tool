@@ -17,6 +17,9 @@ list.files("R/lait_modules/", full.names = TRUE) |>
 ui_mod <- bslib::page_fillable(
   ## Custom CSS ===============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
+  tags$head(htmltools::includeScript("www/custom_js.js")),
+  shinyToastify::useShinyToastify(),
+  shinyjs::useShinyjs(),
 
   # Tab header ================================================================
   h1("Local Authority View"),
@@ -32,7 +35,15 @@ ui_mod <- bslib::page_fillable(
   LA_StatsTableUI("la_stats"),
 
   # LA Charts ----------------------------------
-  LA_ChartUI("la_chart"),
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_tab(
+      id = "la_charts",
+      LA_LineChartUI("la_line_chart"),
+      LA_BarChartUI("la_bar_chart")
+    )
+  ),
 
   # LA Metadata ----------------------------------
   LA_LevelMetaUI("la_meta")
@@ -52,8 +63,11 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("la_inputs", shared_values)
-
+  app_inputs <- appInputsServer(
+    "la_inputs",
+    shared_values,
+    metrics_raw
+  )
 
   # LA level table ----------------------------------
   LA_LevelTableServer(
@@ -68,23 +82,26 @@ server_mod <- function(input, output, session) {
     "la_stats",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    no_qb_indicators
   )
 
   # LA line chart  ----------------------------------
   LA_LineChartServer(
-    "la_chart",
+    "la_line_chart",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_data
   )
 
   # LA bar chart  ----------------------------------
   LA_BarChartServer(
-    "la_chart",
+    "la_bar_chart",
     app_inputs,
     bds_metrics,
-    stat_n_la
+    stat_n_la,
+    covid_affected_data
   )
 
   # LA Meta
@@ -93,6 +110,9 @@ server_mod <- function(input, output, session) {
     app_inputs$indicator,
     metrics_clean
   )
+
+  # Copy-to-clipboard pop-up notification
+  CopyToClipboardPopUpServer("copy-to-clipboard")
 }
 
 

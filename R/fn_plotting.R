@@ -1,16 +1,88 @@
-#' @title Extract the Unique Y-Axis Title from a Dataset
-#' @description This function extracts the unique y-axis title from a
-#' given dataset.
-#' @param data_full A dataframe containing the full dataset.
-#' @return A character vector containing the unique y-axis title(s).
+#' Get Y-Axis Title for Plot
+#'
+#' This function retrieves the title for the Y-axis based on the `y_axis_name`
+#' column of the provided dataset. If there is only one unique value for
+#' `y_axis_name`, the title will be formatted with line breaks. If there are
+#' multiple unique values, the function returns a combined title indicating
+#' mixed units, with the individual units separated by commas and "and" before
+#' the last unit.
+#'
+#' @param data_full A data frame containing the `y_axis_name` column, which will
+#'   be used to determine the Y-axis title.
+#'
+#' @return A character string representing the Y-axis title. This can either
+#'   be the formatted title with line breaks or a combined string indicating
+#'   mixed units.
+#'
+#' @details The function uses `pull_uniques` to extract unique values from
+#'   the `y_axis_name` column. If a single unique value is found, it formats
+#'   it with line breaks via `add_line_breaks`. If multiple unique values are
+#'   found, the function combines them with commas and "and" before the last unit.
+#'
 #' @examples
-#' \dontrun{
-#' get_yaxis_title(data_full = my_data)
-#' }
-#' @export
+#' # If there is a single y-axis title
+#' get_yaxis_title(data_full = data_frame(y_axis_name = c("Units")))
+#'
+#' # If there are multiple y-axis titles
+#' get_yaxis_title(data_full = data_frame(y_axis_name = c("Units", "Indicator")))
+#'
 get_yaxis_title <- function(data_full) {
-  data_full |>
+  y_axis_title <- data_full |>
     pull_uniques("y_axis_name")
+
+  # If more than one y-axis title then combine
+  if (length(y_axis_title) == 1) {
+    add_line_breaks(y_axis_title)
+  } else {
+    mixed_title <- paste(
+      "Mixed units:\n",
+      paste(
+        paste(y_axis_title[-length(y_axis_title)], collapse = ",\n"),
+        y_axis_title[length(y_axis_title)],
+        sep = " and\n"
+      )
+    )
+  }
+}
+
+
+#' Get X-Axis Title for Plot
+#'
+#' This function retrieves the title for the X-axis based on the `Year_Type`
+#' column of the provided dataset. If there is only one unique value for
+#' `Year_Type`, the title will be formatted with line breaks. If there are
+#' multiple unique values, a generic "Mixed Year Types" label is used.
+#'
+#' @param data_full A data frame containing the `Year_Type` column, which will
+#'   be used to determine the X-axis title.
+#'
+#' @return A character string representing the X-axis title. This can either
+#'   be the value of `Year_Type` formatted with line breaks or the string
+#'   "Mixed Year Types" if there are multiple unique values.
+#'
+#' @details The function uses `pull_uniques` to extract unique values from
+#'   the `Year_Type` column. If a single unique value is found, it formats
+#'   it with line breaks via `add_line_breaks`. If multiple unique values
+#'   are found, the title will be "Plain Years".
+#'
+#' @examples
+#' # If there is a single year type
+#' get_xaxis_title(data_full = data_frame(Year_Type = c("Fiscal", "Fiscal", "Fiscal")))
+#'
+#' # If there are multiple year types
+#' get_xaxis_title(data_full = data_frame(Year_Type = c("Fiscal", "Calendar")))
+get_xaxis_title <- function(data_full) {
+  x_axis_title <- data_full |>
+    pull_uniques("Year_Type")
+
+  # If more than one y-axis title then give generic
+  if (length(x_axis_title) == 0 || all(is.na(x_axis_title))) {
+    "Years (no type given)"
+  } else if (length(x_axis_title) == 1) {
+    add_line_breaks(x_axis_title)
+  } else {
+    "Mixed Year Types"
+  }
 }
 
 
@@ -27,8 +99,23 @@ get_yaxis_title <- function(data_full) {
 #' }
 #' @export
 get_plot_title <- function(data_full) {
-  data_full |>
+  chart_title <- data_full |>
     pull_uniques("Chart_title")
+
+  # If more than one title, format with "," & "and"s
+  if (length(chart_title) == 1) {
+    chart_title
+  } else {
+    paste(
+      "Chart showing -",
+      paste(
+        paste(chart_title[-length(chart_title)], collapse = ",<br>"),
+        chart_title[length(chart_title)],
+        sep = " and<br>"
+      ),
+      sep = "<br>"
+    )
+  }
 }
 
 
@@ -53,16 +140,32 @@ get_plot_title <- function(data_full) {
 #' The output is a named vector where the names correspond to the groups,
 #' and the values are the respective colors.
 #'
-create_plot_colours <- function(data_long) {
-  # Colours
+create_plot_colours <- function(data_long, focus_group = NULL) {
+  # Extract unique groups for plotting
   plot_groups <- data_long |>
     pull_uniques("LA and Regions")
 
-  plot_colours <- afcolours::af_colours(
-    type = "categorical",
-    n = length(plot_groups)
-  )
-  names(plot_colours) <- plot_groups
+  # Initialise plot colours
+  plot_colours <- c()
+
+  # Assign specific colour for focus group if provided & remove from plot groups
+  if (!is.null(focus_group) && focus_group %in% plot_groups) {
+    plot_colours[focus_group] <- get_la_focus_colour()
+    plot_groups <- setdiff(plot_groups, focus_group)
+  }
+
+  # Assign specific colour for "England" if present & remove from plot groups
+  if ("England" %in% plot_groups) {
+    plot_colours["England"] <- get_england_colour()
+    plot_groups <- setdiff(plot_groups, "England")
+  }
+
+  # Assign colours for remaining groups
+  remaining_colours <- get_clean_af_colours()[seq_along(plot_groups)]
+  names(remaining_colours) <- plot_groups
+
+  # Combine all colours
+  plot_colours <- c(plot_colours, remaining_colours)
 
   plot_colours
 }
@@ -136,7 +239,7 @@ create_focus_plot_sizes <- function(data_long, focus_group) {
   names(plot_sizes) <- plot_groups
 
   # Set focus line size
-  plot_sizes[focus_group] <- 1
+  plot_sizes[focus_group] <- 1.5
 
   plot_sizes
 }
@@ -219,7 +322,6 @@ pretty_y_gridlines <- function(data_long) {
 }
 
 
-
 #' Extract unique years from a dataset
 #'
 #' This function retrieves unique years from a long-form dataset, allowing
@@ -261,6 +363,37 @@ get_years <- function(data_long, type = "numeric") {
 }
 
 
+#' Remove Trailing Zeroes from Formatted Numbers
+#'
+#' This function takes numeric values, formats them using `pretty_num_large()`
+#' and removes any trailing zeroes from the decimal part, but only for values
+#' greater than zero.
+#'
+#' @param x A numeric vector to be formatted.
+#' @param dp Integer. The default number of decimal places to be used if the
+#'   number has decimals. Default is 0.
+#' @param ... Additional arguments passed to `pretty_num_large`.
+#'
+#' @return A character vector with formatted numeric values and no trailing zeroes,
+#'         only for values greater than 0.
+#'
+#' @examples
+#' pretty_num_remove_trailing_zeroes(c(1000000, 1234567.8901, 100.0), dp = 3)
+#' pretty_num_remove_trailing_zeroes(c(5000000000, 9876543210), dp = 2)
+#'
+#' @export
+pretty_num_remove_zero <- function(x, dp = 2, ...) {
+  # Apply pretty_num_large to format the numbers
+  formatted_numbers <- pretty_num_large(x, dp = dp, ...)
+
+  # Remove trailing zeroes after decimal point
+  if (abs(as.numeric(x)) >= 1 || abs(as.numeric(x)) == 0) {
+    formatted_numbers <- sub("\\.0+(?=\\s|$)", "", formatted_numbers, perl = TRUE)
+  }
+
+  formatted_numbers
+}
+
 
 #' Format Axes for Plotting
 #'
@@ -287,7 +420,7 @@ get_years <- function(data_long, type = "numeric") {
 #' ggplot(data_long) +
 #'   axes +
 #'   geom_line()
-format_axes <- function(data_long) {
+format_axes <- function(data_long, indicator_dps = 2) {
   # Get pretty Y-axis breaks
   y_breaks <- pretty_y_gridlines(data_long)
 
@@ -297,13 +430,18 @@ format_axes <- function(data_long) {
   # Get X-axis year labels (these can be non-numeric such as 2019-20)
   year_labels <- get_years(data_long, "character")
 
+  # Check if suffixes consistent
+  if (!check_year_suffix_consistency(data_long)) {
+    year_labels <- num_years
+  }
+
   # Axes formatting
   list(
     ggplot2::scale_y_continuous(
       limits = range(y_breaks),
       expand = expansion(0, 0),
       breaks = pretty(y_breaks),
-      labels = unlist(lapply(pretty(y_breaks), dfeR::pretty_num))
+      labels = unlist(lapply(pretty(y_breaks), pretty_num_remove_zero, indicator_dps))
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
@@ -348,9 +486,9 @@ set_plot_colours <- function(data_long,
                              colour_type = "colour",
                              focus_group = NULL) {
   if (colour_type == "colour") {
-    ggplot2::scale_colour_manual(values = create_plot_colours(data_long))
+    ggplot2::scale_colour_manual(values = create_plot_colours(data_long, focus_group))
   } else if (colour_type == "fill") {
-    ggplot2::scale_fill_manual(values = create_plot_colours(data_long))
+    ggplot2::scale_fill_manual(values = create_plot_colours(data_long, focus_group))
   } else if (colour_type == "focus") {
     list(
       ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group)),
@@ -370,7 +508,7 @@ set_plot_colours <- function(data_long,
 #'
 #' The function uses helper functions to determine appropriate titles for
 #' the axes and the plot, ensuring that the labels are relevant to the data
-#' being visualized.
+#' being visualised.
 #'
 #' @param filtered_bds A data frame or object containing the filtered data
 #'   used for plotting. This should include information necessary to derive
@@ -388,11 +526,12 @@ set_plot_colours <- function(data_long,
 #'   geom_line()
 #'
 set_plot_labs <- function(filtered_bds) {
+  x_title <- get_xaxis_title(filtered_bds)
   y_title <- get_yaxis_title(filtered_bds)
   plot_title <- get_plot_title(filtered_bds)
 
   ggplot2::labs(
-    x = "",
+    x = x_title,
     y = y_title,
     title = plot_title
   )
@@ -418,18 +557,26 @@ set_plot_labs <- function(filtered_bds) {
 #'   geom_line() +
 #'   custom_theme()
 #'
-custom_theme <- function() {
+custom_theme <- function(title_margin = 0) {
   list(
     ggplot2::theme_minimal(),
     ggplot2::theme(
       # Keeps title within chart
       plot.title = ggtext::element_textbox(
         hjust = 0.5,
-        width = unit(0.9, "npc"),
+        width = unit(1, "npc"),
         halign = 0.5,
-        margin = margin(b = unit(15, "lines"))
+        margin = margin(b = unit(22.5 + 7.5 * title_margin, "lines"))
       ),
-      axis.title.y = element_text(angle = 0, vjust = 0.5),
+      axis.title.x = element_text(
+        hjust = 0.5,
+        margin = margin(t = 15, r = 0, b = 0, l = 0)
+      ),
+      axis.title.y = element_text(
+        angle = 0,
+        vjust = 0.5,
+        margin = margin(t = 0, r = 10, b = 0, l = 0)
+      ),
       legend.position = "bottom",
       legend.title = element_blank(),
       panel.grid = element_line(colour = "#D9D9D9"),
@@ -443,54 +590,283 @@ custom_theme <- function() {
 }
 
 
-#' Create Interactive Vertical Lines for Tooltips
+#' Generate year text for tooltip
 #'
-#' This function generates vertical lines on a ggplot2 plot that display
-#' tooltips when hovered over, using the ggiraph package.
+#' This function creates a text string indicating the year based on the
+#' specified years number and the provided data frame.
 #'
-#' @param x A numeric value representing the x-axis position (year)
-#' for the vertical line.
-#' @param data A data frame containing the data for the plot,
-#' filtered for the relevant year.
+#' @param data A data frame containing year information.
+#' @param years_num A numeric value representing the year.
 #'
-#' @return A `ggiraph::geom_vline_interactive` object representing the
-#' vertical line with attached tooltips.
+#' @return A formatted string with the year information.
+#' @export
+generate_year_text <- function(data, years_num) {
+  glue::glue(
+    "Year: {data |>
+      dplyr::filter(Years_num == years_num) |>
+      get_years(type = 'character')}"
+  )
+}
+
+
+#' Generate tooltip text when including measures
 #'
-#' @details
-#' The function creates an interactive vertical line at the specified
-#' x-axis position.
-#' The tooltip displays the year and corresponding values for each
-#' `LA and Regions` group present in the data.
-#' The line is dashed and only becomes visible upon hovering,
-#' enhancing the interactivity of the plot.
+#' This function generates a tooltip text string that includes the measures
+#' along with the corresponding LA and region values.
 #'
-tooltip_vlines <- function(x, data, indicator_dp = 1) {
+#' @param data A data frame containing the measures and values.
+#' @param years_num A numeric value representing the year for filtering.
+#' @param indicator_dp A numeric value for decimal places to format the values.
+#'
+#' @return A formatted string containing measures and corresponding values.
+#' @export
+tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
+  measure_summary <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+    dplyr::filter(Years_num == years_num) |>
+    dplyr::group_by(Measure) |>
+    dplyr::summarise(
+      tooltip_text = paste(
+        paste0(`LA and Regions`, ": ", values_num),
+        collapse = "\n"
+      ),
+      .groups = "drop"
+    )
+
+  glue::glue_data(
+    measure_summary,
+    "{Measure}:\n  {tooltip_text}",
+    .sep = "\n"
+  ) |>
+    paste(collapse = "\n\n")
+}
+
+
+#' Generate Tooltip Text with Conditional Formatting
+#'
+#' This function generates formatted tooltip text for a given dataset, including
+#' optional styling for a specified geography (focus group), with special styling
+#' for "England". The tooltip can be customized to display values and other details
+#' for each geographical region in the dataset.
+#'
+#' @param data A data frame containing the dataset with values to be displayed
+#'   in the tooltip.
+#' @param years_num Numeric. The year to filter the data by.
+#' @param indicator_dp Numeric. The number of decimal places for formatting the
+#'   values.
+#' @param highlight_geography Character or NULL. The geography to be highlighted
+#'   in the tooltip. If NULL, no specific geography is highlighted.
+#' @param focus_colour Character. The colour to use for highlighting the specified
+#'   geography (highlight_geography). Defaults to a color retrieved by
+#'   `get_la_focus_colour()`.
+#'
+#' @return A character string representing the formatted tooltip text for each
+#'   region. Includes the value for each region, with conditional styling for
+#'   "England" and the specified highlight geography.
+#'
+#' @details The function formats the tooltip for each region, and applies bold
+#'   styling and colours for the specified `highlight_geography` and "England".
+#'   The tooltip text includes the region name and the corresponding value, with
+#'   specific styling applied based on the geography.
+#'
+#' @examples
+#' # Generate tooltip text for a dataset with focus on "Barnet" and bold red for "England"
+#' tooltip_text(
+#'   data = my_data, years_num = 2022, indicator_dp = 2,
+#'   highlight_geography = "Barnet", focus_colour = "red"
+#' )
+#'
+#' # Generate tooltip text without any highlighted geography
+#' tooltip_text(data = my_data, years_num = 2022, indicator_dp = 2)
+#'
+tooltip_text <- function(data,
+                         years_num,
+                         indicator_dp,
+                         highlight_geography = NULL,
+                         focus_colour) {
+  data_clean <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
+    dplyr::filter(Years_num == years_num) |>
+    dplyr::arrange(dplyr::desc(values_num))
+
+  # Create formatted tooltip text
+  tooltip_lines <- sapply(seq_len(nrow(data_clean)), function(i) {
+    row <- data_clean[i, ]
+    geography <- row$`LA and Regions`
+    value <- row$values_num
+
+    # Apply styling for highlighted geography
+    if (!is.null(highlight_geography) && geography == highlight_geography) {
+      paste0(
+        "<span style='color:", focus_colour, "; font-weight: bold;'>",
+        geography, ": ", value, "</span>"
+      )
+      # Apply specific styling for "England" if present
+    } else if (geography == "England") {
+      paste0(
+        "<span style='color:", get_england_colour(), "; font-weight: bold;'>",
+        geography, ": ", value, "</span>"
+      )
+    } else {
+      paste0(geography, ": ", value)
+    }
+  })
+
+  paste(tooltip_lines, collapse = "\n")
+}
+
+
+#' Add an Interactive Vertical Line with Tooltips
+#'
+#' Creates an interactive vertical line at a specified `x` position in the plot,
+#' with tooltip content that includes the year and optionally the measure value.
+#' The line can highlight a specified focus group with a custom color.
+#'
+#' @param x Numeric. The x-coordinate for the vertical line, e.g., a specific year.
+#' @param data Data frame. The dataset used for plotting, containing columns
+#'   relevant for generating tooltip content.
+#' @param indicator_dp Integer, default = 1. Number of decimal places to display
+#'   in tooltip values.
+#' @param focus_group Character, optional. Name of the group to highlight in the
+#'   tooltip, if present in the data.
+#' @param focus_colour Character, default = `get_la_focus_colour()`. The color
+#'   to apply to `focus_group` if it appears in tooltips.
+#' @param include_measure Logical, default = FALSE. If TRUE, adds the measure
+#'   value to the tooltip text.
+#'
+#' @details Applies conditional styling to highlight `focus_group` using
+#'   `focus_colour` if specified. The tooltip displays the year and group value,
+#'   optionally including the measure name. If no matching data is found for `x`,
+#'   the function gracefully handles missing information.
+#'
+#' @return A `geom_vline_interactive` object, with custom tooltips and
+#'   interactive hover effects.
+#' @export
+#'
+#' @examples
+#' tooltip_vlines(
+#'   x = 2021, data = my_data, indicator_dp = 1,
+#'   focus_group = "England", focus_colour = "blue",
+#'   include_measure = TRUE
+#' )
+#'
+tooltip_vlines <- function(x,
+                           data,
+                           indicator_dp = 1,
+                           focus_group = NULL,
+                           focus_colour = get_la_focus_colour(),
+                           include_measure = FALSE) {
+  year_text <- generate_year_text(data, x)
+
+  tooltip_content <- if (include_measure) {
+    tooltip_text_w_indicator(data, x, indicator_dp)
+  } else {
+    tooltip_text(data, x, indicator_dp, focus_group, focus_colour)
+  }
+
   geom_vline_interactive(
     xintercept = x,
     data_id = x,
-    tooltip = glue::glue(
-      # Get Years (descriptive)
-      "Year: {data |>
-      dplyr::filter(Years_num == x) |>
-      get_years(type = 'character')}",
-      # Get Geog area: Value
-      paste0(
-        "\n",
-        glue::glue_data(
-          data |>
-            pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-            dplyr::filter(Years_num == x) |>
-            dplyr::arrange(dplyr::desc(values_num)),
-          "{`LA and Regions`}: {values_num}"
-        ),
-        collapse = ""
-      )
-    ),
+    tooltip = paste(year_text, tooltip_content, sep = "\n\n"),
     hover_nearest = TRUE,
     linetype = "dashed",
     size = 2.5,
     color = "transparent"
   )
+}
+
+
+#' Generate Custom Tooltip Text for Bar Chart with Conditional Formatting
+#'
+#' This function generates tooltip text for each row of data to display in
+#' an interactive bar chart, with conditional color formatting for specific
+#' geographic groups such as "England" or a specified `focus_group`.
+#'
+#' @param data Data frame. The dataset used for plotting, containing columns
+#'   relevant for tooltip content such as `LA and Regions`, `values_num`, and
+#'   `Years`.
+#' @param indicator_dps Integer. Number of decimal places to display in
+#'   the `values_num` column.
+#' @param focus_group Character, optional. Name of a specific group to highlight
+#'   in the tooltip if present.
+#' @param text_colour Character, default = `get_la_focus_colour()`. Color to
+#'   apply to `focus_group` if it appears in tooltips.
+#' @param include_measure Logical, default = FALSE. If TRUE, includes the
+#'   measure name in the tooltip if the `Measure` column exists in `data`.
+#'
+#' @details This function processes each row of data to create tooltip text.
+#'   The tooltip text includes the year and values, with optional inclusion
+#'   of the measure name. Conditional styling is applied to `focus_group`
+#'   and the "England" group, using the provided color or `get_england_colour()`
+#'   for "England". The `indicator_dps` parameter controls the decimal precision
+#'   of `values_num` in the tooltip.
+#'
+#' @return A character vector of tooltip text for each row in `data`.
+#' @export
+#'
+#' @examples
+#' tooltip_bar(
+#'   data = my_data, indicator_dps = 1, focus_group = "England",
+#'   text_colour = "blue", include_measure = TRUE
+#' )
+#'
+tooltip_bar <- function(data,
+                        indicator_dps,
+                        focus_group = NULL,
+                        text_colour = get_la_focus_colour(),
+                        include_measure = FALSE) {
+  # Prepare data with specified decimal points
+  data_clean <- data |>
+    pretty_num_table(include_columns = "values_num", dp = indicator_dps)
+
+  # Generate tooltip text for each row of data
+  sapply(seq_len(nrow(data_clean)), function(i) {
+    row <- data_clean[i, ]
+    geography <- row$`LA and Regions`
+    value <- row$values_num
+    year <- row$Years
+    measure_text <- ""
+
+    # Conditionally add Measure to the tooltip if include_measure is TRUE
+    if (include_measure && "Measure" %in% names(row)) {
+      measure_text <- paste0("Measure: ", row$Measure, "\n")
+    }
+
+    # Create formatted tooltip text with colour formatting for "England" and focus_group
+    tooltip_text <- paste0(
+      measure_text,
+      "Year: ",
+      year,
+      "\n\n",
+      ifelse(
+        geography == "England",
+        paste0(
+          "<span style='color:",
+          get_england_colour(),
+          "; font-weight: bold;'>",
+          geography,
+          ": ",
+          value,
+          "</span>"
+        ),
+        ifelse(
+          !is.null(focus_group) && geography == focus_group,
+          paste0(
+            "<span style='color:",
+            text_colour,
+            "; font-weight: bold;'>",
+            geography,
+            ": ",
+            value,
+            "</span>"
+          ),
+          paste0(geography, ": ", value)
+        )
+      )
+    )
+
+    tooltip_text
+  })
 }
 
 
@@ -527,7 +903,7 @@ custom_ggiraph_tooltip <- function() {
 #' Generate Generic ggiraph Options
 #'
 #' This function generates a list of commonly used ggiraph options for
-#' customising tooltips and toolbars in `ggiraph` visualizations.
+#' customising tooltips and toolbars in `ggiraph` visualisations.
 #' It is designed to provide a set of default settings that can be easily
 #' extended or overridden.
 #'
@@ -557,7 +933,6 @@ generic_ggiraph_options <- function(...) {
     ),
     ggiraph::opts_toolbar(
       position = "topright",
-      pngname = "lait-png-download",
       hidden = c("selection", "zoom", "misc")
     ),
     ...
@@ -593,10 +968,11 @@ generic_ggiraph_options <- function(...) {
 #' reordered_data <- reorder_la_regions(chart_data, factor_order)
 #' print(reordered_data)
 #'
-reorder_la_regions <- function(chart_data, factor_order, ...) {
+reorder_la_regions <- function(chart_data, factor_order = NULL, reverse = FALSE, ...) {
   chart_data |>
     dplyr::mutate(
-      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...)
+      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...),
+      `LA and Regions` = if (reverse) forcats::fct_rev(`LA and Regions`) else `LA and Regions`
     ) |>
     dplyr::arrange(`LA and Regions`)
 }
@@ -647,14 +1023,44 @@ manual_colour_mapping <- function(chart_groups, type) {
   }
 }
 
-display_no_data_plot <- function() {
+
+#' Display a "No Data" Plot with Custom Message
+#'
+#' This function generates a placeholder plot displaying a custom message when
+#' no data is available for plotting. The message is centered within a blank
+#' plot to inform the user that data is missing, with a prompt to report any
+#' discrepancies.
+#'
+#' @param label Character. A custom message to display on the plot. Defaults to
+#'   "No plot due to no available data." Additional instructions are included
+#'   in the message to prompt user feedback if they believe data should be
+#'   present.
+#'
+#' @details The function creates an empty plot using `ggplot2`, removing any
+#'   axis lines, gridlines, or other plot elements to focus solely on the
+#'   message text. The plot includes padding for better readability and centers
+#'   the text both horizontally and vertically.
+#'
+#' @return A ggplot object with the custom "no data" message displayed.
+#' @export
+#'
+#' @examples
+#' # Display a plot with the default "no data" message
+#' display_no_data_plot()
+#'
+#' # Display a plot with a custom message
+#' display_no_data_plot(label = "No data available for this indicator.")
+#'
+display_no_data_plot <- function(label = "No plot due to no available data.") {
   error_plot <- ggplot() +
     annotate(
       "text",
       x = 0.5,
-      y = 0.5, # Position at the center of the plot
+      y = 0.5,
+      # Position at the center of the plot
       label = paste0(
-        "No plot due to no available data.\n",
+        label,
+        "\n",
         "If you think this is incorrect, ",
         "please report so in the feedback form."
       ),
@@ -668,4 +1074,395 @@ display_no_data_plot <- function() {
     coord_cartesian(clip = "off")
 
   error_plot
+}
+
+
+#' Create Show Points for COVID-Affected Data
+#'
+#' This function processes data to identify key points to display on a plot
+#' when handling COVID-affected data, such as the first and last non-missing
+#' values before and after missing periods (2019–2021).
+#'
+#' @param data A data frame or tibble containing the dataset with columns
+#'   `LA and Regions`, `Years_num`, and `values_num`. Optionally, it may
+#'   include a `Measure` column for custom groupings.
+#' @param covid_affected A logical vector indicating whether the data is
+#'   affected by COVID (e.g., missing values in 2019–2021).
+#'
+#' @details
+#' This function:
+#' - Groups the data by `LA and Regions` and `Measure` (if present).
+#' - Identifies the first and last missing (`NA`) values in the period
+#'   2019–2021 due to COVID-19.
+#' - Marks the last non-missing value before the first COVID-affected year
+#'   and the first non-missing value after the last COVID-affected year.
+#' - Identifies isolated points for better visualisation.
+#' - Removes intermediate helper columns used for processing.
+#'
+#' @return A tibble with the same structure as the input, augmented with a
+#'   `show_point` column, which is a logical flag indicating whether a
+#'   specific row should be highlighted in the plot.
+#'
+#' @examples
+#' # Example dataset
+#' data <- tibble::tibble(
+#'   `LA and Regions` = rep("Region A", 10),
+#'   Years_num = 2015:2024,
+#'   values_num = c(1:5, NA, NA, 8:10)
+#' )
+#' covid_affected <- rep(TRUE, 10)
+#'
+#' # Process data
+#' result <- create_show_point(data, covid_affected)
+#'
+create_show_point <- function(data, covid_affected_data, selected_indicators) {
+  # Check if all indicators affected by COVID
+  all_covid_affected <- all(
+    covid_affected_data |>
+      pull_uniques("Measure") %in% selected_indicators
+  )
+
+  data |>
+    dplyr::group_by(
+      `LA and Regions`,
+      # Groupby Measure if it exists (for create your own)
+      !!!rlang::syms(if ("Measure" %in% colnames(data)) "Measure" else NULL)
+    ) |>
+    dplyr::arrange(`LA and Regions`, Years_num) |>
+    dplyr::mutate(
+      # Helper: Is the current value NA
+      is_na = is.na(values_num),
+
+      # First COVID affected year (First NA within 2019–2021)
+      is_first_covid_na = (Years_num >= 2019 & Years_num <= 2021) &
+        is_na & dplyr::lag(!is_na, default = FALSE),
+
+      # Last COVID affected year (Last NA within 2019–2021)
+      is_last_covid_na = (Years_num >= 2019 & Years_num <= 2021) &
+        is_na & dplyr::lead(!is_na, default = FALSE),
+
+      # Finds the last non-NA before first COVID (show point)
+      is_prev_covid = dplyr::lead(is_first_covid_na, default = FALSE),
+      # Finds the first non-NA after last COVID (show point)
+      is_post_covid = dplyr::lag(is_last_covid_na, default = FALSE),
+
+      # General NA show point conditions to show isolated points
+      show_point = dplyr::if_else(
+        # Isolated in middle of plot
+        (dplyr::lag(is_na) & dplyr::lead(is_na)) |
+          # Isolated at start of plot
+          (dplyr::row_number() == 1 & dplyr::lead(is_na)) |
+          # Isolated at end of plot
+          (dplyr::row_number() == dplyr::n() & dplyr::lag(is_na)) |
+          # Covid start and end points
+          # (uses all for multiple indicators in create your own)
+          (all_covid_affected & is_prev_covid) |
+          (all_covid_affected & is_post_covid),
+        TRUE,
+        FALSE
+      )
+    ) |>
+    dplyr::ungroup() |>
+    # Clean up - remove uneeded cols
+    dplyr::select(-dplyr::starts_with("is_"))
+}
+
+
+#' Calculate Data for COVID Plot (Break in Timeseries)
+#'
+#' This function identifies periods in the data affected by missing values
+#' during the COVID-19 pandemic (2019–2021) and prepares the data required
+#' to visualise these periods on a plot.
+#'
+#' @param data A data frame or tibble containing the dataset, including columns
+#'   `Years_num` (years), `values_num` (values), and optionally `Measure`
+#'   (for custom groupings in "Create Own" charts).
+#' @param covid_affected A logical vector indicating whether the data is
+#'   affected by COVID-19 (e.g., missing values in 2019–2021).
+#' @param chart_type A string specifying the type of chart: either `"line"` or
+#'   `"bar"`. This determines whether to apply an offset to align with
+#'   non-missing points.
+#'
+#' @details
+#' The function:
+#' - Filters rows with missing (`NA`) values in `values_num` during 2019–2021.
+#' - Calculates start and end years of the missing period and adjusts these
+#'   with an offset for line charts.
+#' - Groups by `Measure` if applicable, allowing for multiple indicators in
+#'   custom charts.
+#' - Checks whether the missing period is consistent across all indicators.
+#' - Generates appropriate labels and returns a data structure for plotting.
+#'
+#' If `chart_type` is `"bar"` and `Measure` is present, it returns grouped data
+#' to support `facet_wrap`. Otherwise, it returns shared COVID-affected period
+#' data for the entire dataset.
+#'
+#' @return A tibble with columns:
+#' - `start_year`: Start of the COVID-affected period.
+#' - `end_year`: End of the COVID-affected period.
+#' - `label_x`: Position for the label.
+#' - `vertical_lines`: Years to draw vertical lines (if applicable).
+#' - `label`: Text label explaining the missing data.
+#'
+#' Returns `NULL` if `covid_affected` is `FALSE`.
+#'
+#' @examples
+#' # Example dataset
+#' data <- tibble::tibble(
+#'   Years_num = c(2018, 2019, 2020, 2021, 2022),
+#'   values_num = c(10, NA, NA, 15, 20),
+#'   Measure = rep("Example Measure", 5)
+#' )
+#' covid_affected <- rep(TRUE, 5)
+#'
+#' # Line chart example
+#' covid_plot_data <- calculate_covid_plot(data, covid_affected, "line")
+#'
+calculate_covid_plot <- function(data, covid_affected_data, selected_indicators, chart_type) {
+  # Check if measures affected by COVID
+  covid_affected <- covid_affected_data |>
+    dplyr::filter(Measure %in% selected_indicators)
+
+  if (nrow(covid_affected) > 0) {
+    # Group/ filter by `Measure` if it exists (for Create Own charts - multiple indicators)
+    grouping_vars <- if ("Measure" %in% colnames(data)) "Measure" else NULL
+
+    # Join covid data to find the NA years due to COVID
+    na_rows <- data |>
+      dplyr::inner_join(
+        covid_affected |> dplyr::select(Measure, Years_num),
+        by = c(grouping_vars, "Years_num")
+      )
+
+    # Whether to offset vline to last/next non-NA point (for line chart)
+    yr_offset <- ifelse(chart_type == "line", 1, 0)
+
+    # Find missing COVID period and calculate label position
+    # (by indicator for Create Own)
+    na_periods <- na_rows |>
+      dplyr::group_by(!!!rlang::syms(grouping_vars)) |>
+      dplyr::summarise(
+        start_year = min(Years_num) - yr_offset,
+        end_year = max(Years_num) + yr_offset,
+        label_x = (min(Years_num) - yr_offset + max(Years_num) + yr_offset) / 2,
+        label = "No data\ndue to COVID",
+        .groups = "drop"
+      )
+
+    # Check if all indicators share the same period (for Create Own)
+    shared_period <- na_periods |>
+      dplyr::summarise(
+        same_period = all(
+          length(unique(start_year)) == 1,
+          length(unique(end_year)) == 1
+        ),
+        start_year = min(start_year),
+        end_year = max(end_year),
+        label_x = (min(start_year) + max(end_year)) / 2
+      )
+
+    # Check if all indicators affected by COVID
+    all_covid_affected <- all(
+      covid_affected |>
+        pull_uniques("Measure") %in% selected_indicators
+    )
+
+    # Set label based on whether the COVID period is the same across all indicators
+    if (shared_period$same_period && all_covid_affected) {
+      shared_period$label <- "No data\ndue to COVID"
+    } else {
+      shared_period$label <- "Some indicators have\nmissing data due to COVID"
+    }
+
+    # If Create Own bar chart then use grouped COVID period data (for facet_wrap)
+    if (!is.null(grouping_vars) && chart_type == "bar") {
+      na_periods
+    } else if (!is.null(shared_period)) {
+      # Otherwise, return the shared COVID period (or individual if only one indicator)
+      tibble::tibble(
+        xmin = shared_period$start_year,
+        xmax = shared_period$end_year,
+        label_x = shared_period$label_x,
+        vertical_lines = c(shared_period$start_year, shared_period$end_year),
+        label = shared_period$label
+      )
+    }
+  } else {
+    # Return nothing if not affected by COVID
+    NULL
+  }
+}
+
+
+#' Add COVID Plot Elements to a ggplot Object
+#'
+#' This function generates ggplot elements to visually indicate periods
+#' affected by missing data during the COVID-19 pandemic. It includes options
+#' for vertical lines, explanatory labels, and optionally a shaded box.
+#'
+#' @param covid_plot_data A data frame or tibble containing information about
+#'   COVID-affected periods, with columns such as:
+#'   - `start_year`, `end_year`: Start and end years of the COVID-affected
+#'     period.
+#'   - `vertical_lines`: Years to draw vertical lines (alternative format).
+#'   - `label_x`: Horizontal position for the explanatory label.
+#'   - `label`: Text to display in the label.
+#'   - Optionally, `xmin` and `xmax` for shaded box boundaries.
+#' @param include_shaded_box A logical value indicating whether to include a
+#'   shaded rectangle to highlight the COVID-affected period
+#'   (`FALSE` by default).
+#'
+#' @details
+#' The function:
+#' - Adds dashed vertical lines at `start_year` and `end_year` to mark the
+#'   boundaries of COVID-affected periods.
+#' - Optionally adds vertical lines using the `vertical_lines` column, if present.
+#' - Includes an explanatory label positioned at `label_x` and the top of the
+#'   plot, with customisable text from the `label` column.
+#' - Optionally adds a shaded rectangle between `xmin` and `xmax` if
+#'   `include_shaded_box` is `TRUE`.
+#' - Ensures that plot elements outside the plot area are not clipped and adds
+#'   padding around the plot.
+#'
+#' @return A list of ggplot2 elements representing the COVID-related annotations.
+#'   Returns `NULL` if `covid_plot_data` is `NULL`.
+#'
+#' @examples
+#' # Example dataset for COVID plot data
+#' covid_plot_data <- tibble::tibble(
+#'   start_year = 2019,
+#'   end_year = 2021,
+#'   label_x = 2020,
+#'   label = "No data\ndue to COVID",
+#'   xmin = 2019,
+#'   xmax = 2021
+#' )
+#'
+#' # Add COVID elements without a shaded box
+#' covid_elements <- add_covid_elements(covid_plot_data, include_shaded_box = FALSE)
+#'
+#' # Add COVID elements with a shaded box
+#' covid_elements_with_box <- add_covid_elements(covid_plot_data, include_shaded_box = TRUE)
+#'
+add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
+  if (!is.null(covid_plot_data)) {
+    elements <- list()
+
+    # Add vertical lines for COVID periods (mainly for Create Own Bar - facet_wrap)
+    if ("start_year" %in% colnames(covid_plot_data) && "end_year" %in% colnames(covid_plot_data)) {
+      elements <- append(elements, list(
+        ggplot2::geom_vline(
+          data = covid_plot_data,
+          ggplot2::aes(xintercept = start_year),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        ),
+        ggplot2::geom_vline(
+          data = covid_plot_data,
+          ggplot2::aes(xintercept = end_year),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        )
+      ))
+    }
+
+    # Add vertical lines for COVID periods (for all other line and bar charts)
+    if ("vertical_lines" %in% colnames(covid_plot_data)) {
+      elements <- append(elements, list(
+        ggplot2::geom_vline(
+          data = covid_plot_data,
+          ggplot2::aes(xintercept = vertical_lines),
+          linetype = "dashed",
+          color = "grey50",
+          alpha = 0.5,
+          linewidth = 0.3
+        )
+      ))
+    }
+
+    # Add a label to explain COVID impact
+    elements <- append(
+      elements,
+      list(
+        ggplot2::geom_text(
+          data = covid_plot_data,
+          ggplot2::aes(
+            x = label_x, # Centered horizontally in the shaded region
+            y = Inf, # Positioned at the top of the plot
+            label = label
+          ),
+          vjust = 0.5, # Move label slightly higher
+          color = "black",
+          size = 4,
+          fontface = "italic",
+          inherit.aes = FALSE
+        ),
+        # Ensure the plot does not clip elements outside the plot area
+        ggplot2::coord_cartesian(clip = "off"),
+        # Add padding around the plot
+        ggplot2::theme(
+          plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10)
+        )
+      )
+    )
+
+    # Optionally add a shaded box to show COVID-affected periods
+    if (include_shaded_box) {
+      elements <- append(
+        elements,
+        ggplot2::geom_rect(
+          data = covid_plot_data,
+          ggplot2::aes(
+            xmin = xmin,
+            xmax = xmax,
+            ymin = -Inf,
+            ymax = Inf
+          ),
+          fill = "grey",
+          alpha = 0.1,
+          inherit.aes = FALSE
+        )
+      )
+    }
+
+    # Return COVID plotting elements
+    return(elements)
+  } else {
+    return(NULL)
+  }
+}
+
+
+#' Calculate padded range for a specified variable
+#'
+#' This function calculates the minimum and maximum values of a specified
+#' variable in the data, and then adds padding to the range for use in plotting.
+#' It is useful when adjusting axis limits for visual clarity in plots.
+#'
+#' @param data A data frame containing the variable to be analyzed.
+#' @param var The variable for which the range is calculated. Should be
+#'   specified in the form of an unquoted variable name (e.g., `var = x`).
+#' @param padding A numeric value specifying the amount of padding to be added
+#'   to the min and max values. Default is 0.2.
+#'
+#' @return A numeric vector of length 2, representing the padded range
+#'   of the specified variable.
+#' @examples
+#' # Example usage:
+#' thin_bar(my_data, var = my_var, padding = 0.5)
+#' @export
+thin_bar <- function(data, var, padding = 0.2) {
+  # Pull the variable data
+  var_data <- dplyr::pull(data, {{ var }})
+
+  # Calculate min and max values
+  x_min <- min(var_data, na.rm = TRUE)
+  x_max <- max(var_data, na.rm = TRUE)
+
+  # Return the range with padding as a two-element vector
+  c(x_min - padding, x_max + padding)
 }

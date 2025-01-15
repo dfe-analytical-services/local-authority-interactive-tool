@@ -52,11 +52,16 @@ Build_AllLATableServer <- function(id, filtered_bds, la_names_bds) {
         filter_la_regions(la_names_bds, latest = TRUE) |>
         dplyr::mutate(
           Rank = dplyr::case_when(
+            indicator_polarity %notin% c("High", "Low") ~ "-",
             is.na(values_num) ~ NA,
             # Rank in descending order
-            indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+            indicator_polarity == "High" ~ as.character(
+              rank(-values_num, ties.method = "min", na.last = TRUE)
+            ),
             # Rank in ascending order
-            indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+            indicator_polarity == "Low" ~ as.character(
+              rank(values_num, ties.method = "min", na.last = TRUE)
+            )
           )
         ) |>
         dplyr::select(`LA and Regions`, Rank)
@@ -69,11 +74,7 @@ Build_AllLATableServer <- function(id, filtered_bds, la_names_bds) {
           names_from = Years,
           values_from = values_num,
         ) |>
-        dplyr::left_join(all_la_ranked, by = "LA and Regions") |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = c("LA Number", "Rank")
-        )
+        dplyr::left_join(all_la_ranked, by = "LA and Regions")
     })
   })
 }
@@ -160,16 +161,24 @@ AllLA_TableUI <- function(id) {
           style = "text-align: center;"
         ),
         bslib::card_header("Local Authorities"),
-        reactable::reactableOutput(ns("la_table")),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table")),
+          size = 3
+        ),
         div(
-          style = "border-top: 2px solid black; padding-top: 2.5rem;", # Add black border between the tables
+          # Add black border between the tables
+          style = "border-top: 2px solid black; padding-top: 2.5rem;",
           bslib::card_header("Regions"),
-          reactable::reactableOutput(ns("region_table"))
+          with_gov_spinner(
+            reactable::reactableOutput(ns("region_table")),
+            size = 1.6
+          )
         )
       ),
       bslib::nav_panel(
         "Download data",
-        file_type_input_btn(ns("file_type")),
+        shiny::uiOutput(ns("download_file_txt")),
+        Download_DataUI(ns("all_download"), "All Geographies Table"),
         Download_DataUI(ns("la_download"), "LA Table"),
         Download_DataUI(ns("region_download"), "Region Table")
       )
@@ -223,6 +232,20 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       la_names_bds
     )
 
+    # All geographies table download ------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), all_la_table())
+    })
+
+    # Download dataset
+    Download_DataServer(
+      "all_download",
+      reactive(input$file_type),
+      reactive(all_la_table()),
+      reactive(c(app_inputs$indicator(), "All-Geographies"))
+    )
 
     # All LA Level LA table ---------------------------------------------------
     output$la_table <- reactable::renderReactable({
@@ -234,9 +257,17 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       dfe_reactable(
         all_la_la_table,
         # Create the reactable with specific column alignments
-        columns = align_reactable_cols(all_la_la_table, num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            all_la_la_table,
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number",
+            categorical = "Rank"
+          ),
+          set_custom_default_col_widths()
+        ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_la_table, app_inputs$la())
+          highlight_selected_row(index, all_la_la_table, app_inputs$la(), "LA")
         },
         pagination = FALSE
       )
@@ -261,10 +292,10 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
             # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
             rowSums(!is.na(dplyr::select(all_la_table(), -c(`LA Number`, `LA and Regions`)))) == 0)
         ) |>
-        # Replace Rank with a blank col
+        # Replace Rank
         dplyr::mutate(Rank = "") |>
-        dplyr::rename(` ` = "Rank") |>
-        dplyr::arrange(`LA Number`)
+        dplyr::arrange(`LA Number`) |>
+        dplyr::rename("Region" = `LA and Regions`)
 
       # Get region of LA
       all_la_region <- stat_n_la |>
@@ -276,9 +307,26 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
       dfe_reactable(
         all_la_region_table,
         # Create the reactable with specific column alignments
-        columns = align_reactable_cols(all_la_region_table, num_exclude = "LA Number"),
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            all_la_region_table,
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number",
+            categorical = "Rank"
+          ),
+          list(
+            set_custom_default_col_widths(),
+            Rank = reactable::colDef(
+              header = add_tooltip_to_reactcol(
+                "Rank",
+                "Regions are not currently ranked",
+                placement = "top"
+              )
+            )
+          )
+        ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_region_table, all_la_region)
+          highlight_selected_row(index, all_la_region_table, all_la_region, "Region")
         },
         pagination = FALSE
         # class = "hidden-column-headers"

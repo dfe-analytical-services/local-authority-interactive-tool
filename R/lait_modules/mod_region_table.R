@@ -209,10 +209,50 @@ RegionLA_DataServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 #' @examples
 #' RegionLA_TableUI("region_la_table")
 #'
-RegionLA_TableUI <- function(id) {
+RegionLevel_TableUI <- function(id) {
   ns <- NS(id)
 
-  reactable::reactableOutput(ns("region_la_table"))
+  div(
+    class = "well",
+    style = "overflow-y: visible;",
+    bslib::navset_card_tab(
+      id = "region_table_tabs",
+      # Tables tab
+      bslib::nav_panel(
+        title = "Tables",
+        # Region LA Table -------------------------------------------------
+        bslib::card_header("Local Authorities"),
+        with_gov_spinner(
+          reactable::reactableOutput(ns("la_table")),
+          size = 2
+        ),
+        # Region Table ----------------------------------------------------
+        div(
+          style = "overflow-y: visible; border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Regions"),
+          with_gov_spinner(
+            reactable::reactableOutput(ns("region_table")),
+            size = 1.6
+          )
+        ),
+        div(
+          style = "overflow-y: visible; border-top: 2px solid black; padding-top: 2.5rem;",
+          bslib::card_header("Summary"),
+          # Region Stats Table --------------------------------------------------
+          Region_StatsTableUI("region_stats_mod")
+        )
+      ),
+      # Downloads tab
+      bslib::nav_panel(
+        title = "Download",
+        div(
+          shiny::uiOutput(ns("download_file_txt")),
+          Download_DataUI(ns("la_download"), "LA Table"),
+          Download_DataUI(ns("region_download"), "Region Table")
+        )
+      )
+    )
+  )
 }
 
 
@@ -263,24 +303,41 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
     # Pretty and order table ready for rendering
     region_la_table <- reactive({
       region_la_table_raw() |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
-        dplyr::arrange(.data[[current_year()]], `LA and Regions`)
+        dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
+        dplyr::rename("LA" = `LA and Regions`)
     })
 
-    # Table output
-    output$region_la_table <- reactable::renderReactable({
+    # Download ----------------------------------------------------------------
+    # File download text - calculates file size
+    ns <- NS(id)
+    output$download_file_txt <- shiny::renderUI({
+      file_type_input_btn(ns("file_type"), region_la_table_raw())
+    })
+
+    # Download dataset
+    Download_DataServer(
+      "la_download",
+      reactive(input$file_type),
+      reactive(region_la_table_raw()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Regional-Level"))
+    )
+
+    # Table output ------------------------------------------------------------
+    output$la_table <- reactable::renderReactable({
       dfe_reactable(
         region_la_table(),
-        columns = align_reactable_cols(
-          region_la_table(),
-          num_exclude = "LA Number"
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            region_la_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_la_table(), app_inputs$la())
-        }
+          highlight_selected_row(index, region_la_table(), app_inputs$la(), "LA")
+        },
+        pagination = FALSE
       )
     })
   })
@@ -292,7 +349,7 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
 #'
 #' Server module to process and format long data for regions and England.
 #' It filters the data based on selected regions and transforms it into
-#' a long format suitable for further analysis and visualization.
+#' a long format suitable for further analysis and visualisation.
 #'
 #' @param id The namespace ID for the server module.
 #' @param filtered_bds A reactive expression providing filtered BDS data.
@@ -388,16 +445,18 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
 #' @examples
 #' Region_TableUI("region_table_ui")
 #'
-Region_TableUI <- function(id) {
-  ns <- NS(id)
-
-  div(
-    # Add black border between the tables
-    style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
-    reactable::reactableOutput(ns("region_table"))
-  )
-}
-
+# Region_TableUI <- function(id) {
+#   ns <- NS(id)
+#' #
+#   shiny::tagList(
+#     div(
+#       # Add black border between the tables
+#       style = "overflow-y: visible;border-top: 2px solid black; padding-top: 2.5rem;",
+#       reactable::reactableOutput(ns("region_table"))
+#     ),
+#     Download_DataUI(ns("region_download"), "Region Table")
+#   )
+# }
 
 #' Region Table Server
 #'
@@ -453,17 +512,14 @@ Region_TableServer <- function(id,
     # Pretty and order table ready for rendering
     region_table <- reactive({
       region_table_raw() |>
-        pretty_num_table(
-          dp = get_indicator_dps(filtered_bds()),
-          exclude_columns = "LA Number"
-        ) |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
         # Places England row at the bottom of the table
         dplyr::mutate(is_england = ifelse(
           grepl("^England", `LA and Regions`), 1, 0
         )) |>
         dplyr::arrange(is_england, .by_group = FALSE) |>
-        dplyr::select(-is_england)
+        dplyr::select(-is_england) |>
+        dplyr::rename("Region" = `LA and Regions`)
     })
 
     # Get clean Regions
@@ -474,16 +530,28 @@ Region_TableServer <- function(id,
       bds_metrics
     )
 
+    # Download ----------------------------------------------------------------
+    Download_DataServer(
+      "region_download",
+      reactive(input$file_type),
+      reactive(region_table()),
+      reactive(c(app_inputs$la(), app_inputs$indicator(), "Region-Regional-Level"))
+    )
+
     # Table output
     output$region_table <- reactable::renderReactable({
       dfe_reactable(
         region_table(),
-        columns = align_reactable_cols(
-          region_table(),
-          num_exclude = "LA Number"
+        columns = utils::modifyList(
+          format_num_reactable_cols(
+            region_table(),
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
+          ),
+          set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_table(), region_clean())
+          highlight_selected_row(index, region_table(), region_clean(), "Region")
         },
         pagination = FALSE
       )
@@ -509,14 +577,9 @@ Region_TableServer <- function(id,
 Region_StatsTableUI <- function(id) {
   ns <- NS(id)
 
-  div(
-    class = "well",
-    style = "overflow-y: visible;",
-    bslib::card(
-      bslib::card_body(
-        reactable::reactableOutput(ns("region_stats_table"))
-      )
-    )
+  with_gov_spinner(
+    reactable::reactableOutput(ns("stats_table")),
+    size = 0.6
   )
 }
 
@@ -619,20 +682,30 @@ Region_StatsTableServer <- function(id,
     })
 
     # Table output
-    output$region_stats_table <- reactable::renderReactable({
+    output$stats_table <- reactable::renderReactable({
       dfe_reactable(
         region_stats_table(),
         columns = modifyList(
-          align_reactable_cols(
+          format_num_reactable_cols(
             region_stats_table(),
-            num_exclude = "LA Number",
-            categorical = c("Trend", "Quartile Banding")
+            get_indicator_dps(filtered_bds()),
+            num_exclude = "LA Number"
           ),
           # Trend icon arrows
           list(
+            set_custom_default_col_widths(),
             Trend = reactable::colDef(
-              cell = trend_icon_renderer
-            )
+              header = add_tooltip_to_reactcol(
+                "Trend",
+                "Based on change from previous year",
+                placement = "top"
+              ),
+              cell = trend_icon_renderer,
+              style = function(value) {
+                get_trend_colour(value, region_stats_table()$Polarity[1])
+              }
+            ),
+            Polarity = reactable::colDef(show = FALSE)
           )
         ),
         rowStyle = function(index) {

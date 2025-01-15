@@ -110,7 +110,10 @@ calculate_change_from_prev_yr <- function(data) {
 #'   "High"
 #' )
 #'
-calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_polarity) {
+calculate_quartile_band <- function(indicator_val,
+                                    quartile_bands,
+                                    indicator_polarity,
+                                    no_show_qb = FALSE) {
   # Check if all required quartile bands are present
   required_bands <- c("0%", "25%", "50%", "75%", "100%")
   missing_bands <- setdiff(required_bands, names(quartile_bands))
@@ -128,7 +131,9 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
   }
 
   # Set the Quartile Band (dependent on polarity)
-  if (indicator_polarity %in% "Low") {
+  if (no_show_qb) {
+    quartile_band <- "-"
+  } else if (indicator_polarity %in% "Low") {
     quartile_band <- dplyr::case_when(
       is.na(indicator_val) ~ NA_character_,
       (indicator_val >= quartile_bands[["0%"]]) &
@@ -155,13 +160,14 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
       TRUE ~ "Error"
     )
   } else {
-    quartile_band <- "Not applicable"
+    quartile_band <- "-"
   }
 
-  if (quartile_band %notin% c("A", "B", "C", "D", "Not applicable", NA_character_)) {
+  if (quartile_band %notin% c("A", "B", "C", "D", "-", NA_character_)) {
     warning("Unexpected Quartile Banding")
   }
 
+  # Clean NA values based on polarity
   quartile_band
 }
 
@@ -182,7 +188,7 @@ calculate_quartile_band <- function(indicator_val, quartile_bands, indicator_pol
 get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
   all_polarities <- c("High", "Low", "-", NA)
   valid_polarities <- c("High", "Low")
-  all_quartiles <- c("A", "B", "C", "D", "Error", "Not applicable", NA_character_)
+  all_quartiles <- c("A", "B", "C", "D", "Error", "-", "", NA_character_)
   valid_quartiles <- c("A", "B", "C", "D")
 
   polarity <- data_polarity[1]
@@ -221,14 +227,22 @@ get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
 #' @return A data frame with an additional column for the calculated rank.
 #'
 calculate_rank <- function(filtered_data, indicator_polarity) {
+  # Check if filtered_data is empty and emit a warning
+  if (nrow(filtered_data) == 0) {
+    warning("The filtered data frame is empty; returning an empty result.")
+    return(filtered_data |> dplyr::mutate(rank = numeric(0)))
+  }
+
+  # Proceed with ranking if data is not empty
   filtered_data |>
     dplyr::mutate(
       rank = dplyr::case_when(
-        is.na(values_num) ~ NA,
+        indicator_polarity %notin% c("High", "Low") ~ "-",
+        indicator_polarity %in% c("High", "Low") & is.na(values_num) ~ NA,
         # Rank in descending order
-        indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+        indicator_polarity == "High" ~ as.character(rank(-values_num, ties.method = "min", na.last = TRUE)),
         # Rank in ascending order
-        indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+        indicator_polarity == "Low" ~ as.character(rank(values_num, ties.method = "min", na.last = TRUE))
       )
     )
 }
@@ -255,10 +269,11 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
 #' # Assuming `df` is your data frame and `la_names_vec` is a vector of LA names
 #' filtered_data <- filter_la_data_all_la(df, la_names_vec)
 #'
-filter_la_data_all_la <- function(data, la_names) {
+filter_la_data_all_la <- function(data, la_names, geog_colname) {
   data |>
     dplyr::filter(`LA and Regions` %in% la_names) |>
-    dplyr::arrange(`LA and Regions`)
+    dplyr::arrange(`LA and Regions`) |>
+    dplyr::rename("LA" = `LA and Regions`)
 }
 
 
@@ -296,5 +311,143 @@ filter_region_data_all_la <- function(data, la_names) {
         ))) == 0)
     ) |>
     dplyr::mutate(Rank = "") |>
-    dplyr::arrange(`LA Number`)
+    dplyr::arrange(`LA Number`) |>
+    dplyr::rename("Region" = `LA and Regions`)
+}
+
+
+#' Filter BDS for Selected Indicators
+#'
+#' This function filters a given BDS dataset to include only the rows that
+#' match the specified indicators. It removes any rows where the year value
+#' is missing (NA). The filtered dataset can be used for further analysis
+#' or visualization of selected indicators.
+#'
+#' @param bds_data A data frame containing BDS data, including a column
+#'                 for indicators (`Measure`) and years (`Years`).
+#' @param selected_indicators A character vector of indicator names that
+#'                            should be retained in the filtered dataset.
+#' @return A data frame containing only the rows from `bds_data` that
+#'         correspond to the specified indicators and have non-missing
+#'         year values.
+
+filter_bds_for_indicators <- function(bds_data, selected_indicators) {
+  bds_data |>
+    dplyr::filter(
+      Measure %in% selected_indicators
+    )
+}
+
+
+#' Get Local Authorities in Selected Regions
+#'
+#' This function filters a dataset of geographical data to return unique
+#' local authority names based on the selected regions. It is useful for
+#' narrowing down local authorities relevant to specific regions.
+#'
+#' @param data_geog A data frame containing geographical data, including
+#'                  local authority names and corresponding region codes.
+#' @param selected_regions A vector of region identifiers to filter the
+#'                         local authorities. Only those local authorities
+#'                         that belong to the selected regions will be
+#'                         returned.
+#' @return A vector of unique local authority names that are part of the
+#'         specified regions.
+#'
+get_las_in_regions <- function(data_geog, selected_regions) {
+  data_geog |>
+    dplyr::filter(GOReg %in% selected_regions) |>
+    pull_uniques("LA Name")
+}
+
+
+#' Get Regions for Selected Local Authorities
+#'
+#' This function filters a dataset of geographical data to return unique
+#' region identifiers associated with selected local authorities. It helps
+#' in identifying the regions relevant to a specified set of local
+#' authorities.
+#'
+#' @param data_geog A data frame containing geographical data, including
+#'                  local authority names and their corresponding region
+#'                  codes.
+#' @param selected_las A vector of local authority names to filter the
+#'                      regions. Only the regions associated with the
+#'                      specified local authorities will be returned.
+#' @return A vector of unique region identifiers that correspond to the
+#'         selected local authorities.
+#'
+get_la_region <- function(data_geog, selected_las) {
+  data_geog |>
+    dplyr::filter(`LA Name` %in% selected_las) |>
+    pull_uniques("GOReg")
+}
+
+
+#' Get Statistical Neighbors for Selected Local Authorities
+#'
+#' This function retrieves the statistical neighbors for a given set of
+#' local authorities from a dataset containing statistical neighbor
+#' information. It filters the dataset to include only the selected local
+#' authorities and returns their associated statistical neighbors.
+#'
+#' @param data_stat_n A data frame containing statistical neighbor data,
+#'                     which includes local authority names and their
+#'                     corresponding statistical neighbor identifiers.
+#' @param selected_las A vector of local authority names for which
+#'                      statistical neighbors should be retrieved. The
+#'                      function will return neighbors associated with
+#'                      these local authorities.
+#' @return A vector of unique statistical neighbor identifiers linked to
+#'         the specified local authorities.
+#'
+get_la_stat_neighbrs <- function(data_stat_n, selected_las) {
+  data_stat_n |>
+    dplyr::filter(`LA Name` %in% selected_las) |>
+    pull_uniques("LA Name_sn")
+}
+
+
+
+#' Get Distinct and Separated Unique Values from a Data Frame Column
+#'
+#' This helper function retrieves distinct values from a specified column
+#' in a data frame, separates them into individual rows if they are
+#' concatenated, and trims any whitespace. This is particularly useful
+#' for extracting and formatting unique entries for dropdowns or filters
+#' in a Shiny application.
+#'
+#' @param data A data frame from which unique values will be extracted.
+#' @param column The name of the column from which to retrieve unique
+#'               values. The column can contain concatenated entries
+#'               that will be separated into individual values.
+#' @return A vector of unique values from the specified column, with any
+#'         whitespace trimmed and values separated into individual entries.
+#'
+get_query_table_values <- function(data, column) {
+  data |>
+    dplyr::distinct({{ column }}) |>
+    tidyr::separate_rows({{ column }}, sep = ",<br>") |>
+    dplyr::mutate({{ column }} := trimws({{ column }})) |>
+    pull_uniques(as.character(substitute(column)))
+}
+
+
+#' Filter data based on topic selection
+#'
+#' @param data A data frame or tibble to filter.
+#' @param topic_column The name of the column containing topic values (as a string).
+#' @param selected_topics A vector of selected topics from the user input.
+#' @return A filtered data frame or tibble based on the topic selection.
+filter_by_topic <- function(data, topic_column, selected_topics) {
+  # Check if selected topics are all selected or empty (return whole df if so)
+  if (is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))) {
+    # Return data ordered alphabetically by "Measure", with letters first
+    alphabet_ordered <- data |>
+      order_alphabetically(.data$Measure)
+    return(alphabet_ordered)
+  }
+
+  # Filter by selected topic
+  dplyr::filter(data, .data[[topic_column]] %in% selected_topics)
 }

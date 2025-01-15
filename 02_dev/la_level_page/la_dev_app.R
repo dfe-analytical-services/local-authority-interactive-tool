@@ -22,30 +22,42 @@ ui_dev <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::layout_column_wrap(
       width = "15rem", # Minimum width for each input box before wrapping
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "la_input",
         label = "LA:",
         choices = la_names_bds
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "topic_input",
         label = "Topic:",
-        choices = metric_topics
+        choices = c("All topics", metric_topics),
+        multiple = TRUE,
+        options = list(
+          maxItems = 1,
+          placeholder = "No topic selected, showing all indicators.",
+          plugins = list("clear_button"),
+          dropdownParent = "body"
+        )
       ),
-      shiny::selectInput(
+      shiny::selectizeInput(
         inputId = "indicator",
-        label = NULL,
+        label = "Indicator:",
         choices = metric_names
       )
-    )
+    ),
+    # Conditional State-funded school banner
+    shiny::uiOutput("state_funded_banner")
   ),
   div(
     class = "well",
     style = "overflow-y: visible;",
     bslib::card(
-      bslib::card_header("Local Authority, Region and England"),
       bslib::card_body(
-        reactable::reactableOutput("la_table")
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput("la_table"),
+          type = 6,
+          color = "#1d70b8"
+        )
       )
     )
   ),
@@ -54,7 +66,13 @@ ui_dev <- bslib::page_fillable(
     style = "overflow-y: visible;",
     bslib::card(
       bslib::card_body(
-        reactable::reactableOutput("la_stats_table")
+        shinycssloaders::withSpinner(
+          reactable::reactableOutput("la_stats_table"),
+          type = 6,
+          color = "#1d70b8",
+          size = 0.5,
+          proxy.height = "100px"
+        )
       )
     )
   ),
@@ -67,7 +85,11 @@ ui_dev <- bslib::page_fillable(
         title = "Line chart",
         bslib::card(
           bslib::card_body(
-            ggiraph::girafeOutput("la_line_chart")
+            shinycssloaders::withSpinner(
+              ggiraph::girafeOutput("la_line_chart"),
+              type = 6,
+              color = "#1d70b8"
+            )
           ),
           full_screen = TRUE
         ),
@@ -77,7 +99,11 @@ ui_dev <- bslib::page_fillable(
         bslib::card(
           id = "la_bar_body",
           bslib::card_body(
-            ggiraph::girafeOutput("la_bar_chart")
+            shinycssloaders::withSpinner(
+              ggiraph::girafeOutput("la_bar_chart"),
+              type = 6,
+              color = "#1d70b8"
+            )
           ),
           full_screen = TRUE
         )
@@ -90,70 +116,114 @@ ui_dev <- bslib::page_fillable(
     bslib::card(
       bslib::card_body(
         h3("Description:"),
-        textOutput("description"),
+        shinycssloaders::withSpinner(
+          textOutput("description"),
+          type = 6,
+          color = "#1d70b8"
+        ),
         h3("Methodology:"),
-        uiOutput("methodology"),
+        shinycssloaders::withSpinner(
+          uiOutput("methodology"),
+          type = 6,
+          color = "#1d70b8"
+        ),
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
           h3("Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          textOutput("last_update")
+          shinycssloaders::withSpinner(
+            textOutput("last_update"),
+            type = 6,
+            color = "#1d70b8"
+          )
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          uiOutput("next_update")
+          shinycssloaders::withSpinner(
+            uiOutput("next_update"),
+            type = 6,
+            color = "#1d70b8"
+          )
         ),
         div(
           style = "display: flex; align-items: baseline;",
           h3("Source:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
-          uiOutput("source")
+          shinycssloaders::withSpinner(
+            uiOutput("source"),
+            type = 6,
+            color = "#1d70b8"
+          )
         )
       )
     )
   )
 )
 
+
 # Server
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input, {
-    # Get indicator choices for selected topic
-    filtered_topic_bds <- bds_metrics |>
-      dplyr::filter(
-        Topic == input$topic_input
-      ) |>
-      pull_uniques("Measure")
+  shiny::observeEvent(input$topic_input,
+    {
+      # Save the currently selected indicator
+      current_indicator <- input$indicator
 
-    updateSelectInput(
-      session = session,
-      inputId = "indicator",
-      label = "Indicator:",
-      choices = filtered_topic_bds
-    )
-  })
+      # Get indicator choices for selected topic
+      # Include all rows if no topic is selected or "All topics" is selected
+      filtered_topic_bds <- bds_metrics |>
+        dplyr::filter(
+          if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
+            TRUE
+          } else {
+            .data$Topic %in% input$topic_input # Filter by selected topic(s)
+          }
+        ) |>
+        pull_uniques("Measure")
+
+      # Ensure the current indicator stays selected if it's in the new list of available indicators
+      # Default to the first available indicator if the current one is no longer valid
+      selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+        current_indicator
+      } else {
+        filtered_topic_bds[1]
+      }
+
+      shiny::updateSelectizeInput(
+        session = session,
+        inputId = "indicator",
+        label = "Indicator:",
+        choices = filtered_topic_bds,
+        selected = selected_indicator
+      )
+    },
+    ignoreNULL = FALSE
+  )
 
 
   # Main LA Level table ----------------------------------
-  # Filter for selected topic and indicator
+  # Filter for selectedindicator
   # Define filtered_bds outside of observeEvent
   filtered_bds <- reactiveValues(data = NULL)
 
   observeEvent(input$indicator, {
+    # Don't change the currently selected indicator if no indicator is selected
+    if (is.null(input$indicator) || input$indicator == "") {
+      return()
+    }
+
     # Main LA Level table ----------------------------------
-    # Filter for selected topic and indicator
+    # Filter for selected indicator
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
-        Topic == input$topic_input,
-        Measure == input$indicator,
-        !is.na(Years)
+        Measure == input$indicator
       )
   })
 
@@ -193,7 +263,7 @@ server_dev <- function(input, output, session) {
     sn_avg <- la_filtered_bds |>
       dplyr::filter(`LA and Regions` %in% la_sns) |>
       dplyr::summarise(
-        values_num = mean(values_num, na.rm = TRUE),
+        values_num = dplyr::na_if(mean(values_num, na.rm = TRUE), NaN),
         .by = c("Years", "Years_num")
       ) |>
       dplyr::mutate(
@@ -240,21 +310,40 @@ server_dev <- function(input, output, session) {
         names_from = Years,
         values_from = values_num
       ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = "LA Number"
-      ) |>
       dplyr::arrange(`LA and Regions`)
+  })
+
+
+  # Stet funded school banner (appears for certain indicators)
+  output$state_funded_banner <- renderUI({
+    # Get whether state-funded idnicator
+    state_funded <- filtered_bds$data |>
+      pull_uniques("state_funded_flag") |>
+      (\(x) !is.na(x))()
+
+    # Render banner if state-funded
+    if (state_funded) {
+      tagList(
+        br(),
+        shinyGovstyle::noti_banner(
+          inputId = "notId",
+          title_txt = "Note",
+          body_txt = "Data includes only State-funded Schools."
+        )
+      )
+    }
   })
 
   output$la_table <- reactable::renderReactable({
     dfe_reactable(
       la_table(),
       columns = utils::modifyList(
-        align_reactable_cols(la_table(), num_exclude = "LA Number"),
-        list(
-          `LA and Regions` = set_min_col_width()
-        )
+        format_num_reactable_cols(
+          la_table(),
+          get_indicator_dps(filtered_bds$data),
+          num_exclude = "LA Number"
+        ),
+        set_custom_default_col_widths()
       ),
       rowStyle = function(index) {
         highlight_selected_row(index, la_table(), input$la_input)
@@ -291,6 +380,9 @@ server_dev <- function(input, output, session) {
     la_indicator_val <- filtered_bds$data |>
       filter_la_regions(input$la_input, latest = TRUE, pull_col = "values_num")
 
+    # Boolean as to whether to include Quartile Banding
+    no_show_qb <- input$indicator %in% no_qb_indicators
+
     # Calculating which quartile this value sits in
     la_quartile <- calculate_quartile_band(
       la_indicator_val,
@@ -307,36 +399,54 @@ server_dev <- function(input, output, session) {
       la_rank,
       la_quartile,
       la_quartile_bands,
-      la_indicator_polarity
-    ) |>
-      pretty_num_table(
-        dp = indicator_dps(),
-        exclude_columns = c("LA Number", "Trend", "Latest National Rank")
-      )
+      get_indicator_dps(filtered_bds$data),
+      la_indicator_polarity,
+      no_show_qb
+    )
 
     la_stats_table
   })
 
   output$la_stats_table <- reactable::renderReactable({
     dfe_reactable(
-      la_stats_table() |>
-        dplyr::select(-Polarity),
+      la_stats_table(),
       columns = modifyList(
         # Create the reactable with specific column alignments
-        align_reactable_cols(
-          la_stats_table() |>
-            dplyr::select(-Polarity),
+        format_num_reactable_cols(
+          la_stats_table(),
+          get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
-          categorical = c("Trend", "Quartile Banding")
+          categorical = c(
+            "Trend", "Quartile Banding", "Latest National Rank",
+            "A", "B",
+            "C", "D"
+          )
         ),
         # Style Quartile Banding column with colour
         list(
-          `Quartile Banding` = reactable::colDef(
-            style = quartile_banding_col_def(la_stats_table())
-          ),
+          set_custom_default_col_widths(),
           Trend = reactable::colDef(
-            cell = trend_icon_renderer
-          )
+            header = add_tooltip_to_reactcol(
+              "Trend",
+              "Based on change from previous year"
+            ),
+            cell = trend_icon_renderer,
+            style = function(value) {
+              get_trend_colour(value, la_stats_table()$Polarity[1])
+            }
+          ),
+          `Quartile Banding` = reactable::colDef(
+            style = function(value, index) {
+              quartile_banding_col_def(la_stats_table()[index, ])
+            }
+          ),
+          `Latest National Rank` = reactable::colDef(
+            header = add_tooltip_to_reactcol(
+              "Latest National Rank",
+              "Rank 1 is always best/top"
+            )
+          ),
+          Polarity = reactable::colDef(show = FALSE)
         )
       )
     )
@@ -345,19 +455,19 @@ server_dev <- function(input, output, session) {
 
   # LA Level line chart plot ----------------------------------
   la_line_chart <- reactive({
+    # Generate the covid plot data if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(
+      la_long(),
+      covid_affected_data,
+      input$indicator,
+      "line"
+    )
+
     # Build plot
     la_line_chart <- la_long() |>
+      # Set geog orders so selected LA is on top of plot
+      reorder_la_regions(reverse = TRUE) |>
       ggplot2::ggplot() +
-      ggiraph::geom_point_interactive(
-        ggplot2::aes(
-          x = Years_num,
-          y = values_num,
-          color = `LA and Regions`,
-          shape = `LA and Regions`,
-          data_id = `LA and Regions`
-        ),
-        na.rm = TRUE
-      ) +
       ggiraph::geom_line_interactive(
         ggplot2::aes(
           x = Years_num,
@@ -365,20 +475,41 @@ server_dev <- function(input, output, session) {
           color = `LA and Regions`,
           data_id = `LA and Regions`
         ),
+        na.rm = TRUE,
+        linewidth = 1
+      ) +
+      # Only show point data where line won't appear (NAs)
+      ggplot2::geom_point(
+        data = subset(create_show_point(
+          la_long(),
+          covid_affected_data,
+          input$indicator
+        ), show_point),
+        ggplot2::aes(
+          x = Years_num,
+          y = values_num,
+          color = `LA and Regions`
+        ),
+        shape = 15,
+        size = 1,
         na.rm = TRUE
       ) +
+      # Add COVID plot if indicator affected
+      add_covid_elements(covid_plot) +
       format_axes(la_long()) +
-      set_plot_colours(la_long()) +
+      set_plot_colours(la_long(), focus_group = input$la_input) +
       set_plot_labs(filtered_bds$data) +
-      custom_theme()
-
+      custom_theme() +
+      # Revert order of the legend so goes from right to left
+      ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
       get_years(la_long()),
       tooltip_vlines,
       la_long(),
-      indicator_dps()
+      indicator_dps(),
+      input$la_input
     )
 
     # Plotting interactive graph
@@ -401,6 +532,14 @@ server_dev <- function(input, output, session) {
 
   # LA Level bar plot ----------------------------------
   la_bar_chart <- reactive({
+    # Generate the covid plot data if add_covid_plot is TRUE
+    covid_plot <- calculate_covid_plot(
+      la_long(),
+      covid_affected_data,
+      input$indicator,
+      "bar"
+    )
+
     # Build plot
     la_bar_chart <- la_long() |>
       ggplot2::ggplot() +
@@ -409,11 +548,7 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = glue::glue_data(
-            la_long() |>
-              pretty_num_table(include_columns = "values_num", dp = indicator_dps()),
-            "Year: {Years}\n{`LA and Regions`}: {values_num}"
-          ),
+          tooltip = tooltip_bar(la_long(), indicator_dps(), input$la_input),
           data_id = `LA and Regions`
         ),
         position = "dodge",
@@ -421,8 +556,10 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE,
         colour = "black"
       ) +
+      # Add COVID plot if indicator affected
+      add_covid_elements(covid_plot) +
       format_axes(la_long()) +
-      set_plot_colours(la_long(), "fill") +
+      set_plot_colours(la_long(), "fill", input$la_input) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 
@@ -430,7 +567,11 @@ server_dev <- function(input, output, session) {
     ggiraph::girafe(
       ggobj = la_bar_chart,
       width_svg = 8.5,
-      options = generic_ggiraph_options(),
+      options = generic_ggiraph_options(
+        opts_hover(
+          css = "stroke-dasharray:5,5;stroke:black;stroke-width:2px;"
+        )
+      ),
       fonts = list(sans = "Arial")
     )
   })
@@ -442,40 +583,60 @@ server_dev <- function(input, output, session) {
 
 
   # LA Metadata ----------------------------------
+  # Reactive values to store previous data
+  previous_metadata <- reactiveValues(
+    description = NULL,
+    methodology = NULL,
+    last_update = NULL,
+    next_update = NULL,
+    source = NULL
+  )
 
-  # Description
+  # Outputs using the helper function
   output$description <- renderText({
-    metrics_clean |>
-      get_metadata(input$indicator, "Description")
-  })
-
-  # Methodology
-  output$methodology <- renderUI({
-    metrics_clean |>
-      get_metadata(input$indicator, "Methodology")
-  })
-
-  # Last updated
-  output$last_update <- renderText({
-    metrics_clean |>
-      get_metadata(input$indicator, "Last Update")
-  })
-
-  # Next updated
-  output$next_update <- renderUI({
-    metrics_clean |>
-      get_metadata(input$indicator, "Next Update")
-  })
-
-  # Source (hyperlink)
-  output$source <- renderUI({
-    hyperlink <- metrics_clean |>
-      get_metadata(input$indicator, "Hyperlink(s)")
-    label <- input$indicator
-    dfeshiny::external_link(
-      href = hyperlink,
-      link_text = label
+    update_and_fetch_metadata(
+      input$indicator,
+      "Description",
+      previous_metadata,
+      "description"
     )
+  })
+
+  output$methodology <- renderUI({
+    update_and_fetch_metadata(
+      input$indicator,
+      "Methodology",
+      previous_metadata,
+      "methodology"
+    )
+  })
+
+  output$last_update <- renderText({
+    update_and_fetch_metadata(
+      input$indicator,
+      "Last Update",
+      previous_metadata,
+      "last_update"
+    )
+  })
+
+  output$next_update <- renderUI({
+    update_and_fetch_metadata(
+      input$indicator,
+      "Next Update",
+      previous_metadata,
+      "next_update"
+    )
+  })
+
+  output$source <- renderUI({
+    hyperlink <- update_and_fetch_metadata(
+      input$indicator,
+      "Hyperlink(s)",
+      previous_metadata,
+      "source"
+    )
+    dfeshiny::external_link(href = hyperlink, link_text = input$indicator)
   })
 }
 
