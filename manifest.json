@@ -1206,7 +1206,7 @@
         "Package": "curl",
         "Type": "Package",
         "Title": "A Modern and Flexible Web Client for R",
-        "Version": "6.0.1",
+        "Version": "6.1.0",
         "Authors@R": "c(\n    person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"), email = \"jeroenooms@gmail.com\",\n      comment = c(ORCID = \"0000-0002-4035-0289\")),\n    person(\"Hadley\", \"Wickham\", role = \"ctb\"),\n    person(\"Posit Software, PBC\", role = \"cph\"))",
         "Description": "Bindings to 'libcurl' <https://curl.se/libcurl/> for performing fully\n    configurable HTTP/FTP requests where responses can be processed in memory, on\n    disk, or streaming via the callback or connection interfaces. Some knowledge\n    of 'libcurl' is recommended; for a more-user-friendly web client see the \n    'httr2' package which builds on this package with http specific tools and logic.",
         "License": "MIT + file LICENSE",
@@ -1220,12 +1220,12 @@
         "Encoding": "UTF-8",
         "Language": "en-US",
         "NeedsCompilation": "yes",
-        "Packaged": "2024-11-13 13:14:47 UTC; jeroen",
+        "Packaged": "2024-12-22 11:16:23 UTC; jeroen",
         "Author": "Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),\n  Hadley Wickham [ctb],\n  Posit Software, PBC [cph]",
         "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
         "Repository": "RSPM",
-        "Date/Publication": "2024-11-14 09:20:02 UTC",
-        "Built": "R 4.4.0; x86_64-w64-mingw32; 2024-11-15 04:51:47 UTC; windows",
+        "Date/Publication": "2025-01-06 15:30:02 UTC",
+        "Built": "R 4.4.0; x86_64-w64-mingw32; 2025-01-07 04:21:13 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemotePkgRef": "curl",
@@ -1233,7 +1233,7 @@
         "RemoteRepos": "https://packagemanager.posit.co/cran/latest",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "6.0.1"
+        "RemoteSha": "6.1.0"
       }
     },
     "cyclocomp": {
@@ -6146,7 +6146,7 @@
       "checksum": "f8cce4a8acfff22f216ce5e59480bcb1"
     },
     ".Rprofile": {
-      "checksum": "010f6e2235de97f8d125a65dcb0a293b"
+      "checksum": "d0ce91de77487423d04c04da926b9f20"
     },
     "01_data/02_prod/banner_update.csv": {
       "checksum": "9a408857db3aa08c56eee16c81b28abe"
@@ -6350,7 +6350,7 @@
       "checksum": "8db9c1a06d46f57f47b51cf25e0d34ed"
     },
     "renv.lock": {
-      "checksum": "1ae17ffaf3442a3ecb3adbd617fba3a4"
+      "checksum": "ffab7e40b0d3356327e76f181fd5def3"
     },
     "server.R": {
       "checksum": "dc7424f9f8738a380be552192a75ae1c"
