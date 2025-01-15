@@ -6,7 +6,6 @@ pool:
 trigger:
   branches:
     include:
-    - main
     - azure-deploy
   paths:
     exclude:
