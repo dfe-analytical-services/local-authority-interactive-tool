@@ -30,6 +30,8 @@ if (FALSE) {
   shhh(library(lintr))
   shhh(library(roxygen2))
   shhh(library(rstudioapi))
+  shhh(library(rsconnect)) ###### ONLY TO BE USED FOR INTERNAL DEPLOYING,
+  ###### DO NOT KEEP FOR MAIN BRANCH !!!!!!!!!!!
   # Housekeeping
   shhh(library(devtools))
   shhh(library(usethis))
