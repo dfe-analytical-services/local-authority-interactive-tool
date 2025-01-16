@@ -19,14 +19,58 @@ Hence, the tool is now being rebuilt in R Shiny.
 This the link to the [current version of LAIT and its GOV.UK webpage](https://www.gov.uk/government/publications/local-authority-interactive-tool-lait).
 
 
-This application is deployed in the following places:
+This application is deployed and live:
 
 <!-- Update this list as appropriate for your app -->
 
 - https://department-for-education.shinyapps.io/local-authority-interactive-tool/
-- https://department-for-education.shinyapps.io/local-authority-interactive-tool-overflow/
 
-(NOTE: These are not currently in use as the app has not been deployed.)
+---
+
+## Important: DfE Developers
+For developers within the Department for Education (DfE), an internal deployment of the app is available as a pre-production environment for testing changes.
+This pre-production app is hosted on the pre-production server and is named `lait`.
+
+### Deployment Instructions
+The deployment process uses an existing Azure pipeline and release workflow
+(stored in an DevOps repository owned by the Regions Group (RG) Data Science team).
+The pipeline is configured to run off the `azure-deploy` branch.
+To deploy updates to the app, follow these steps:
+
+#### i. Create a Manifest File
+Use the `{rsconnect}` package to create or update the `manifest.json` file.
+This file is essential for bundling and deploying the app.
+
+```r
+rsconnect::write_manifest()
+```
+
+> [!NOTE]
+> After generating the manifest.json file, you may need to manually remove references to the following files:
+> - `03_documentation/01_priv/LAIT.xlsm`
+> - `01_data/01_raw/BDS_Wide.csv`.
+> 
+> These files are not tracked by Git and will not be available during deployment.
+> 
+> While the `.rscignore` script (which functions similarly to `.gitignore`) is intended to exclude such files from being added to the manifest,
+> it is currently not working as expected.
+> Until resolved, manual removal is required.
+
+#### ii. Set Up a Remote for Azure DevOps
+If you haven't already, configure a remote to the Azure DevOps repository alongside the GitHub remote in your project.
+For example, you could name the remote `azure`.
+This allows you to push changes with a command like:
+
+```console
+git push azure azure-deploy
+```
+
+#### iii. Use the `azure-pipelines.yml`
+Ensure that any changes are tested and finalised before pushing to the `azure-deploy` branch.
+The pipeline will handle the deployment to the pre-production app.
+
+### Accessing the Azure Repository and Deployment Pipeline
+To gain access to the Azure DevOps repository and deployment pipeline, please contact the **RG Data Science team** for permissions and further guidance.
 
 ---
 
