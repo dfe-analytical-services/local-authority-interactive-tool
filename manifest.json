@@ -6139,7 +6139,7 @@
       "checksum": "f8cce4a8acfff22f216ce5e59480bcb1"
     },
     ".Rprofile": {
-      "checksum": "b86ecf32a597ddf70ba784745a623bb8"
+      "checksum": "8a8b7536bf328ec247f6dd632abc21c0"
     },
     "01_data/02_prod/banner_update.csv": {
       "checksum": "9a408857db3aa08c56eee16c81b28abe"
@@ -6340,7 +6340,7 @@
       "checksum": "1d3bdbf1bcef6370ba143b4212c9e27d"
     },
     "README.md": {
-      "checksum": "8db9c1a06d46f57f47b51cf25e0d34ed"
+      "checksum": "e4e97390bbc7a5d68d04f90ff3d10565"
     },
     "renv.lock": {
       "checksum": "712d351571799966bb0a6d659a61bc67"
