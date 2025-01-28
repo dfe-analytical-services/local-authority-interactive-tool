@@ -4,8 +4,7 @@
 #' The folder is synchronised and located in the user's local system.
 #'
 shared_folder <- paste0(
-  r"(C:\Users\jtufts\Department for Education\LAIT modernisation - General)",
-  r"(\LAIT Modernisation 2024\Information for App Development)"
+  r"(C:\Users\ASTOKER\OneDrive - Department for Education\Information for App Development)"
 )
 
 
