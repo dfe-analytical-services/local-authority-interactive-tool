@@ -6,8 +6,9 @@
 shared_folder <- paste0(
   r"(C:\Users\)",
   Sys.info()[["user"]],
-  r"(\Department for Education\LAIT modernisation - General)",
-  r"(\LAIT Modernisation 2024\Information for App Development)"
+  r"(\Department for Education)",
+  r"(\LA Data & Analysis - Children's Social Care - LAPD Private Sync)",
+  r"(\LAIT\Information for App Development)"
 )
 
 
