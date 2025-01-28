@@ -81,7 +81,7 @@ Logic to load BDS wide and convert to long
 
 ```{r pull-latest-bds-data}
 # Load raw BDS wide from shared folder
-bds_wide_raw_sf <- readxl::read_xlsx(
+bds_wide_raw <- readxl::read_xlsx(
   path = paste0(shared_folder, "/../Information for App Development/BDS - 2024 (JAKE).xlsx"),
   sheet = "BDS New",
   col_names = TRUE,
@@ -89,22 +89,6 @@ bds_wide_raw_sf <- readxl::read_xlsx(
   # Replace multi-space with single-space
   .name_repair = clean_spaces,
   col_types = "text"
-)
-
-# Save to data folder
-write.csv(
-  bds_wide_raw_sf,
-  here::here("01_data/01_raw/BDS_Wide.csv"),
-  row.names = FALSE
-)
-```
-
-
-```{r load-bds}
-# Load BDS wide
-bds_wide_raw <- read.csv(
-  here::here("01_data/01_raw/BDS_Wide.csv"),
-  check.names = FALSE
 )
 
 # styler: off
@@ -179,7 +163,7 @@ bds_long_la <- bds_long_clean |>
 # only public-safe/in-use measures)
 # NOTE: Children_away changed to Children_Away to match BDS
 data_dict <- read.csv(
-  file = paste0("01_data/02_prod/lait_data_dictionary.csv"),
+  file = here::here("01_data/02_prod/lait_data_dictionary.csv"),
   check.names = FALSE
 ) |>
   dplyr::mutate(Measure_short = trimws(Measure_short)) |>
