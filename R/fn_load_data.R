@@ -4,7 +4,9 @@
 #' The folder is synchronised and located in the user's local system.
 #'
 shared_folder <- paste0(
-  r"(C:\Users\jtufts\Department for Education\LAIT modernisation - General)",
+  r"(C:\Users\)",
+  Sys.info()[["user"]],
+  r"(\Department for Education\LAIT modernisation - General)",
   r"(\LAIT Modernisation 2024\Information for App Development)"
 )
 
@@ -407,7 +409,7 @@ update_and_fetch_metadata <- function(input_indicator,
 #'
 #' @details
 #' - The data dictionary file is assumed to be located in a specific relative
-#'   path: `"../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"`.
+#'   path: `"/LAIT Data Dictionary (To QA!).xlsx"`.
 #' - The `.name_repair` argument is set to a custom function, `clean_spaces`,
 #'   which replaces multiple spaces in column names with single spaces.
 #'
@@ -426,7 +428,7 @@ update_and_fetch_metadata <- function(input_indicator,
 #'
 read_data_dict_shared_folder <- function(shared_folder, sheet_name) {
   readxl::read_xlsx(
-    path = paste0(shared_folder, "/../Information for App Development/LAIT Data Dictionary (To QA!).xlsx"),
+    path = paste0(shared_folder, "/LAIT Data Dictionary (To QA!).xlsx"),
     sheet = sheet_name,
     # Replace multi-space with single-space
     .name_repair = clean_spaces
