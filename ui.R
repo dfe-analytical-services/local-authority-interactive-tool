@@ -72,7 +72,13 @@ ui <- function(input, output, session) {
       shinyGovstyle::banner(
         ifelse(banner_update_msg == "", "beta-banner", "beta-banner-no-border"),
         "Beta",
-        "This Dashboard is in beta phase and we are still reviewing performance and reliability."
+        paste0(
+          "This Dashboard is in beta phase and we are reviewing performance. ",
+          'Use this <a href="https://forms.office.com/pages/responsepage.aspx?id=yXfS',
+          "-grGoU2187O4s0qC-an-sVScsPtDqU0DmZXVHbtUN0kzQjRaOVpIUVFMVE41Q0FEQjlNVzE2OS4u&amp;route=shor",
+          'turl" target="_blank" rel="noopener noreferrer">feedback form (opens in new tab)</a>',
+          " or e-mail Darlington.BRIDGE@education.gov.uk with general queries."
+        )
       )
     ),
     # News banner --------------------------------------------------------------
