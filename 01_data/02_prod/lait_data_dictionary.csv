@@ -2379,7 +2379,7 @@ The SEN variable indicates whether a pupil has learning difficulties or disabili
 
 a) SEN support - Extra or different help is given from that provided as part of the school’s usual curriculum. The class teacher and SEN Coordinator (SENCO) may receive advice or support from outside specialists. This category replaces the former ‘School Action’ and ‘School Action Plus’ categories.
 b) Statement/EHC plan - A pupil has a statement of SEN or an EHC plan when a formal assessment has been made.","https://explore-education-statistics.service.gov.uk/find-statistics/key-stage-2-attainment",NA,"Academic Year",NA
-"355","Children with SEN","Progress scores - Key stage 2 by SEN pupils -Reading","Progress scores - Key stage 2 by SEN pupils -Reading","KS2_SEN_Reading_Progress","High","Average Score","State Funded","ks2_regional_local_authority_and_pupil_characteristics","NOTE: it will not be possible to calculate KS1-KS2 progress measures for academic years 2023/24 and 2024/25. This is because there is no relevant KS1 data required to calculate KS1-KS2 progress measures for these cohorts, as primary tests and assessments were cancelled in academic years 2019/20 and 2020/21 due to COVID-19 disruption.
+"355","Children with SEN","Progress scores - Key stage 2 by SEN Statement/EHCP pupils -Reading","Progress scores - Key stage 2 by SEN Statement/EHCP pupils -Reading","KS2_SEN_Reading_Progress","High","Average Score","State Funded","ks2_regional_local_authority_and_pupil_characteristics","NOTE: it will not be possible to calculate KS1-KS2 progress measures for academic years 2023/24 and 2024/25. This is because there is no relevant KS1 data required to calculate KS1-KS2 progress measures for these cohorts, as primary tests and assessments were cancelled in academic years 2019/20 and 2020/21 due to COVID-19 disruption.
 
 The progress measures aim to capture the progress that pupils make from the end of Key Stage 1 to the end of primary school. They are a type of value-added measure, which means that pupils’ results are compared to the actual achievements of other pupils nationally with similar prior attainment.
 
@@ -2391,7 +2391,7 @@ A positive score means pupils with this characteristic, on average, did better a
 A negative score means pupils with this characteristic, on average, did not make as much progress by the end of KS2 as other pupils with similar prior attainment nationally. A negative progress score does not mean pupils made no progress, rather it means pupils with that characteristic made less progress than other pupils across England with similar results at the end of KS1.
 
 See publication for further details.","https://explore-education-statistics.service.gov.uk/find-statistics/key-stage-2-attainment",2,"Academic Year",NA
-"355","Children with SEN","Progress scores - Key stage 2 by SEN pupils -Writing","Progress scores - Key stage 2 by SEN pupils -Writing","KS2_SEN_Writing_Progress","High","Average Score","State Funded","ks2_regional_local_authority_and_pupil_characteristics","NOTE: it will not be possible to calculate KS1-KS2 progress measures for academic years 2023/24 and 2024/25. This is because there is no relevant KS1 data required to calculate KS1-KS2 progress measures for these cohorts, as primary tests and assessments were cancelled in academic years 2019/20 and 2020/21 due to COVID-19 disruption.
+"355","Children with SEN","Progress scores - Key stage 2 by SEN Statement/EHCP pupils -Writing","Progress scores - Key stage 2 by SEN Statement/EHCP pupils -Writing","KS2_SEN_Writing_Progress","High","Average Score","State Funded","ks2_regional_local_authority_and_pupil_characteristics","NOTE: it will not be possible to calculate KS1-KS2 progress measures for academic years 2023/24 and 2024/25. This is because there is no relevant KS1 data required to calculate KS1-KS2 progress measures for these cohorts, as primary tests and assessments were cancelled in academic years 2019/20 and 2020/21 due to COVID-19 disruption.
 
 The progress measures aim to capture the progress that pupils make from the end of Key Stage 1 to the end of primary school. They are a type of value-added measure, which means that pupils’ results are compared to the actual achievements of other pupils nationally with similar prior attainment.
 
@@ -2403,7 +2403,7 @@ A positive score means pupils with this characteristic, on average, did better a
 A negative score means pupils with this characteristic, on average, did not make as much progress by the end of KS2 as other pupils with similar prior attainment nationally. A negative progress score does not mean pupils made no progress, rather it means pupils with that characteristic made less progress than other pupils across England with similar results at the end of KS1.
 
 See publication for further details.","https://explore-education-statistics.service.gov.uk/find-statistics/key-stage-2-attainment",2,"Academic Year",NA
-"355","Children with SEN","Progress scores - Key stage 2 by SEN pupils -Maths","Progress scores - Key stage 2 by SEN pupils -Maths","KS2_SEN_Maths_Progress","High","Average Score","State Funded","ks2_regional_local_authority_and_pupil_characteristics","NOTE: it will not be possible to calculate KS1-KS2 progress measures for academic years 2023/24 and 2024/25. This is because there is no relevant KS1 data required to calculate KS1-KS2 progress measures for these cohorts, as primary tests and assessments were cancelled in academic years 2019/20 and 2020/21 due to COVID-19 disruption.
+"355","Children with SEN","Progress scores - Key stage 2 by SEN Statement/EHCP pupils -Maths","Progress scores - Key stage 2 by SEN Statement/EHCP pupils -Maths","KS2_SEN_Maths_Progress","High","Average Score","State Funded","ks2_regional_local_authority_and_pupil_characteristics","NOTE: it will not be possible to calculate KS1-KS2 progress measures for academic years 2023/24 and 2024/25. This is because there is no relevant KS1 data required to calculate KS1-KS2 progress measures for these cohorts, as primary tests and assessments were cancelled in academic years 2019/20 and 2020/21 due to COVID-19 disruption.
 
 The progress measures aim to capture the progress that pupils make from the end of Key Stage 1 to the end of primary school. They are a type of value-added measure, which means that pupils’ results are compared to the actual achievements of other pupils nationally with similar prior attainment.
 
@@ -3204,7 +3204,7 @@ Note: By definition a child must be provided with accommodation for a continuous
 
 5) Education of looked after children -This includes expenditure on the services provided to promote the education of the children looked after by your local authority (e.g. looked after children education service teams and training for designated teachers).  This excludes any spend delegated to schools for looked after children.
 
-6) Leaving care support services - This Includes local authority’s ""leaving care"" support services functions under the Children (Leaving Care) Act 2000.",2024-01-01,"45658","DfE","(x/y)/365 * 7 where:
+6) Leaving care support services - This Includes local authority’s ""leaving care"" support services functions under the Children (Leaving Care) Act 2000.",2025-01-20,"46042","DfE","(x/y)/365 * 7 where:
 
  x = Total funding on Looked after children recorded on outturn
 
@@ -3229,7 +3229,7 @@ Refer to the Adoption Support Services Regulations 2005 for further information.
 Provision of adoption support is based on assessed needs.  Financial payments are made depending on the needs of the child and are means-tested.  Children are placed with approved prospective adopters under the Adoption and Children Act 2002 and the Adoption Agencies Regulations 2005.  This is the provision of care and accommodation of children placed for adoption under the Adoption Agencies Regulation 2005.  It also covers payments made, in accordance with the Adoption Support Services Regulations 2005, to a family after an adoption order has been made.
 
 This excludes the costs of children placed for adoption (see fostering services) and social work costs directly relating to the adopted children (see Social work).
-",2024-01-01,"45658","DfE","Calculation : (x/y)/365 * 7 where
+",2025-01-20,"46042","DfE","Calculation : (x/y)/365 * 7 where
  x = Total funding on Adoption Services recorded on outturn (OT) 
  y = Total number of children freed for adoption or with a placement order as at 31 March (figures under 6 are subject to suppression)
 
@@ -3241,7 +3241,7 @@ Result is rounded to nearest £5.
 -  permanence placements
 -  temporary /respite fostering
 -  associated independent visitor costs and relevant contact payments under sections 20/34 of the Children Act 1989.
-",2024-01-01,"45658","DfE","Calculation : (x/y)/365 * 7 where
+",2025-01-20,"46042","DfE","Calculation : (x/y)/365 * 7 where
 
  x = Total funding on Fostering Services recorded on outturn (OT) 
  y = Total number of Foster placements as at 31 March
@@ -3260,7 +3260,7 @@ This excludes expenditure costs for:
 -  Youth Detention Accommodation (include in Other Children Looked After Services). 
 -  respite care for those children not meeting the definition of children looked after.
 
-Explicitly excludes short breaks for looked after disabled children.",2024-01-01,"45658","DfE","Calculation : (x/y) * 7 where:
+Explicitly excludes short breaks for looked after disabled children.",2025-01-20,"46042","DfE","Calculation : (x/y) * 7 where:
  x = Total funding on residential care recorded on outturn (OT)
  y = Total number of residential care days provided via SSDA903 collection**
 
@@ -3287,7 +3287,7 @@ This excludes the costs of the actual services commissioned as well as any socia
 
 3) Children’s services strategy element - this includes partnership costs for multi-agency working i.e. contributions from the authority to partnership manager and other costs excluding pooled budget contributions for specific front line services.  This also includes spending on statutory regulatory duties related to children’s services that are not included in the line on central administration related to education above (line 82).
 
-",2024-01-01,"45658","DfE","Calculation : (x/y)/365 * 7 where
+",2025-01-20,"46042","DfE","Calculation : (x/y)/365 * 7 where
  x = Total funding on Social work and Commissioning & Children's Services Strategy recorded on outturn (OT)
 
  y = Total number of Children in need at 31 March
@@ -3295,7 +3295,7 @@ This excludes the costs of the actual services commissioned as well as any socia
 
 Result is rounded to nearest £5
 ","https://www.gov.uk/government/collections/statistics-local-authority-school-finance-data",0,"Financial Year",NA
-"299","Children's Service Finance","SEN - S251/Outturn weekly unit costs","SEN - S251/Outturn weekly unit costs (approximate)","SENFinance",NA,"Unit Cost",NA,"None standard - manual process","Includes the Section 251 budget lines: SEN support services; Direct Payments (SEN and disability) ; SEN Transport; Home to school transport (pre 16): SEN transport expenditure; SEN Admin, assessment and coordination and monitoring.",2024-01-01,"45658","DfE","Calculation : (x/y)/365 * 7 where
+"299","Children's Service Finance","SEN - S251/Outturn weekly unit costs","SEN - S251/Outturn weekly unit costs (approximate)","SENFinance",NA,"Unit Cost",NA,"None standard - manual process","Includes the Section 251 budget lines: SEN support services; Direct Payments (SEN and disability) ; SEN Transport; Home to school transport (pre 16): SEN transport expenditure; SEN Admin, assessment and coordination and monitoring.",2025-01-20,"46042","DfE","Calculation : (x/y)/365 * 7 where
  x = Total funding on SEN Services recorded on S251 financial budget statement
  y = Total number of children with a statement as at January (school census)
 
