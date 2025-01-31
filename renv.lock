@@ -320,7 +320,7 @@
     },
     "chromote": {
       "Package": "chromote",
-      "Version": "0.3.1",
+      "Version": "0.4.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -336,7 +336,7 @@
         "utils",
         "websocket"
       ],
-      "Hash": "5532726015b620830baae59aa689ea52"
+      "Hash": "1327bc3ec8e3052b09889fc87de93470"
     },
     "cli": {
       "Package": "cli",
@@ -448,13 +448,13 @@
     },
     "curl": {
       "Package": "curl",
-      "Version": "6.0.1",
+      "Version": "5.2.2",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R"
       ],
-      "Hash": "e8ba62486230951fcd2b881c5be23f96"
+      "Hash": "8f27335f2bcff4d6035edcc82d7d46de"
     },
     "cyclocomp": {
       "Package": "cyclocomp",
