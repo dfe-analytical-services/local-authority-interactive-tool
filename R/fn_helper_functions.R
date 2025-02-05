@@ -487,7 +487,7 @@ get_clean_af_colours <- function() {
 #' @export
 af_colours_focus <- function() {
   withCallingHandlers(
-    afcolours::af_colours(type = "duo"),
+    afcolours::af_colours(type = "focus"),
     message = function(m) {
       if (grepl(
         paste0(
@@ -688,7 +688,7 @@ add_line_breaks <- function(text, max_length = 20) {
 #' # Wrap a plot with a larger spinner
 #' with_gov_spinner(plotOutput("la_plot"), size = 2)
 #'
-with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#5694ca") {
+with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1d70b8") {
   shinycssloaders::withSpinner(
     ui_element,
     type = spinner_type,
