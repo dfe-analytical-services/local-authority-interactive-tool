@@ -455,11 +455,15 @@ get_england_colour <- function() {
 #' # Use clean_colours for general plotting, excluding reserved colours
 #'
 get_clean_af_colours <- function() {
-  setdiff(get_af_colours(), c(
-    get_la_focus_colour(),
-    get_england_colour(),
-    "#3D3D3D"
-  ))
+  c(setdiff(
+    get_af_colours(),
+    c(
+      get_la_focus_colour(),
+      get_england_colour(),
+      "#3D3D3D",
+      "#12436D"
+    )
+  ), "#3D3D3D")
 }
 
 
@@ -483,7 +487,7 @@ get_clean_af_colours <- function() {
 #' @export
 af_colours_focus <- function() {
   withCallingHandlers(
-    afcolours::af_colours(type = "focus"),
+    afcolours::af_colours(type = "duo"),
     message = function(m) {
       if (grepl(
         paste0(
@@ -684,7 +688,7 @@ add_line_breaks <- function(text, max_length = 20) {
 #' # Wrap a plot with a larger spinner
 #' with_gov_spinner(plotOutput("la_plot"), size = 2)
 #'
-with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1d70b8") {
+with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#5694ca") {
   shinycssloaders::withSpinner(
     ui_element,
     type = spinner_type,
