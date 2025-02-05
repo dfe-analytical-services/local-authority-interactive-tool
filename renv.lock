@@ -122,18 +122,6 @@
       ],
       "Hash": "45f0398006e83a5b10b72a90663d8d8c"
     },
-    "RCurl": {
-      "Package": "RCurl",
-      "Version": "1.98-1.16",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "bitops",
-        "methods"
-      ],
-      "Hash": "ddbdf53d15b47be4407ede6914f56fbb"
-    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.0.13-1",
@@ -242,13 +230,6 @@
         "utils"
       ],
       "Hash": "e84984bf5f12a18628d9a02322128dfd"
-    },
-    "bitops": {
-      "Package": "bitops",
-      "Version": "1.0-9",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "d972ef991d58c19e6efa71b21f5e144b"
     },
     "brew": {
       "Package": "brew",
@@ -431,13 +412,13 @@
     },
     "cpp11": {
       "Package": "cpp11",
-      "Version": "0.5.0",
+      "Version": "0.5.1",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R"
       ],
-      "Hash": "91570bba75d0c9d3f1040c835cee8fba"
+      "Hash": "9df43854f1c84685d095ed6270b52387"
     },
     "crayon": {
       "Package": "crayon",
@@ -467,13 +448,13 @@
     },
     "curl": {
       "Package": "curl",
-      "Version": "6.0.1",
+      "Version": "5.2.2",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Requirements": [
         "R"
       ],
-      "Hash": "e8ba62486230951fcd2b881c5be23f96"
+      "Hash": "8f27335f2bcff4d6035edcc82d7d46de"
     },
     "cyclocomp": {
       "Package": "cyclocomp",
@@ -541,11 +522,11 @@
       "Version": "0.6.1.9000",
       "Source": "GitHub",
       "RemoteType": "github",
+      "RemoteHost": "api.github.com",
       "RemoteUsername": "dfe-analytical-services",
       "RemoteRepo": "dfeR",
       "RemoteRef": "main",
-      "RemoteSha": "7010d10184bf913e877f311f00bfe06b110b28b6",
-      "RemoteHost": "api.github.com",
+      "RemoteSha": "6695f5d8be563fc3891f02161706c496ca44be8e",
       "Requirements": [
         "R",
         "dplyr",
@@ -561,21 +542,20 @@
         "utils",
         "withr"
       ],
-      "Hash": "38055f6403dfd3cc32d46b5e9c70db80"
+      "Hash": "8b19e27d16bc8084d9e2d7033bfd63bc"
     },
     "dfeshiny": {
       "Package": "dfeshiny",
-      "Version": "0.5.3",
+      "Version": "0.5.3.9000",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "dfe-analytical-services",
       "RemoteRepo": "dfeshiny",
       "RemoteRef": "main",
-      "RemoteSha": "8c345bf079b6a5b4d93d2c5ca1be077d21fd761a",
+      "RemoteSha": "2de5915421cf2cdccceb9440ee694254f2f6af1c",
       "Requirements": [
         "R",
-        "RCurl",
         "checkmate",
         "glue",
         "htmltools",
@@ -587,7 +567,7 @@
         "stringr",
         "styler"
       ],
-      "Hash": "9967c01468b897c3da0530f2688fd5f6"
+      "Hash": "b09d13e69d151ab2acc7bb0b4eb510c0"
     },
     "diffobj": {
       "Package": "diffobj",
@@ -1864,7 +1844,7 @@
     },
     "shiny": {
       "Package": "shiny",
-      "Version": "1.9.1",
+      "Version": "1.10.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1893,7 +1873,7 @@
         "withr",
         "xtable"
       ],
-      "Hash": "6a293995a66e12c48d13aa1f957d09c7"
+      "Hash": "4b4477baa9a939c5577e5ddb4bf01f28"
     },
     "shinyGovstyle": {
       "Package": "shinyGovstyle",
