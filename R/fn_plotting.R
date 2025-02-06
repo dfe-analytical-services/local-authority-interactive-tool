@@ -285,7 +285,7 @@ calculate_y_range <- function(data_long) {
 #'
 #' @return A numeric vector of 'pretty' breaks for y-gridlines, ensuring
 #'   that gridlines extend beyond the minimum and maximum values for better
-#'   visualization.
+#'   visualisation.
 #'
 #' @examples
 #' # Example usage:
@@ -622,6 +622,8 @@ generate_year_text <- function(data, years_num) {
 #' @export
 tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
   measure_summary <- data |>
+    # Order geogs by value while still a raw number
+    dplyr::arrange(dplyr::desc(values_num)) |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
     dplyr::filter(Years_num == years_num) |>
     dplyr::group_by(Measure) |>
@@ -685,9 +687,10 @@ tooltip_text <- function(data,
                          highlight_geography = NULL,
                          focus_colour) {
   data_clean <- data |>
+    # Order geogs by value while still a raw number
+    dplyr::arrange(dplyr::desc(values_num)) |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-    dplyr::filter(Years_num == years_num) |>
-    dplyr::arrange(dplyr::desc(values_num))
+    dplyr::filter(Years_num == years_num)
 
   # Create formatted tooltip text
   tooltip_lines <- sapply(seq_len(nrow(data_clean)), function(i) {

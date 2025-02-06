@@ -331,7 +331,7 @@
     },
     "chromote": {
       "Package": "chromote",
-      "Version": "0.3.1",
+      "Version": "0.4.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -347,7 +347,7 @@
         "utils",
         "websocket"
       ],
-      "Hash": "5532726015b620830baae59aa689ea52"
+      "Hash": "1327bc3ec8e3052b09889fc87de93470"
     },
     "cli": {
       "Package": "cli",
