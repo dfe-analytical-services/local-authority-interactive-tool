@@ -81,8 +81,8 @@ Logic to load BDS wide and convert to long
 
 ```{r pull-latest-bds-data}
 # Load raw BDS wide from shared folder
-bds_wide_raw_sf <- readxl::read_xlsx(
-  path = paste0(shared_folder, "/../Information for App Development/BDS - 2024 (JAKE).xlsx"),
+bds_wide_raw <- readxl::read_xlsx(
+  path = paste0(shared_folder, "/BDS - 2024 (JAKE).xlsx"),
   sheet = "BDS New",
   col_names = TRUE,
   skip = 1,
@@ -90,12 +90,6 @@ bds_wide_raw_sf <- readxl::read_xlsx(
   .name_repair = clean_spaces,
   col_types = "text"
 )
-```
-
-
-```{r load-bds}
-# Load BDS wide
-bds_wide_raw <- bds_wide_raw_sf
 
 # styler: off
 # Remove any cols that are all na
