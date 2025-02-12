@@ -457,8 +457,8 @@ get_clean_af_colours <- function() {
   excluded_colours <- c(
     get_la_focus_colour(),
     get_england_colour(),
-    "#3D3D3D",  # Grey colour (moved to the end)
-    "#12436D"   # Blue colour to exclude
+    "#3D3D3D", # Grey colour (moved to the end)
+    "#12436D" # Blue colour to exclude
   )
 
   # Remove excluded colours and add "#3D3D3D" at the end
