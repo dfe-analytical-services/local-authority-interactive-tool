@@ -451,18 +451,12 @@ get_england_colour <- function() {
 #' clean_colours <- get_clean_af_colours()
 #' @export
 get_clean_af_colours <- function() {
-  all_colours <- get_af_colours()
+  af_colours <- get_af_colours()
+  clean_colours <- c("#A285D1", "#28A197", "#3D3D3D", "#F46A25")
 
-  # Unwanted or already reserved colours
-  excluded_colours <- c(
-    get_la_focus_colour(),
-    get_england_colour(),
-    "#3D3D3D", # Grey colour (moved to the end)
-    "#12436D" # Blue colour to exclude
-  )
-
-  # Remove excluded colours and add "#3D3D3D" at the end
-  clean_colours <- c(setdiff(all_colours, excluded_colours), "#3D3D3D")
+  if (!all(clean_colours %in% af_colours)) {
+    warning("Not all clean_colours are present in af_colours.")
+  }
 
   clean_colours
 }
