@@ -442,24 +442,29 @@ get_england_colour <- function() {
 #' Retrieve Available Colours for Plotting
 #'
 #' This function provides a filtered set of colours from the AF colours palette,
-#' excluding the specific colours reserved for the focus group and "England."
+#' excluding the specific colours reserved for the selected LA, "England" and
+#' the focus group colour.
 #'
 #' @return A vector of hex colour codes from the AF colours palette, with
 #'   colours reserved for the focus group and "England" removed.
-#' @seealso [get_af_colours()] for the original AF colour palette,
-#'   [get_la_focus_colour()] for the focus group colour, and
-#'   [get_england_colour()] for the "England" colour.
 #' @examples
 #' clean_colours <- get_clean_af_colours()
-#'
-#' # Use clean_colours for general plotting, excluding reserved colours
-#'
+#' @export
 get_clean_af_colours <- function() {
-  setdiff(get_af_colours(), c(
+  all_colours <- get_af_colours()
+
+  # Unwanted or already reserved colours
+  excluded_colours <- c(
     get_la_focus_colour(),
     get_england_colour(),
-    "#3D3D3D"
-  ))
+    "#3D3D3D", # Grey colour (moved to the end)
+    "#12436D" # Blue colour to exclude
+  )
+
+  # Remove excluded colours and add "#3D3D3D" at the end
+  clean_colours <- c(setdiff(all_colours, excluded_colours), "#3D3D3D")
+
+  clean_colours
 }
 
 
