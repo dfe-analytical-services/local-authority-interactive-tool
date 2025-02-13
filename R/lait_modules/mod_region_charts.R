@@ -232,7 +232,12 @@ Region_FocusLineChartServer <- function(id,
     # Prepare the chart data, setting the selected region to appear at the front
     chart_data <- reactive({
       region_long_plot() |>
-        reorder_la_regions(region_clean(), after = Inf)
+        reorder_la_regions(region_clean(), after = Inf) |>
+        # Creating options for graph labels
+        dplyr::mutate(
+          label_color = ifelse(`LA and Regions` == region_clean(), "#12436D", "#505a5f"),
+          label_fontface = ifelse(`LA and Regions` == region_clean(), "bold", "plain")
+        )
     })
 
     # Build the static version of the focus line chart
@@ -289,9 +294,10 @@ Region_FocusLineChartServer <- function(id,
             aes(
               x = Years_num,
               y = values_num,
-              label = `LA and Regions`
+              label = `LA and Regions`,
+              fontface = label_fontface
             ),
-            color = "black",
+            colour = subset(chart_data(), Years == current_year())$label_color,
             segment.colour = NA,
             label.size = NA,
             max.overlaps = Inf,

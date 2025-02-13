@@ -501,7 +501,12 @@ server_dev <- function(input, output, session) {
     # Set selected region to last level so appears at front of plot
     region_focus_line_data <- region_long_plot() |>
       dplyr::ungroup() |>
-      reorder_la_regions(region_la_ldn_clean(), after = Inf)
+      reorder_la_regions(region_la_ldn_clean(), after = Inf) |>
+      # Creating options for graph labels
+      dplyr::mutate(
+        label_color = ifelse(`LA and Regions` == region_la_ldn_clean(), "#12436D", "#505a5f"),
+        label_fontface = ifelse(`LA and Regions` == region_la_ldn_clean(), "bold", "plain")
+      )
 
     # Built focus plot
     region_line_chart <- region_focus_line_data |>
@@ -527,9 +532,10 @@ server_dev <- function(input, output, session) {
         aes(
           x = Years_num,
           y = values_num,
-          label = `LA and Regions`
+          label = `LA and Regions`,
+          fontface = label_fontface
         ),
-        color = "black",
+        colour = subset(region_focus_line_data, Years == current_year())$label_color,
         segment.colour = NA,
         label.size = NA,
         max.overlaps = Inf,
