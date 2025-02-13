@@ -3,7 +3,13 @@
 #' This variable holds the path to the 'LAIT - modernisation' teams channel folder.
 #' The folder is synchronised and located in the user's local system.
 #'
-shared_folder <- paste0(r"(C:\Users\)", Sys.info()[["user"]], r"(\Department for Education)", r"(\LA Data & Analysis - Children's Social Care - LAPD Private Sync)", r"(\LAIT\Information for App Development)")
+shared_folder <- paste0(
+  r"(C:\Users\)",
+  Sys.info()[["user"]],
+  r"(\Department for Education)",
+  r"(\LA Data & Analysis - Children's Social Care - LAPD Private Sync)",
+  r"(\LAIT\Information for App Development)"
+)
 
 
 #' Clean SNP Column Names
