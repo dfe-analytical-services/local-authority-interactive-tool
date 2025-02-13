@@ -452,7 +452,11 @@ get_england_colour <- function() {
 #' @export
 get_clean_af_colours <- function() {
   af_colours <- get_af_colours()
-  clean_colours <- c("#A285D1", "#28A197", "#3D3D3D", "#F46A25")
+
+  # Orange first as it is the normal selected geog colour
+  # It is usually replaced by the get_la_focus_colour() in create_plot_colours()
+  # But is needed for the Create Your Own charts (which have no focus_group)
+  clean_colours <- c("#F46A25", "#A285D1", "#28A197", "#3D3D3D")
 
   if (!all(clean_colours %in% af_colours)) {
     warning("Not all clean_colours are present in af_colours.")

@@ -160,8 +160,8 @@ create_plot_colours <- function(data_long, focus_group = NULL) {
     plot_groups <- setdiff(plot_groups, "England")
   }
 
-  # Assign colours for remaining groups
-  remaining_colours <- get_clean_af_colours()[seq_along(plot_groups)]
+  # Assign colours for remaining groups (ensure now duplicate colours)
+  remaining_colours <- setdiff(get_clean_af_colours(), plot_colours)[seq_along(plot_groups)]
   names(remaining_colours) <- plot_groups
 
   # Combine all colours
@@ -620,16 +620,16 @@ generate_year_text <- function(data, years_num) {
 #'
 #' @return A formatted string containing measures and corresponding values.
 #' @export
-tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
+tooltip_text_w_indicator <- function(data, years_num, indicator_dp, geog_colours) {
   measure_summary <- data |>
-    # Order geogs by value while still a raw number
+    dplyr::filter(Years_num == years_num) |>
     dplyr::arrange(dplyr::desc(values_num)) |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-    dplyr::filter(Years_num == years_num) |>
     dplyr::group_by(Measure) |>
     dplyr::summarise(
-      tooltip_text = paste(
-        paste0(`LA and Regions`, ": ", values_num),
+      tooltip_text = paste0(
+        "<span style='color:", geog_colours[`LA and Regions`], ";'>",
+        `LA and Regions`, ": ", values_num, "</span>",
         collapse = "\n"
       ),
       .groups = "drop"
@@ -681,42 +681,30 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
 #' # Generate tooltip text without any highlighted geography
 #' tooltip_text(data = my_data, years_num = 2022, indicator_dp = 2)
 #'
-tooltip_text <- function(data,
-                         years_num,
-                         indicator_dp,
-                         highlight_geography = NULL,
-                         focus_colour) {
+tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_colours) {
   data_clean <- data |>
-    # Order geogs by value while still a raw number
+    dplyr::filter(Years_num == years_num) |>
     dplyr::arrange(dplyr::desc(values_num)) |>
-    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-    dplyr::filter(Years_num == years_num)
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp)
 
-  # Create formatted tooltip text
-  tooltip_lines <- sapply(seq_len(nrow(data_clean)), function(i) {
-    row <- data_clean[i, ]
-    geography <- row$`LA and Regions`
-    value <- row$values_num
+  tooltip_lines <- apply(data_clean, 1, function(row) {
+    geography <- row["LA and Regions"]
+    value <- row["values_num"]
 
-    # Apply styling for highlighted geography
-    if (!is.null(highlight_geography) && geography == highlight_geography) {
-      paste0(
-        "<span style='color:", focus_colour, "; font-weight: bold;'>",
-        geography, ": ", value, "</span>"
-      )
-      # Apply specific styling for "England" if present
-    } else if (geography == "England") {
-      paste0(
-        "<span style='color:", get_england_colour(), "; font-weight: bold;'>",
-        geography, ": ", value, "</span>"
-      )
+    text_colour <- if (!is.null(focus_geog)) {
+      if (geography == focus_geog) "#12436D" else "black"
     } else {
-      paste0(geography, ": ", value)
+      geog_colours[geography]
     }
+
+    weight <- if (text_colour %in% c("#F46A25", "#12436D")) "font-weight: bold;" else ""
+
+    paste0("<span style='color:", text_colour, "; ", weight, "'>", geography, ": ", value, "</span>")
   })
 
   paste(tooltip_lines, collapse = "\n")
 }
+
 
 
 #' Add an Interactive Vertical Line with Tooltips
@@ -756,15 +744,15 @@ tooltip_text <- function(data,
 tooltip_vlines <- function(x,
                            data,
                            indicator_dp = 1,
-                           focus_group = NULL,
-                           focus_colour = get_la_focus_colour(),
+                           focus_geog = NULL,
                            include_measure = FALSE) {
   year_text <- generate_year_text(data, x)
+  geog_colours <- create_plot_colours(data)
 
   tooltip_content <- if (include_measure) {
-    tooltip_text_w_indicator(data, x, indicator_dp)
+    tooltip_text_w_indicator(data, x, indicator_dp, geog_colours)
   } else {
-    tooltip_text(data, x, indicator_dp, focus_group, focus_colour)
+    tooltip_text(data, x, indicator_dp, focus_geog, geog_colours)
   }
 
   geom_vline_interactive(
