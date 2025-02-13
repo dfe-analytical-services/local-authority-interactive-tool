@@ -367,7 +367,7 @@ la_bar_chart <- la_long |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = tooltip_bar(la_long, indicator_dps, selected_la),
+      tooltip = tooltip_bar(la_long, indicator_dps),
       data_id = `LA and Regions`
     ),
     position = "dodge",

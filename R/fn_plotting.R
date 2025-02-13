@@ -803,60 +803,40 @@ tooltip_vlines <- function(x,
 #'
 tooltip_bar <- function(data,
                         indicator_dps,
-                        focus_group = NULL,
-                        text_colour = get_la_focus_colour(),
+                        focus_geog = NULL,
                         include_measure = FALSE) {
-  # Prepare data with specified decimal points
+  # Prepare data with formatted numbers
   data_clean <- data |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dps)
+  geog_colours <- create_plot_colours(data)
 
-  # Generate tooltip text for each row of data
-  sapply(seq_len(nrow(data_clean)), function(i) {
-    row <- data_clean[i, ]
-    geography <- row$`LA and Regions`
-    value <- row$values_num
-    year <- row$Years
-    measure_text <- ""
+  apply(data_clean, 1, function(row) {
+    geography <- row["LA and Regions"]
+    value <- row["values_num"]
+    year <- row["Years"]
 
-    # Conditionally add Measure to the tooltip if include_measure is TRUE
-    if (include_measure && "Measure" %in% names(row)) {
-      measure_text <- paste0("Measure: ", row$Measure, "\n")
+    # Tooltip content
+    measure_text <- if (include_measure && "Measure" %in% names(row)) {
+      paste0("Measure: ", row$Measure, "\n")
+    } else {
+      ""
     }
 
-    # Create formatted tooltip text with colour formatting for "England" and focus_group
-    tooltip_text <- paste0(
-      measure_text,
-      "Year: ",
-      year,
-      "\n\n",
-      ifelse(
-        geography == "England",
-        paste0(
-          "<span style='color:",
-          get_england_colour(),
-          "; font-weight: bold;'>",
-          geography,
-          ": ",
-          value,
-          "</span>"
-        ),
-        ifelse(
-          !is.null(focus_group) && geography == focus_group,
-          paste0(
-            "<span style='color:",
-            text_colour,
-            "; font-weight: bold;'>",
-            geography,
-            ": ",
-            value,
-            "</span>"
-          ),
-          paste0(geography, ": ", value)
-        )
-      )
-    )
+    # Apply colour formatting (set focus plot colours)
+    text_colour <- if (!is.null(focus_geog)) {
+      if (geography == focus_geog) "#12436D" else "black"
+    } else {
+      geog_colours[geography]
+    }
 
-    tooltip_text
+    weight <- if (text_colour %in% c("#F46A25", "#12436D")) "bold" else "normal"
+
+    paste0(
+      measure_text,
+      "Year: ", year, "\n\n",
+      "<span style='color:", text_colour, "; font-weight: ", weight, ";'>",
+      geography, ": ", value, "</span>"
+    )
   })
 }
 
