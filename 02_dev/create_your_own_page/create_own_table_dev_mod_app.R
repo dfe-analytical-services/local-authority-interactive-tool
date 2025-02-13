@@ -16,7 +16,7 @@ list.files("R/lait_modules/", full.names = TRUE) |>
 ui <- bslib::page_fillable(
   ## Other language dependencies ===============================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
-  tags$head(htmltools::includeScript("www/custom_js.js")),
+  tags$head(htmltools::includeScript(here::here("www/custom_js.js"))),
   # Makes the remove button work
   reactable.extras::reactable_extras_dependency(),
 

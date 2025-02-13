@@ -508,8 +508,7 @@ server_dev <- function(input, output, session) {
       get_years(la_long()),
       tooltip_vlines,
       la_long(),
-      indicator_dps(),
-      input$la_input
+      indicator_dps()
     )
 
     # Plotting interactive graph
@@ -548,7 +547,7 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = tooltip_bar(la_long(), indicator_dps(), input$la_input),
+          tooltip = tooltip_bar(la_long(), indicator_dps()),
           data_id = `LA and Regions`
         ),
         position = "dodge",

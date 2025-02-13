@@ -186,6 +186,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data
 
       # Plot data - colour represents Geographies & linetype represents Indicator
       chart_info$data() |>
+        reorder_la_regions(reverse = TRUE) |>
         ggplot2::ggplot() +
         ggiraph::geom_line_interactive(
           ggplot2::aes(
@@ -229,6 +230,7 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data
             order = 1,
             ncol = 1,
             title = "Geographies (colour):",
+            reverse = TRUE,
             override.aes = list(size = 3, shape = 15, linetype = NULL)
           ),
           linetype = ggplot2::guide_legend(
