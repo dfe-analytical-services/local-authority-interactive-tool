@@ -49,16 +49,10 @@ region_la_filtered_bds <- filtered_bds |>
 
 # Region LA levels long
 region_la_long <- region_la_filtered_bds |>
-  # dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
   dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
-  # dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`
-      # levels = c(
-      #   selected_la, la_region,
-      #   "Statistical Neighbours", "England"
-      # )
     )
   )
 
@@ -108,16 +102,10 @@ region_filtered_bds <- filtered_bds |>
 
 # Region levels long
 region_long <- region_filtered_bds |>
-  # dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
   dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
-  # dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`
-      # levels = c(
-      #   selected_la, la_region,
-      #   "Statistical Neighbours", "England"
-      # )
     )
   )
 

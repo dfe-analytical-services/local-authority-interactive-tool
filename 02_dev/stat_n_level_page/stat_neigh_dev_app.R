@@ -161,7 +161,7 @@ server_dev <- function(input, output, session) {
         dplyr::filter(
           # If topic_input is not NULL or "All topics", filter by selected topics
           # Include all rows if no topic is selected or "All topics" is selected
-          if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
+          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
             TRUE
           } else {
             .data$Topic %in% input$topic_input
