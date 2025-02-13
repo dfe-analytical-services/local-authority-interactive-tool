@@ -97,7 +97,12 @@ StatN_FocusLineChartServer <- function(id,
     focus_chart_data <- reactive({
       stat_n_long() |>
         dplyr::filter(`LA and Regions` %in% c(app_inputs$la(), stat_n_sns())) |>
-        reorder_la_regions(app_inputs$la(), after = Inf)
+        reorder_la_regions(app_inputs$la(), after = Inf) |>
+        # Creating options for graph labels
+        dplyr::mutate(
+          label_color = ifelse(`LA and Regions` == app_inputs$la(), "#12436D", "#505a5f"),
+          label_fontface = ifelse(`LA and Regions` == app_inputs$la(), "bold", "plain")
+        )
     })
 
     static_chart <- reactive({
@@ -150,9 +155,10 @@ StatN_FocusLineChartServer <- function(id,
             aes(
               x = Years_num,
               y = values_num,
-              label = `LA and Regions`
+              label = `LA and Regions`,
+              fontface = label_fontface
             ),
-            color = "black",
+            colour = subset(focus_chart_data(), Years == current_year())$label_color,
             segment.colour = NA,
             label.size = NA,
             max.overlaps = Inf,

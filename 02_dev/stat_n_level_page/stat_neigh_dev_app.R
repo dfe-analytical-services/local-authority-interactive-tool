@@ -244,9 +244,6 @@ server_dev <- function(input, output, session) {
         .before = "Years"
       )
 
-    print(filtered_bds$data)
-    print(stat_n_sn_avg)
-
     # Statistical Neighbours long data
     filtered_bds$data |>
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns(), stat_n_region(), "England")) |>
@@ -564,7 +561,12 @@ server_dev <- function(input, output, session) {
     # Set selected LA to last level so appears at front of plot
     focus_line_data <- stat_n_long() |>
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
-      reorder_la_regions(input$la_input, after = Inf)
+      reorder_la_regions(input$la_input, after = Inf) |>
+      # Creating options for graph labels
+      dplyr::mutate(
+        label_color = ifelse(`LA and Regions` == input$la_input, "#12436D", "#505a5f"),
+        label_fontface = ifelse(`LA and Regions` == input$la_input, "bold", "plain")
+      )
 
     if (all(is.na(focus_line_data$values_num))) {
       ggiraph::girafe(
@@ -598,9 +600,10 @@ server_dev <- function(input, output, session) {
           aes(
             x = Years_num,
             y = values_num,
-            label = `LA and Regions`
+            label = `LA and Regions`,
+            fontface = label_fontface
           ),
-          color = "black",
+          colour = subset(focus_line_data, Years == current_year())$label_color,
           segment.colour = NA,
           label.size = NA,
           max.overlaps = Inf,

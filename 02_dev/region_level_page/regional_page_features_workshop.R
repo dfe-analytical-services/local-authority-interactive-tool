@@ -315,6 +315,7 @@ ggiraph::girafe(
 focus_line_data <- region_long_plot |>
   dplyr::ungroup() |>
   reorder_la_regions(region_clean, after = Inf) |>
+  # Creating options for graph labels
   dplyr::mutate(
     label_color = ifelse(`LA and Regions` == region_clean, "#12436D", "#505a5f"),
     label_fontface = ifelse(`LA and Regions` == region_clean, "bold", "plain")

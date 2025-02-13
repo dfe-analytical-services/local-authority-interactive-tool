@@ -233,9 +233,14 @@ dfe_reactable(
 # Set selected LA to last level so appears at front of plot
 focus_line_data <- stat_n_long |>
   dplyr::filter(`LA and Regions` %in% c(selected_la, stat_n_sns)) |>
-  reorder_la_regions(selected_la, after = Inf)
+  reorder_la_regions(selected_la, after = Inf) |>
+  # Creating options for graph labels
+  dplyr::mutate(
+    label_color = ifelse(`LA and Regions` == selected_la, "#12436D", "#505a5f"),
+    label_fontface = ifelse(`LA and Regions` == selected_la, "bold", "plain")
+  )
 
-region_line_chart <- focus_line_data |>
+stat_n_focus_line_chart <- focus_line_data |>
   ggplot2::ggplot() +
   ggiraph::geom_line_interactive(
     ggplot2::aes(
@@ -255,9 +260,10 @@ region_line_chart <- focus_line_data |>
     aes(
       x = Years_num,
       y = values_num,
-      label = `LA and Regions`
+      label = `LA and Regions`,
+      fontface = label_fontface
     ),
-    color = "black",
+    colour = subset(focus_line_data, Years == current_year)$label_color,
     segment.colour = NA,
     label.size = NA,
     max.overlaps = Inf,
@@ -284,7 +290,7 @@ vertical_hover <- lapply(
 
 # Plotting interactive graph
 ggiraph::girafe(
-  ggobj = (region_line_chart + vertical_hover),
+  ggobj = (stat_n_focus_line_chart + vertical_hover),
   width_svg = 12,
   options = generic_ggiraph_options(
     opts_hover(
