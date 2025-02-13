@@ -594,8 +594,7 @@ server_dev <- function(input, output, session) {
         tooltip_vlines,
         focus_line_data,
         indicator_dps(),
-        input$la_input,
-        "#12436D"
+        input$la_input
       )
 
       # Plotting interactive graph
@@ -683,9 +682,11 @@ server_dev <- function(input, output, session) {
       vertical_hover <- lapply(
         get_years(stat_n_line_chart_data),
         tooltip_vlines,
-        stat_n_line_chart_data,
-        indicator_dps(),
-        input$la_input
+        stat_n_line_chart_data |>
+          reorder_la_regions(
+            intersect(c(input$la_input, input$chart_line_input), valid_regions)
+          ),
+        indicator_dps()
       )
 
       # Plotting interactive graph

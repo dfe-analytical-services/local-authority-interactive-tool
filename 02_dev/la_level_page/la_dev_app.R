@@ -508,8 +508,7 @@ server_dev <- function(input, output, session) {
       get_years(la_long()),
       tooltip_vlines,
       la_long(),
-      indicator_dps(),
-      input$la_input
+      indicator_dps()
     )
 
     # Plotting interactive graph

@@ -329,8 +329,7 @@ vertical_hover <- lapply(
   get_years(la_long),
   tooltip_vlines,
   la_long,
-  indicator_dps,
-  selected_la
+  indicator_dps
 )
 
 # Plotting interactive graph

@@ -252,6 +252,7 @@ region_random_selection <- region_long_plot |>
   sample(size = 3) # Select up to 6 randomly
 
 region_line_chart_data <- region_long_plot |>
+  dplyr::ungroup() |>
   # Filter for random Regions - simulate user choosing up to 6 regions
   dplyr::filter(
     (`LA and Regions` %in% region_random_selection) |
@@ -294,8 +295,7 @@ vertical_hover <- lapply(
   get_years(region_line_chart_data),
   tooltip_vlines,
   region_line_chart_data,
-  indicator_dps,
-  region_clean
+  indicator_dps
 )
 
 # Plotting interactive graph
@@ -313,6 +313,7 @@ ggiraph::girafe(
 # Focus plot
 # Set selected region to last level so appears at front of plot
 focus_line_data <- region_long_plot |>
+  dplyr::ungroup() |>
   reorder_la_regions(region_clean, after = Inf)
 
 region_line_chart <- focus_line_data |>
@@ -335,9 +336,9 @@ region_line_chart <- focus_line_data |>
     aes(
       x = Years_num,
       y = values_num,
-      label = `LA and Regions`
+      label = `LA and Regions`,
+      colour = `LA and Regions`
     ),
-    color = "black",
     segment.colour = NA,
     label.size = NA,
     max.overlaps = Inf,
@@ -357,10 +358,9 @@ region_line_chart <- focus_line_data |>
 vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
-  focus_line_data,
+  focus_line_data |> reorder_la_regions(region_clean),
   indicator_dps,
-  region_clean,
-  "#12436D"
+  region_clean
 )
 
 # Plotting interactive graph

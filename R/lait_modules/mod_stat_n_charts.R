@@ -178,8 +178,7 @@ StatN_FocusLineChartServer <- function(id,
           tooltip_vlines,
           focus_chart_data(),
           get_indicator_dps(filtered_bds()),
-          app_inputs$la(),
-          "#12436D"
+          app_inputs$la()
         )
 
         # Combine static chart and vertical hover into one ggplot object
@@ -826,9 +825,11 @@ StatN_MultiLineChartServer <- function(id,
         vertical_hover <- lapply(
           get_years(chart_data()),
           tooltip_vlines,
-          chart_data(),
-          get_indicator_dps(filtered_bds()),
-          app_inputs$la()
+          chart_data() |>
+            reorder_la_regions(
+              intersect(c(app_inputs$la(), chart_input()), stat_n_long()$`LA and Regions`)
+            ),
+          get_indicator_dps(filtered_bds())
         )
 
         # Combine static chart and vertical hover into one ggplot object

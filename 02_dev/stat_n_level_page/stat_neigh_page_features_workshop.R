@@ -279,8 +279,7 @@ vertical_hover <- lapply(
   tooltip_vlines,
   focus_line_data,
   indicator_dps,
-  selected_la,
-  "#12436D"
+  selected_la
 )
 
 # Plotting interactive graph
@@ -315,7 +314,7 @@ stat_n_line_chart_data <- stat_n_long |>
   reorder_la_regions(rev(c(selected_la, stat_n_random_selection)), after = Inf)
 
 # Plot - selected areas
-region_line_chart <- stat_n_line_chart_data |>
+stat_n_line_chart <- stat_n_line_chart_data |>
   ggplot2::ggplot() +
   ggiraph::geom_point_interactive(
     ggplot2::aes(
@@ -353,14 +352,14 @@ region_line_chart <- stat_n_line_chart_data |>
 vertical_hover <- lapply(
   get_years(stat_n_line_chart_data),
   tooltip_vlines,
-  stat_n_line_chart_data,
-  indicator_dps,
-  selected_la
+  stat_n_line_chart_data |>
+    reorder_la_regions(c(selected_la, stat_n_random_selection)),
+  indicator_dps
 )
 
 # Plotting interactive graph
 ggiraph::girafe(
-  ggobj = (region_line_chart + vertical_hover),
+  ggobj = (stat_n_line_chart + vertical_hover),
   width_svg = 8.5,
   options = generic_ggiraph_options(
     opts_hover(

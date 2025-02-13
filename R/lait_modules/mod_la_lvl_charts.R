@@ -152,8 +152,7 @@ LA_LineChartServer <- function(id,
         get_years(la_long()),
         tooltip_vlines,
         la_long(),
-        get_indicator_dps(filtered_bds()),
-        app_inputs$la()
+        get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph

@@ -550,8 +550,7 @@ server_dev <- function(input, output, session) {
       tooltip_vlines,
       region_focus_line_data,
       indicator_dps(),
-      region_la_ldn_clean(),
-      "#12436D"
+      region_la_ldn_clean()
     )
 
     # Plotting interactive graph
@@ -623,9 +622,9 @@ server_dev <- function(input, output, session) {
     vertical_hover <- lapply(
       get_years(region_multi_choice_data),
       tooltip_vlines,
-      region_multi_choice_data,
-      indicator_dps(),
-      region_la_ldn_clean()
+      region_multi_choice_data |>
+        reorder_la_regions(c(region_la_ldn_clean(), input$chart_line_input)),
+      indicator_dps()
     )
 
     # Plotting interactive graph
