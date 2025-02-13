@@ -208,8 +208,8 @@ get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
 
   # Set cell colour based on Quartile Banding
   matching_colour <- dplyr::case_when(
-    quartile_band == "A" & polarity %in% valid_polarities ~ "#00703c",
-    quartile_band == "D" & polarity %in% valid_polarities ~ "#d4351c",
+    quartile_band == "A" & polarity %in% valid_polarities ~ get_gov_green(),
+    quartile_band == "D" & polarity %in% valid_polarities ~ get_gov_red(),
     TRUE ~ "none"
   )
 

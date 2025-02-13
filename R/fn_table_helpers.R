@@ -754,7 +754,7 @@ trend_icon_renderer <- function(value) {
 #' Accepts "High" for favourable high values or "Low" for favourable low values.
 #'
 #' @return A list with `background` and `text` elements. The `background` is set
-#' to green (`"#00703c"`) for favourable trends, red (`"#d4351c"`) for
+#' to green (`get_gov_green()`) for favourable trends, red (`get_gov_red()`) for
 #' unfavourable trends,
 #' or `"none"` if either `value` or `polarity` is `NA`.
 #' The `color` is `"white"` when the background is coloured,
@@ -771,8 +771,8 @@ get_trend_colour <- function(value, polarity) {
   }
 
   # Colours to set trend arrow
-  red_colour <- "#d4351c"
-  green_colour <- "#00703c"
+  red_colour <- get_gov_red()
+  green_colour <- get_gov_green()
 
   # Apply colour dependent on polarity and vlaue
   trend_colour <- dplyr::case_when(

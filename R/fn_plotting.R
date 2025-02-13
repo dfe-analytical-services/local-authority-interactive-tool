@@ -832,7 +832,7 @@ tooltip_bar <- function(data,
     }
 
     weight <- ifelse(
-      text_colour %in% c("#F46A25", get_focus_front_colour()) & !include_measure,
+      text_colour %in% c(get_selected_la_colour(), get_focus_front_colour()) & !include_measure,
       "bold",
       "normal"
     )

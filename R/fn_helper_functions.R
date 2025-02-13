@@ -467,6 +467,19 @@ get_focus_back_colour <- function() {
 }
 
 
+#' Get Colour for the Gov text
+#'
+#' Retrieves the GOV.UK text colour.
+#'
+#' @return A character string with the hex colour code for the Gov text colour.
+#' @examples
+#' get_gov_text_colour()
+#'
+get_gov_text_colour <- function() {
+  "#0b0c0c"
+}
+
+
 #' Get Colour for the Gov Secondary Text
 #'
 #' Retrieves the GOV.UK secondary text colour for text in tooltips for the
@@ -479,6 +492,45 @@ get_focus_back_colour <- function() {
 #'
 get_gov_secondary_text_colour <- function() {
   "#505a5f"
+}
+
+
+#' Get Colour for the Gov Brand
+#'
+#' Retrieves the GOV.UK brand colour.
+#'
+#' @return A character string with the hex colour code for the Gov brand colour.
+#' @examples
+#' get_gov_brand_colour()
+#'
+get_gov_brand_colour <- function() {
+  "#1d70b8"
+}
+
+
+#' Get Colour for the Gov Red
+#'
+#' Retrieves the GOV.UK Red colour.
+#'
+#' @return A character string with the hex colour code for the Gov Red colour.
+#' @examples
+#' get_gov_red()
+#'
+get_gov_red <- function() {
+  "#d4351c"
+}
+
+
+#' Get Colour for the Gov Green
+#'
+#' Retrieves the GOV.UK Green colour.
+#'
+#' @return A character string with the hex colour code for the Gov Green colour.
+#' @examples
+#' get_gov_green()
+#'
+get_gov_green <- function() {
+  "#00703c"
 }
 
 
