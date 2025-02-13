@@ -819,7 +819,7 @@ tooltip_bar <- function(data,
 
     # Tooltip content
     measure_text <- if (include_measure && "Measure" %in% names(row)) {
-      paste0("Measure: ", row$Measure, "\n")
+      paste0("Measure: ", row["Measure"], "\n")
     } else {
       ""
     }
@@ -831,7 +831,11 @@ tooltip_bar <- function(data,
       geog_colours[geography]
     }
 
-    weight <- if (text_colour %in% c("#F46A25", "#12436D")) "bold" else "normal"
+    weight <- ifelse(
+      text_colour %in% c("#F46A25", "#12436D") & !include_measure,
+      "bold",
+      "normal"
+    )
 
     paste0(
       measure_text,
