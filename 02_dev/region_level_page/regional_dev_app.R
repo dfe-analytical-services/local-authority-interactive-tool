@@ -500,6 +500,7 @@ server_dev <- function(input, output, session) {
   region_focus_line_chart <- reactive({
     # Set selected region to last level so appears at front of plot
     region_focus_line_data <- region_long_plot() |>
+      dplyr::ungroup() |>
       reorder_la_regions(region_la_ldn_clean(), after = Inf)
 
     # Built focus plot
@@ -573,6 +574,7 @@ server_dev <- function(input, output, session) {
   region_multi_line_chart <- reactive({
     # Filtering plotting data for selected LA region and others user choices
     region_multi_choice_data <- region_long_plot() |>
+      dplyr::ungroup() |>
       dplyr::filter(
         (`LA and Regions` %in% input$chart_line_input) |
           (`LA and Regions` %in% region_la_ldn_clean())
@@ -660,8 +662,7 @@ server_dev <- function(input, output, session) {
           tooltip = tooltip_bar(
             region_focus_bar_data,
             indicator_dps(),
-            region_la_ldn_clean(),
-            "#12436D"
+            region_la_ldn_clean()
           ),
           data_id = `LA and Regions`
         ),
@@ -713,8 +714,7 @@ server_dev <- function(input, output, session) {
           fill = `LA and Regions`,
           tooltip = tooltip_bar(
             region_multi_choice_data,
-            indicator_dps(),
-            region_la_ldn_clean()
+            indicator_dps()
           ),
           data_id = `LA and Regions`
         ),

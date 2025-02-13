@@ -518,8 +518,7 @@ Region_FocusBarChartServer <- function(id,
               tooltip = tooltip_bar(
                 chart_data(),
                 get_indicator_dps(filtered_bds()),
-                region_clean(),
-                "#12436D"
+                region_clean()
               ),
               data_id = `LA and Regions`
             ),
@@ -1255,8 +1254,7 @@ Region_MultiBarChartServer <- function(id,
               fill = `LA and Regions`,
               tooltip = tooltip_bar(
                 multi_chart_data(),
-                get_indicator_dps(filtered_bds()),
-                region_clean()
+                get_indicator_dps(filtered_bds())
               ),
               data_id = `LA and Regions`
             ),

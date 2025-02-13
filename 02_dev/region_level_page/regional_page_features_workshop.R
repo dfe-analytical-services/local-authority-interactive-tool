@@ -381,7 +381,7 @@ test <- ggiraph::girafe(
 focus_bar_data <- region_long_plot |>
   reorder_la_regions(region_clean)
 
-la_bar_chart <- focus_bar_data |>
+region_focus_bar_chart <- focus_bar_data |>
   ggplot2::ggplot() +
   ggiraph::geom_col_interactive(
     ggplot2::aes(
@@ -391,8 +391,7 @@ la_bar_chart <- focus_bar_data |>
       tooltip = tooltip_bar(
         focus_bar_data,
         indicator_dps,
-        region_clean,
-        "#12436D"
+        region_clean
       ),
       data_id = `LA and Regions`
     ),
@@ -409,7 +408,7 @@ la_bar_chart <- focus_bar_data |>
 
 # Plotting interactive graph
 ggiraph::girafe(
-  ggobj = la_bar_chart,
+  ggobj = region_focus_bar_chart,
   width_svg = 8.5,
   options = generic_ggiraph_options(),
   fonts = list(sans = "Arial")
