@@ -314,17 +314,21 @@ ggiraph::girafe(
 # Set selected region to last level so appears at front of plot
 focus_line_data <- region_long_plot |>
   dplyr::ungroup() |>
-  reorder_la_regions(region_clean, after = Inf)
+  reorder_la_regions(region_clean, after = Inf) |>
+  dplyr::mutate(
+    label_color = ifelse(`LA and Regions` == region_clean, "#12436D", "#505a5f"),
+    label_fontface = ifelse(`LA and Regions` == region_clean, "bold", "plain")
+  )
 
 region_line_chart <- focus_line_data |>
-  ggplot2::ggplot() +
+  ggplot() +
   ggiraph::geom_line_interactive(
-    ggplot2::aes(
+    aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`,
       size = `LA and Regions`,
-      data_id = `LA and Regions`,
+      data_id = `LA and Regions`
     ),
     na.rm = TRUE
   ) +
@@ -337,8 +341,9 @@ region_line_chart <- focus_line_data |>
       x = Years_num,
       y = values_num,
       label = `LA and Regions`,
-      colour = `LA and Regions`
+      fontface = label_fontface
     ),
+    colour = subset(focus_line_data, Years == current_year)$label_color,
     segment.colour = NA,
     label.size = NA,
     max.overlaps = Inf,
@@ -346,12 +351,14 @@ region_line_chart <- focus_line_data |>
     direction = "y",
     hjust = 1,
     show.legend = FALSE,
-    na.rm = TRUE
+    na.rm = TRUE,
   ) +
   custom_theme() +
   coord_cartesian(clip = "off") +
   theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
   guides(color = "none", size = "none")
+
+
 
 
 # Creating vertical geoms to make vertical hover tooltip
