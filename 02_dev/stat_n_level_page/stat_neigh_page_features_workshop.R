@@ -236,7 +236,7 @@ focus_line_data <- stat_n_long |>
   reorder_la_regions(selected_la, after = Inf) |>
   # Creating options for graph labels
   dplyr::mutate(
-    label_color = ifelse(`LA and Regions` == selected_la, "#12436D", "#505a5f"),
+    label_color = ifelse(`LA and Regions` == selected_la, get_focus_front_colour(), get_gov_secondary_text_colour()),
     label_fontface = ifelse(`LA and Regions` == selected_la, "bold", "plain")
   )
 

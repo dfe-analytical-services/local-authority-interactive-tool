@@ -504,7 +504,7 @@ server_dev <- function(input, output, session) {
       reorder_la_regions(region_la_ldn_clean(), after = Inf) |>
       # Creating options for graph labels
       dplyr::mutate(
-        label_color = ifelse(`LA and Regions` == region_la_ldn_clean(), "#12436D", "#505a5f"),
+        label_color = ifelse(`LA and Regions` == region_la_ldn_clean(), get_focus_front_colour(), get_gov_secondary_text_colour()),
         label_fontface = ifelse(`LA and Regions` == region_la_ldn_clean(), "bold", "plain")
       )
 

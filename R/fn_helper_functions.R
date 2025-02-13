@@ -418,10 +418,10 @@ get_af_colours <- function() {
 #'
 #' @return A character string with the hex colour code for LA focus.
 #' @examples
-#' get_la_focus_colour()
+#' get_selected_la_colour()
 #' @export
-get_la_focus_colour <- function() {
-  get_af_colours()[4] # "#5694ca"
+get_selected_la_colour <- function() {
+  get_af_colours()[4] # "#F46A25"
 }
 
 
@@ -435,7 +435,50 @@ get_la_focus_colour <- function() {
 #' get_england_colour()
 #' @export
 get_england_colour <- function() {
-  get_af_colours()[3]
+  get_af_colours()[3] # "#801650
+}
+
+
+#' Get Colour for the Front Line in Focus Plots
+#'
+#' Retrieves the blue colour from the afcolours package palette for highlighting
+#' the main geography or group rows in focus tables or plots.
+#'
+#' @return A character string with the hex colour code for the front focus colour.
+#' @examples
+#' get_focus_front_colour()
+#'
+get_focus_front_colour <- function() {
+  get_af_colours()[1] # "#12436D"
+}
+
+
+#' Get Colour for the Back Line in Focus Plots
+#'
+#' A grey colour from the analysis function best practice for highlighting
+#' the other (background) geography or group rows in focus tables or plots.
+#'
+#' @return A character string with the hex colour code for the back focus colour.
+#' @examples
+#' get_focus_back_colour()
+#'
+get_focus_back_colour <- function() {
+  "#D9D9D9"
+}
+
+
+#' Get Colour for the Gov Secondary Text
+#'
+#' Retrieves the GOV.UK secondary text colour for text in tooltips for the
+#' background geography or group rows in focus tables or plots.
+#'
+#' @return A character string with the hex colour code for the Gov secondary
+#' text colour.
+#' @examples
+#' get_gov_secondary_text_colour()
+#'
+get_gov_secondary_text_colour <- function() {
+  "#505a5f"
 }
 
 
@@ -454,9 +497,13 @@ get_clean_af_colours <- function() {
   af_colours <- get_af_colours()
 
   # Orange first as it is the normal selected geog colour
-  # It is usually replaced by the get_la_focus_colour() in create_plot_colours()
+  # It is usually replaced by the get_selected_la_colour() in create_plot_colours()
   # But is needed for the Create Your Own charts (which have no focus_group)
-  clean_colours <- c("#F46A25", "#A285D1", "#28A197", "#3D3D3D")
+  clean_colours <- c(get_selected_la_colour(), "#A285D1", "#28A197", "#3D3D3D")
+
+  if (any(duplicated(clean_colours))) {
+    warning("Duplicates found in clean_colours.")
+  }
 
   if (!all(clean_colours %in% af_colours)) {
     warning("Not all clean_colours are present in af_colours.")

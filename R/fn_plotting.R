@@ -150,7 +150,7 @@ create_plot_colours <- function(data_long, focus_group = NULL) {
 
   # Assign specific colour for focus group if provided & remove from plot groups
   if (!is.null(focus_group) && focus_group %in% plot_groups) {
-    plot_colours[focus_group] <- get_la_focus_colour()
+    plot_colours[focus_group] <- get_selected_la_colour()
     plot_groups <- setdiff(plot_groups, focus_group)
   }
 
@@ -579,7 +579,7 @@ custom_theme <- function(title_margin = 0) {
       ),
       legend.position = "bottom",
       legend.title = element_blank(),
-      panel.grid = element_line(colour = "#D9D9D9"),
+      panel.grid = element_line(colour = get_focus_back_colour()),
       panel.grid.minor = element_blank(),
       panel.grid.major.x = element_blank(),
       plot.background = ggplot2::element_rect(fill = "white", color = NA),
@@ -660,7 +660,7 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp, geog_colours
 #'   in the tooltip. If NULL, no specific geography is highlighted.
 #' @param focus_colour Character. The colour to use for highlighting the specified
 #'   geography (highlight_geography). Defaults to a color retrieved by
-#'   `get_la_focus_colour()`.
+#'   `get_selected_la_colour()`.
 #'
 #' @return A character string representing the formatted tooltip text for each
 #'   region. Includes the value for each region, with conditional styling for
@@ -692,12 +692,12 @@ tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_
     value <- row["values_num"]
 
     text_colour <- if (!is.null(focus_geog)) {
-      if (geography == focus_geog) "#12436D" else "black"
+      if (geography == focus_geog) get_focus_front_colour() else get_gov_secondary_text_colour()
     } else {
       geog_colours[geography]
     }
 
-    weight <- if (text_colour %in% c("#F46A25", "#12436D")) "font-weight: bold;" else ""
+    weight <- if (text_colour %in% c(get_selected_la_colour(), get_focus_front_colour())) "font-weight: bold;" else ""
 
     paste0("<span style='color:", text_colour, "; ", weight, "'>", geography, ": ", value, "</span>")
   })
@@ -720,7 +720,7 @@ tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_
 #'   in tooltip values.
 #' @param focus_group Character, optional. Name of the group to highlight in the
 #'   tooltip, if present in the data.
-#' @param focus_colour Character, default = `get_la_focus_colour()`. The color
+#' @param focus_colour Character, default = `get_selected_la_colour()`. The color
 #'   to apply to `focus_group` if it appears in tooltips.
 #' @param include_measure Logical, default = FALSE. If TRUE, adds the measure
 #'   value to the tooltip text.
@@ -780,7 +780,7 @@ tooltip_vlines <- function(x,
 #'   the `values_num` column.
 #' @param focus_group Character, optional. Name of a specific group to highlight
 #'   in the tooltip if present.
-#' @param text_colour Character, default = `get_la_focus_colour()`. Color to
+#' @param text_colour Character, default = `get_selected_la_colour()`. Color to
 #'   apply to `focus_group` if it appears in tooltips.
 #' @param include_measure Logical, default = FALSE. If TRUE, includes the
 #'   measure name in the tooltip if the `Measure` column exists in `data`.
@@ -826,13 +826,13 @@ tooltip_bar <- function(data,
 
     # Apply colour formatting (set focus plot colours)
     text_colour <- if (!is.null(focus_geog)) {
-      if (geography == focus_geog) "#12436D" else "black"
+      if (geography == focus_geog) get_focus_front_colour() else "black"
     } else {
       geog_colours[geography]
     }
 
     weight <- ifelse(
-      text_colour %in% c("#F46A25", "#12436D") & !include_measure,
+      text_colour %in% c("#F46A25", get_focus_front_colour()) & !include_measure,
       "bold",
       "normal"
     )

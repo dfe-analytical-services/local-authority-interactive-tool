@@ -656,7 +656,7 @@ highlight_selected_row <- function(index, data, selected_area = NULL, geog_col =
   # Check if the row matches the selected area
   if (!is.null(selected_area) && la_region == selected_area) {
     return(list(
-      color = get_la_focus_colour(),
+      color = get_selected_la_colour(),
       fontWeight = "bold"
     ))
   }
