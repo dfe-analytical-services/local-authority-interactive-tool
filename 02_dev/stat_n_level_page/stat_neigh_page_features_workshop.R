@@ -206,7 +206,7 @@ dfe_reactable(
       stat_n_stats_table,
       get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding", "National Rank")
+      categorical = c("Trend", "Quartile Banding", "Latest National Rank")
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
@@ -383,9 +383,8 @@ stat_n_focus_bar_chart <- focus_bar_data |>
       fill = `LA and Regions`,
       tooltip = tooltip_bar(
         focus_bar_data,
-        stat_n_indicator_polarity,
-        selected_la,
-        "#12436D"
+        indicator_dps,
+        selected_la
       ),
       data_id = `LA and Regions`
     ),
@@ -424,7 +423,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = tooltip_bar(stat_n_bar_multi_data, stat_n_indicator_polarity, selected_la),
+      tooltip = tooltip_bar(stat_n_bar_multi_data, indicator_dps),
       data_id = `LA and Regions`
     ),
     position = "dodge",

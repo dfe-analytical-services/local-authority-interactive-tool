@@ -808,6 +808,8 @@ tooltip_bar <- function(data,
   # Prepare data with formatted numbers
   data_clean <- data |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dps)
+
+  # Get plot colours for geogs
   geog_colours <- create_plot_colours(data)
 
   apply(data_clean, 1, function(row) {

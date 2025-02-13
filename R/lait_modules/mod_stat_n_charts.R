@@ -358,8 +358,7 @@ StatN_FocusBarChartServer <- function(id,
               tooltip = tooltip_bar(
                 focus_chart_data(),
                 get_indicator_dps(filtered_bds()),
-                app_inputs$la(),
-                "#12436D"
+                app_inputs$la()
               ),
               data_id = `LA and Regions`
             ),
@@ -1043,8 +1042,7 @@ StatN_MultiBarChartServer <- function(id,
               fill = `LA and Regions`,
               tooltip = tooltip_bar(
                 multi_chart_data(),
-                get_indicator_dps(filtered_bds()),
-                app_inputs$la()
+                get_indicator_dps(filtered_bds())
               ),
               data_id = `LA and Regions`
             ),
