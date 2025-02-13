@@ -12,7 +12,7 @@ MetadataUI <- function(id) {
   shinycssloaders::withSpinner(
     uiOutput(ns("metadata")),
     type = 7,
-    color = "#0b0c0c",
+    color = get_gov_text_colour(),
     size = 0.6,
     proxy.height = "10px"
   )

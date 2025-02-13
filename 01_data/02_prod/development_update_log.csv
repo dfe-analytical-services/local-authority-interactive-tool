@@ -1,11 +1,19 @@
 "Type","Summary","Details","Date"
-"Feature","Initial message","The development of the new R-Shiny LAIT is now complete! While the tool’s core functionality remains unchanged, the user experience has been significantly enhanced. Key features like interactive charts, easy downloads, and accessibility-friendly styling aim to empower users to extract meaningful insights on children’s services with ease.
-
-Looking ahead, we’re excited about potential future enhancements, such as:
-
-- Visualizing quartile bands for better comparisons.
-- Enabling users to deselect geographies from the LA page charts.
-- Highlighting years where local authorities’ values are statistically above or below average.
-
+"Feature","Initial message","The development of the new R-Shiny LAIT is now complete! While the tool’s core functionality remains unchanged, the user experience has been significantly enhanced. Key features like interactive charts, easy downloads, and accessibility-friendly styling aim to empower users to extract meaningful insights on children’s services with ease.
+
+
+
+Looking ahead, we’re excited about potential future enhancements, such as:
+
+
+
+- Visualising quartile bands for better comparisons.
+
+- Enabling users to deselect geographies from the LA page charts.
+
+- Highlighting years where local authorities’ values are statistically above or below average.
+
+
+
 We’d love to hear your ideas! If you have suggestions for new features, please let us know by submitting a [feature request issue on GitHub](https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues/new/choose).",2024-12-13
 "Chore","Test","Test log for development",2024-12-05

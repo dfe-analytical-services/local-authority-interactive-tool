@@ -100,7 +100,7 @@ StatN_FocusLineChartServer <- function(id,
         reorder_la_regions(app_inputs$la(), after = Inf) |>
         # Creating options for graph labels
         dplyr::mutate(
-          label_color = ifelse(`LA and Regions` == app_inputs$la(), "#12436D", "#505a5f"),
+          label_color = ifelse(`LA and Regions` == app_inputs$la(), get_focus_front_colour(), get_gov_secondary_text_colour()),
           label_fontface = ifelse(`LA and Regions` == app_inputs$la(), "bold", "plain")
         )
     })

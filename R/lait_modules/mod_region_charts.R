@@ -235,7 +235,7 @@ Region_FocusLineChartServer <- function(id,
         reorder_la_regions(region_clean(), after = Inf) |>
         # Creating options for graph labels
         dplyr::mutate(
-          label_color = ifelse(`LA and Regions` == region_clean(), "#12436D", "#505a5f"),
+          label_color = ifelse(`LA and Regions` == region_clean(), get_focus_front_colour(), get_gov_secondary_text_colour()),
           label_fontface = ifelse(`LA and Regions` == region_clean(), "bold", "plain")
         )
     })
