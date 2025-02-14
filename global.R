@@ -196,13 +196,16 @@ metrics_clean <- metrics_included |>
   dplyr::mutate(
     Measure_short = trimws(Measure_short),
     dps = ifelse(is.na(dps), 1, dps),
+    # Have to supress warnings due to mixed datatypes
     `Last Update` = dplyr::case_when(
-      inherits(as.Date(`Last Update`), "Date") ~ as.Date(`Last Update`) |>
-        format("%B %Y") |>
-        as.character(),
+      grepl("^[0-9]+$", `Last Update`) ~ suppressWarnings(
+        as.numeric(`Last Update`) |>
+          as.Date(origin = "1899-12-30") |>
+          format("%B %Y") |>
+          as.character()
+      ),
       TRUE ~ as.character(`Last Update`)
     ),
-    # Have to supress warnings due to mixed datatypes
     `Next Update` = dplyr::case_when(
       grepl("^[0-9]+$", `Next Update`) ~ suppressWarnings(
         as.numeric(`Next Update`) |>
