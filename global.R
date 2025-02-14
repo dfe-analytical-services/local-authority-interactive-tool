@@ -30,8 +30,6 @@ if (FALSE) {
   shhh(library(lintr))
   shhh(library(roxygen2))
   shhh(library(rstudioapi))
-  shhh(library(rsconnect)) ###### ONLY TO BE USED FOR INTERNAL DEPLOYING,
-  ###### DO NOT KEEP FOR MAIN BRANCH !!!!!!!!!!!
   # Housekeeping
   shhh(library(devtools))
   shhh(library(usethis))
@@ -119,15 +117,19 @@ banner_update_msg <- read.csv(
   here::here("01_data/02_prod/banner_update.csv"),
   check.names = FALSE
 ) |>
+  dplyr::arrange(Date) |>
   dplyr::slice_head(n = 1) |>
-  dplyr::pull(var = 1)
+  dplyr::mutate(
+    Date = format(as.Date(Date), "%d %B %Y")
+  ) |>
+  unlist() |>
+  paste(collapse = " ")
 
 # Useful links
 useful_links <- read.csv(
   here::here("01_data/02_prod/useful_links.csv"),
   check.names = FALSE
 )
-
 
 # Cleaning data ===============================================================
 # BDS
@@ -198,13 +200,16 @@ metrics_clean <- metrics_included |>
   dplyr::mutate(
     Measure_short = trimws(Measure_short),
     dps = ifelse(is.na(dps), 1, dps),
+    # Have to supress warnings due to mixed datatypes
     `Last Update` = dplyr::case_when(
-      inherits(as.Date(`Last Update`), "Date") ~ as.Date(`Last Update`) |>
-        format("%B %Y") |>
-        as.character(),
+      grepl("^[0-9]+$", `Last Update`) ~ suppressWarnings(
+        as.numeric(`Last Update`) |>
+          as.Date(origin = "1899-12-30") |>
+          format("%B %Y") |>
+          as.character()
+      ),
       TRUE ~ as.character(`Last Update`)
     ),
-    # Have to supress warnings due to mixed datatypes
     `Next Update` = dplyr::case_when(
       grepl("^[0-9]+$", `Next Update`) ~ suppressWarnings(
         as.numeric(`Next Update`) |>
