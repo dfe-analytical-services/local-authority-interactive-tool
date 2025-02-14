@@ -1,4 +1,5 @@
 "Type","Summary","Details","Date"
+"Feature","Colour added to chart tooltips.","Tooltip colours now match chart lines to clearly highlight each geography. Chart colours have been adjusted and reordered—blue is now reserved for focus charts only to avoid confusion with selected geography switching from orange to blue. In focus charts, the selected geography label is now bold and highlighted in blue for added clarity.",2025-02-14
 "Feature","Initial message","The development of the new R-Shiny LAIT is now complete! While the tool’s core functionality remains unchanged, the user experience has been significantly enhanced. Key features like interactive charts, easy downloads, and accessibility-friendly styling aim to empower users to extract meaningful insights on children’s services with ease.
 
 Looking ahead, we’re excited about potential future enhancements, such as:
