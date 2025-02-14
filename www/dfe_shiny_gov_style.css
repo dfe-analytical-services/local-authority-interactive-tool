@@ -193,6 +193,7 @@ template. 80% works well here to reduce white space on the right hand side.*/
 /* footer padding */
 .govuk-footer {
   padding: 2rem;
+  flex-grow: 0;
 }
 
 /* This makes it look like the footer extends on shorter pages  */

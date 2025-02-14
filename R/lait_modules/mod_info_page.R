@@ -90,7 +90,7 @@ LatestDataUpdateServer <- function(id, metrics_data) {
       dplyr::mutate(latest_update_date = as.Date(paste(`Last Update`, "01"),
         format = "%B %Y %d"
       )) |>
-      dplyr::filter(latest_update_date == max(latest_update_date)) |>
+      dplyr::filter(latest_update_date == max(latest_update_date, na.rm = TRUE)) |>
       dplyr::select(Indicator = Measure, `Last Update`) |>
       order_alphabetically(Indicator)
 
@@ -220,7 +220,7 @@ LatestDevUpdateUI <- function(id) {
           style = "margin-bottom: 10px;",
           with_gov_spinner(
             shiny::uiOutput(ns("latest_update_table")),
-            color = "#0b0c0c",
+            color = get_gov_text_colour(),
             size = 0.7,
             spinner_type = 7
           )
@@ -459,7 +459,7 @@ UsefulLinksUI <- function(id) {
   with_gov_spinner(
     shiny::uiOutput(ns("useful_links_lst")),
     spinner_type = 7,
-    color = "#0b0c0c"
+    color = get_gov_text_colour()
   )
 }
 

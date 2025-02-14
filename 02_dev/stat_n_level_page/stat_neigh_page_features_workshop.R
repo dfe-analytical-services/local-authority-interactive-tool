@@ -206,7 +206,7 @@ dfe_reactable(
       stat_n_stats_table,
       get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
-      categorical = c("Trend", "Quartile Banding", "National Rank")
+      categorical = c("Trend", "Quartile Banding", "Latest National Rank")
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
     list(
@@ -233,9 +233,14 @@ dfe_reactable(
 # Set selected LA to last level so appears at front of plot
 focus_line_data <- stat_n_long |>
   dplyr::filter(`LA and Regions` %in% c(selected_la, stat_n_sns)) |>
-  reorder_la_regions(selected_la, after = Inf)
+  reorder_la_regions(selected_la, after = Inf) |>
+  # Creating options for graph labels
+  dplyr::mutate(
+    label_color = ifelse(`LA and Regions` == selected_la, get_focus_front_colour(), get_gov_secondary_text_colour()),
+    label_fontface = ifelse(`LA and Regions` == selected_la, "bold", "plain")
+  )
 
-region_line_chart <- focus_line_data |>
+stat_n_focus_line_chart <- focus_line_data |>
   ggplot2::ggplot() +
   ggiraph::geom_line_interactive(
     ggplot2::aes(
@@ -255,9 +260,10 @@ region_line_chart <- focus_line_data |>
     aes(
       x = Years_num,
       y = values_num,
-      label = `LA and Regions`
+      label = `LA and Regions`,
+      fontface = label_fontface
     ),
-    color = "black",
+    colour = subset(focus_line_data, Years == current_year)$label_color,
     segment.colour = NA,
     label.size = NA,
     max.overlaps = Inf,
@@ -279,13 +285,12 @@ vertical_hover <- lapply(
   tooltip_vlines,
   focus_line_data,
   indicator_dps,
-  selected_la,
-  "#12436D"
+  selected_la
 )
 
 # Plotting interactive graph
 ggiraph::girafe(
-  ggobj = (region_line_chart + vertical_hover),
+  ggobj = (stat_n_focus_line_chart + vertical_hover),
   width_svg = 12,
   options = generic_ggiraph_options(
     opts_hover(
@@ -315,7 +320,7 @@ stat_n_line_chart_data <- stat_n_long |>
   reorder_la_regions(rev(c(selected_la, stat_n_random_selection)), after = Inf)
 
 # Plot - selected areas
-region_line_chart <- stat_n_line_chart_data |>
+stat_n_line_chart <- stat_n_line_chart_data |>
   ggplot2::ggplot() +
   ggiraph::geom_point_interactive(
     ggplot2::aes(
@@ -353,14 +358,14 @@ region_line_chart <- stat_n_line_chart_data |>
 vertical_hover <- lapply(
   get_years(stat_n_line_chart_data),
   tooltip_vlines,
-  stat_n_line_chart_data,
-  indicator_dps,
-  selected_la
+  stat_n_line_chart_data |>
+    reorder_la_regions(c(selected_la, stat_n_random_selection)),
+  indicator_dps
 )
 
 # Plotting interactive graph
 ggiraph::girafe(
-  ggobj = (region_line_chart + vertical_hover),
+  ggobj = (stat_n_line_chart + vertical_hover),
   width_svg = 8.5,
   options = generic_ggiraph_options(
     opts_hover(
@@ -384,9 +389,8 @@ stat_n_focus_bar_chart <- focus_bar_data |>
       fill = `LA and Regions`,
       tooltip = tooltip_bar(
         focus_bar_data,
-        stat_n_indicator_polarity,
-        selected_la,
-        "#12436D"
+        indicator_dps,
+        selected_la
       ),
       data_id = `LA and Regions`
     ),
@@ -425,7 +429,7 @@ stat_n_multi_bar_chart <- stat_n_bar_multi_data |>
       x = Years_num,
       y = values_num,
       fill = `LA and Regions`,
-      tooltip = tooltip_bar(stat_n_bar_multi_data, stat_n_indicator_polarity, selected_la),
+      tooltip = tooltip_bar(stat_n_bar_multi_data, indicator_dps),
       data_id = `LA and Regions`
     ),
     position = "dodge",

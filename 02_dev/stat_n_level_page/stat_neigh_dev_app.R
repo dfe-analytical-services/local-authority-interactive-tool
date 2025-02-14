@@ -151,21 +151,42 @@ ui_dev <- bslib::page_fillable(
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input, {
-    # Get indicator choices for selected topic
-    filtered_topic_bds <- bds_metrics |>
-      dplyr::filter(
-        Topic == input$topic_input
-      ) |>
-      pull_uniques("Measure")
+  shiny::observeEvent(input$topic_input,
+    {
+      # Save the currently selected indicator
+      current_indicator <- input$indicator
 
-    updateSelectInput(
-      session = session,
-      inputId = "indicator",
-      label = "Indicator:",
-      choices = filtered_topic_bds
-    )
-  })
+      # Get indicator choices for selected topic
+      filtered_topic_bds <- bds_metrics |>
+        dplyr::filter(
+          # If topic_input is not NULL or "All topics", filter by selected topics
+          # Include all rows if no topic is selected or "All topics" is selected
+          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
+            TRUE
+          } else {
+            .data$Topic %in% input$topic_input
+          }
+        ) |>
+        pull_uniques("Measure")
+
+      # Ensure the current indicator stays selected if it's in the new list of available indicators
+      # Default to the first available indicator if the current one is no longer valid
+      selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+        current_indicator
+      } else {
+        filtered_topic_bds[1]
+      }
+
+      shiny::updateSelectizeInput(
+        session = session,
+        inputId = "indicator",
+        label = "Indicator:",
+        choices = filtered_topic_bds,
+        selected = selected_indicator
+      )
+    },
+    ignoreNULL = FALSE
+  )
 
 
   # Region LA Level table ----------------------------------
@@ -174,11 +195,15 @@ server_dev <- function(input, output, session) {
   filtered_bds <- reactiveValues(data = NULL)
 
   observeEvent(input$indicator, {
+    # Don't change the currently selected indicator if no indicator is selected
+    if (is.null(input$indicator) || input$indicator == "") {
+      return()
+    }
+
     # Region LA Level table ----------------------------------
-    # Filter for selected topic and indicator
+    # Filter for selected indicator
     filtered_bds$data <- bds_metrics |>
       dplyr::filter(
-        Topic == input$topic_input,
         Measure == input$indicator
       )
   })
@@ -536,7 +561,15 @@ server_dev <- function(input, output, session) {
     # Set selected LA to last level so appears at front of plot
     focus_line_data <- stat_n_long() |>
       dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns())) |>
-      reorder_la_regions(input$la_input, after = Inf)
+      reorder_la_regions(input$la_input, after = Inf) |>
+      # Creating options for graph labels
+      dplyr::mutate(
+        label_color = ifelse(`LA and Regions` == input$la_input,
+          get_focus_front_colour(),
+          get_gov_secondary_text_colour()
+        ),
+        label_fontface = ifelse(`LA and Regions` == input$la_input, "bold", "plain")
+      )
 
     if (all(is.na(focus_line_data$values_num))) {
       ggiraph::girafe(
@@ -570,9 +603,10 @@ server_dev <- function(input, output, session) {
           aes(
             x = Years_num,
             y = values_num,
-            label = `LA and Regions`
+            label = `LA and Regions`,
+            fontface = label_fontface
           ),
-          color = "black",
+          colour = subset(focus_line_data, Years == current_year())$label_color,
           segment.colour = NA,
           label.size = NA,
           max.overlaps = Inf,
@@ -594,8 +628,7 @@ server_dev <- function(input, output, session) {
         tooltip_vlines,
         focus_line_data,
         indicator_dps(),
-        input$la_input,
-        "#12436D"
+        input$la_input
       )
 
       # Plotting interactive graph
@@ -683,9 +716,11 @@ server_dev <- function(input, output, session) {
       vertical_hover <- lapply(
         get_years(stat_n_line_chart_data),
         tooltip_vlines,
-        stat_n_line_chart_data,
-        indicator_dps(),
-        input$la_input
+        stat_n_line_chart_data |>
+          reorder_la_regions(
+            intersect(c(input$la_input, input$chart_line_input), valid_regions)
+          ),
+        indicator_dps()
       )
 
       # Plotting interactive graph
@@ -731,8 +766,7 @@ server_dev <- function(input, output, session) {
             tooltip = tooltip_bar(
               focus_bar_data,
               indicator_dps(),
-              input$la_input,
-              "#12436D"
+              input$la_input
             ),
             data_id = `LA and Regions`
           ),
@@ -799,8 +833,7 @@ server_dev <- function(input, output, session) {
             fill = `LA and Regions`,
             tooltip = tooltip_bar(
               stat_n_bar_multi_data,
-              indicator_dps(),
-              input$la_input
+              indicator_dps()
             ),
             data_id = `LA and Regions`
           ),
