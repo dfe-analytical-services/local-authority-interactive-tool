@@ -90,7 +90,7 @@ LatestDataUpdateServer <- function(id, metrics_data) {
       dplyr::mutate(latest_update_date = as.Date(paste(`Last Update`, "01"),
         format = "%B %Y %d"
       )) |>
-      dplyr::filter(latest_update_date == max(latest_update_date)) |>
+      dplyr::filter(latest_update_date == max(latest_update_date, na.rm = TRUE)) |>
       dplyr::select(Indicator = Measure, `Last Update`) |>
       order_alphabetically(Indicator)
 
