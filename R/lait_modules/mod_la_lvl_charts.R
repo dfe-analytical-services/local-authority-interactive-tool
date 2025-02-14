@@ -152,8 +152,7 @@ LA_LineChartServer <- function(id,
         get_years(la_long()),
         tooltip_vlines,
         la_long(),
-        get_indicator_dps(filtered_bds()),
-        app_inputs$la()
+        get_indicator_dps(filtered_bds())
       )
 
       # Plotting interactive graph
@@ -316,11 +315,7 @@ LA_BarChartServer <- function(id,
             x = Years_num,
             y = values_num,
             fill = `LA and Regions`,
-            tooltip = tooltip_bar(
-              la_long(),
-              get_indicator_dps(filtered_bds()),
-              app_inputs$la()
-            ),
+            tooltip = tooltip_bar(la_long(), get_indicator_dps(filtered_bds())),
             data_id = `LA and Regions`
           ),
           position = "dodge",

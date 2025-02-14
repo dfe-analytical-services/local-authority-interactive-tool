@@ -117,15 +117,19 @@ banner_update_msg <- read.csv(
   here::here("01_data/02_prod/banner_update.csv"),
   check.names = FALSE
 ) |>
+  dplyr::arrange(Date) |>
   dplyr::slice_head(n = 1) |>
-  dplyr::pull(var = 1)
+  dplyr::mutate(
+    Date = format(as.Date(Date), "%d %B %Y")
+  ) |>
+  unlist() |>
+  paste(collapse = " ")
 
 # Useful links
 useful_links <- read.csv(
   here::here("01_data/02_prod/useful_links.csv"),
   check.names = FALSE
 )
-
 
 # Cleaning data ===============================================================
 # BDS

@@ -194,7 +194,7 @@ server_dev <- function(input, output, session) {
         dplyr::filter(
           # If topic_input is not NULL or "All topics", filter by selected topics
           # Include all rows if no topic is selected or "All topics" is selected
-          if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
+          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
             TRUE
           } else {
             .data$Topic %in% input$topic_input
@@ -500,7 +500,16 @@ server_dev <- function(input, output, session) {
   region_focus_line_chart <- reactive({
     # Set selected region to last level so appears at front of plot
     region_focus_line_data <- region_long_plot() |>
-      reorder_la_regions(region_la_ldn_clean(), after = Inf)
+      dplyr::ungroup() |>
+      reorder_la_regions(region_la_ldn_clean(), after = Inf) |>
+      # Creating options for graph labels
+      dplyr::mutate(
+        label_color = ifelse(`LA and Regions` == region_la_ldn_clean(),
+          get_focus_front_colour(),
+          get_gov_secondary_text_colour()
+        ),
+        label_fontface = ifelse(`LA and Regions` == region_la_ldn_clean(), "bold", "plain")
+      )
 
     # Built focus plot
     region_line_chart <- region_focus_line_data |>
@@ -526,9 +535,10 @@ server_dev <- function(input, output, session) {
         aes(
           x = Years_num,
           y = values_num,
-          label = `LA and Regions`
+          label = `LA and Regions`,
+          fontface = label_fontface
         ),
-        color = "black",
+        colour = subset(region_focus_line_data, Years == current_year())$label_color,
         segment.colour = NA,
         label.size = NA,
         max.overlaps = Inf,
@@ -550,8 +560,7 @@ server_dev <- function(input, output, session) {
       tooltip_vlines,
       region_focus_line_data,
       indicator_dps(),
-      region_la_ldn_clean(),
-      "#12436D"
+      region_la_ldn_clean()
     )
 
     # Plotting interactive graph
@@ -574,6 +583,7 @@ server_dev <- function(input, output, session) {
   region_multi_line_chart <- reactive({
     # Filtering plotting data for selected LA region and others user choices
     region_multi_choice_data <- region_long_plot() |>
+      dplyr::ungroup() |>
       dplyr::filter(
         (`LA and Regions` %in% input$chart_line_input) |
           (`LA and Regions` %in% region_la_ldn_clean())
@@ -623,9 +633,9 @@ server_dev <- function(input, output, session) {
     vertical_hover <- lapply(
       get_years(region_multi_choice_data),
       tooltip_vlines,
-      region_multi_choice_data,
-      indicator_dps(),
-      region_la_ldn_clean()
+      region_multi_choice_data |>
+        reorder_la_regions(c(region_la_ldn_clean(), input$chart_line_input)),
+      indicator_dps()
     )
 
     # Plotting interactive graph
@@ -661,8 +671,7 @@ server_dev <- function(input, output, session) {
           tooltip = tooltip_bar(
             region_focus_bar_data,
             indicator_dps(),
-            region_la_ldn_clean(),
-            "#12436D"
+            region_la_ldn_clean()
           ),
           data_id = `LA and Regions`
         ),
@@ -714,8 +723,7 @@ server_dev <- function(input, output, session) {
           fill = `LA and Regions`,
           tooltip = tooltip_bar(
             region_multi_choice_data,
-            indicator_dps(),
-            region_la_ldn_clean()
+            indicator_dps()
           ),
           data_id = `LA and Regions`
         ),

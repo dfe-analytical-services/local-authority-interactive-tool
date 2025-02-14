@@ -232,7 +232,12 @@ Region_FocusLineChartServer <- function(id,
     # Prepare the chart data, setting the selected region to appear at the front
     chart_data <- reactive({
       region_long_plot() |>
-        reorder_la_regions(region_clean(), after = Inf)
+        reorder_la_regions(region_clean(), after = Inf) |>
+        # Creating options for graph labels
+        dplyr::mutate(
+          label_color = ifelse(`LA and Regions` == region_clean(), get_focus_front_colour(), get_gov_secondary_text_colour()),
+          label_fontface = ifelse(`LA and Regions` == region_clean(), "bold", "plain")
+        )
     })
 
     # Build the static version of the focus line chart
@@ -289,9 +294,10 @@ Region_FocusLineChartServer <- function(id,
             aes(
               x = Years_num,
               y = values_num,
-              label = `LA and Regions`
+              label = `LA and Regions`,
+              fontface = label_fontface
             ),
-            color = "black",
+            colour = subset(chart_data(), Years == current_year())$label_color,
             segment.colour = NA,
             label.size = NA,
             max.overlaps = Inf,
@@ -319,8 +325,7 @@ Region_FocusLineChartServer <- function(id,
           tooltip_vlines,
           chart_data(),
           get_indicator_dps(filtered_bds()),
-          region_clean(),
-          "#12436D"
+          region_clean()
         )
 
         # Combine static chart and vertical hover into one ggplot object
@@ -519,8 +524,7 @@ Region_FocusBarChartServer <- function(id,
               tooltip = tooltip_bar(
                 chart_data(),
                 get_indicator_dps(filtered_bds()),
-                region_clean(),
-                "#12436D"
+                region_clean()
               ),
               data_id = `LA and Regions`
             ),
@@ -1016,9 +1020,9 @@ Region_MultiLineChartServer <- function(id,
         vertical_hover <- lapply(
           get_years(chart_data()),
           tooltip_vlines,
-          chart_data(),
-          get_indicator_dps(filtered_bds()),
-          region_clean()
+          chart_data() |>
+            reorder_la_regions(unique(c(region_clean(), chart_input()))),
+          get_indicator_dps(filtered_bds())
         )
 
         # Combine static chart and vertical hover into one ggplot object
@@ -1256,8 +1260,7 @@ Region_MultiBarChartServer <- function(id,
               fill = `LA and Regions`,
               tooltip = tooltip_bar(
                 multi_chart_data(),
-                get_indicator_dps(filtered_bds()),
-                region_clean()
+                get_indicator_dps(filtered_bds())
               ),
               data_id = `LA and Regions`
             ),
