@@ -753,8 +753,8 @@ add_line_breaks <- function(text, max_length = 20) {
   for (word in words) {
     if (nchar(current_line) + nchar(word) + 1 <= max_length) {
       current_line <- paste(current_line,
-                            word,
-                            sep = if (nchar(current_line) > 0) " " else ""
+        word,
+        sep = if (nchar(current_line) > 0) " " else ""
       )
     } else {
       lines <- c(lines, current_line)

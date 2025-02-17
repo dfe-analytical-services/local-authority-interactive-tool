@@ -164,13 +164,13 @@ region_la_num <- region_table |>
 # Selected LA
 region_la_change_prev <- region_la_diff |>
   filter_la_regions(selected_la,
-                    pull_col = "values_num"
+    pull_col = "values_num"
   )
 
 # Region and England
 region_change_prev <- region_diff |>
   filter_la_regions(c(region_clean, "England"),
-                    pull_col = "values_num"
+    pull_col = "values_num"
   )
 
 

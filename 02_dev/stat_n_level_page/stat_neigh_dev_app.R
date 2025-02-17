@@ -152,40 +152,40 @@ server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
   shiny::observeEvent(input$topic_input,
-                      {
-                        # Save the currently selected indicator
-                        current_indicator <- input$indicator
+    {
+      # Save the currently selected indicator
+      current_indicator <- input$indicator
 
-                        # Get indicator choices for selected topic
-                        filtered_topic_bds <- bds_metrics |>
-                          dplyr::filter(
-                            # If topic_input is not NULL or "All topics", filter by selected topics
-                            # Include all rows if no topic is selected or "All topics" is selected
-                            if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
-                              TRUE
-                            } else {
-                              .data$Topic %in% input$topic_input
-                            }
-                          ) |>
-                          pull_uniques("Measure")
+      # Get indicator choices for selected topic
+      filtered_topic_bds <- bds_metrics |>
+        dplyr::filter(
+          # If topic_input is not NULL or "All topics", filter by selected topics
+          # Include all rows if no topic is selected or "All topics" is selected
+          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
+            TRUE
+          } else {
+            .data$Topic %in% input$topic_input
+          }
+        ) |>
+        pull_uniques("Measure")
 
-                        # Ensure the current indicator stays selected if it's in the new list of available indicators
-                        # Default to the first available indicator if the current one is no longer valid
-                        selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
-                          current_indicator
-                        } else {
-                          filtered_topic_bds[1]
-                        }
+      # Ensure the current indicator stays selected if it's in the new list of available indicators
+      # Default to the first available indicator if the current one is no longer valid
+      selected_indicator <- if (current_indicator %in% filtered_topic_bds) {
+        current_indicator
+      } else {
+        filtered_topic_bds[1]
+      }
 
-                        shiny::updateSelectizeInput(
-                          session = session,
-                          inputId = "indicator",
-                          label = "Indicator:",
-                          choices = filtered_topic_bds,
-                          selected = selected_indicator
-                        )
-                      },
-                      ignoreNULL = FALSE
+      shiny::updateSelectizeInput(
+        session = session,
+        inputId = "indicator",
+        label = "Indicator:",
+        choices = filtered_topic_bds,
+        selected = selected_indicator
+      )
+    },
+    ignoreNULL = FALSE
   )
 
 
@@ -344,7 +344,7 @@ server_dev <- function(input, output, session) {
     # Extract change from prev year
     stat_n_change_prev <- stat_n_diff() |>
       filter_la_regions(stat_n_stats_geog,
-                        pull_col = "values_num"
+        pull_col = "values_num"
       )
 
     # Get polarity of indicator
@@ -491,68 +491,68 @@ server_dev <- function(input, output, session) {
 
   # Keep line and bar inputs synchronised without resetting selections
   observeEvent(input$chart_line_input,
-               {
-                 # Capture the current reactive values
-                 shared_chart_inputs$line_chart <- input$chart_line_input
-               },
-               ignoreNULL = FALSE,
-               ignoreInit = TRUE
+    {
+      # Capture the current reactive values
+      shared_chart_inputs$line_chart <- input$chart_line_input
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
   )
 
   # Update the bar chart with new line chart value
   observeEvent(shared_chart_inputs$line_chart,
-               {
-                 later::later(function() {
-                   isolate({
-                     if (!setequal(shared_chart_inputs$line_chart, input$chart_bar_input)) {
-                       updateSelectInput(
-                         session = session,
-                         inputId = "chart_bar_input",
-                         selected = if (is.null(shared_chart_inputs$line_chart)) {
-                           character(0)
-                         } else {
-                           shared_chart_inputs$line_chart
-                         }
-                       )
-                     }
-                   })
-                 }, delay = 0.1)
-               },
-               ignoreNULL = FALSE,
-               ignoreInit = TRUE
+    {
+      later::later(function() {
+        isolate({
+          if (!setequal(shared_chart_inputs$line_chart, input$chart_bar_input)) {
+            updateSelectInput(
+              session = session,
+              inputId = "chart_bar_input",
+              selected = if (is.null(shared_chart_inputs$line_chart)) {
+                character(0)
+              } else {
+                shared_chart_inputs$line_chart
+              }
+            )
+          }
+        })
+      }, delay = 0.1)
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
   )
 
   # Update shared bar input
   observeEvent(input$chart_bar_input,
-               {
-                 # Capture the current reactive values
-                 shared_chart_inputs$chart_bar_input <- input$chart_bar_input
-               },
-               ignoreNULL = FALSE,
-               ignoreInit = TRUE
+    {
+      # Capture the current reactive values
+      shared_chart_inputs$chart_bar_input <- input$chart_bar_input
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
   )
 
   # Update line chart with bar chart input
   observeEvent(shared_chart_inputs$bar_chart,
-               {
-                 later::later(function() {
-                   isolate({
-                     if (!setequal(shared_chart_inputs$chart_bar_input, input$chart_line_input)) {
-                       updateSelectInput(
-                         session = session,
-                         inputId = "chart_line_input",
-                         selected = if (is.null(shared_chart_inputs$chart_bar_input)) {
-                           character(0)
-                         } else {
-                           shared_chart_inputs$chart_bar_input
-                         }
-                       )
-                     }
-                   })
-                 }, delay = 0.1)
-               },
-               ignoreNULL = FALSE,
-               ignoreInit = TRUE
+    {
+      later::later(function() {
+        isolate({
+          if (!setequal(shared_chart_inputs$chart_bar_input, input$chart_line_input)) {
+            updateSelectInput(
+              session = session,
+              inputId = "chart_line_input",
+              selected = if (is.null(shared_chart_inputs$chart_bar_input)) {
+                character(0)
+              } else {
+                shared_chart_inputs$chart_bar_input
+              }
+            )
+          }
+        })
+      }, delay = 0.1)
+    },
+    ignoreNULL = FALSE,
+    ignoreInit = TRUE
   )
 
 
@@ -565,8 +565,8 @@ server_dev <- function(input, output, session) {
       # Creating options for graph labels
       dplyr::mutate(
         label_color = ifelse(`LA and Regions` == input$la_input,
-                             get_focus_front_colour(),
-                             get_gov_secondary_text_colour()
+          get_focus_front_colour(),
+          get_gov_secondary_text_colour()
         ),
         label_fontface = ifelse(`LA and Regions` == input$la_input, "bold", "plain")
       )

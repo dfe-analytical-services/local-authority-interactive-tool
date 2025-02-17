@@ -160,8 +160,8 @@ stat_n <- stat_n_raw |>
 # Transforming long
 stat_n_long <- stat_n |>
   tidyr::pivot_longer(dplyr::starts_with("SN"),
-                      names_to = c(".value", "SN_SNP"),
-                      names_pattern = "^(.*?)(\\d+)$"
+    names_to = c(".value", "SN_SNP"),
+    names_pattern = "^(.*?)(\\d+)$"
   )
 
 # Extract LAs and LA nums
@@ -251,8 +251,8 @@ bds_metrics <- metrics_clean |>
     Polarity, y_axis_name, Year_Type, Chart_title, dps
   ) |>
   dplyr::left_join(bds_clean,
-                   by = c("Measure_short" = "Short Desc"),
-                   relationship = "many-to-many"
+    by = c("Measure_short" = "Short Desc"),
+    relationship = "many-to-many"
   ) |>
   dplyr::mutate(
     Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
@@ -343,7 +343,7 @@ stat_n_la <- stat_n_long |>
     stat_n_geog |>
       dplyr::mutate(`LA num` = as.character(`LA num`)) |>
       dplyr::select(`LA num`,
-                    `LA Name_sn` = `LA Name`
+        `LA Name_sn` = `LA Name`
       ),
     by = c("SN" = "LA num")
   )
