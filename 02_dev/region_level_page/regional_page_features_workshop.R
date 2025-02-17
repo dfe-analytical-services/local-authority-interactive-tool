@@ -49,16 +49,10 @@ region_la_filtered_bds <- filtered_bds |>
 
 # Region LA levels long
 region_la_long <- region_la_filtered_bds |>
-  # dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
   dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
-  # dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`
-      # levels = c(
-      #   selected_la, la_region,
-      #   "Statistical Neighbours", "England"
-      # )
     )
   )
 
@@ -108,16 +102,10 @@ region_filtered_bds <- filtered_bds |>
 
 # Region levels long
 region_long <- region_filtered_bds |>
-  # dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
   dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
-  # dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`
-      # levels = c(
-      #   selected_la, la_region,
-      #   "Statistical Neighbours", "England"
-      # )
     )
   )
 
@@ -176,13 +164,13 @@ region_la_num <- region_table |>
 # Selected LA
 region_la_change_prev <- region_la_diff |>
   filter_la_regions(selected_la,
-    pull_col = "values_num"
+                    pull_col = "values_num"
   )
 
 # Region and England
 region_change_prev <- region_diff |>
   filter_la_regions(c(region_clean, "England"),
-    pull_col = "values_num"
+                    pull_col = "values_num"
   )
 
 
@@ -252,6 +240,7 @@ region_random_selection <- region_long_plot |>
   sample(size = 3) # Select up to 6 randomly
 
 region_line_chart_data <- region_long_plot |>
+  dplyr::ungroup() |>
   # Filter for random Regions - simulate user choosing up to 6 regions
   dplyr::filter(
     (`LA and Regions` %in% region_random_selection) |
@@ -294,8 +283,7 @@ vertical_hover <- lapply(
   get_years(region_line_chart_data),
   tooltip_vlines,
   region_line_chart_data,
-  indicator_dps,
-  region_clean
+  indicator_dps
 )
 
 # Plotting interactive graph
@@ -313,17 +301,23 @@ ggiraph::girafe(
 # Focus plot
 # Set selected region to last level so appears at front of plot
 focus_line_data <- region_long_plot |>
-  reorder_la_regions(region_clean, after = Inf)
+  dplyr::ungroup() |>
+  reorder_la_regions(region_clean, after = Inf) |>
+  # Creating options for graph labels
+  dplyr::mutate(
+    label_color = ifelse(`LA and Regions` == region_clean, get_focus_front_colour(), get_gov_secondary_text_colour()),
+    label_fontface = ifelse(`LA and Regions` == region_clean, "bold", "plain")
+  )
 
 region_line_chart <- focus_line_data |>
-  ggplot2::ggplot() +
+  ggplot() +
   ggiraph::geom_line_interactive(
-    ggplot2::aes(
+    aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`,
       size = `LA and Regions`,
-      data_id = `LA and Regions`,
+      data_id = `LA and Regions`
     ),
     na.rm = TRUE
   ) +
@@ -335,9 +329,10 @@ region_line_chart <- focus_line_data |>
     aes(
       x = Years_num,
       y = values_num,
-      label = `LA and Regions`
+      label = `LA and Regions`,
+      fontface = label_fontface
     ),
-    color = "black",
+    colour = subset(focus_line_data, Years == current_year)$label_color,
     segment.colour = NA,
     label.size = NA,
     max.overlaps = Inf,
@@ -345,7 +340,7 @@ region_line_chart <- focus_line_data |>
     direction = "y",
     hjust = 1,
     show.legend = FALSE,
-    na.rm = TRUE
+    na.rm = TRUE,
   ) +
   custom_theme() +
   coord_cartesian(clip = "off") +
@@ -353,14 +348,15 @@ region_line_chart <- focus_line_data |>
   guides(color = "none", size = "none")
 
 
+
+
 # Creating vertical geoms to make vertical hover tooltip
 vertical_hover <- lapply(
   get_years(focus_line_data),
   tooltip_vlines,
-  focus_line_data,
+  focus_line_data |> reorder_la_regions(region_clean),
   indicator_dps,
-  region_clean,
-  "#12436D"
+  region_clean
 )
 
 # Plotting interactive graph
@@ -381,7 +377,7 @@ test <- ggiraph::girafe(
 focus_bar_data <- region_long_plot |>
   reorder_la_regions(region_clean)
 
-la_bar_chart <- focus_bar_data |>
+region_focus_bar_chart <- focus_bar_data |>
   ggplot2::ggplot() +
   ggiraph::geom_col_interactive(
     ggplot2::aes(
@@ -391,8 +387,7 @@ la_bar_chart <- focus_bar_data |>
       tooltip = tooltip_bar(
         focus_bar_data,
         indicator_dps,
-        region_clean,
-        "#12436D"
+        region_clean
       ),
       data_id = `LA and Regions`
     ),
@@ -409,7 +404,7 @@ la_bar_chart <- focus_bar_data |>
 
 # Plotting interactive graph
 ggiraph::girafe(
-  ggobj = la_bar_chart,
+  ggobj = region_focus_bar_chart,
   width_svg = 8.5,
   options = generic_ggiraph_options(),
   fonts = list(sans = "Arial")

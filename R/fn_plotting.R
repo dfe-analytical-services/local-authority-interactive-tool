@@ -150,7 +150,7 @@ create_plot_colours <- function(data_long, focus_group = NULL) {
 
   # Assign specific colour for focus group if provided & remove from plot groups
   if (!is.null(focus_group) && focus_group %in% plot_groups) {
-    plot_colours[focus_group] <- get_la_focus_colour()
+    plot_colours[focus_group] <- get_selected_la_colour()
     plot_groups <- setdiff(plot_groups, focus_group)
   }
 
@@ -160,8 +160,8 @@ create_plot_colours <- function(data_long, focus_group = NULL) {
     plot_groups <- setdiff(plot_groups, "England")
   }
 
-  # Assign colours for remaining groups
-  remaining_colours <- get_clean_af_colours()[seq_along(plot_groups)]
+  # Assign colours for remaining groups (ensure now duplicate colours)
+  remaining_colours <- setdiff(get_clean_af_colours(), plot_colours)[seq_along(plot_groups)]
   names(remaining_colours) <- plot_groups
 
   # Combine all colours
@@ -579,7 +579,7 @@ custom_theme <- function(title_margin = 0) {
       ),
       legend.position = "bottom",
       legend.title = element_blank(),
-      panel.grid = element_line(colour = "#D9D9D9"),
+      panel.grid = element_line(colour = get_focus_back_colour()),
       panel.grid.minor = element_blank(),
       panel.grid.major.x = element_blank(),
       plot.background = ggplot2::element_rect(fill = "white", color = NA),
@@ -620,16 +620,16 @@ generate_year_text <- function(data, years_num) {
 #'
 #' @return A formatted string containing measures and corresponding values.
 #' @export
-tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
+tooltip_text_w_indicator <- function(data, years_num, indicator_dp, geog_colours) {
   measure_summary <- data |>
-    # Order geogs by value while still a raw number
+    dplyr::filter(Years_num == years_num) |>
     dplyr::arrange(dplyr::desc(values_num)) |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-    dplyr::filter(Years_num == years_num) |>
     dplyr::group_by(Measure) |>
     dplyr::summarise(
-      tooltip_text = paste(
-        paste0(`LA and Regions`, ": ", values_num),
+      tooltip_text = paste0(
+        "<span style='color:", geog_colours[`LA and Regions`], ";'>",
+        `LA and Regions`, ": ", values_num, "</span>",
         collapse = "\n"
       ),
       .groups = "drop"
@@ -660,7 +660,7 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
 #'   in the tooltip. If NULL, no specific geography is highlighted.
 #' @param focus_colour Character. The colour to use for highlighting the specified
 #'   geography (highlight_geography). Defaults to a color retrieved by
-#'   `get_la_focus_colour()`.
+#'   `get_selected_la_colour()`.
 #'
 #' @return A character string representing the formatted tooltip text for each
 #'   region. Includes the value for each region, with conditional styling for
@@ -681,42 +681,30 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp) {
 #' # Generate tooltip text without any highlighted geography
 #' tooltip_text(data = my_data, years_num = 2022, indicator_dp = 2)
 #'
-tooltip_text <- function(data,
-                         years_num,
-                         indicator_dp,
-                         highlight_geography = NULL,
-                         focus_colour) {
+tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_colours) {
   data_clean <- data |>
-    # Order geogs by value while still a raw number
+    dplyr::filter(Years_num == years_num) |>
     dplyr::arrange(dplyr::desc(values_num)) |>
-    pretty_num_table(include_columns = "values_num", dp = indicator_dp) |>
-    dplyr::filter(Years_num == years_num)
+    pretty_num_table(include_columns = "values_num", dp = indicator_dp)
 
-  # Create formatted tooltip text
-  tooltip_lines <- sapply(seq_len(nrow(data_clean)), function(i) {
-    row <- data_clean[i, ]
-    geography <- row$`LA and Regions`
-    value <- row$values_num
+  tooltip_lines <- apply(data_clean, 1, function(row) {
+    geography <- row["LA and Regions"]
+    value <- row["values_num"]
 
-    # Apply styling for highlighted geography
-    if (!is.null(highlight_geography) && geography == highlight_geography) {
-      paste0(
-        "<span style='color:", focus_colour, "; font-weight: bold;'>",
-        geography, ": ", value, "</span>"
-      )
-      # Apply specific styling for "England" if present
-    } else if (geography == "England") {
-      paste0(
-        "<span style='color:", get_england_colour(), "; font-weight: bold;'>",
-        geography, ": ", value, "</span>"
-      )
+    text_colour <- if (!is.null(focus_geog)) {
+      if (geography == focus_geog) get_focus_front_colour() else get_gov_secondary_text_colour()
     } else {
-      paste0(geography, ": ", value)
+      geog_colours[geography]
     }
+
+    weight <- if (text_colour %in% c(get_selected_la_colour(), get_focus_front_colour())) "font-weight: bold;" else ""
+
+    paste0("<span style='color:", text_colour, "; ", weight, "'>", geography, ": ", value, "</span>")
   })
 
   paste(tooltip_lines, collapse = "\n")
 }
+
 
 
 #' Add an Interactive Vertical Line with Tooltips
@@ -732,7 +720,7 @@ tooltip_text <- function(data,
 #'   in tooltip values.
 #' @param focus_group Character, optional. Name of the group to highlight in the
 #'   tooltip, if present in the data.
-#' @param focus_colour Character, default = `get_la_focus_colour()`. The color
+#' @param focus_colour Character, default = `get_selected_la_colour()`. The color
 #'   to apply to `focus_group` if it appears in tooltips.
 #' @param include_measure Logical, default = FALSE. If TRUE, adds the measure
 #'   value to the tooltip text.
@@ -756,15 +744,15 @@ tooltip_text <- function(data,
 tooltip_vlines <- function(x,
                            data,
                            indicator_dp = 1,
-                           focus_group = NULL,
-                           focus_colour = get_la_focus_colour(),
+                           focus_geog = NULL,
                            include_measure = FALSE) {
   year_text <- generate_year_text(data, x)
+  geog_colours <- create_plot_colours(data)
 
   tooltip_content <- if (include_measure) {
-    tooltip_text_w_indicator(data, x, indicator_dp)
+    tooltip_text_w_indicator(data, x, indicator_dp, geog_colours)
   } else {
-    tooltip_text(data, x, indicator_dp, focus_group, focus_colour)
+    tooltip_text(data, x, indicator_dp, focus_geog, geog_colours)
   }
 
   geom_vline_interactive(
@@ -792,7 +780,7 @@ tooltip_vlines <- function(x,
 #'   the `values_num` column.
 #' @param focus_group Character, optional. Name of a specific group to highlight
 #'   in the tooltip if present.
-#' @param text_colour Character, default = `get_la_focus_colour()`. Color to
+#' @param text_colour Character, default = `get_selected_la_colour()`. Color to
 #'   apply to `focus_group` if it appears in tooltips.
 #' @param include_measure Logical, default = FALSE. If TRUE, includes the
 #'   measure name in the tooltip if the `Measure` column exists in `data`.
@@ -815,60 +803,46 @@ tooltip_vlines <- function(x,
 #'
 tooltip_bar <- function(data,
                         indicator_dps,
-                        focus_group = NULL,
-                        text_colour = get_la_focus_colour(),
+                        focus_geog = NULL,
                         include_measure = FALSE) {
-  # Prepare data with specified decimal points
+  # Prepare data with formatted numbers
   data_clean <- data |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dps)
 
-  # Generate tooltip text for each row of data
-  sapply(seq_len(nrow(data_clean)), function(i) {
-    row <- data_clean[i, ]
-    geography <- row$`LA and Regions`
-    value <- row$values_num
-    year <- row$Years
-    measure_text <- ""
+  # Get plot colours for geogs
+  geog_colours <- create_plot_colours(data)
 
-    # Conditionally add Measure to the tooltip if include_measure is TRUE
-    if (include_measure && "Measure" %in% names(row)) {
-      measure_text <- paste0("Measure: ", row$Measure, "\n")
+  apply(data_clean, 1, function(row) {
+    geography <- row["LA and Regions"]
+    value <- row["values_num"]
+    year <- row["Years"]
+
+    # Tooltip content
+    measure_text <- if (include_measure && "Measure" %in% names(row)) {
+      paste0("Measure: ", row["Measure"], "\n")
+    } else {
+      ""
     }
 
-    # Create formatted tooltip text with colour formatting for "England" and focus_group
-    tooltip_text <- paste0(
-      measure_text,
-      "Year: ",
-      year,
-      "\n\n",
-      ifelse(
-        geography == "England",
-        paste0(
-          "<span style='color:",
-          get_england_colour(),
-          "; font-weight: bold;'>",
-          geography,
-          ": ",
-          value,
-          "</span>"
-        ),
-        ifelse(
-          !is.null(focus_group) && geography == focus_group,
-          paste0(
-            "<span style='color:",
-            text_colour,
-            "; font-weight: bold;'>",
-            geography,
-            ": ",
-            value,
-            "</span>"
-          ),
-          paste0(geography, ": ", value)
-        )
-      )
+    # Apply colour formatting (set focus plot colours)
+    text_colour <- if (!is.null(focus_geog)) {
+      if (geography == focus_geog) get_focus_front_colour() else "black"
+    } else {
+      geog_colours[geography]
+    }
+
+    weight <- ifelse(
+      text_colour %in% c(get_selected_la_colour(), get_focus_front_colour()) & !include_measure,
+      "bold",
+      "normal"
     )
 
-    tooltip_text
+    paste0(
+      measure_text,
+      "Year: ", year, "\n\n",
+      "<span style='color:", text_colour, "; font-weight: ", weight, ";'>",
+      geography, ": ", value, "</span>"
+    )
   })
 }
 

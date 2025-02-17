@@ -56,7 +56,7 @@ ui_dev <- bslib::page_fillable(
         shinycssloaders::withSpinner(
           reactable::reactableOutput("la_table"),
           type = 6,
-          color = "#1d70b8"
+          color = get_gov_brand_colour()
         )
       )
     )
@@ -69,7 +69,7 @@ ui_dev <- bslib::page_fillable(
         shinycssloaders::withSpinner(
           reactable::reactableOutput("la_stats_table"),
           type = 6,
-          color = "#1d70b8",
+          color = get_gov_brand_colour(),
           size = 0.5,
           proxy.height = "100px"
         )
@@ -88,7 +88,7 @@ ui_dev <- bslib::page_fillable(
             shinycssloaders::withSpinner(
               ggiraph::girafeOutput("la_line_chart"),
               type = 6,
-              color = "#1d70b8"
+              color = get_gov_brand_colour()
             )
           ),
           full_screen = TRUE
@@ -102,7 +102,7 @@ ui_dev <- bslib::page_fillable(
             shinycssloaders::withSpinner(
               ggiraph::girafeOutput("la_bar_chart"),
               type = 6,
-              color = "#1d70b8"
+              color = get_gov_brand_colour()
             )
           ),
           full_screen = TRUE
@@ -119,13 +119,13 @@ ui_dev <- bslib::page_fillable(
         shinycssloaders::withSpinner(
           textOutput("description"),
           type = 6,
-          color = "#1d70b8"
+          color = get_gov_brand_colour()
         ),
         h3("Methodology:"),
         shinycssloaders::withSpinner(
           uiOutput("methodology"),
           type = 6,
-          color = "#1d70b8"
+          color = get_gov_brand_colour()
         ),
         div(
           # Creates a flex container where the items are centered vertically
@@ -136,7 +136,7 @@ ui_dev <- bslib::page_fillable(
           shinycssloaders::withSpinner(
             textOutput("last_update"),
             type = 6,
-            color = "#1d70b8"
+            color = get_gov_brand_colour()
           )
         ),
         div(
@@ -147,7 +147,7 @@ ui_dev <- bslib::page_fillable(
           shinycssloaders::withSpinner(
             uiOutput("next_update"),
             type = 6,
-            color = "#1d70b8"
+            color = get_gov_brand_colour()
           )
         ),
         div(
@@ -158,7 +158,7 @@ ui_dev <- bslib::page_fillable(
           shinycssloaders::withSpinner(
             uiOutput("source"),
             type = 6,
-            color = "#1d70b8"
+            color = get_gov_brand_colour()
           )
         )
       )
@@ -508,8 +508,7 @@ server_dev <- function(input, output, session) {
       get_years(la_long()),
       tooltip_vlines,
       la_long(),
-      indicator_dps(),
-      input$la_input
+      indicator_dps()
     )
 
     # Plotting interactive graph
@@ -548,7 +547,7 @@ server_dev <- function(input, output, session) {
           x = Years_num,
           y = values_num,
           fill = `LA and Regions`,
-          tooltip = tooltip_bar(la_long(), indicator_dps(), input$la_input),
+          tooltip = tooltip_bar(la_long(), indicator_dps()),
           data_id = `LA and Regions`
         ),
         position = "dodge",
