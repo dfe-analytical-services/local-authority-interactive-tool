@@ -359,24 +359,31 @@ mute_cat <- function(input) {
 #'
 #' @export
 clean_ldn_region <- function(region, filtered_bds) {
-  # Return early if the region doesn't start with "London"
-  if (!grepl("^London", region)) {
+  # Return early if region is NA or doesn't start with "London"
+  if (is.na(region) || !stringr::str_starts(region, "London")) {
     return(region)
   }
 
-  # Extract values for the given region
-  ldn_values <- filtered_bds |>
-    dplyr::filter(`LA and Regions` == region) |>
+  # Check if required columns exist in filtered_bds
+  if (!all(c("LA and Regions", "values_num", "Years_num") %in% colnames(filtered_bds))) {
+    stop("filtered_bds must contain 'LA and Regions', 'values_num', and 'Years_num' columns")
+  }
+
+  # Determine the latest year available in the dataset
+  latest_year <- max(filtered_bds$Years_num, na.rm = TRUE)
+
+  # Extract values for the given region in the latest year
+  latest_values <- filtered_bds |>
+    dplyr::filter(`LA and Regions` == region, Years_num == latest_year) |>
     dplyr::pull(values_num)
 
-  # Return "London" if all values are NA, otherwise return the original region
-  if (all(is.na(ldn_values))) {
+  # Return "London" if the value is NA for the latest year, otherwise return the original region
+  if (all(is.na(latest_values))) {
     return("London")
-  } else {
-    return(region)
   }
-}
 
+  return(region)
+}
 
 #' Retrieve AF Colours Without Warning Message
 #'
