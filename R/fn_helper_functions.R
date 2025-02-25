@@ -342,7 +342,7 @@ mute_cat <- function(input) {
 #'
 #' This function determines which London region to use for reporting.
 #' Some indicators may not be provided at the Inner or Outer London level,
-#' so the function defaults to "London" if no data is available for a
+#' so the function defaults to "London" if the latest data is not available for a
 #' specific region.
 #'
 #' @param region A character string representing the region
@@ -377,12 +377,12 @@ clean_ldn_region <- function(region, filtered_bds) {
     dplyr::filter(`LA and Regions` == region, Years_num == latest_year) |>
     dplyr::pull(values_num)
 
-  # Return "London" if the value is NA for the latest year, otherwise return the original region
-  if (all(is.na(latest_values))) {
-    return("London")
+  # Return "London" if values for the latest year are NA, otherwise return the original region
+  if (is.na(latest_values)) {
+    "London"
+  } else {
+    region
   }
-
-  return(region)
 }
 
 #' Retrieve AF Colours Without Warning Message
