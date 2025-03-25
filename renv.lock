@@ -320,11 +320,12 @@
     },
     "chromote": {
       "Package": "chromote",
-      "Version": "0.4.0",
+      "Version": "0.5.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R6",
+        "cli",
         "curl",
         "fastmap",
         "jsonlite",
@@ -334,9 +335,11 @@
         "promises",
         "rlang",
         "utils",
-        "websocket"
+        "websocket",
+        "withr",
+        "zip"
       ],
-      "Hash": "1327bc3ec8e3052b09889fc87de93470"
+      "Hash": "11811b9f4279dcd325739b3f4b460b52"
     },
     "cli": {
       "Package": "cli",
