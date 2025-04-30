@@ -451,27 +451,13 @@
     },
     "curl": {
       "Package": "curl",
-      "Version": "5.2.2",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R"
-      ],
-      "Hash": "8f27335f2bcff4d6035edcc82d7d46de"
-    },
-    "cyclocomp": {
-      "Package": "cyclocomp",
-      "Version": "1.1.1",
+      "Version": "6.2.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
-        "callr",
-        "crayon",
-        "desc",
-        "remotes",
-        "withr"
+        "R"
       ],
-      "Hash": "cdc4a473222b0112d4df0bcfbed12d44"
+      "Hash": "e4f9e10b18f453a1b7eaf38247dad4fe"
     },
     "desc": {
       "Package": "desc",
@@ -1172,14 +1158,14 @@
     },
     "lintr": {
       "Package": "lintr",
-      "Version": "3.1.2",
+      "Version": "3.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "backports",
+        "cli",
         "codetools",
-        "cyclocomp",
         "digest",
         "glue",
         "knitr",
@@ -1189,7 +1175,7 @@
         "xml2",
         "xmlparsedata"
       ],
-      "Hash": "08cff46381a242d44c0d8dd0aabd9f71"
+      "Hash": "45b44c7f1040cce8f34ec0a9c92d47f3"
     },
     "lubridate": {
       "Package": "lubridate",
