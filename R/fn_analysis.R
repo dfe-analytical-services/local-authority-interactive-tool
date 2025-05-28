@@ -213,7 +213,7 @@ get_quartile_band_cell_colour <- function(data_polarity, data_quartile_band) {
     TRUE ~ "none"
   )
 
-  return(matching_colour)
+  matching_colour
 }
 
 

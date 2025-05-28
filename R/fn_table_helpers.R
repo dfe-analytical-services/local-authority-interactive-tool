@@ -783,7 +783,7 @@ get_trend_colour <- function(value, polarity) {
     TRUE ~ "black"
   )
 
-  return(list(color = trend_colour))
+  list(color = trend_colour)
 }
 
 
