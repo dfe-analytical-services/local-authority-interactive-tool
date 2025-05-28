@@ -528,7 +528,7 @@ user_guide_panel <- function() {
                   add_warning = TRUE
                 ),
                 HTML(
-                  " landing page for further details.
+                  " landing page for further details about the 2025 refresh.
                   <br>
                   <br>
                   These neighbour groupings are used in this tool to allow

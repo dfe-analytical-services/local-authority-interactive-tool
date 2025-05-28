@@ -93,12 +93,15 @@ bds <- arrow::read_parquet(
 
 # Statistical Neighbours
 stat_n_raw <- readxl::read_xlsx(
-  here::here("01_data/02_prod/sn_april_2021.xlsx"),
+  here::here("01_data/02_prod/sn_may_2025.xlsx"),
   sheet = "LA SN Groups",
   col_names = TRUE,
   skip = 2,
-  .name_repair = "unique_quiet"
+  .name_repair = "unique_quiet",
+  col_types = "text"
 )
+
+
 
 # Data dictionary
 metrics_raw <- read.csv(
@@ -329,7 +332,7 @@ testthat::test_that("Number of topics per duplicate is 2", {
 
         stopifnot(length(metric_topics) == 2)
 
-        return(metric_topics)
+        metric_topics
       })
     }),
     message = "length(metric_topics) > 2 is not TRUE"
@@ -341,10 +344,9 @@ testthat::test_that("Number of topics per duplicate is 2", {
 stat_n_la <- stat_n_long |>
   dplyr::left_join(
     stat_n_geog |>
+      dplyr::mutate(`LA number` = as.numeric(`LA number`)) |>
       dplyr::mutate(`LA num` = as.character(`LA num`)) |>
-      dplyr::select(`LA num`,
-        `LA Name_sn` = `LA Name`
-      ),
+      dplyr::select(`LA num`, "LA Name_sn" = `LA Name`),
     by = c("SN" = "LA num")
   )
 

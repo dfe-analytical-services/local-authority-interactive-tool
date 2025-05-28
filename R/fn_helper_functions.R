@@ -31,7 +31,7 @@ expandable <- function(input_id, label, contents) {
     shiny::tags$div(contents)
   )
 
-  return(gov_details)
+  gov_details
 }
 
 
@@ -727,10 +727,10 @@ rename_columns_with_year <- function(df) {
   new_names <- sapply(names(df), function(col) {
     if (grepl("^\\d{4}", col)) {
       # Extract the first 4 digits
-      return(substr(col, start = 1, stop = 4))
+      substr(col, start = 1, stop = 4)
     } else {
       # Return the original name if it doesn't start with 4 digits
-      return(col)
+      col
     }
   })
 
@@ -987,5 +987,5 @@ format_text <- function(text) {
   # Convert to HTML
   text <- HTML(text)
 
-  return(text)
+  text
 }

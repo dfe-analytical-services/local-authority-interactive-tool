@@ -274,7 +274,7 @@ calculate_file_size <- function(file_type, data) {
   rounded_file_size <- round(file_size_kb, 2)
 
   unlink(temp_file) # Remove the temporary file
-  return(paste0(rounded_file_size, " KB"))
+  paste0(rounded_file_size, " KB")
 }
 
 
@@ -390,7 +390,7 @@ update_and_fetch_metadata <- function(input_indicator,
   # Update the previous value in the reactive storage
   reactive_storage[[key]] <- metadata
 
-  return(metadata)
+  metadata
 }
 
 

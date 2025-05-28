@@ -180,7 +180,7 @@ server_dev <- function(input, output, session) {
       # Include all rows if no topic is selected or "All topics" is selected
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(
-          if (is.null(input$topic_input) || "All topics" %in% input$topic_input) {
+          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
             TRUE
           } else {
             .data$Topic %in% input$topic_input # Filter by selected topic(s)
