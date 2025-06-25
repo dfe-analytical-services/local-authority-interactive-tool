@@ -604,9 +604,4 @@ server <- function(input, output, session) {
   # Extras ====================================================================
   # Copy-to-clipboard pop-up notification
   CopyToClipboardPopUpServer("copy-to-clipboard")
-
-  # Stop app ==================================================================
-  session$onSessionEnded(function() {
-    shiny::stopApp()
-  })
 }
