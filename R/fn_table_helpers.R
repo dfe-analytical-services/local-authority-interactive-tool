@@ -465,18 +465,19 @@ build_la_stats_table <- function(
     indicator_dps,
     indicator_polarity,
     no_show_qb) {
+  # Ensure la_number is scalar or NA
+  la_number <- main_table |>
+    filter_la_regions(selected_la, pull_col = "LA Number")
 
-# Ensure la_number is scalar or NA
-la_number <- main_table |>
-filter_la_regions(selected_la, pull_col = "LA Number")
-
-if (any(is.na(c(selected_la, la_number)))) {
-  warning("Suprise NA value in stats table")
-}
+  if (any(is.na(c(selected_la, la_number)))) {
+    warning("Suprise NA value in stats table")
+  }
 
   # Helper: safely coerce empty inputs to length-1 values
   safe_scalar <- function(x, na_value) {
-    if (length(x) == 0 || all(is.na(x))) return(na_value)
+    if (length(x) == 0 || all(is.na(x))) {
+      return(na_value)
+    }
     x
   }
 
