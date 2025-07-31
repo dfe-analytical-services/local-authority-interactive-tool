@@ -101,63 +101,83 @@ LA_LineChartServer <- function(id,
 
     # Build main static plot
     line_chart <- reactive({
-      # Generate the covid plot data if add_covid_plot is TRUE
+      safe_data <- la_long()
+
+      # Count number of distinct years
+      year_count <- dplyr::n_distinct(safe_data$Years_num)
+
+      # Handle empty or missing data
+      if (nrow(safe_data) == 0 || year_count < 1) {
+        return(
+          ggplot2::ggplot() +
+            ggplot2::geom_blank() +
+            ggplot2::labs(title = "No data available for selected options") +
+            custom_theme()
+        )
+      }
+
+      # Generate COVID plot elements
       covid_plot <- calculate_covid_plot(
-        la_long(),
+        safe_data,
         covid_affected_data,
         app_inputs$indicator(),
         "line"
       )
 
-      # Build plot
-      la_long() |>
-        # Set geog orders so selected LA is on top of plot
-        reorder_la_regions(reverse = TRUE) |>
-        ggplot2::ggplot() +
-        ggiraph::geom_line_interactive(
-          ggplot2::aes(
-            x = Years_num,
-            y = values_num,
-            color = `LA and Regions`,
-            data_id = `LA and Regions`
-          ),
-          na.rm = TRUE,
-          linewidth = 1
-        ) +
-        # Only show point data where line won't appear (NAs)
-        ggplot2::geom_point(
-          data = subset(
-            create_show_point(la_long(), covid_affected_data, app_inputs$indicator()),
-            show_point
-          ),
-          ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
-          shape = 15,
-          size = 1,
-          na.rm = TRUE
-        ) +
-        # Add COVID plot if indicator affected
-        add_covid_elements(covid_plot) +
-        format_axes(la_long()) +
-        set_plot_colours(la_long(), "colour", app_inputs$la()) +
-        set_plot_labs(filtered_bds()) +
-        custom_theme() +
-        # Revert order of the legend so goes from right to left
-        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
-    })
-
-    # Build interactive line chart
-    interactive_line_chart <- reactive({
-      # Creating vertical geoms to make vertical hover tooltip
-      vertical_hover <- lapply(
-        get_years(la_long()),
-        tooltip_vlines,
-        la_long(),
-        get_indicator_dps(filtered_bds())
+      # Tooltip (safe fallback)
+      tooltip_text <- tryCatch(
+        tooltip_line(safe_data, get_indicator_dps(filtered_bds())),
+        error = function(e) rep("", nrow(safe_data))
       )
 
-      # Plotting interactive graph
+      # Start base plot
+      plot <- ggplot2::ggplot(safe_data)
+
+      if (year_count == 1) {
+        # Fallback to point plot if only one year
+        plot <- plot +
+          ggplot2::geom_point(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              color = `LA and Regions`
+            ),
+            size = 3,
+            shape = 21,
+            stroke = 1,
+            fill = "white"
+          ) +
+          ggplot2::labs(subtitle = "Only one year of data available")
+      } else {
+        # Standard line plot
+        plot <- plot +
+          ggiraph::geom_path_interactive(
+            ggplot2::aes(
+              x = Years_num,
+              y = values_num,
+              group = `LA and Regions`,
+              color = `LA and Regions`,
+              tooltip = tooltip_text,
+              data_id = `LA and Regions`
+            ),
+            linewidth = 1.5,
+            na.rm = TRUE
+          )
+      }
+
+      # Add shared plot elements
+      plot +
+        add_covid_elements(covid_plot) +
+        format_axes(safe_data) +
+        set_plot_colours(safe_data, "color", app_inputs$la()) +
+        set_plot_labs(filtered_bds()) +
+        custom_theme()
+    })
+
+    # Interactive plot wrapper
+    interactive_line_chart <- reactive({
       ggiraph::girafe(
-        ggobj = (line_chart() + vertical_hover),
+        ggobj = line_chart(),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -168,11 +188,9 @@ LA_LineChartServer <- function(id,
       )
     })
 
-    # Line chart download ------------------------------------------------------
-    # Initialise server logic for download button and modal
+    # Download setup
     DownloadChartBtnServer("download_btn", id, "Line")
 
-    # Set up the download handlers for the chart
     Download_DataServer(
       "chart_download",
       reactive(input$file_type),
@@ -180,7 +198,7 @@ LA_LineChartServer <- function(id,
       reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
     )
 
-    # Plot used for copy to clipboard (hidden)
+    # Hidden static plot for clipboard
     output$copy_plot <- shiny::renderPlot(
       {
         line_chart()
@@ -190,12 +208,13 @@ LA_LineChartServer <- function(id,
       height = 12 * 96
     )
 
-    # LA Level line chart plot ------------------------------------------------
+    # Render interactive line chart
     output$line_chart <- ggiraph::renderGirafe({
       interactive_line_chart()
     })
   })
 }
+
 
 
 #' Bar Chart UI Module

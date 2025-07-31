@@ -465,6 +465,7 @@ build_la_stats_table <- function(
     indicator_dps,
     indicator_polarity,
     no_show_qb) {
+  # Ensure la_number is scalar or NA
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
@@ -472,53 +473,69 @@ build_la_stats_table <- function(
     warning("Suprise NA value in stats table")
   }
 
-  round_qbs <- round(quartile_bands, indicator_dps)
-  qb_adj <- 10**-(indicator_dps)
+  # Helper: safely coerce empty inputs to length-1 values
+  safe_scalar <- function(x, na_value) {
+    if (length(x) == 0 || all(is.na(x))) {
+      return(na_value)
+    }
+    x
+  }
 
-  # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- list()
-  if (indicator_polarity %in% "Low") {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Latest National Rank" = rank,
-        "Quartile Banding" = quartile,
-        "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-        "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-        "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-        "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
-      )
-    )
+  rank <- safe_scalar(rank, NA_integer_)
+  quartile <- safe_scalar(quartile, NA_character_)
+  change_since_prev <- safe_scalar(change_since_prev, NA_real_)
+  trend <- safe_scalar(trend, NA_real_)
+  indicator_polarity <- safe_scalar(indicator_polarity, NA_character_)
+
+  round_qbs <- round(quartile_bands, indicator_dps)
+  qb_adj <- 10^(-indicator_dps)
+
+  # Decide polarity case (safe against empty input)
+  polarity_case <- if (is.na(indicator_polarity)) {
+    "none"
+  } else if (indicator_polarity %in% "Low") {
+    "low"
   } else if (indicator_polarity %in% "High") {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Latest National Rank" = rank,
-        "Quartile Banding" = quartile,
-        "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
-        "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
-        "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
-        "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
-      )
+    "high"
+  } else {
+    "none"
+  }
+
+  # Create quartile band text
+  rank_quartile_band_values <- list()
+
+  if (polarity_case == "low") {
+    rank_quartile_band_values <- list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
+      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
+      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
+      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+    )
+  } else if (polarity_case == "high") {
+    rank_quartile_band_values <- list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
+      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
+      "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
+      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
     )
   } else {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Latest National Rank" = "-",
-        "Quartile Banding" = "-",
-        "No Quartiles" = "-",
-        "A" = NULL,
-        "B" = NULL,
-        "C" = NULL,
-        "D" = NULL
-      )
+    rank_quartile_band_values <- list(
+      "Latest National Rank" = "-",
+      "Quartile Banding" = "-",
+      "No Quartiles" = "-",
+      "A" = NULL,
+      "B" = NULL,
+      "C" = NULL,
+      "D" = NULL
     )
   }
 
-  # Hide QB if no_show_qb is True value which is derived from the
-  # No Quartile column of the Data Dict (normally due to small data range)
-  if (no_show_qb) {
+  # Override with no_show_qb logic if needed
+  if (isTRUE(no_show_qb)) {
     rank_quartile_band_values <- modifyList(
       rank_quartile_band_values,
       list(
@@ -533,17 +550,21 @@ build_la_stats_table <- function(
   }
 
   stats_table <- data.frame(
-    "LA Number" = la_number,
-    "LA and Regions" = selected_la,
-    "Trend" = trend,
-    "Change from previous year" = change_since_prev,
-    "Polarity" = indicator_polarity,
+    "LA Number" = if (length(la_number) == 0) NA else la_number,
+    "LA and Regions" = if (length(selected_la) == 0) NA else selected_la,
+    "Trend" = if (length(trend) == 0) NA else trend,
+    "Change from previous year" = if (length(change_since_prev) == 0) NA else change_since_prev,
+    "Polarity" = if (length(indicator_polarity) == 0) NA else indicator_polarity,
     check.names = FALSE
-  ) |>
-    cbind(rank_quartile_band_values)
+  )
+
+  # Now safely combine with rank/quartile info
+  stats_table <- cbind(stats_table, rank_quartile_band_values)
+
 
   stats_table
 }
+
 
 
 #' Build a formatted statistics table for regions
