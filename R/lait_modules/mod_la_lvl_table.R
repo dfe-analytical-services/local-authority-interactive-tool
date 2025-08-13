@@ -305,65 +305,89 @@ LA_StatsTableServer <- function(id,
 
     # Build Stats LA Level table ----------------------------------
     la_stats_table <- shiny::reactive({
+      # Helper to avoid zero-length issues
+      safe_scalar <- function(x, na_value) {
+        if (length(x) == 0 || all(is.na(x))) {
+          return(na_value)
+        }
+        x
+      }
+
       # Extract change from prev year (from LA table)
-      la_change_prev <- la_diff() |>
-        filter_la_regions(app_inputs$la(), pull_col = "values_num")
+      la_change_prev <- safe_scalar(
+        la_diff() |>
+          filter_la_regions(app_inputs$la(), pull_col = "values_num"),
+        NA_real_
+      )
 
       # Get polarity of indicator
-      la_indicator_polarity <- filtered_bds() |>
-        pull_uniques("Polarity")
+      la_indicator_polarity <- safe_scalar(
+        filtered_bds() |> pull_uniques("Polarity"),
+        NA_character_
+      )
 
       # Set the trend value
-      la_trend <- as.numeric(la_change_prev)
+      la_trend <- safe_scalar(as.numeric(la_change_prev), NA_real_)
 
       # Get latest rank, ties are set to min & NA vals to NA rank
-      la_rank <- filtered_bds() |>
-        filter_la_regions(la_names_bds, latest = TRUE) |>
-        calculate_rank(la_indicator_polarity) |>
-        filter_la_regions(app_inputs$la(), pull_col = "rank")
+      la_rank <- safe_scalar(
+        filtered_bds() |>
+          filter_la_regions(la_names_bds, latest = TRUE) |>
+          calculate_rank(la_indicator_polarity) |>
+          filter_la_regions(app_inputs$la(), pull_col = "rank"),
+        NA_integer_
+      )
 
       # Calculate quartile bands for indicator
-      la_quartile_bands <- filtered_bds() |>
-        filter_la_regions(la_names_bds,
-          latest = TRUE,
-          pull_col = "values_num"
-        ) |>
-        quantile(na.rm = TRUE)
+      la_quartile_bands <- safe_scalar(
+        filtered_bds() |>
+          filter_la_regions(la_names_bds,
+            latest = TRUE,
+            pull_col = "values_num"
+          ) |>
+          quantile(na.rm = TRUE),
+        rep(NA_real_, 5) # quantile returns vector of length 5
+      )
 
       # Extracting LA latest value
-      la_indicator_val <- filtered_bds() |>
-        filter_la_regions(app_inputs$la(),
-          latest = TRUE,
-          pull_col = "values_num"
-        )
+      la_indicator_val <- safe_scalar(
+        filtered_bds() |>
+          filter_la_regions(app_inputs$la(),
+            latest = TRUE,
+            pull_col = "values_num"
+          ),
+        NA_real_
+      )
 
       # Boolean as to whether to include Quartile Banding
       no_show_qb <- app_inputs$indicator() %in% no_qb_indicators
 
       # Calculating which quartile this value sits in
-      la_quartile <- calculate_quartile_band(
-        la_indicator_val,
-        la_quartile_bands,
-        la_indicator_polarity,
-        no_show_qb
+      la_quartile <- safe_scalar(
+        calculate_quartile_band(
+          la_indicator_val,
+          la_quartile_bands,
+          la_indicator_polarity,
+          no_show_qb
+        ),
+        NA_character_
       )
 
-      # Build stats LA Level table
-      la_stats_table <- build_la_stats_table(
+      # Build stats LA Level table (now protected from empty values)
+      build_la_stats_table(
         la_diff(),
-        app_inputs$la(),
+        safe_scalar(app_inputs$la(), NA_character_),
         la_trend,
         la_change_prev,
         la_rank,
         la_quartile,
         la_quartile_bands,
-        get_indicator_dps(filtered_bds()),
+        safe_scalar(get_indicator_dps(filtered_bds()), NA_integer_),
         la_indicator_polarity,
         no_show_qb
       )
-
-      la_stats_table
     })
+
 
     # LA Stats table
     output$la_stats <- reactable::renderReactable({
