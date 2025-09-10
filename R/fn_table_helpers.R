@@ -464,19 +464,15 @@ build_la_stats_table <- function(
     quartile_bands,
     indicator_dps,
     indicator_polarity,
-    no_show_qb) {
+    no_show_qb
+) {
   # Get LA number
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
-  if (any(is.na(c(selected_la, la_number)))) {
-    warning("Surprise NA value in stats table")
-  }
-
-  # Number of rows in the output (usually 1 for LA)
   n_rows <- max(length(selected_la), length(la_number), 1)
 
-  # Safe fill helper — matches target length & fills NA if empty
+  # Helper to safely fill vectors
   safe_fill <- function(x, len, na_value) {
     if (length(x) == 0 || all(is.na(x))) {
       rep(na_value, len)
@@ -494,62 +490,62 @@ build_la_stats_table <- function(
   quartile <- safe_fill(quartile, n_rows, NA_character_)
   indicator_polarity <- safe_fill(indicator_polarity, n_rows, NA_character_)
 
-  # Quartile band rounding
+  # Round quartile bands
   round_qbs <- round(quartile_bands, indicator_dps)
   qb_adj <- 10^(-indicator_dps)
 
-  # Decide polarity case
-  polarity_case <- if (is.na(indicator_polarity[1])) {
-    "none"
-  } else if (indicator_polarity[1] %in% "Low") {
-    "low"
-  } else if (indicator_polarity[1] %in% "High") {
-    "high"
-  } else {
-    "none"
+  # Function to make a band label
+  make_band <- function(lo, hi) {
+    lo <- ifelse(is.na(lo), "-", lo)
+    hi <- ifelse(is.na(hi), "-", hi)
+    paste0(lo, " to ", hi)
   }
 
-  # Quartile band values
+  # Quartile band columns
+  polarity_case <- if (is.na(indicator_polarity[1])) "none" else tolower(indicator_polarity[1])
+
   if (polarity_case == "low") {
-    rank_quartile_band_values <- list(
+    bands <- list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-      "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-      "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
+      "A" = make_band(round_qbs[["0%"]], round_qbs[["25%"]]),
+      "B" = make_band(round_qbs[["25%"]] + qb_adj, round_qbs[["50%"]]),
+      "C" = make_band(round_qbs[["50%"]] + qb_adj, round_qbs[["75%"]]),
+      "D" = make_band(round_qbs[["75%"]] + qb_adj, round_qbs[["100%"]])
     )
   } else if (polarity_case == "high") {
-    rank_quartile_band_values <- list(
+    bands <- list(
       "Latest National Rank" = rank,
       "Quartile Banding" = quartile,
-      "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
-      "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
-      "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["25%"]] + qb_adj),
-      "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
+      "A" = make_band(round_qbs[["100%"]], round_qbs[["75%"]] + qb_adj),
+      "B" = make_band(round_qbs[["75%"]], round_qbs[["50%"]] + qb_adj),
+      "C" = make_band(round_qbs[["50%"]] + qb_adj, round_qbs[["25%"]] + qb_adj),
+      "D" = make_band(round_qbs[["25%"]], round_qbs[["0%"]])
     )
   } else {
-    rank_quartile_band_values <- list(
+    bands <- list(
       "Latest National Rank" = safe_fill(rank, n_rows, NA_integer_),
       "Quartile Banding" = safe_fill(quartile, n_rows, NA_character_),
-      "No Quartiles" = rep("-", n_rows),
-      "A" = NULL, "B" = NULL, "C" = NULL, "D" = NULL
+      "No Quartiles" = rep("-", n_rows)
     )
   }
 
-  # Override with no_show_qb logic if needed
+  # Apply no_show_qb logic
   if (isTRUE(no_show_qb)) {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Quartile Banding" = rep("-", n_rows),
-        "No Quartiles" = rep("Data range is too small.", n_rows),
-        "A" = NULL, "B" = NULL, "C" = NULL, "D" = NULL
-      )
-    )
+    bands <- modifyList(bands, list(
+      "Quartile Banding" = rep("-", n_rows),
+      "No Quartiles" = rep("Data range is too small.", n_rows)
+    ))
   }
 
-  # Base stats table
+  # Convert all band entries to flat character vectors
+  bands <- lapply(bands, function(x) {
+    if (is.null(x)) rep("-", n_rows)
+    else if (is.list(x)) unlist(x, use.names = FALSE)
+    else x
+  })
+
+  # Build main stats table
   stats_table <- data.frame(
     "LA Number" = la_number,
     "LA and Regions" = selected_la,
@@ -559,11 +555,12 @@ build_la_stats_table <- function(
     check.names = FALSE
   )
 
-  # Combine with rank/quartile info
-  stats_table <- cbind(stats_table, rank_quartile_band_values)
+  # Bind everything together safely
+  stats_table <- dplyr::bind_cols(stats_table, as.data.frame(bands, check.names = FALSE))
 
-  stats_table
+  return(stats_table)
 }
+
 
 
 
