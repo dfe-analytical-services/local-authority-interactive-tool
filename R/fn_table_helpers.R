@@ -464,8 +464,7 @@ build_la_stats_table <- function(
     quartile_bands,
     indicator_dps,
     indicator_polarity,
-    no_show_qb
-) {
+    no_show_qb) {
   # Get LA number
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
@@ -540,9 +539,13 @@ build_la_stats_table <- function(
 
   # Convert all band entries to flat character vectors
   bands <- lapply(bands, function(x) {
-    if (is.null(x)) rep("-", n_rows)
-    else if (is.list(x)) unlist(x, use.names = FALSE)
-    else x
+    if (is.null(x)) {
+      rep("-", n_rows)
+    } else if (is.list(x)) {
+      unlist(x, use.names = FALSE)
+    } else {
+      x
+    }
   })
 
   # Build main stats table
@@ -558,7 +561,7 @@ build_la_stats_table <- function(
   # Bind everything together safely
   stats_table <- dplyr::bind_cols(stats_table, as.data.frame(bands, check.names = FALSE))
 
-  return(stats_table)
+  stats_table
 }
 
 
