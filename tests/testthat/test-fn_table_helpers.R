@@ -162,4 +162,3 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
     "Latest National Rank", "Quartile Banding"
   ) %in% names(result)))
 })
-
