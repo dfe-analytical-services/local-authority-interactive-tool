@@ -639,39 +639,49 @@ Region_StatsTableServer <- function(id,
 
     # Build stats table
     region_stats_table <- reactive({
-      # Get LA numbers
-      # Selected LA
+      # Helper to add missing change column
+      safe_add_change_col <- function(df) {
+        if (!"Change from previous year" %in% names(df)) {
+          df <- df |> dplyr::mutate(`Change from previous year` = NA_real_)
+        }
+        df
+      }
+
+      # Selected LA numbers
       region_la_la_num <- region_la_table_raw() |>
+        safe_add_change_col() |>
         filter_la_regions(app_inputs$la(), pull_col = "LA Number")
 
-      # Region and England
+      # Region + England numbers
       region_la_num <- region_table_raw() |>
+        safe_add_change_col() |>
         filter_la_regions(c(region_clean(), "England"), pull_col = "LA Number")
 
-      # Get change in previous year
-      # Selected LA
+      # Change from previous year - selected LA
       region_la_change_prev <- region_la_table_raw() |>
+        safe_add_change_col() |>
         filter_la_regions(app_inputs$la(),
           latest = FALSE,
           pull_col = "Change from previous year"
         )
 
-      # Region and England
+      # Change from previous year - region + England
       region_change_prev <- region_table_raw() |>
+        safe_add_change_col() |>
         filter_la_regions(c(region_clean(), "England"),
           latest = FALSE,
           pull_col = "Change from previous year"
         )
 
-      # Creating the stats table cols
+      # Creating combined stats columns
       region_stats_la_num <- c(region_la_la_num, region_la_num)
       region_stats_name <- c(app_inputs$la(), region_clean(), "England")
       region_stats_change <- c(region_la_change_prev, region_change_prev)
 
-      # Creating the trend descriptions
+      # Trend as numeric
       region_trend <- as.numeric(region_stats_change)
 
-      # Build stats table
+      # Build final table
       build_region_stats_table(
         region_stats_la_num,
         region_stats_name,
@@ -680,6 +690,7 @@ Region_StatsTableServer <- function(id,
         filtered_bds()
       )
     })
+
 
     # Table output
     output$stats_table <- reactable::renderReactable({

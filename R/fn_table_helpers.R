@@ -31,28 +31,23 @@
 #'
 filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
   if (nrow(data) < 1) {
-    warning("Dataframe seems empty")
+    return(if (is.na(pull_col)) data else vector(mode = "list", length = 0))
   }
 
-  # Filter LA & Regions (order by filter_col order)
   result <- data |>
     dplyr::filter(`LA and Regions` %in% filter_col) |>
     dplyr::arrange(factor(`LA and Regions`, levels = filter_col))
 
   if (nrow(result) < 1) {
-    warning("Filter value doesn't exist in LA and Regions")
+    return(if (is.na(pull_col)) result else vector(mode = "list", length = 0))
   }
 
-  # Slice max Year if latest is TRUE
   if (latest) {
-    result <- result |>
-      dplyr::slice_max(Years, na_rm = TRUE)
+    result <- result |> dplyr::slice_max(Years, na_rm = TRUE)
   }
 
-  # Return df or col
   if (!is.na(pull_col)) {
-    result <- result |>
-      dplyr::pull(pull_col)
+    result <- result |> dplyr::pull(pull_col)
   }
 
   result
@@ -465,73 +460,90 @@ build_la_stats_table <- function(
     indicator_dps,
     indicator_polarity,
     no_show_qb) {
+  # Get LA number
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
 
-  if (any(is.na(c(selected_la, la_number)))) {
-    warning("Suprise NA value in stats table")
+  n_rows <- max(length(selected_la), length(la_number), 1)
+
+  # Helper to safely fill vectors
+  safe_fill <- function(x, len, na_value) {
+    if (length(x) == 0 || all(is.na(x))) {
+      rep(na_value, len)
+    } else {
+      rep(x, length.out = len)
+    }
   }
 
-  round_qbs <- round(quartile_bands, indicator_dps)
-  qb_adj <- 10**-(indicator_dps)
+  # Apply safe filling
+  la_number <- safe_fill(la_number, n_rows, NA_integer_)
+  selected_la <- safe_fill(selected_la, n_rows, NA_character_)
+  trend <- safe_fill(trend, n_rows, NA_real_)
+  change_since_prev <- safe_fill(change_since_prev, n_rows, NA_real_)
+  rank <- safe_fill(rank, n_rows, NA_integer_)
+  quartile <- safe_fill(quartile, n_rows, NA_character_)
+  indicator_polarity <- safe_fill(indicator_polarity, n_rows, NA_character_)
 
-  # Create the ranking and Quartile Banding based on polarity
-  rank_quartile_band_values <- list()
-  if (indicator_polarity %in% "Low") {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Latest National Rank" = rank,
-        "Quartile Banding" = quartile,
-        "A" = paste0(round_qbs[["0%"]], " to ", round_qbs[["25%"]]),
-        "B" = paste0(round_qbs[["25%"]] + qb_adj, " to ", round_qbs[["50%"]]),
-        "C" = paste0(round_qbs[["50%"]] + qb_adj, " to ", round_qbs[["75%"]]),
-        "D" = paste0(round_qbs[["75%"]] + qb_adj, " to ", round_qbs[["100%"]])
-      )
+  # Round quartile bands
+  round_qbs <- round(quartile_bands, indicator_dps)
+  qb_adj <- 10^(-indicator_dps)
+
+  # Function to make a band label
+  make_band <- function(lo, hi) {
+    lo <- ifelse(is.na(lo), "-", lo)
+    hi <- ifelse(is.na(hi), "-", hi)
+    paste0(lo, " to ", hi)
+  }
+
+  # Quartile band columns
+  polarity_case <- if (is.na(indicator_polarity[1])) "none" else tolower(indicator_polarity[1])
+
+  if (polarity_case == "low") {
+    bands <- list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "A" = make_band(round_qbs[["0%"]], round_qbs[["25%"]]),
+      "B" = make_band(round_qbs[["25%"]] + qb_adj, round_qbs[["50%"]]),
+      "C" = make_band(round_qbs[["50%"]] + qb_adj, round_qbs[["75%"]]),
+      "D" = make_band(round_qbs[["75%"]] + qb_adj, round_qbs[["100%"]])
     )
-  } else if (indicator_polarity %in% "High") {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Latest National Rank" = rank,
-        "Quartile Banding" = quartile,
-        "A" = paste0(round_qbs[["100%"]], " to ", round_qbs[["75%"]] + qb_adj),
-        "B" = paste0(round_qbs[["75%"]], " to ", round_qbs[["50%"]] + qb_adj),
-        "C" = paste0(round_qbs[["50%"]], " to ", round_qbs[["25%"]] + qb_adj),
-        "D" = paste0(round_qbs[["25%"]], " to ", round_qbs[["0%"]])
-      )
+  } else if (polarity_case == "high") {
+    bands <- list(
+      "Latest National Rank" = rank,
+      "Quartile Banding" = quartile,
+      "A" = make_band(round_qbs[["100%"]], round_qbs[["75%"]] + qb_adj),
+      "B" = make_band(round_qbs[["75%"]], round_qbs[["50%"]] + qb_adj),
+      "C" = make_band(round_qbs[["50%"]] + qb_adj, round_qbs[["25%"]] + qb_adj),
+      "D" = make_band(round_qbs[["25%"]], round_qbs[["0%"]])
     )
   } else {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Latest National Rank" = "-",
-        "Quartile Banding" = "-",
-        "No Quartiles" = "-",
-        "A" = NULL,
-        "B" = NULL,
-        "C" = NULL,
-        "D" = NULL
-      )
+    bands <- list(
+      "Latest National Rank" = safe_fill(rank, n_rows, NA_integer_),
+      "Quartile Banding" = safe_fill(quartile, n_rows, NA_character_),
+      "No Quartiles" = rep("-", n_rows)
     )
   }
 
-  # Hide QB if no_show_qb is True value which is derived from the
-  # No Quartile column of the Data Dict (normally due to small data range)
-  if (no_show_qb) {
-    rank_quartile_band_values <- modifyList(
-      rank_quartile_band_values,
-      list(
-        "Quartile Banding" = "-",
-        "No Quartiles" = "Data range is too small.",
-        "A" = NULL,
-        "B" = NULL,
-        "C" = NULL,
-        "D" = NULL
-      )
-    )
+  # Apply no_show_qb logic
+  if (isTRUE(no_show_qb)) {
+    bands <- modifyList(bands, list(
+      "Quartile Banding" = rep("-", n_rows),
+      "No Quartiles" = rep("Data range is too small.", n_rows)
+    ))
   }
 
+  # Convert all band entries to flat character vectors
+  bands <- lapply(bands, function(x) {
+    if (is.null(x)) {
+      rep("-", n_rows)
+    } else if (is.list(x)) {
+      unlist(x, use.names = FALSE)
+    } else {
+      x
+    }
+  })
+
+  # Build main stats table
   stats_table <- data.frame(
     "LA Number" = la_number,
     "LA and Regions" = selected_la,
@@ -539,11 +551,15 @@ build_la_stats_table <- function(
     "Change from previous year" = change_since_prev,
     "Polarity" = indicator_polarity,
     check.names = FALSE
-  ) |>
-    cbind(rank_quartile_band_values)
+  )
+
+  # Bind everything together safely
+  stats_table <- dplyr::bind_cols(stats_table, as.data.frame(bands, check.names = FALSE))
 
   stats_table
 }
+
+
 
 
 #' Build a formatted statistics table for regions
@@ -599,6 +615,7 @@ build_region_stats_table <- function(la_number,
 #'
 #' @return A data frame containing stats table for LA with national statistics.
 #' @export
+
 build_sn_stats_table <- function(
     stat_n_diff,
     la_and_regions,
@@ -608,18 +625,36 @@ build_sn_stats_table <- function(
     quartile_band,
     polarity,
     pull_col = "LA Number") {
+  # Helper to safely pad or replace missing values
+  safe_fill <- function(x, len, na_value) {
+    if (length(x) == 0 || all(is.na(x))) {
+      rep(na_value, len)
+    } else {
+      # If shorter than needed, recycle
+      rep(x, length.out = len)
+    }
+  }
+
+  # Number of rows in the output table
+  n_rows <- length(la_and_regions)
+
   data.frame(
-    "LA Number" = stat_n_diff |>
-      filter_la_regions(la_and_regions, pull_col = pull_col),
-    "LA and Regions" = la_and_regions,
-    "Trend" = trend,
-    "Change from previous year" = change_prev,
-    "Latest National Rank" = c(national_rank, "", ""),
-    "Quartile Banding" = c(quartile_band, "", ""),
-    "Polarity" = polarity,
+    "LA Number" = safe_fill(
+      stat_n_diff |> filter_la_regions(la_and_regions, pull_col = pull_col),
+      n_rows,
+      NA_integer_
+    ),
+    "LA and Regions" = safe_fill(la_and_regions, n_rows, NA_character_),
+    "Trend" = safe_fill(trend, n_rows, NA_real_),
+    "Change from previous year" = safe_fill(change_prev, n_rows, NA_real_),
+    "Latest National Rank" = safe_fill(national_rank, n_rows, NA_character_),
+    "Quartile Banding" = safe_fill(quartile_band, n_rows, NA_character_),
+    "Polarity" = safe_fill(polarity, n_rows, NA_character_),
     check.names = FALSE
   )
 }
+
+
 
 
 #' Highlight a selected row in a reactable
