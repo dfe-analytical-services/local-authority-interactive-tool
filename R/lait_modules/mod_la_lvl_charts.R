@@ -101,13 +101,11 @@ LA_LineChartServer <- function(id,
 
     # Build main static plot
     line_chart <- reactive({
-      safe_data <- la_long()
-
       # Count number of distinct years
-      year_count <- dplyr::n_distinct(safe_data$Years_num)
+      year_count <- dplyr::n_distinct(la_long()$Years_num)
 
       # Handle empty or missing data
-      if (nrow(safe_data) == 0 || year_count < 1) {
+      if (nrow(la_long()) == 0 || year_count < 1) {
         return(
           ggplot2::ggplot() +
             ggplot2::geom_blank() +
@@ -118,7 +116,7 @@ LA_LineChartServer <- function(id,
 
       # Generate COVID plot elements
       covid_plot <- calculate_covid_plot(
-        safe_data,
+        la_long(),
         covid_affected_data,
         app_inputs$indicator(),
         "line"
@@ -126,12 +124,12 @@ LA_LineChartServer <- function(id,
 
       # Tooltip (safe fallback)
       tooltip_text <- tryCatch(
-        tooltip_line(safe_data, get_indicator_dps(filtered_bds())),
-        error = function(e) rep("", nrow(safe_data))
+        tooltip_line(la_long(), get_indicator_dps(filtered_bds())),
+        error = function(e) rep("", nrow(la_long()))
       )
 
       # Start base plot
-      plot <- ggplot2::ggplot(safe_data)
+      plot <- ggplot2::ggplot(la_long())
 
       if (year_count == 1) {
         # Fallback to point plot if only one year
@@ -168,16 +166,26 @@ LA_LineChartServer <- function(id,
       # Add shared plot elements
       plot +
         add_covid_elements(covid_plot) +
-        format_axes(safe_data) +
-        set_plot_colours(safe_data, "color", app_inputs$la()) +
+        format_axes(la_long()) +
+        set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
-        custom_theme()
+        custom_theme() +
+        # Revert order of the legend so goes from right to left
+        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
     })
 
     # Interactive plot wrapper
     interactive_line_chart <- reactive({
+      # Creating vertical geoms to make vertical hover tooltip
+      vertical_hover <- lapply(
+        get_years(la_long()),
+        tooltip_vlines,
+        la_long(),
+        get_indicator_dps(filtered_bds())
+      )
+
       ggiraph::girafe(
-        ggobj = line_chart(),
+        ggobj = line_chart() + vertical_hover,
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(

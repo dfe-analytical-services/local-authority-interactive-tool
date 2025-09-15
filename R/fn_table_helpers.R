@@ -31,28 +31,23 @@
 #'
 filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
   if (nrow(data) < 1) {
-    warning("Dataframe seems empty")
+    return(if (is.na(pull_col)) data else vector(mode = "list", length = 0))
   }
 
-  # Filter LA & Regions (order by filter_col order)
   result <- data |>
     dplyr::filter(`LA and Regions` %in% filter_col) |>
     dplyr::arrange(factor(`LA and Regions`, levels = filter_col))
 
   if (nrow(result) < 1) {
-    warning("Filter value doesn't exist in LA and Regions")
+    return(if (is.na(pull_col)) result else vector(mode = "list", length = 0))
   }
 
-  # Slice max Year if latest is TRUE
   if (latest) {
-    result <- result |>
-      dplyr::slice_max(Years, na_rm = TRUE)
+    result <- result |> dplyr::slice_max(Years, na_rm = TRUE)
   }
 
-  # Return df or col
   if (!is.na(pull_col)) {
-    result <- result |>
-      dplyr::pull(pull_col)
+    result <- result |> dplyr::pull(pull_col)
   }
 
   result
