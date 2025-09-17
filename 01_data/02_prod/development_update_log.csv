@@ -1,5 +1,5 @@
-"Type","Summary","Details","Date"
-"Feature","Colour added to chart tooltips.","Tooltip colours now match chart lines to clearly highlight each geography. Chart colours have been adjusted and reordered—blue is now reserved for focus charts only to avoid confusion with selected geography switching from orange to blue. In focus charts, the selected geography label is now bold and highlighted in blue for added clarity.",2025-02-14
+"Type","Summary","Details","Date",""
+"Feature","Colour added to chart tooltips.","Tooltip colours now match chart lines to clearly highlight each geography. Chart colours have been adjusted and reordered—blue is now reserved for focus charts only to avoid confusion with selected geography switching from orange to blue. In focus charts, the selected geography label is now bold and highlighted in blue for added clarity.",2025-02-14,NA
 "Feature","Initial message","The development of the new R-Shiny LAIT is now complete! While the tool’s core functionality remains unchanged, the user experience has been significantly enhanced. Key features like interactive charts, easy downloads, and accessibility-friendly styling aim to empower users to extract meaningful insights on children’s services with ease.
 
 Looking ahead, we’re excited about potential future enhancements, such as:
@@ -8,5 +8,8 @@ Looking ahead, we’re excited about potential future enhancements, such as:
 - Enabling users to deselect geographies from the LA page charts.
 - Highlighting years where local authorities’ values are statistically above or below average.
 
-We’d love to hear your ideas! If you have suggestions for new features, please let us know by submitting a [feature request issue on GitHub](https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues/new/choose).",2024-12-13
-"Chore","Test","Test log for development",2024-12-05
+We’d love to hear your ideas! If you have suggestions for new features, please let us know by submitting a [feature request issue on GitHub](https://github.com/dfe-analytical-services/local-authority-interactive-tool/issues/new/choose).",2024-12-13,NA
+"Chore","Test","Test log for development",2024-12-05,NA
+"Feature","Ability to self adjust axis on charts","Ability for users to self adjust axis on charts, i.e. users have reported they don't always want the charts to start at zero.",2025-06-07,NA
+"Feature","Incorporate old SNs?","This is a difficult one - we will need to have a considered debate before taking forward",2025-08-14,NA
+"Correction","SN chart LA Labels","Where latest year data is missing, the Target LA name is missing",2025-09-10,NA
