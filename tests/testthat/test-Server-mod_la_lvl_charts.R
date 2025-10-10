@@ -8,10 +8,10 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
       "Cumbria"
     }),
     topic = reactive({
-      "Looked After Children"
+      "Children Looked After"
     }),
     indicator = reactive({
-      "LAC Key Stage 4 - AVG Attainment 8 score"
+      "CLA Key Stage 4 - AVG Attainment 8 score"
     })
   )
 
@@ -42,7 +42,7 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
       extracted_text <- gsub("\\s+", " ", extracted_text)
 
       # Check title
-      testthat::expect_true(grepl("LAC - KS4 Average Attainment 8 Score", extracted_text))
+      testthat::expect_true(grepl("CLA - KS4 Average Attainment 8 Score", extracted_text))
     }
   )
 })
