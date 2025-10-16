@@ -106,6 +106,7 @@ StatN_FocusLineChartServer <- function(id,
     })
 
     static_chart <- reactive({
+      year_count <- dplyr::n_distinct(focus_chart_data()$Years_num)
       # Check to see if any data - if not display error plot
       if (all(is.na(focus_chart_data()$values_num))) {
         display_no_data_plot()
@@ -117,60 +118,78 @@ StatN_FocusLineChartServer <- function(id,
           app_inputs$indicator(),
           "line"
         )
-
-        # Build plot
-        focus_chart_data() |>
-          ggplot2::ggplot() +
-          ggiraph::geom_line_interactive(
-            ggplot2::aes(
-              x = Years_num,
-              y = values_num,
-              color = `LA and Regions`,
-              size = `LA and Regions`,
-              data_id = `LA and Regions`,
-            ),
-            na.rm = TRUE
-          ) +
-          # Only show point data where line won't appear (NAs)
-          ggplot2::geom_point(
-            data = subset(
-              create_show_point(focus_chart_data(), covid_affected_data, app_inputs$indicator()),
-              show_point
-            ),
-            ggplot2::aes(
-              x = Years_num,
-              y = values_num,
-              color = `LA and Regions`,
-              size = `LA and Regions`
-            ),
-            shape = 15,
-            na.rm = TRUE
-          ) +
-          add_covid_elements(covid_plot) +
-          format_axes(focus_chart_data()) +
-          set_plot_colours(focus_chart_data(), colour_type = "focus", focus_group = app_inputs$la()) +
-          set_plot_labs(filtered_bds()) +
-          ggrepel::geom_label_repel(
-            data = subset(focus_chart_data(), Years == current_year()),
-            aes(
-              x = Years_num,
-              y = values_num,
-              label = `LA and Regions`,
-              fontface = label_fontface
-            ),
-            colour = subset(focus_chart_data(), Years == current_year())$label_color,
-            segment.colour = NA,
-            label.size = NA,
-            max.overlaps = Inf,
-            nudge_x = 2,
-            direction = "y",
-            hjust = 1,
-            show.legend = FALSE,
-            na.rm = TRUE
-          ) +
-          custom_theme() +
-          theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
-          guides(color = "none", size = "none")
+        if (year_count == 1) {
+          focus_chart_data() |>
+            ggplot() +
+            ggplot2::geom_point(
+              ggplot2::aes(
+                x = Years_num,
+                y = values_num,
+                color = `LA and Regions`,
+              ),
+              size = 3,
+              shape = 21,
+              stroke = 1,
+              fill = "white"
+            ) +
+            ggplot2::labs(subtitle = "Only one year of data available") +
+            format_axes(focus_chart_data()) +
+            set_plot_labs(filtered_bds())
+        } else {
+          # Build plot
+          focus_chart_data() |>
+            ggplot2::ggplot() +
+            ggiraph::geom_line_interactive(
+              ggplot2::aes(
+                x = Years_num,
+                y = values_num,
+                color = `LA and Regions`,
+                size = `LA and Regions`,
+                data_id = `LA and Regions`,
+              ),
+              na.rm = TRUE
+            ) +
+            # Only show point data where line won't appear (NAs)
+            ggplot2::geom_point(
+              data = subset(
+                create_show_point(focus_chart_data(), covid_affected_data, app_inputs$indicator()),
+                show_point
+              ),
+              ggplot2::aes(
+                x = Years_num,
+                y = values_num,
+                color = `LA and Regions`,
+                size = `LA and Regions`
+              ),
+              shape = 15,
+              na.rm = TRUE
+            ) +
+            add_covid_elements(covid_plot) +
+            format_axes(focus_chart_data()) +
+            set_plot_colours(focus_chart_data(), colour_type = "focus", focus_group = app_inputs$la()) +
+            set_plot_labs(filtered_bds()) +
+            ggrepel::geom_label_repel(
+              data = subset(focus_chart_data(), Years == current_year()),
+              aes(
+                x = Years_num,
+                y = values_num,
+                label = `LA and Regions`,
+                fontface = label_fontface
+              ),
+              colour = subset(focus_chart_data(), Years == current_year())$label_color,
+              segment.colour = NA,
+              label.size = NA,
+              max.overlaps = Inf,
+              nudge_x = 2,
+              direction = "y",
+              hjust = 1,
+              show.legend = FALSE,
+              na.rm = TRUE
+            ) +
+            custom_theme() +
+            theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
+            guides(color = "none", size = "none")
+        }
       }
     })
 
@@ -769,6 +788,7 @@ StatN_MultiLineChartServer <- function(id,
 
     # Statistical Neighbour Level SN multi-choice line plot -----------------------
     static_chart <- reactive({
+      year_count <- dplyr::n_distinct(chart_data()$Years_num)
       # Check to see if any data - if not display error plot
       if (all(is.na(chart_data()$values_num))) {
         display_no_data_plot()
@@ -780,45 +800,63 @@ StatN_MultiLineChartServer <- function(id,
           app_inputs$indicator(),
           "line"
         )
-
-        # Plot - selected areas
-        chart_data() |>
-          ggplot2::ggplot() +
-          ggiraph::geom_line_interactive(
-            ggplot2::aes(
-              x = Years_num,
-              y = values_num,
-              color = `LA and Regions`,
-              data_id = `LA and Regions`
-            ),
-            na.rm = TRUE,
-            linewidth = 1.5
-          ) +
-          # Only show point data where line won't appear (NAs)
-          ggplot2::geom_point(
-            data = subset(
-              create_show_point(chart_data(), covid_affected_data, app_inputs$indicator()),
-              show_point
-            ),
-            ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
-            shape = 15,
-            na.rm = TRUE,
-            size = 1.5
-          ) +
-          add_covid_elements(covid_plot) +
-          format_axes(chart_data()) +
-          set_plot_colours(
-            data.frame(
-              `LA and Regions` = c(app_inputs$la(), chart_input()),
-              check.names = FALSE
-            ),
-            "colour",
-            app_inputs$la()
-          ) +
-          set_plot_labs(filtered_bds()) +
-          custom_theme() +
-          # Revert order of the legend so goes from right to left
-          ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+        if (year_count == 1) {
+          chart_data() |>
+            ggplot() +
+            ggplot2::geom_point(
+              ggplot2::aes(
+                x = Years_num,
+                y = values_num,
+                color = `LA and Regions`,
+              ),
+              size = 3,
+              shape = 21,
+              stroke = 1,
+              fill = "white"
+            ) +
+            ggplot2::labs(subtitle = "Only one year of data available") +
+            format_axes(chart_data()) +
+            set_plot_labs(filtered_bds())
+        } else {
+          # Plot - selected areas
+          chart_data() |>
+            ggplot2::ggplot() +
+            ggiraph::geom_line_interactive(
+              ggplot2::aes(
+                x = Years_num,
+                y = values_num,
+                color = `LA and Regions`,
+                data_id = `LA and Regions`
+              ),
+              na.rm = TRUE,
+              linewidth = 1.5
+            ) +
+            # Only show point data where line won't appear (NAs)
+            ggplot2::geom_point(
+              data = subset(
+                create_show_point(chart_data(), covid_affected_data, app_inputs$indicator()),
+                show_point
+              ),
+              ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
+              shape = 15,
+              na.rm = TRUE,
+              size = 1.5
+            ) +
+            add_covid_elements(covid_plot) +
+            format_axes(chart_data()) +
+            set_plot_colours(
+              data.frame(
+                `LA and Regions` = c(app_inputs$la(), chart_input()),
+                check.names = FALSE
+              ),
+              "colour",
+              app_inputs$la()
+            ) +
+            set_plot_labs(filtered_bds()) +
+            custom_theme() +
+            # Revert order of the legend so goes from right to left
+            ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+        }
       }
     })
 
