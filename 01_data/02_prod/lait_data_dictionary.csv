@@ -3616,7 +3616,7 @@ Note: By definition a child must be provided with accommodation for a continuous
 
 5) Education of looked after children -This includes expenditure on the services provided to promote the education of the children looked after by your local authority (e.g. looked after children education service teams and training for designated teachers).  This excludes any spend delegated to schools for looked after children.
 
-6) Leaving care support services - This Includes local authority’s ""leaving care"" support services functions under the Children (Leaving Care) Act 2000.","45677","46042","DfE","(x/y)/365 * 7 where:
+6) Leaving care support services - This Includes local authority’s ""leaving care"" support services functions under the Children (Leaving Care) Act 2000.","46051","46407","DfE","(x/y)/365 * 7 where:
 
  x = Total funding on Looked after children recorded on outturn
 
@@ -3641,7 +3641,7 @@ Refer to the Adoption Support Services Regulations 2005 for further information.
 Provision of adoption support is based on assessed needs.  Financial payments are made depending on the needs of the child and are means-tested.  Children are placed with approved prospective adopters under the Adoption and Children Act 2002 and the Adoption Agencies Regulations 2005.  This is the provision of care and accommodation of children placed for adoption under the Adoption Agencies Regulation 2005.  It also covers payments made, in accordance with the Adoption Support Services Regulations 2005, to a family after an adoption order has been made.
 
 This excludes the costs of children placed for adoption (see fostering services) and social work costs directly relating to the adopted children (see Social work).
-","45677","46042","DfE","Calculation : (x/y)/365 * 7 where
+","46051","46407","DfE","Calculation : (x/y)/365 * 7 where
  x = Total funding on Adoption Services recorded on outturn (OT) 
  y = Total number of children freed for adoption or with a placement order as at 31 March (figures under 6 are subject to suppression)
 
@@ -3653,7 +3653,7 @@ Result is rounded to nearest £5.
 -  permanence placements
 -  temporary /respite fostering
 -  associated independent visitor costs and relevant contact payments under sections 20/34 of the Children Act 1989.
-","45677","46042","DfE","Calculation : (x/y)/365 * 7 where
+","46051","46407","DfE","Calculation : (x/y)/365 * 7 where
 
  x = Total funding on Fostering Services recorded on outturn (OT) 
  y = Total number of Foster placements as at 31 March
@@ -3672,7 +3672,7 @@ This excludes expenditure costs for:
 -  Youth Detention Accommodation (include in Other Children Looked After Services). 
 -  respite care for those children not meeting the definition of children looked after.
 
-Explicitly excludes short breaks for looked after disabled children.","45677","46042","DfE","Calculation : (x/y) * 7 where:
+Explicitly excludes short breaks for looked after disabled children.","46051","46407","DfE","Calculation : (x/y) * 7 where:
  x = Total funding on residential care recorded on outturn (OT)
  y = Total number of residential care days provided via SSDA903 collection**
 
@@ -3699,7 +3699,7 @@ This excludes the costs of the actual services commissioned as well as any socia
 
 3) Children’s services strategy element - this includes partnership costs for multi-agency working i.e. contributions from the authority to partnership manager and other costs excluding pooled budget contributions for specific front line services.  This also includes spending on statutory regulatory duties related to children’s services that are not included in the line on central administration related to education above (line 82).
 
-","45677","46042","DfE","Calculation : (x/y)/365 * 7 where
+","46051","46407","DfE","Calculation : (x/y)/365 * 7 where
  x = Total funding on Social work and Commissioning & Children's Services Strategy recorded on outturn (OT)
 
  y = Total number of Children in need at 31 March
@@ -3707,7 +3707,7 @@ This excludes the costs of the actual services commissioned as well as any socia
 
 Result is rounded to nearest £5
 ","https://explore-education-statistics.service.gov.uk/find-statistics/la-and-school-expenditure",0,"Financial Year",NA
-"299","Children's Service Finance","SEN - S251/Outturn weekly unit costs","SEN - S251/Outturn weekly unit costs (approximate)","SENFinance",NA,"Unit Cost",NA,"None standard - manual process","Includes the Section 251 budget lines: SEN support services; Direct Payments (SEN and disability) ; SEN Transport; Home to school transport (pre 16): SEN transport expenditure; SEN Admin, assessment and coordination and monitoring.","45677","46042","DfE","Calculation : (x/y)/365 * 7 where
+"299","Children's Service Finance","SEN - S251/Outturn weekly unit costs","SEN - S251/Outturn weekly unit costs (approximate)","SENFinance",NA,"Unit Cost",NA,"None standard - manual process","Includes the Section 251 budget lines: SEN support services; Direct Payments (SEN and disability) ; SEN Transport; Home to school transport (pre 16): SEN transport expenditure; SEN Admin, assessment and coordination and monitoring.","46051","46407","DfE","Calculation : (x/y)/365 * 7 where
  x = Total funding on SEN Services recorded on S251 financial budget statement
  y = Total number of children with a statement as at January (school census)
 
