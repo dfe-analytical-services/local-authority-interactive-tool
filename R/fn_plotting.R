@@ -1407,9 +1407,9 @@ add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
     }
 
     # Return COVID plotting elements
-    return(elements)
+    elements
   } else {
-    return(NULL)
+    NULL
   }
 }
 

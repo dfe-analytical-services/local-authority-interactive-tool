@@ -75,25 +75,25 @@ filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
 #' @export
 determine_decimal_places <- function(value, dp = 0) {
   if (is.na(value)) {
-    return(dp)
+    dp
   } else if (abs(value) >= 1e9) {
     # For values over 1 billion, check divisibility by 10 after dividing by 1 billion
     if ((value / 1e9) %% 10 != 0) {
-      return(3)
+      3
     } else {
-      return(0)
+      0
     }
   } else if (abs(value) >= 1e6) {
     # For values between 1 million and 1 billion,
     # check divisibility by 10 after dividing by 1 million
     if ((value / 1e6) %% 10 != 0) {
-      return(3)
+      3
     } else {
-      return(0)
+      0
     }
   } else {
     # For values less than 1 million, use the default decimal places
-    return(dp)
+    dp
   }
 }
 
@@ -450,16 +450,17 @@ format_num_reactable_cols <- function(data,
 #' )
 #'
 build_la_stats_table <- function(
-    main_table,
-    selected_la,
-    trend,
-    change_since_prev,
-    rank,
-    quartile,
-    quartile_bands,
-    indicator_dps,
-    indicator_polarity,
-    no_show_qb) {
+  main_table,
+  selected_la,
+  trend,
+  change_since_prev,
+  rank,
+  quartile,
+  quartile_bands,
+  indicator_dps,
+  indicator_polarity,
+  no_show_qb
+) {
   # Get LA number
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
@@ -560,8 +561,6 @@ build_la_stats_table <- function(
 }
 
 
-
-
 #' Build a formatted statistics table for regions
 #'
 #' This function creates a data frame containing statistics for local
@@ -617,14 +616,15 @@ build_region_stats_table <- function(la_number,
 #' @export
 
 build_sn_stats_table <- function(
-    stat_n_diff,
-    la_and_regions,
-    trend,
-    change_prev,
-    national_rank,
-    quartile_band,
-    polarity,
-    pull_col = "LA Number") {
+  stat_n_diff,
+  la_and_regions,
+  trend,
+  change_prev,
+  national_rank,
+  quartile_band,
+  polarity,
+  pull_col = "LA Number"
+) {
   # Helper to safely pad or replace missing values
   safe_fill <- function(x, len, na_value) {
     if (length(x) == 0 || all(is.na(x))) {
@@ -653,8 +653,6 @@ build_sn_stats_table <- function(
     check.names = FALSE
   )
 }
-
-
 
 
 #' Highlight a selected row in a reactable
@@ -1069,10 +1067,11 @@ truncate_cell_with_hover <- function(text, tooltip) {
 #' )
 #'
 create_tooltip_icon <- function(
-    tooltip_text,
-    icon_class = "fas fa-info-circle",
-    icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
-    ...) {
+  tooltip_text,
+  icon_class = "fas fa-info-circle",
+  icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
+  ...
+) {
   bslib::tooltip(
     htmltools::tags$span(
       htmltools::tags$i(
