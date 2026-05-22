@@ -97,6 +97,9 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
 }
 
 
+
+
+
 generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las = 4) {
   set.seed(1)
 
@@ -212,6 +215,8 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
     values_num = dummy_bds_dependent$values_num
   )
 }
+
+
 
 
 # Source functions (all scripts in R/ with prefix 'fn_') ----------------------

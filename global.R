@@ -102,6 +102,7 @@ stat_n_raw <- readxl::read_xlsx(
 )
 
 
+
 # Data dictionary
 metrics_raw <- read.csv(
   here::here("01_data/02_prod/lait_data_dictionary.csv"),

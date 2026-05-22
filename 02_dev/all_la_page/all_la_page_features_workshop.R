@@ -40,6 +40,7 @@ all_la_region <- stat_n_la |>
   clean_ldn_region(filtered_bds)
 
 
+
 # Get latest rank, ties are set to min & NA vals to NA rank
 all_la_ranked <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
