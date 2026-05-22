@@ -706,7 +706,6 @@ tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_
 }
 
 
-
 #' Add an Interactive Vertical Line with Tooltips
 #'
 #' Creates an interactive vertical line at a specified `x` position in the plot,

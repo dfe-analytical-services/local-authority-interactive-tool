@@ -91,9 +91,7 @@ test_that("2. BDS_FilteredServer correctly responds to input changes", {
 # LA_LongDataServer() ---------------------------------------------------------
 
 
-
 # LA_LevelTableServer() -------------------------------------------------------
-
 
 
 # LA_StatsTableServer() -------------------------------------------------------

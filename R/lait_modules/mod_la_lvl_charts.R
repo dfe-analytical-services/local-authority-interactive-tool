@@ -224,7 +224,6 @@ LA_LineChartServer <- function(id,
 }
 
 
-
 #' Bar Chart UI Module
 #'
 #' Creates a user interface component for displaying a bar chart with

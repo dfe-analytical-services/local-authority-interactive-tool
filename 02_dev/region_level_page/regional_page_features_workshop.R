@@ -174,7 +174,6 @@ region_change_prev <- region_diff |>
   )
 
 
-
 # Creating the stats table cols
 region_stats_la_num <- c(region_la_la_num, region_la_num)
 region_stats_name <- c(selected_la, region_clean, "England")
@@ -346,8 +345,6 @@ region_line_chart <- focus_line_data |>
   coord_cartesian(clip = "off") +
   theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
   guides(color = "none", size = "none")
-
-
 
 
 # Creating vertical geoms to make vertical hover tooltip

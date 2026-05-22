@@ -109,7 +109,8 @@ StagingBDSServer <- function(id,
 #'         ready for display in the Shiny app.
 #'
 StagingDataServer <- function(
-    id, create_inputs, staging_bds, region_names_bds, la_names_bds, stat_n_la) {
+  id, create_inputs, staging_bds, region_names_bds, la_names_bds, stat_n_la
+) {
   moduleServer(id, function(input, output, session) {
     # Make statistical neighbour association table available
     stat_n_association <- StatN_AssociationServer(

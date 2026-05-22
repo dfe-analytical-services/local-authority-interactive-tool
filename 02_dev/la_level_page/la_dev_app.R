@@ -11,7 +11,6 @@ list.files("R/", full.names = TRUE) |>
 
 # UI
 ui_dev <- bslib::page_fillable(
-
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 

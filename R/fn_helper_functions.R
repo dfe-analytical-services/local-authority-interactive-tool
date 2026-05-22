@@ -837,10 +837,11 @@ with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1
 #' )
 #'
 update_topic_label <- function(
-    indicator_input,
-    topic_input,
-    topic_indicator_data,
-    topic_label_id = "topic_label") {
+  indicator_input,
+  topic_input,
+  topic_indicator_data,
+  topic_label_id = "topic_label"
+) {
   shiny::observeEvent(c(indicator_input(), topic_input()), {
     indicator <- indicator_input()
     topic <- topic_input()

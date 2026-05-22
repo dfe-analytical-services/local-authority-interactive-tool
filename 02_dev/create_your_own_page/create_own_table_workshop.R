@@ -30,8 +30,6 @@ input$topic_input <- selected_topic
 input$indicator <- selected_indicator
 
 
-
-
 # Filter the dataset for selected indicators and get distinct years
 years_dict <- bds_metrics |>
   dplyr::filter(Measure %in% input$indicator) |>
@@ -208,7 +206,6 @@ dfe_reactable(
   pageSizeOptions = c(3, 5, 10, 25),
   compact = TRUE
 )
-
 
 
 # Query data frame

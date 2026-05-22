@@ -17,7 +17,6 @@ list.files("R/ui_panels/", full.names = TRUE) |>
 
 ui_dev <- function(input, output, session) {
   bslib::page_fillable(
-
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
     tags$head(tags$link(rel = "shortcut icon", href = here::here("www/dfefavicon.png"))),
