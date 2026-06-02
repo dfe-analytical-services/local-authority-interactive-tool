@@ -63,7 +63,7 @@ ui <- function(input, output, session) {
     dfeshiny::cookies_banner_ui(
       name = site_title
     ),
-
+    shinyGovstyle::full_width_overrides(),
     # Header ------------------------------------------------------------------
     dfeshiny::header(site_title),
 

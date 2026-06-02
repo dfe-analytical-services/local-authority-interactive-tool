@@ -75,25 +75,25 @@ filter_la_regions <- function(data, filter_col, latest = FALSE, pull_col = NA) {
 #' @export
 determine_decimal_places <- function(value, dp = 0) {
   if (is.na(value)) {
-    return(dp)
+    dp
   } else if (abs(value) >= 1e9) {
     # For values over 1 billion, check divisibility by 10 after dividing by 1 billion
     if ((value / 1e9) %% 10 != 0) {
-      return(3)
+      3
     } else {
-      return(0)
+      0
     }
   } else if (abs(value) >= 1e6) {
     # For values between 1 million and 1 billion,
     # check divisibility by 10 after dividing by 1 million
     if ((value / 1e6) %% 10 != 0) {
-      return(3)
+      3
     } else {
-      return(0)
+      0
     }
   } else {
     # For values less than 1 million, use the default decimal places
-    return(dp)
+    dp
   }
 }
 

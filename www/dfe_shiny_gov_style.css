@@ -15,7 +15,7 @@ p {
 
 /* make all text sans-serif (for ggiraph plots on shinyapps.io) */
 text {
-  font-family: helvetica,arial,sans-serf;
+  font-family: helvetica,arial,sans-serif;
 }
 
 /* heading text */
@@ -1045,46 +1045,4 @@ go to bottom link and start of the content) */
   max-width: 1200px;
   margin-top: 10px;
   border: #b1b4b6 solid 2px;
-}
-
-/* Center the app title */
-.govuk-width-container {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-.govuk-header__content,
-.govuk-header__logo {
-    box-sizing: border-box
-}
-
-.govuk-header__logo {
-    margin-bottom: 10px;
-    padding-right: 50px
-}
-
-@media (min-width:40.0625em) {
-    .govuk-header__logo {
-        margin-bottom: 10px
-    }
-}
-
-@media (min-width:48.0625em) {
-    .govuk-header__logo {
-  width: 15% !important;
-  margin-left: 15px !important;
-        padding-right: 15px !important;
-        float: left !important;
-        vertical-align: top !important;
-    }
-}
-
-@media (min-width:48.0625em) {
-    .govuk-header__content {
-  width: 64% !important;
-  text-align: center !important;
-        padding-left: 15px !important;
-        float: left !important;
-        vertical-align: top !important;
-    }
 }
