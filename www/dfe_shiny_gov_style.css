@@ -15,7 +15,7 @@ p {
 
 /* make all text sans-serif (for ggiraph plots on shinyapps.io) */
 text {
-  font-family: helvetica,arial,sans-serf;
+  font-family: helvetica,arial,sans-serif;
 }
 
 /* heading text */
@@ -1045,10 +1045,4 @@ go to bottom link and start of the content) */
   max-width: 1200px;
   margin-top: 10px;
   border: #b1b4b6 solid 2px;
-}
-
-/* Center the app title */
-.govuk-width-container {
-    width: 100% !important;
-    max-width: 100% !important;
 }
