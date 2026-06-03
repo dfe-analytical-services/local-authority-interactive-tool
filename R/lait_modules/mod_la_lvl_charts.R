@@ -97,8 +97,10 @@ LA_LineChartServer <- function(
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
-    la_long_raw <- LA_LongDataServer(
       "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
       app_inputs,
       bds_metrics,
       stat_n_la
