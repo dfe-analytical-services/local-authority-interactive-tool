@@ -24,7 +24,6 @@ ui_mod <- bslib::page_fillable(
   # Tab header ================================================================
   h1("Local Authority View"),
 
-  appInputsUI("la_inputs"),
 
   # LA Level Table ----------------------------------
   LA_LevelTableUI("la_table"),
