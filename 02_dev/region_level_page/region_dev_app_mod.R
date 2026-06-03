@@ -22,7 +22,6 @@ ui_mod <- bslib::page_fillable(
   # Tab header ================================================================
   h1("Regional Level"),
 
-
   # Start of app  =============================================================
   appInputsUI("region_inputs"),
 
@@ -57,7 +56,11 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("region_inputs", shared_values, topic_indicator_full)
+  app_inputs <- appInputsServer(
+    "region_inputs",
+    shared_values,
+    topic_indicator_full
+  )
 
   # Region tables =============================================================
   # Region LA table -----------------------------------------------------------

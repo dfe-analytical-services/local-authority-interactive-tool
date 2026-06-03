@@ -71,9 +71,7 @@ appInputsUI <- function(id) {
 #' @return A list of reactive expressions for the app inputs, including
 #' the selected LA name, topic name, and indicator name.
 #'
-appInputsServer <- function(id,
-                            shared_values,
-                            topic_indicator_full) {
+appInputsServer <- function(id, shared_values, topic_indicator_full) {
   moduleServer(id, function(input, output, session) {
     # Reactive value to store the previous LA name
     previous_la_name <- reactiveVal(NULL)
@@ -81,10 +79,14 @@ appInputsServer <- function(id,
     # Debounce input values to prevent looping when inputs change quickly
     debounced_la_name <- shiny::debounce(reactive(input$la_name), 150)
     debounced_topic_name <- shiny::debounce(reactive(input$topic_name), 75)
-    debounced_indicator_name <- shiny::debounce(reactive(input$indicator_name), 150)
+    debounced_indicator_name <- shiny::debounce(
+      reactive(input$indicator_name),
+      150
+    )
 
     # Update Indicator dropdown for selected Topic
-    shiny::observeEvent(debounced_topic_name(),
+    shiny::observeEvent(
+      debounced_topic_name(),
       {
         # Save the currently selected indicator
         current_indicator <- debounced_indicator_name()
@@ -151,15 +153,27 @@ appInputsServer <- function(id,
     # Synchronise inputs across pages:
     # LA
     observe({
-      shiny::updateSelectizeInput(session, "la_name", selected = shared_values$la)
+      shiny::updateSelectizeInput(
+        session,
+        "la_name",
+        selected = shared_values$la
+      )
     })
     # Topic
     observe({
-      shiny::updateSelectizeInput(session, "topic_name", selected = shared_values$topic)
+      shiny::updateSelectizeInput(
+        session,
+        "topic_name",
+        selected = shared_values$topic
+      )
     })
     # Indicator
     observe({
-      shiny::updateSelectizeInput(session, "indicator_name", selected = shared_values$indicator)
+      shiny::updateSelectizeInput(
+        session,
+        "indicator_name",
+        selected = shared_values$indicator
+      )
     })
 
     # Return reactive settings

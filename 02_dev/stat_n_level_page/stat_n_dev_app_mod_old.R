@@ -23,7 +23,6 @@ ui_mod <- bslib::page_fillable(
   # Tab header ================================================================
   h1("Statistical Neighbour Level"),
 
-
   # Start of app  =============================================================
   appInputsUI("stat_n_inputs"),
 

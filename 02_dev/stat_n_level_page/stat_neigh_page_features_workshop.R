@@ -60,14 +60,24 @@ stat_n_sn_avg <- stat_n_filtered_bds |>
 
 # Statistical Neighbours long data
 stat_n_long <- stat_n_filtered_bds |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
+  dplyr::select(
+    `LA Number`,
+    `LA and Regions`,
+    Years,
+    Years_num,
+    values_num,
+    Values
+  ) |>
   dplyr::bind_rows(stat_n_sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`,
       levels = c(
-        selected_la, stat_n_sns, "Statistical Neighbours",
-        stat_n_region, "England"
+        selected_la,
+        stat_n_sns,
+        "Statistical Neighbours",
+        stat_n_region,
+        "England"
       )
     )
   )
@@ -116,11 +126,14 @@ dfe_reactable(
 
 # Statistical Neighbour Level comparison table --------------------------------
 stat_n_comp_table <- stat_n_table |>
-  dplyr::filter(`LA and Regions` %in% c(
-    "Statistical Neighbours",
-    stat_n_region,
-    "England"
-  )) |>
+  dplyr::filter(
+    `LA and Regions` %in%
+      c(
+        "Statistical Neighbours",
+        stat_n_region,
+        "England"
+      )
+  ) |>
   dplyr::arrange(`LA and Regions`)
 
 # Output table
@@ -147,9 +160,7 @@ stat_n_stats_geog <- c(selected_la, stat_n_region, "England")
 
 # Extract change from prev year
 stat_n_change_prev <- stat_n_diff |>
-  filter_la_regions(stat_n_stats_geog,
-    pull_col = "values_num"
-  )
+  filter_la_regions(stat_n_stats_geog, pull_col = "values_num")
 
 # Get polarity of indicator
 stat_n_indicator_polarity <- filtered_bds |>
@@ -236,7 +247,11 @@ focus_line_data <- stat_n_long |>
   reorder_la_regions(selected_la, after = Inf) |>
   # Creating options for graph labels
   dplyr::mutate(
-    label_color = ifelse(`LA and Regions` == selected_la, get_focus_front_colour(), get_gov_secondary_text_colour()),
+    label_color = ifelse(
+      `LA and Regions` == selected_la,
+      get_focus_front_colour(),
+      get_gov_secondary_text_colour()
+    ),
     label_fontface = ifelse(`LA and Regions` == selected_la, "bold", "plain")
   )
 
@@ -253,7 +268,11 @@ stat_n_focus_line_chart <- focus_line_data |>
     na.rm = TRUE
   ) +
   format_axes(focus_line_data) +
-  set_plot_colours(focus_line_data, colour_type = "focus", focus_group = selected_la) +
+  set_plot_colours(
+    focus_line_data,
+    colour_type = "focus",
+    focus_group = selected_la
+  ) +
   set_plot_labs(filtered_bds) +
   ggrepel::geom_label_repel(
     data = subset(focus_line_data, Years == current_year),

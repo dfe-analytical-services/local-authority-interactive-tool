@@ -64,11 +64,13 @@ StatN_FocusLineChartUI <- function(id) {
 #'   interactive line chart of the selected LA and its statistical
 #'   neighbours.
 #'
-StatN_FocusLineChartServer <- function(id,
-                                       app_inputs,
-                                       bds_metrics,
-                                       stat_n_la,
-                                       covid_affected_data) {
+StatN_FocusLineChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -100,8 +102,16 @@ StatN_FocusLineChartServer <- function(id,
         reorder_la_regions(app_inputs$la(), after = Inf) |>
         # Creating options for graph labels
         dplyr::mutate(
-          label_color = ifelse(`LA and Regions` == app_inputs$la(), get_focus_front_colour(), get_gov_secondary_text_colour()),
-          label_fontface = ifelse(`LA and Regions` == app_inputs$la(), "bold", "plain")
+          label_color = ifelse(
+            `LA and Regions` == app_inputs$la(),
+            get_focus_front_colour(),
+            get_gov_secondary_text_colour()
+          ),
+          label_fontface = ifelse(
+            `LA and Regions` == app_inputs$la(),
+            "bold",
+            "plain"
+          )
         )
     })
 
@@ -152,7 +162,11 @@ StatN_FocusLineChartServer <- function(id,
             # Only show point data where line won't appear (NAs)
             ggplot2::geom_point(
               data = subset(
-                create_show_point(focus_chart_data(), covid_affected_data, app_inputs$indicator()),
+                create_show_point(
+                  focus_chart_data(),
+                  covid_affected_data,
+                  app_inputs$indicator()
+                ),
                 show_point
               ),
               ggplot2::aes(
@@ -166,7 +180,11 @@ StatN_FocusLineChartServer <- function(id,
             ) +
             add_covid_elements(covid_plot) +
             format_axes(focus_chart_data()) +
-            set_plot_colours(focus_chart_data(), colour_type = "focus", focus_group = app_inputs$la()) +
+            set_plot_colours(
+              focus_chart_data(),
+              colour_type = "focus",
+              focus_group = app_inputs$la()
+            ) +
             set_plot_labs(filtered_bds()) +
             ggrepel::geom_label_repel(
               data = subset(focus_chart_data(), Years == current_year()),
@@ -176,7 +194,10 @@ StatN_FocusLineChartServer <- function(id,
                 label = `LA and Regions`,
                 fontface = label_fontface
               ),
-              colour = subset(focus_chart_data(), Years == current_year())$label_color,
+              colour = subset(
+                focus_chart_data(),
+                Years == current_year()
+              )$label_color,
               segment.colour = NA,
               label.size = NA,
               max.overlaps = Inf,
@@ -232,7 +253,11 @@ StatN_FocusLineChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Line-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Stat-Neighbour-Focus-Line-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)
@@ -326,11 +351,13 @@ StatN_FocusBarChartUI <- function(id) {
 #'   statistical neighbours, allowing users to hover over bars for
 #'   additional information.
 #'
-StatN_FocusBarChartServer <- function(id,
-                                      app_inputs,
-                                      bds_metrics,
-                                      stat_n_la,
-                                      covid_affected_data) {
+StatN_FocusBarChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -424,7 +451,11 @@ StatN_FocusBarChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Focus-Bar-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Stat-Neighbour-Focus-Bar-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)
@@ -525,7 +556,12 @@ StatN_Chart_InputUI <- function(id) {
 #'   and bar chart inputs. This allows other parts of the application to
 #'   access the current selections made by the user.
 #'
-StatN_Chart_InputServer <- function(id, app_inputs, stat_n_long, shared_values) {
+StatN_Chart_InputServer <- function(
+  id,
+  app_inputs,
+  stat_n_long,
+  shared_values
+) {
   moduleServer(id, function(input, output, session) {
     # Helper function to retain only the valid selections that are in the available choices
     retain_valid_selections <- function(current_choices, previous_selections) {
@@ -547,8 +583,14 @@ StatN_Chart_InputServer <- function(id, app_inputs, stat_n_long, shared_values) 
       prev_bar_selections <- shared_values$chart_bar_input
 
       # Retain only valid selections from the previous inputs
-      valid_line_selections <- retain_valid_selections(valid_selections(), prev_line_selections)
-      valid_bar_selections <- retain_valid_selections(valid_selections(), prev_bar_selections)
+      valid_line_selections <- retain_valid_selections(
+        valid_selections(),
+        prev_line_selections
+      )
+      valid_bar_selections <- retain_valid_selections(
+        valid_selections(),
+        prev_bar_selections
+      )
 
       # Update the line chart selectize input with valid selections
       updateSelectizeInput(
@@ -568,7 +610,8 @@ StatN_Chart_InputServer <- function(id, app_inputs, stat_n_long, shared_values) 
     })
 
     # Line chart input --------------------------------------------------------
-    observeEvent(input$chart_line_input,
+    observeEvent(
+      input$chart_line_input,
       {
         if (!setequal(input$chart_line_input, shared_values$chart_line_input)) {
           # Update line chart shared val with user input
@@ -580,30 +623,37 @@ StatN_Chart_InputServer <- function(id, app_inputs, stat_n_long, shared_values) 
     )
 
     # Keep the bar selected synchronized with shared values
-    observeEvent(shared_values$chart_line_input,
+    observeEvent(
+      shared_values$chart_line_input,
       {
-        later::later(function() {
-          isolate({
-            if (!setequal(input$chart_bar_input, shared_values$chart_line_input)) {
-              updateSelectizeInput(
-                session = session,
-                inputId = "chart_bar_input",
-                selected = if (is.null(shared_values$chart_line_input)) {
-                  character(0)
-                } else {
-                  shared_values$chart_line_input
-                }
-              )
-            }
-          })
-        }, delay = 0.5)
+        later::later(
+          function() {
+            isolate({
+              if (
+                !setequal(input$chart_bar_input, shared_values$chart_line_input)
+              ) {
+                updateSelectizeInput(
+                  session = session,
+                  inputId = "chart_bar_input",
+                  selected = if (is.null(shared_values$chart_line_input)) {
+                    character(0)
+                  } else {
+                    shared_values$chart_line_input
+                  }
+                )
+              }
+            })
+          },
+          delay = 0.5
+        )
       },
       ignoreNULL = FALSE,
       ignoreInit = TRUE
     )
 
     # Bar chart input ---------------------------------------------------------
-    observeEvent(input$chart_bar_input,
+    observeEvent(
+      input$chart_bar_input,
       {
         if (!setequal(input$chart_bar_input, shared_values$chart_bar_input)) {
           # Update bar chart shared val with user input
@@ -615,23 +665,29 @@ StatN_Chart_InputServer <- function(id, app_inputs, stat_n_long, shared_values) 
     )
 
     # Keep the line selected synchronized with shared values
-    observeEvent(shared_values$chart_bar_input,
+    observeEvent(
+      shared_values$chart_bar_input,
       {
-        later::later(function() {
-          isolate({
-            if (!setequal(input$chart_line_input, shared_values$chart_bar_input)) {
-              updateSelectizeInput(
-                session = session,
-                inputId = "chart_line_input",
-                selected = if (is.null(shared_values$chart_bar_input)) {
-                  character(0)
-                } else {
-                  shared_values$chart_bar_input
-                }
-              )
-            }
-          })
-        }, delay = 0.5)
+        later::later(
+          function() {
+            isolate({
+              if (
+                !setequal(input$chart_line_input, shared_values$chart_bar_input)
+              ) {
+                updateSelectizeInput(
+                  session = session,
+                  inputId = "chart_line_input",
+                  selected = if (is.null(shared_values$chart_bar_input)) {
+                    character(0)
+                  } else {
+                    shared_values$chart_bar_input
+                  }
+                )
+              }
+            })
+          },
+          delay = 0.5
+        )
       },
       ignoreNULL = FALSE,
       ignoreInit = TRUE
@@ -742,12 +798,14 @@ StatN_MultiLineChartUI <- function(id) {
 #' @return NULL This function does not return any values; it generates
 #'   the multi-line chart and updates the UI based on user selections.
 #'
-StatN_MultiLineChartServer <- function(id,
-                                       app_inputs,
-                                       bds_metrics,
-                                       stat_n_la,
-                                       shared_values,
-                                       covid_affected_data) {
+StatN_MultiLineChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  shared_values,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -834,10 +892,18 @@ StatN_MultiLineChartServer <- function(id,
             # Only show point data where line won't appear (NAs)
             ggplot2::geom_point(
               data = subset(
-                create_show_point(chart_data(), covid_affected_data, app_inputs$indicator()),
+                create_show_point(
+                  chart_data(),
+                  covid_affected_data,
+                  app_inputs$indicator()
+                ),
                 show_point
               ),
-              ggplot2::aes(x = Years_num, y = values_num, color = `LA and Regions`),
+              ggplot2::aes(
+                x = Years_num,
+                y = values_num,
+                color = `LA and Regions`
+              ),
               shape = 15,
               na.rm = TRUE,
               size = 1.5
@@ -870,7 +936,10 @@ StatN_MultiLineChartServer <- function(id,
           tooltip_vlines,
           chart_data() |>
             reorder_la_regions(
-              intersect(c(app_inputs$la(), chart_input()), stat_n_long()$`LA and Regions`)
+              intersect(
+                c(app_inputs$la(), chart_input()),
+                stat_n_long()$`LA and Regions`
+              )
             ),
           get_indicator_dps(filtered_bds())
         )
@@ -901,7 +970,11 @@ StatN_MultiLineChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Line-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Regional-Level-Multi-Line-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard
@@ -1019,12 +1092,14 @@ StatN_MultiBarChartUI <- function(id) {
 #' @return NULL This function does not return any values; it generates
 #'   the multi-bar chart and updates the UI based on user selections.
 #'
-StatN_MultiBarChartServer <- function(id,
-                                      app_inputs,
-                                      bds_metrics,
-                                      stat_n_la,
-                                      shared_values,
-                                      covid_affected_data) {
+StatN_MultiBarChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  shared_values,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -1126,7 +1201,11 @@ StatN_MultiBarChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Stat-Neighbour-Multi-Bar-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Stat-Neighbour-Multi-Bar-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)

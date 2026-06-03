@@ -31,7 +31,10 @@ test_that("2. calculate_quartile_band handles boundary values correctly", {
 
 # 3. Test when indicator_val is NA
 test_that("3. calculate_quartile_band returns NA_character_ for NA values", {
-  expect_equal(calculate_quartile_band(NA, quartile_bands, "High"), NA_character_)
+  expect_equal(
+    calculate_quartile_band(NA, quartile_bands, "High"),
+    NA_character_
+  )
 })
 
 # 4. Test when indicator_val is outside the defined quartile bands
@@ -58,13 +61,34 @@ test_that("5. calculate_quartile_band handles non-standard quartile bands correc
 
   expect_warning(
     {
-      expect_equal(calculate_quartile_band(15, custom_quartile_bands, "Low"), "A") # within 10%-20%
-      expect_equal(calculate_quartile_band(25, custom_quartile_bands, "Low"), "Error") # within 20%-NA%
-      expect_equal(calculate_quartile_band(35, custom_quartile_bands, "High"), "Error") # within NA%-40%
-      expect_equal(calculate_quartile_band(45, custom_quartile_bands, "Low"), "D") # within 40%-50%
-      expect_equal(calculate_quartile_band(5, custom_quartile_bands, "High"), "Error") # less than 10%
-      expect_equal(calculate_quartile_band(55, custom_quartile_bands, "Low"), "Error") # more than 50%
-      expect_equal(calculate_quartile_band(20, custom_quartile_bands, "High"), "D") # more than 50%
+      expect_equal(
+        calculate_quartile_band(15, custom_quartile_bands, "Low"),
+        "A"
+      ) # within 10%-20%
+      expect_equal(
+        calculate_quartile_band(25, custom_quartile_bands, "Low"),
+        "Error"
+      ) # within 20%-NA%
+      expect_equal(
+        calculate_quartile_band(35, custom_quartile_bands, "High"),
+        "Error"
+      ) # within NA%-40%
+      expect_equal(
+        calculate_quartile_band(45, custom_quartile_bands, "Low"),
+        "D"
+      ) # within 40%-50%
+      expect_equal(
+        calculate_quartile_band(5, custom_quartile_bands, "High"),
+        "Error"
+      ) # less than 10%
+      expect_equal(
+        calculate_quartile_band(55, custom_quartile_bands, "Low"),
+        "Error"
+      ) # more than 50%
+      expect_equal(
+        calculate_quartile_band(20, custom_quartile_bands, "High"),
+        "D"
+      ) # more than 50%
     },
     "Unexpected Quartile Banding"
   )
@@ -73,7 +97,10 @@ test_that("5. calculate_quartile_band handles non-standard quartile bands correc
 # 6. Test with an empty vector
 test_that("6. calculate_quartile_band returns an empty vector for an empty input and warns", {
   expect_warning(
-    expect_equal(calculate_quartile_band(numeric(0), quartile_bands, "High"), character(0)),
+    expect_equal(
+      calculate_quartile_band(numeric(0), quartile_bands, "High"),
+      character(0)
+    ),
     regexp = "Indicator value is empty; returning an empty character vector."
   )
 })
@@ -88,7 +115,13 @@ table_stats <- data.frame(
 )
 
 # Expected results
-expected_colours <- c(get_gov_green(), get_gov_green(), "none", "none", get_gov_red())
+expected_colours <- c(
+  get_gov_green(),
+  get_gov_green(),
+  "none",
+  "none",
+  get_gov_red()
+)
 
 # 1. Test with matching polarity and quartile bands
 test_that("1. get_quartile_band_cell_colour returns correct colours for matching polarity and quartile bands", {

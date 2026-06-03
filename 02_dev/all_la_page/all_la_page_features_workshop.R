@@ -40,7 +40,6 @@ all_la_region <- stat_n_la |>
   clean_ldn_region(filtered_bds)
 
 
-
 # Get latest rank, ties are set to min & NA vals to NA rank
 all_la_ranked <- filtered_bds |>
   filter_la_regions(la_names_bds, latest = TRUE) |>
@@ -48,16 +47,31 @@ all_la_ranked <- filtered_bds |>
     Rank = dplyr::case_when(
       is.na(values_num) ~ NA,
       # Rank in descending order
-      all_la_indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+      all_la_indicator_polarity == "High" ~ rank(
+        -values_num,
+        ties.method = "min",
+        na.last = TRUE
+      ),
       # Rank in ascending order
-      all_la_indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+      all_la_indicator_polarity == "Low" ~ rank(
+        values_num,
+        ties.method = "min",
+        na.last = TRUE
+      )
     )
   ) |>
   dplyr::select(`LA and Regions`, Rank)
 
 # All LAs long data
 all_la_long <- filtered_bds |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values)
+  dplyr::select(
+    `LA Number`,
+    `LA and Regions`,
+    Years,
+    Years_num,
+    values_num,
+    Values
+  )
 
 # Difference between last two years
 all_la_diff <- all_la_long |>
@@ -83,7 +97,8 @@ all_la_la_table <- all_la_table |>
 dfe_reactable(
   all_la_la_table,
   # Create the reactable with specific column alignments
-  columns = format_num_reactable_cols(all_la_la_table,
+  columns = format_num_reactable_cols(
+    all_la_la_table,
     num_exclude = "LA Number",
     categorical = "Rank",
     indicator_dps = indicator_dps
@@ -101,14 +116,14 @@ all_la_region_table <- all_la_table |>
   dplyr::filter(
     `LA and Regions` %notin% la_names_bds,
     # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
-    !(
-      `LA and Regions` %in% c("London (Inner)", "London (Outer)") &
-        rowSums(
-          !is.na(
-            dplyr::select(all_la_table, -c(`LA Number`, `LA and Regions`))
-          )
-        ) == 0
-    )
+    !(`LA and Regions` %in%
+      c("London (Inner)", "London (Outer)") &
+      rowSums(
+        !is.na(
+          dplyr::select(all_la_table, -c(`LA Number`, `LA and Regions`))
+        )
+      ) ==
+        0)
   ) |>
   # Replace Rank with a blank col
   dplyr::mutate(Rank = "") |>

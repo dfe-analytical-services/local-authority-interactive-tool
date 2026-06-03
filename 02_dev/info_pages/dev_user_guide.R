@@ -17,10 +17,12 @@ list.files("R/ui_panels/", full.names = TRUE) |>
 
 ui_dev <- function(input, output, session) {
   bslib::page_fillable(
-
     # Set application metadata ------------------------------------------------
     tags$head(HTML("<title>Local Authority Interactive Tool (LAIT)</title>")),
-    tags$head(tags$link(rel = "shortcut icon", href = here::here("www/dfefavicon.png"))),
+    tags$head(tags$link(
+      rel = "shortcut icon",
+      href = here::here("www/dfefavicon.png")
+    )),
     tags$head(includeHTML(here::here("google-analytics.html"))),
     shinytitle::use_shiny_title(),
     tags$html(lang = "en"),

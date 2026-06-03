@@ -97,7 +97,13 @@ RegionLA_LongDataServer <- function(id, stat_n_geog, region_la, filtered_bds) {
 
       # Select needed columns, factorise geogs and create numeric yr
       region_la_long <- region_la_filtered_bds |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
+        dplyr::select(
+          `LA Number`,
+          `LA and Regions`,
+          Years,
+          Years_num,
+          values_num
+        ) |>
         dplyr::mutate(
           `LA and Regions` = factor(`LA and Regions`)
         )
@@ -335,7 +341,12 @@ RegionLA_TableServer <- function(id, app_inputs, bds_metrics, stat_n_geog) {
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_la_table(), app_inputs$la(), "LA")
+          highlight_selected_row(
+            index,
+            region_la_table(),
+            app_inputs$la(),
+            "LA"
+          )
         },
         pagination = FALSE
       )
@@ -371,7 +382,13 @@ Region_LongDataServer <- function(id, filtered_bds, region_names_bds) {
 
       # Region levels long
       region_long <- region_filtered_bds |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
+        dplyr::select(
+          `LA Number`,
+          `LA and Regions`,
+          Years,
+          Years_num,
+          values_num
+        ) |>
         dplyr::mutate(
           `LA and Regions` = factor(`LA and Regions`)
         )
@@ -480,11 +497,13 @@ Region_DataServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
 #'   stat_n_geog, region_names_bds
 #' )
 #'
-Region_TableServer <- function(id,
-                               app_inputs,
-                               bds_metrics,
-                               stat_n_geog,
-                               region_names_bds) {
+Region_TableServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_geog,
+  region_names_bds
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -506,7 +525,9 @@ Region_TableServer <- function(id,
     # Region table
     region_table_raw <- Region_DataServer(
       "region_table_raw",
-      app_inputs, bds_metrics, region_names_bds
+      app_inputs,
+      bds_metrics,
+      region_names_bds
     )
 
     # Pretty and order table ready for rendering
@@ -514,9 +535,13 @@ Region_TableServer <- function(id,
       region_table_raw() |>
         dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
         # Places England row at the bottom of the table
-        dplyr::mutate(is_england = ifelse(
-          grepl("^England", `LA and Regions`), 1, 0
-        )) |>
+        dplyr::mutate(
+          is_england = ifelse(
+            grepl("^England", `LA and Regions`),
+            1,
+            0
+          )
+        ) |>
         dplyr::arrange(is_england, .by_group = FALSE) |>
         dplyr::select(-is_england) |>
         dplyr::rename("Region" = `LA and Regions`)
@@ -535,7 +560,11 @@ Region_TableServer <- function(id,
       "region_download",
       reactive(input$file_type),
       reactive(region_table()),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Region-Regional-Level"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Region-Regional-Level"
+      ))
     )
 
     # Table output
@@ -551,7 +580,12 @@ Region_TableServer <- function(id,
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, region_table(), region_clean(), "Region")
+          highlight_selected_row(
+            index,
+            region_table(),
+            region_clean(),
+            "Region"
+          )
         },
         pagination = FALSE
       )
@@ -606,11 +640,13 @@ Region_StatsTableUI <- function(id) {
 #'   stat_n_geog, region_names_bds
 #' )
 #'
-Region_StatsTableServer <- function(id,
-                                    app_inputs,
-                                    bds_metrics,
-                                    stat_n_geog,
-                                    region_names_bds) {
+Region_StatsTableServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_geog,
+  region_names_bds
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
@@ -626,7 +662,9 @@ Region_StatsTableServer <- function(id,
     # Region table
     region_table_raw <- Region_DataServer(
       "region_table_raw",
-      app_inputs, bds_metrics, region_names_bds
+      app_inputs,
+      bds_metrics,
+      region_names_bds
     )
 
     # Get clean Regions
@@ -660,7 +698,8 @@ Region_StatsTableServer <- function(id,
       # Change from previous year - selected LA
       region_la_change_prev <- region_la_table_raw() |>
         safe_add_change_col() |>
-        filter_la_regions(app_inputs$la(),
+        filter_la_regions(
+          app_inputs$la(),
           latest = FALSE,
           pull_col = "Change from previous year"
         )
@@ -668,7 +707,8 @@ Region_StatsTableServer <- function(id,
       # Change from previous year - region + England
       region_change_prev <- region_table_raw() |>
         safe_add_change_col() |>
-        filter_la_regions(c(region_clean(), "England"),
+        filter_la_regions(
+          c(region_clean(), "England"),
           latest = FALSE,
           pull_col = "Change from previous year"
         )
@@ -690,7 +730,6 @@ Region_StatsTableServer <- function(id,
         filtered_bds()
       )
     })
-
 
     # Table output
     output$stats_table <- reactable::renderReactable({

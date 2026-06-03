@@ -30,8 +30,6 @@ input$topic_input <- selected_topic
 input$indicator <- selected_indicator
 
 
-
-
 # Filter the dataset for selected indicators and get distinct years
 years_dict <- bds_metrics |>
   dplyr::filter(Measure %in% input$indicator) |>
@@ -79,7 +77,11 @@ geog_inputs <- {
     inputs <- unique(c(inputs, all_region_las))
   }
   if (input$la_groups == "la_stat_ns") {
-    selected_la_stat_n <- unlist(lapply(input$geog_input, get_la_stat_neighbrs, data = stat_n_la))
+    selected_la_stat_n <- unlist(lapply(
+      input$geog_input,
+      get_la_stat_neighbrs,
+      data = stat_n_la
+    ))
     inputs <- c(inputs, selected_la_stat_n)
   }
   unique(inputs)
@@ -87,7 +89,11 @@ geog_inputs <- {
 
 # Simulating stat_n_association logic without reactives
 stat_n_association <- {
-  association_table <- data.frame(`LA and Regions` = character(), `sn_parent` = character(), check.names = FALSE)
+  association_table <- data.frame(
+    `LA and Regions` = character(),
+    `sn_parent` = character(),
+    check.names = FALSE
+  )
   if (input$la_groups == "la_stat_ns") {
     input_las <- intersect(input$geog_input, la_names_bds)
     stat_n_groups <- lapply(input_las, function(la) {
@@ -138,8 +144,14 @@ if (length(input$year_range) == 1) {
 # Step 1: Select relevant columns and pivot to wide format
 wide_table <- filtered_bds |>
   dplyr::select(
-    `LA Number`, `LA and Regions`, Topic,
-    Measure, Years, Years_num, values_num, Values
+    `LA Number`,
+    `LA and Regions`,
+    Topic,
+    Measure,
+    Years,
+    Years_num,
+    values_num,
+    Values
   ) |>
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
@@ -151,17 +163,21 @@ wide_table <- filtered_bds |>
       dplyr::select(`LA num`, GOReg),
     by = c("LA Number" = "LA num")
   ) |>
-  dplyr::mutate(GOReg = dplyr::case_when(
-    `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
-    TRUE ~ GOReg
-  ))
+  dplyr::mutate(
+    GOReg = dplyr::case_when(
+      `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
+      TRUE ~ GOReg
+    )
+  )
 
 # Step 2: Order columns and sort year columns
 wide_table_ordered <- wide_table |>
   dplyr::select(
-    `LA Number`, `LA and Regions`,
+    `LA Number`,
+    `LA and Regions`,
     "Region" = "GOReg",
-    Topic, Measure,
+    Topic,
+    Measure,
     dplyr::all_of(sort_year_columns(wide_table))
   )
 
@@ -210,7 +226,6 @@ dfe_reactable(
 )
 
 
-
 # Query data frame
 query <- list(
   data = data.frame(
@@ -248,10 +263,16 @@ if (input$add_query) {
     # Define the year range info logic
     year_range_display <- dplyr::case_when(
       length(input$year_range) == 0 ~ paste0(
-        "All years (", available_years[1], " to ", available_years[2], ")"
+        "All years (",
+        available_years[1],
+        " to ",
+        available_years[2],
+        ")"
       ),
       length(input$year_range) == 2 ~ paste(
-        input$year_range[1], "to", input$year_range[2]
+        input$year_range[1],
+        "to",
+        input$year_range[2]
       ),
       length(input$year_range) == 1 ~ paste0("", input$year_range[1])
     )
@@ -332,8 +353,11 @@ if (share_year_suffix) {
 # Sorted year columns
 clean_final_table <- query$output |>
   dplyr::select(
-    `LA Number`, `LA and Regions`,
-    Region, Topic, Measure,
+    `LA Number`,
+    `LA and Regions`,
+    Region,
+    Topic,
+    Measure,
     tidyselect::any_of("Statistical Neighbour Group"),
     dplyr::all_of(sort_year_columns(query$output))
   )

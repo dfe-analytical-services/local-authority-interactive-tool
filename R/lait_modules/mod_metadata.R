@@ -86,23 +86,23 @@ LA_LevelMetaUI <- function(id) {
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
-          h3("Last Updated:",
+          h3(
+            "Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           MetadataUI(ns("last_update"))
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Next Updated:",
+          h3(
+            "Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           MetadataUI(ns("next_update"))
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Source:",
-            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
-          ),
+          h3("Source:", style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
           MetadataUI(ns("source"))
         )
       )

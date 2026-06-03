@@ -113,7 +113,6 @@ server <- function(input, output, session) {
     shiny::updateQueryString(url, mode = "replace")
   })
 
-
   # Update title ==============================================================
   # This changes the title based on the tab selections and is important for accessibility
   # If on the main dashboard it uses the active tab from left_nav, else it uses the page input
@@ -134,10 +133,15 @@ server <- function(input, output, session) {
 
   shiny::observe({
     if (input$pages == "dashboard") {
-      if (input$left_nav %in% c(
-        "la_level", "regional_level",
-        "statistical_neighbour_level", "all_la_level"
-      )) {
+      if (
+        input$left_nav %in%
+          c(
+            "la_level",
+            "regional_level",
+            "statistical_neighbour_level",
+            "all_la_level"
+          )
+      ) {
         shinytitle::change_window_title(
           title = paste0(
             site_title,
@@ -152,7 +156,8 @@ server <- function(input, output, session) {
       } else {
         shinytitle::change_window_title(
           title = paste0(
-            site_title, " - ",
+            site_title,
+            " - ",
             nav_titles[input$left_nav]
           )
         )
@@ -160,7 +165,8 @@ server <- function(input, output, session) {
     } else {
       shinytitle::change_window_title(
         title = paste0(
-          site_title, " - ",
+          site_title,
+          " - ",
           nav_titles[input$pages]
         )
       )
@@ -255,7 +261,6 @@ server <- function(input, output, session) {
     la_linechart = la_linechart(),
     la_barchart = la_barchart()
   )
-
 
   # ===========================================================================
   # Regional Level Page
@@ -364,7 +369,11 @@ server <- function(input, output, session) {
   )
 
   # Header
-  PageHeaderServer("stat_n_header", stat_n_app_inputs, "Statistical Neighbour View")
+  PageHeaderServer(
+    "stat_n_header",
+    stat_n_app_inputs,
+    "Statistical Neighbour View"
+  )
 
   # Statistical Neighbour tables ==============================================
   # LA statistical neighbours table -------------------------------------------
@@ -574,7 +583,6 @@ server <- function(input, output, session) {
     bds_metrics,
     covid_affected_data
   )
-
 
   # Updates and Data Sources ==================================================
   # Latest indicator update notification

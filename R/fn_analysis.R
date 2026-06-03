@@ -56,10 +56,7 @@ calculate_change_from_prev_yr <- function(data) {
 
   data |>
     dplyr::group_by(`LA and Regions`) |>
-    dplyr::arrange(`LA and Regions`,
-      desc(Years_num),
-      .by_group = TRUE
-    ) |>
+    dplyr::arrange(`LA and Regions`, desc(Years_num), .by_group = TRUE) |>
     dplyr::mutate(
       values_num = dplyr::lag(values_num) - values_num,
       Years = "Change from previous year",
@@ -110,17 +107,22 @@ calculate_change_from_prev_yr <- function(data) {
 #'   "High"
 #' )
 #'
-calculate_quartile_band <- function(indicator_val,
-                                    quartile_bands,
-                                    indicator_polarity,
-                                    no_show_qb = FALSE) {
+calculate_quartile_band <- function(
+  indicator_val,
+  quartile_bands,
+  indicator_polarity,
+  no_show_qb = FALSE
+) {
   # Check if all required quartile bands are present
   required_bands <- c("0%", "25%", "50%", "75%", "100%")
   missing_bands <- setdiff(required_bands, names(quartile_bands))
 
   # Check for missing quartile bands
   if (length(missing_bands) > 0) {
-    warning("Quartile bands are missing: ", paste(missing_bands, collapse = ", "))
+    warning(
+      "Quartile bands are missing: ",
+      paste(missing_bands, collapse = ", ")
+    )
     return(rep("Error", length(indicator_val)))
   }
 
@@ -240,9 +242,17 @@ calculate_rank <- function(filtered_data, indicator_polarity) {
         indicator_polarity %notin% c("High", "Low") ~ "-",
         indicator_polarity %in% c("High", "Low") & is.na(values_num) ~ NA,
         # Rank in descending order
-        indicator_polarity == "High" ~ as.character(rank(-values_num, ties.method = "min", na.last = TRUE)),
+        indicator_polarity == "High" ~ as.character(rank(
+          -values_num,
+          ties.method = "min",
+          na.last = TRUE
+        )),
         # Rank in ascending order
-        indicator_polarity == "Low" ~ as.character(rank(values_num, ties.method = "min", na.last = TRUE))
+        indicator_polarity == "Low" ~ as.character(rank(
+          values_num,
+          ties.method = "min",
+          na.last = TRUE
+        ))
       )
     )
 }
@@ -305,10 +315,15 @@ filter_region_data_all_la <- function(data, la_names) {
   data |>
     dplyr::filter(
       `LA and Regions` %notin% la_names,
-      !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
-        rowSums(!is.na(dplyr::select(
-          data, -c(`LA Number`, `LA and Regions`)
-        ))) == 0)
+      !(`LA and Regions` %in%
+        c("London (Inner)", "London (Outer)") &
+        rowSums(
+          !is.na(dplyr::select(
+            data,
+            -c(`LA Number`, `LA and Regions`)
+          ))
+        ) ==
+          0)
     ) |>
     dplyr::mutate(Rank = "") |>
     dplyr::arrange(`LA Number`) |>
@@ -408,7 +423,6 @@ get_la_stat_neighbrs <- function(data_stat_n, selected_las) {
 }
 
 
-
 #' Get Distinct and Separated Unique Values from a Data Frame Column
 #'
 #' This helper function retrieves distinct values from a specified column
@@ -441,7 +455,9 @@ get_query_table_values <- function(data, column) {
 #' @return A filtered data frame or tibble based on the topic selection.
 filter_by_topic <- function(data, topic_column, selected_topics) {
   # Check if selected topics are all selected or empty (return whole df if so)
-  if (is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))) {
+  if (
+    is.null(selected_topics) || any(selected_topics %in% c("All Topics", ""))
+  ) {
     # Return data ordered alphabetically by "Measure", with letters first
     alphabet_ordered <- data |>
       order_alphabetically(.data$Measure)

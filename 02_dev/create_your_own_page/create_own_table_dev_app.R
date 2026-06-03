@@ -282,7 +282,6 @@ server <- function(input, output, session) {
     }
   })
 
-
   # Geography and Indicator inputs ---------------------------------------------
   # Reactive to store all selected indicators along with their topics
   selected_indicators <- reactiveVal({
@@ -317,7 +316,8 @@ server <- function(input, output, session) {
 
   # Update the selected_indicators reactive for newly selected topic-indicator pairs
   # This keeps selection consistent across topics
-  shiny::observeEvent(input$indicator,
+  shiny::observeEvent(
+    input$indicator,
     {
       # Get the new topic-indicator pairs
       current_filtered <- bds_metrics |>
@@ -331,7 +331,10 @@ server <- function(input, output, session) {
       previous_selection <- selected_indicators()
 
       # Remove any topic-indicator pairs that have been deselected
-      deselected_measures <- setdiff(previous_selection$Measure, input$indicator)
+      deselected_measures <- setdiff(
+        previous_selection$Measure,
+        input$indicator
+      )
       updated_selection <- previous_selection |>
         dplyr::filter(!Measure %in% deselected_measures)
 
@@ -419,7 +422,6 @@ server <- function(input, output, session) {
     association_table
   })
 
-
   # Staging table ==============================================================
   # Filter BDS for geographies and
   # topic-indicator pairs in the selected_values reactive
@@ -478,8 +480,14 @@ server <- function(input, output, session) {
     # Join region col (set regions and England as themselves for Region)
     wide_table <- filtered_bds() |>
       dplyr::select(
-        `LA Number`, `LA and Regions`, Topic,
-        Measure, Years, Years_num, values_num, Values
+        `LA Number`,
+        `LA and Regions`,
+        Topic,
+        Measure,
+        Years,
+        Years_num,
+        values_num,
+        Values
       ) |>
       tidyr::pivot_wider(
         id_cols = c("LA Number", "LA and Regions", "Topic", "Measure"),
@@ -491,20 +499,24 @@ server <- function(input, output, session) {
           dplyr::select(`LA num`, GOReg),
         by = c("LA Number" = "LA num")
       ) |>
-      dplyr::mutate(GOReg = dplyr::case_when(
-        `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
-        TRUE ~ GOReg
-      ))
+      dplyr::mutate(
+        GOReg = dplyr::case_when(
+          `LA and Regions` %in%
+            c("England", region_names_bds) ~ `LA and Regions`,
+          TRUE ~ GOReg
+        )
+      )
 
     # Order columns (and sort year cols order)
     wide_table_ordered <- wide_table |>
       dplyr::select(
-        `LA Number`, `LA and Regions`,
+        `LA Number`,
+        `LA and Regions`,
         "Region" = "GOReg",
-        Topic, Measure,
+        Topic,
+        Measure,
         dplyr::all_of(sort_year_columns(wide_table))
       )
-
 
     # If SNs included, add SN LA association column
     # Multi-join as want to include an association for every row (even duplicates)
@@ -619,10 +631,16 @@ server <- function(input, output, session) {
     # One year selected - "x"
     year_range_display <- dplyr::case_when(
       length(input$year_range) == 0 ~ paste0(
-        "All years (", available_years[1], " to ", available_years[2], ")"
+        "All years (",
+        available_years[1],
+        " to ",
+        available_years[2],
+        ")"
       ),
       length(input$year_range) == 2 ~ paste(
-        input$year_range[1], "to", input$year_range[2]
+        input$year_range[1],
+        "to",
+        input$year_range[2]
       ),
       length(input$year_range) == 1 ~ paste0("", input$year_range[1])
     )
@@ -662,7 +680,10 @@ server <- function(input, output, session) {
     consistent_staging_final_yrs <- data.frame(
       Years = c(
         colnames(query$output)[grepl("^\\d{4}", colnames(query$output))],
-        colnames(staging_to_append)[grepl("^\\d{4}", colnames(staging_to_append))]
+        colnames(staging_to_append)[grepl(
+          "^\\d{4}",
+          colnames(staging_to_append)
+        )]
       )
     ) |>
       check_year_suffix_consistency()
@@ -747,20 +768,31 @@ server <- function(input, output, session) {
       remove_button_id <- paste0("remove_", q_id)
 
       # Observe the button click
-      observeEvent(input[[remove_button_id]],
+      observeEvent(
+        input[[remove_button_id]],
         {
           # Remove the corresponding row (query) from query$data using the query ID
           query$data <- query$data[query$data$.query_id != q_id, , drop = FALSE]
 
           # Also remove the corresponding rows from query$output
-          query$output <- query$output[query$output$.query_id != q_id, , drop = FALSE]
+          query$output <- query$output[
+            query$output$.query_id != q_id,
+            ,
+            drop = FALSE
+          ]
 
           # If no rows (queries) left then also remove the years cols
           # This is so that if a user wants a range of years next
           # the legacy years aren't still there
           if (nrow(query$output) == 0) {
             query$output <- query$output |>
-              dplyr::select(`LA Number`, `LA and Regions`, Region, Topic, Measure)
+              dplyr::select(
+                `LA Number`,
+                `LA and Regions`,
+                Region,
+                Topic,
+                Measure
+              )
           }
         },
         ignoreInit = TRUE
@@ -823,8 +855,11 @@ server <- function(input, output, session) {
     # Sorted year columns
     query$output |>
       dplyr::select(
-        `LA Number`, `LA and Regions`,
-        Region, Topic, Measure,
+        `LA Number`,
+        `LA and Regions`,
+        Region,
+        Topic,
+        Measure,
         tidyselect::any_of("Statistical Neighbour Group"),
         dplyr::all_of(sort_year_columns(query$output))
       )
@@ -1031,11 +1066,11 @@ server <- function(input, output, session) {
       )
 
       # Error messages for too many selections
-    } else if (
-      number_of_geogs() > 4
-    ) {
+    } else if (number_of_geogs() > 4) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
+        ggobj = display_no_data_plot(
+          label = "No plot as too many Geographies selected."
+        ),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1044,11 +1079,11 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
-    } else if (
-      number_of_indicators() > 3
-    ) {
+    } else if (number_of_indicators() > 3) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
+        ggobj = display_no_data_plot(
+          label = "No plot as too many Indicators selected."
+        ),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1086,7 +1121,6 @@ server <- function(input, output, session) {
     height = 12 * 96
   )
 
-
   # Bar chart ------------------------------------------------------------------
   # Build main bar static plot
   bar_chart <- reactive({
@@ -1104,17 +1138,18 @@ server <- function(input, output, session) {
     # Wrap the chart names (dependent on number of indicators -
     # more narrows width available)
     chart_names_wrapped <- chart_names |>
-      dplyr::mutate(Chart_title = stringr::str_wrap(
-        Chart_title,
-        width = 60 - length(chart_names$Measure) * 10
-      ))
+      dplyr::mutate(
+        Chart_title = stringr::str_wrap(
+          Chart_title,
+          width = 60 - length(chart_names$Measure) * 10
+        )
+      )
 
     # Create a named vector for custom titles for each indicator
     custom_titles <- setNames(
       chart_names_wrapped$Chart_title,
       chart_names_wrapped$Measure
     )
-
 
     # Plot chart - split by indicators, colours represent Geographies
     chart_plotting_data() |>
@@ -1193,11 +1228,11 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
-    } else if (
-      number_of_geogs() > 4
-    ) {
+    } else if (number_of_geogs() > 4) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
+        ggobj = display_no_data_plot(
+          label = "No plot as too many Geographies selected."
+        ),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(
@@ -1206,11 +1241,11 @@ server <- function(input, output, session) {
         ),
         fonts = list(sans = "Arial")
       )
-    } else if (
-      number_of_indicators() > 3
-    ) {
+    } else if (number_of_indicators() > 3) {
       ggiraph::girafe(
-        ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
+        ggobj = display_no_data_plot(
+          label = "No plot as too many Indicators selected."
+        ),
         width_svg = 8.5,
         options = generic_ggiraph_options(
           opts_hover(

@@ -23,11 +23,13 @@
 #' @return A reactive data frame that contains the filtered BDS metrics
 #'         suitable for display in the staging table.
 #'
-StagingBDSServer <- function(id,
-                             create_inputs,
-                             geog_groups,
-                             year_input,
-                             bds_metrics) {
+StagingBDSServer <- function(
+  id,
+  create_inputs,
+  geog_groups,
+  year_input,
+  bds_metrics
+) {
   moduleServer(id, function(input, output, session) {
     # Forcing module to react to change in year input (not best practice)
     observeEvent(year_input$range(), {
@@ -82,7 +84,6 @@ StagingBDSServer <- function(id,
       filtered_bds
     })
 
-
     # Return staging BDS
     staging_bds
   })
@@ -109,7 +110,13 @@ StagingBDSServer <- function(id,
 #'         ready for display in the Shiny app.
 #'
 StagingDataServer <- function(
-    id, create_inputs, staging_bds, region_names_bds, la_names_bds, stat_n_la) {
+  id,
+  create_inputs,
+  staging_bds,
+  region_names_bds,
+  la_names_bds,
+  stat_n_la
+) {
   moduleServer(id, function(input, output, session) {
     # Make statistical neighbour association table available
     stat_n_association <- StatN_AssociationServer(
@@ -127,25 +134,44 @@ StagingDataServer <- function(
       # Set regions and England as themselves for Region
       wide_table <- staging_bds() |>
         dplyr::select(
-          `LA Number`, `LA and Regions`, Region, Topic,
-          Measure, Years, Years_num, values_num, Values
+          `LA Number`,
+          `LA and Regions`,
+          Region,
+          Topic,
+          Measure,
+          Years,
+          Years_num,
+          values_num,
+          Values
         ) |>
         tidyr::pivot_wider(
-          id_cols = c("LA Number", "LA and Regions", "Region", "Topic", "Measure"),
+          id_cols = c(
+            "LA Number",
+            "LA and Regions",
+            "Region",
+            "Topic",
+            "Measure"
+          ),
           names_from = Years,
           values_from = values_num,
           values_fill = NaN
         ) |>
-        dplyr::mutate(Region = dplyr::case_when(
-          `LA and Regions` %in% c("England", region_names_bds) ~ `LA and Regions`,
-          TRUE ~ Region
-        ))
+        dplyr::mutate(
+          Region = dplyr::case_when(
+            `LA and Regions` %in%
+              c("England", region_names_bds) ~ `LA and Regions`,
+            TRUE ~ Region
+          )
+        )
 
       # Order columns (and sort year cols order)
       wide_table_ordered <- wide_table |>
         dplyr::select(
-          `LA Number`, `LA and Regions`, Region,
-          Topic, Measure,
+          `LA Number`,
+          `LA and Regions`,
+          Region,
+          Topic,
+          Measure,
           dplyr::all_of(sort_year_columns(wide_table))
         )
 
@@ -236,14 +262,16 @@ StagingTableUI <- function(id) {
 #' @param bds_metrics A data frame containing the BDS metrics used for filtering.
 #' @return A reactable output for the staging table, displaying filtered BDS data
 #'         or error messages based on user selections.
-StagingTableServer <- function(id,
-                               create_inputs,
-                               region_names_bds,
-                               la_names_bds,
-                               stat_n_la,
-                               geog_groups,
-                               year_input,
-                               bds_metrics) {
+StagingTableServer <- function(
+  id,
+  create_inputs,
+  region_names_bds,
+  la_names_bds,
+  stat_n_la,
+  geog_groups,
+  year_input,
+  bds_metrics
+) {
   moduleServer(id, function(input, output, session) {
     # Staging table reactable ouput
     output$staging_table <- reactable::renderReactable({
@@ -344,11 +372,13 @@ StagingTableServer <- function(id,
 #' @return A reactive value list containing the current queries and output data
 #'         for display, including options for removing queries.
 #'
-QueryDataServer <- function(id,
-                            create_inputs,
-                            geog_groups,
-                            year_input,
-                            staging_data) {
+QueryDataServer <- function(
+  id,
+  create_inputs,
+  geog_groups,
+  year_input,
+  staging_data
+) {
   moduleServer(id, function(input, output, session) {
     # Reactive value "query" used to store query data
     # Uses lists to store multiple inputs (Geographies & Indicators)
@@ -373,7 +403,8 @@ QueryDataServer <- function(id,
     )
 
     # When "Add table" button clicked - add query to saved queries
-    observeEvent(create_inputs$add_query(),
+    observeEvent(
+      create_inputs$add_query(),
       {
         # Check if anything selected
         req(length(geog_groups()) > 0 && length(create_inputs$indicator()) > 0)
@@ -390,8 +421,18 @@ QueryDataServer <- function(id,
         # Range selected - "x to y"
         # One year selected - "x"
         year_range_display <- dplyr::case_when(
-          length(year_input$range()) == 0 ~ paste0("All years (", available_years[1], " to ", available_years[2], ")"),
-          length(year_input$range()) == 2 ~ paste(year_input$range()[1], "to", year_input$range()[2]),
+          length(year_input$range()) == 0 ~ paste0(
+            "All years (",
+            available_years[1],
+            " to ",
+            available_years[2],
+            ")"
+          ),
+          length(year_input$range()) == 2 ~ paste(
+            year_input$range()[1],
+            "to",
+            year_input$range()[2]
+          ),
           length(year_input$range()) == 1 ~ paste0("", year_input$range()[1])
         )
 
@@ -418,7 +459,12 @@ QueryDataServer <- function(id,
           Topic = paste(selected_topics, collapse = ",<br>"),
           Indicator = paste(create_inputs$indicator(), collapse = ",<br>"),
           `LA and Regions` = paste(
-            get_geog_selection(evaluated_inputs, la_names_bds, region_names_bds, stat_n_geog),
+            get_geog_selection(
+              evaluated_inputs,
+              la_names_bds,
+              region_names_bds,
+              stat_n_geog
+            ),
             collapse = ",<br>"
           ),
           `Year range` = year_range_display,
@@ -439,9 +485,13 @@ QueryDataServer <- function(id,
         consistent_staging_final_yrs <- data.frame(
           Years = c(
             colnames(query_output)[grepl("^\\d{4}", colnames(query_output))],
-            colnames(staging_to_append)[grepl("^\\d{4}", colnames(staging_to_append))]
+            colnames(staging_to_append)[grepl(
+              "^\\d{4}",
+              colnames(staging_to_append)
+            )]
           )
-        ) |> check_year_suffix_consistency()
+        ) |>
+          check_year_suffix_consistency()
 
         # If not consistent suffixes then clean both dfs year cols
         if (!consistent_staging_final_yrs && nrow(query_output) > 0) {
@@ -532,7 +582,10 @@ QueryTableServer <- function(id, query) {
       req(nrow(query$data))
       if (nrow(query$data) == 0) {
         return(dfe_reactable(
-          data.frame(`Message from tool` = "No saved selections.", check.names = FALSE)
+          data.frame(
+            `Message from tool` = "No saved selections.",
+            check.names = FALSE
+          )
         ))
       }
 
@@ -580,13 +633,22 @@ QueryTableServer <- function(id, query) {
         remove_button_id <- paste0("remove-", q_id)
 
         # Observe the button click
-        observeEvent(input[[remove_button_id]],
+        observeEvent(
+          input[[remove_button_id]],
           {
             # Remove the corresponding row (query) from query$data using the query ID
-            query$data <- query$data[query$data$.query_id != q_id, , drop = FALSE]
+            query$data <- query$data[
+              query$data$.query_id != q_id,
+              ,
+              drop = FALSE
+            ]
 
             # Also remove the corresponding rows from query$output
-            query$output <- query$output[query$output$.query_id != q_id, , drop = FALSE]
+            query$output <- query$output[
+              query$output$.query_id != q_id,
+              ,
+              drop = FALSE
+            ]
 
             # If no rows (queries) left then also remove the years cols
             # This is so that if a user wants a range of years next
@@ -650,7 +712,9 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
 
       # Remove columns that contain only NaN values
       # (aka user removed query that was including these years so no need to display them now)
-      query_output_clean <- query$output[, !sapply(query$output, function(x) all(is.nan(x)))]
+      query_output_clean <- query$output[,
+        !sapply(query$output, function(x) all(is.nan(x)))
+      ]
 
       # Logic to reset the year cols to have year suffixes if they match
       # (As they may have been cleaned from the code logic at end of the new query chunk)
@@ -668,13 +732,16 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
 
         # Replace numeric year columns with the corresponding suffix
         new_col_names <- colnames(query_output_clean) |>
-          vapply(function(col) {
-            if (col %in% years_dict$Years_num) {
-              return(years_dict$Years[match(col, years_dict$Years_num)])
-            } else {
-              return(col)
-            }
-          }, character(1))
+          vapply(
+            function(col) {
+              if (col %in% years_dict$Years_num) {
+                return(years_dict$Years[match(col, years_dict$Years_num)])
+              } else {
+                return(col)
+              }
+            },
+            character(1)
+          )
 
         colnames(query_output_clean) <- new_col_names
       }
@@ -683,8 +750,11 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
       # and sorted year columns
       query_output_clean |>
         dplyr::select(
-          `LA Number`, `LA and Regions`,
-          Region, Topic, Measure,
+          `LA Number`,
+          `LA and Regions`,
+          Region,
+          Topic,
+          Measure,
           tidyselect::any_of("Statistical Neighbour Group"),
           dplyr::all_of(sort_year_columns(query_output_clean))
         )
@@ -845,7 +915,10 @@ CreateOwnTableServer <- function(id, query, bds_metrics) {
     # File download text - calculates file size
     ns <- NS(id)
     output$download_file_txt <- shiny::renderUI({
-      file_type_input_btn(ns("file_type"), replace_nan_with_empty(create_own_data()))
+      file_type_input_btn(
+        ns("file_type"),
+        replace_nan_with_empty(create_own_data())
+      )
     })
 
     # Download dataset

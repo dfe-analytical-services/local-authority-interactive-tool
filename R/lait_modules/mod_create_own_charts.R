@@ -57,7 +57,10 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
         dplyr::mutate(
           Years_num = as.numeric(substr(Years, start = 1, stop = 4)),
           values_num = Values,
-          `LA and Regions` = factor(`LA and Regions`, levels = geog_chart_order),
+          `LA and Regions` = factor(
+            `LA and Regions`,
+            levels = geog_chart_order
+          ),
           Measure = factor(Measure, levels = indicator_chart_order)
         ) |>
         # Replace NAs caused by combining datasets with actual value
@@ -65,7 +68,14 @@ CreateOwnChartDataServer <- function(id, create_own_table, query) {
         tidyr::fill(c("Values", "values_num"), .direction = "downup", ) |>
         dplyr::ungroup() |>
         # Remove duplicates
-        dplyr::distinct(`LA and Regions`, Topic, Measure, Years_num, values_num, .keep_all = TRUE)
+        dplyr::distinct(
+          `LA and Regions`,
+          Topic,
+          Measure,
+          Years_num,
+          values_num,
+          .keep_all = TRUE
+        )
     })
 
     # Output number of selected indicators & geogs (for selection error messages)
@@ -141,7 +151,12 @@ CreateOwnLineChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data) {
+CreateOwnLineChartServer <- function(
+  id,
+  query,
+  bds_metrics,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -202,7 +217,11 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data
         # Only show point data where line won't appear (NAs)
         ggplot2::geom_point(
           data = subset(
-            create_show_point(chart_info$data(), covid_affected_data, selected_indicators),
+            create_show_point(
+              chart_info$data(),
+              covid_affected_data,
+              selected_indicators
+            ),
             show_point
           ),
           ggplot2::aes(
@@ -275,23 +294,25 @@ CreateOwnLineChartServer <- function(id, query, bds_metrics, covid_affected_data
       # Error messages for incorrect/ missing selections
       if ("Message from tool" %in% colnames(create_own_data())) {
         ggiraph::girafe(
-          ggobj = display_no_data_plot("No plot as not enough selections made."),
+          ggobj = display_no_data_plot(
+            "No plot as not enough selections made."
+          ),
           width_svg = 8.5,
           options = generic_ggiraph_options()
         )
-      } else if (
-        chart_info$no_geogs() > 4
-      ) {
+      } else if (chart_info$no_geogs() > 4) {
         ggiraph::girafe(
-          ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
+          ggobj = display_no_data_plot(
+            label = "No plot as too many Geographies selected."
+          ),
           width_svg = 8.5,
           options = generic_ggiraph_options()
         )
-      } else if (
-        chart_info$no_indicators() > 3
-      ) {
+      } else if (chart_info$no_indicators() > 3) {
         ggiraph::girafe(
-          ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
+          ggobj = display_no_data_plot(
+            label = "No plot as too many Indicators selected."
+          ),
           width_svg = 8.5,
           options = generic_ggiraph_options()
         )
@@ -386,7 +407,12 @@ CreateOwnBarChartUI <- function(id) {
 #' @return None; this function is used to create and manage reactive elements
 #'         within the Shiny application.
 #'
-CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_data) {
+CreateOwnBarChartServer <- function(
+  id,
+  query,
+  bds_metrics,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Load Create Own Table data
     create_own_data <- CreateOwnDataServer(
@@ -430,10 +456,12 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_data)
       # Wrap the chart names (dependent on number of indicators -
       # more narrows width available)
       chart_names_wrapped <- chart_names |>
-        dplyr::mutate(Chart_title = stringr::str_wrap(
-          Chart_title,
-          width = 60 - length(chart_names$Measure) * 10
-        ))
+        dplyr::mutate(
+          Chart_title = stringr::str_wrap(
+            Chart_title,
+            width = 60 - length(chart_names$Measure) * 10
+          )
+        )
 
       # Create a named vector for custom titles for each indicator
       custom_titles <- setNames(
@@ -540,23 +568,25 @@ CreateOwnBarChartServer <- function(id, query, bds_metrics, covid_affected_data)
       # Error messages for missing or too many selections
       if ("Message from tool" %in% colnames(create_own_data())) {
         ggiraph::girafe(
-          ggobj = display_no_data_plot("No plot as not enough selections made."),
+          ggobj = display_no_data_plot(
+            "No plot as not enough selections made."
+          ),
           width_svg = 8.5,
           options = generic_ggiraph_options()
         )
-      } else if (
-        chart_info$no_geogs() > 4
-      ) {
+      } else if (chart_info$no_geogs() > 4) {
         ggiraph::girafe(
-          ggobj = display_no_data_plot(label = "No plot as too many Geographies selected."),
+          ggobj = display_no_data_plot(
+            label = "No plot as too many Geographies selected."
+          ),
           width_svg = 8.5,
           options = generic_ggiraph_options()
         )
-      } else if (
-        chart_info$no_indicators() > 3
-      ) {
+      } else if (chart_info$no_indicators() > 3) {
         ggiraph::girafe(
-          ggobj = display_no_data_plot(label = "No plot as too many Indicators selected."),
+          ggobj = display_no_data_plot(
+            label = "No plot as too many Indicators selected."
+          ),
           width_svg = 8.5,
           options = generic_ggiraph_options()
         )

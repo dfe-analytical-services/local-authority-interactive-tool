@@ -11,7 +11,6 @@ list.files("R/", full.names = TRUE) |>
 
 # UI
 ui_dev <- bslib::page_fillable(
-
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
@@ -130,7 +129,8 @@ ui_dev <- bslib::page_fillable(
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
-          h3("Last Updated:",
+          h3(
+            "Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           shinycssloaders::withSpinner(
@@ -141,7 +141,8 @@ ui_dev <- bslib::page_fillable(
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Next Updated:",
+          h3(
+            "Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           shinycssloaders::withSpinner(
@@ -152,9 +153,7 @@ ui_dev <- bslib::page_fillable(
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Source:",
-            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
-          ),
+          h3("Source:", style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
           shinycssloaders::withSpinner(
             uiOutput("source"),
             type = 6,
@@ -171,7 +170,8 @@ ui_dev <- bslib::page_fillable(
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input,
+  shiny::observeEvent(
+    input$topic_input,
     {
       # Save the currently selected indicator
       current_indicator <- input$indicator
@@ -180,7 +180,9 @@ server_dev <- function(input, output, session) {
       # Include all rows if no topic is selected or "All topics" is selected
       filtered_topic_bds <- bds_metrics |>
         dplyr::filter(
-          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
+          if (
+            is.null(input$topic_input) | "All topics" %in% input$topic_input
+          ) {
             TRUE
           } else {
             .data$Topic %in% input$topic_input # Filter by selected topic(s)
@@ -206,7 +208,6 @@ server_dev <- function(input, output, session) {
     },
     ignoreNULL = FALSE
   )
-
 
   # Main LA Level table ----------------------------------
   # Filter for selectedindicator
@@ -256,7 +257,8 @@ server_dev <- function(input, output, session) {
     # Then filter for selected LA, region, stat neighbours and relevant national
     la_filtered_bds <- filtered_bds$data |>
       dplyr::filter(
-        `LA and Regions` %in% c(input$la_input, la_region_ldn_clean, la_sns, "England")
+        `LA and Regions` %in%
+          c(input$la_input, la_region_ldn_clean, la_sns, "England")
       )
 
     # SN average
@@ -275,14 +277,22 @@ server_dev <- function(input, output, session) {
     # LA levels long
     la_filtered_bds |>
       dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
+      dplyr::select(
+        `LA Number`,
+        `LA and Regions`,
+        Years,
+        Years_num,
+        values_num
+      ) |>
       dplyr::bind_rows(sn_avg) |>
       dplyr::mutate(
         `LA and Regions` = factor(
           `LA and Regions`,
           levels = c(
-            input$la_input, la_region_ldn_clean,
-            "Statistical Neighbours", "England"
+            input$la_input,
+            la_region_ldn_clean,
+            "Statistical Neighbours",
+            "England"
           )
         )
       )
@@ -312,7 +322,6 @@ server_dev <- function(input, output, session) {
       ) |>
       dplyr::arrange(`LA and Regions`)
   })
-
 
   # Stet funded school banner (appears for certain indicators)
   output$state_funded_banner <- renderUI({
@@ -350,7 +359,6 @@ server_dev <- function(input, output, session) {
       }
     )
   })
-
 
   # Stats LA Level table ----------------------------------
   la_stats_table <- shiny::reactive({
@@ -417,9 +425,13 @@ server_dev <- function(input, output, session) {
           get_indicator_dps(filtered_bds$data),
           num_exclude = "LA Number",
           categorical = c(
-            "Trend", "Quartile Banding", "Latest National Rank",
-            "A", "B",
-            "C", "D"
+            "Trend",
+            "Quartile Banding",
+            "Latest National Rank",
+            "A",
+            "B",
+            "C",
+            "D"
           )
         ),
         # Style Quartile Banding column with colour
@@ -452,7 +464,6 @@ server_dev <- function(input, output, session) {
     )
   })
 
-
   # LA Level line chart plot ----------------------------------
   la_line_chart <- reactive({
     # Generate the covid plot data if add_covid_plot is TRUE
@@ -480,11 +491,14 @@ server_dev <- function(input, output, session) {
       ) +
       # Only show point data where line won't appear (NAs)
       ggplot2::geom_point(
-        data = subset(create_show_point(
-          la_long(),
-          covid_affected_data,
-          input$indicator
-        ), show_point),
+        data = subset(
+          create_show_point(
+            la_long(),
+            covid_affected_data,
+            input$indicator
+          ),
+          show_point
+        ),
         ggplot2::aes(
           x = Years_num,
           y = values_num,
@@ -527,7 +541,6 @@ server_dev <- function(input, output, session) {
   output$la_line_chart <- ggiraph::renderGirafe({
     la_line_chart()
   })
-
 
   # LA Level bar plot ----------------------------------
   la_bar_chart <- reactive({
@@ -575,11 +588,9 @@ server_dev <- function(input, output, session) {
     )
   })
 
-
   output$la_bar_chart <- ggiraph::renderGirafe({
     la_bar_chart()
   })
-
 
   # LA Metadata ----------------------------------
   # Reactive values to store previous data

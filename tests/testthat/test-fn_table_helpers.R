@@ -33,9 +33,13 @@ test_that("1. build_la_stats_table works with standard inputs", {
 
   # Required columns should exist
   expected_cols <- c(
-    "LA Number", "LA and Regions", "Trend",
-    "Change from previous year", "Polarity",
-    "Latest National Rank", "Quartile Banding"
+    "LA Number",
+    "LA and Regions",
+    "Trend",
+    "Change from previous year",
+    "Polarity",
+    "Latest National Rank",
+    "Quartile Banding"
   )
   expect_true(all(expected_cols %in% names(result)))
 
@@ -80,10 +84,16 @@ test_that("2. build_la_stats_table handles empty inputs gracefully", {
   )
 
   expect_s3_class(result, "data.frame")
-  expect_true(all(c(
-    "LA Number", "LA and Regions", "Trend",
-    "Change from previous year", "Polarity"
-  ) %in% names(result)))
+  expect_true(all(
+    c(
+      "LA Number",
+      "LA and Regions",
+      "Trend",
+      "Change from previous year",
+      "Polarity"
+    ) %in%
+      names(result)
+  ))
   expect_equal(nrow(result), 1)
 })
 
@@ -118,11 +128,18 @@ test_that("3. build_la_stats_table handles NAs gracefully", {
 
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), 1)
-  expect_true(all(c(
-    "LA Number", "LA and Regions", "Trend",
-    "Change from previous year", "Polarity",
-    "Latest National Rank", "Quartile Banding"
-  ) %in% names(result)))
+  expect_true(all(
+    c(
+      "LA Number",
+      "LA and Regions",
+      "Trend",
+      "Change from previous year",
+      "Polarity",
+      "Latest National Rank",
+      "Quartile Banding"
+    ) %in%
+      names(result)
+  ))
 })
 
 test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
@@ -156,9 +173,16 @@ test_that("4. build_la_stats_table handles NA Quartile Banding gracefully", {
 
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), 1)
-  expect_true(all(c(
-    "LA Number", "LA and Regions", "Trend",
-    "Change from previous year", "Polarity",
-    "Latest National Rank", "Quartile Banding"
-  ) %in% names(result)))
+  expect_true(all(
+    c(
+      "LA Number",
+      "LA and Regions",
+      "Trend",
+      "Change from previous year",
+      "Polarity",
+      "Latest National Rank",
+      "Quartile Banding"
+    ) %in%
+      names(result)
+  ))
 })

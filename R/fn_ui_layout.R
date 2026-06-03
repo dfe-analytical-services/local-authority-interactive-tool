@@ -103,7 +103,12 @@ create_hidden_clipboard_plot <- function(clipboard_plot_id) {
 #'   )
 #' )
 #'
-closable_noti_banner <- function(input_id, title_txt, body_txt, type = "standard") {
+closable_noti_banner <- function(
+  input_id,
+  title_txt,
+  body_txt,
+  type = "standard"
+) {
   shiny::tagList(
     shiny::tags$div(
       id = paste0(input_id, "-banner"),
@@ -129,11 +134,15 @@ closable_noti_banner <- function(input_id, title_txt, body_txt, type = "standard
     ),
     # JavaScript to remove banner on click
     shiny::tags$script(
-      shiny::HTML(sprintf("
+      shiny::HTML(sprintf(
+        "
         $(document).on('click', '#%s-banner .govuk-notification-banner__close', function() {
           $('#%s-banner').remove();
         });
-      ", input_id, input_id))
+      ",
+        input_id,
+        input_id
+      ))
     )
   )
 }
@@ -229,80 +238,88 @@ dfe_footer <- function(links_list) {
   shiny::tags$footer(
     class = "govuk-footer ",
     role = "contentinfo",
-    shiny::div(class = "govuk-width-container ", shiny::div(
-      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # Add custom links in
+    shiny::div(
+      class = "govuk-width-container ",
       shiny::div(
-        class = "govuk-footer__meta-item govuk-footer__meta-item--grow",
-
-        # Set a visually hidden title for accessibility
-        shiny::h2(class = "govuk-visually-hidden", "Support links"),
-        # Generate as many links as needed
-        shiny::tags$ul(
-          class = "govuk-footer__inline-list",
-          lapply(links_list, create_footer_link)
-        )
-      ),
-
-      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # Back to copied code from shinyGovstyle
-      shiny::div(class = "govuk-footer__meta", shiny::tagList(
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # Add custom links in
         shiny::div(
           class = "govuk-footer__meta-item govuk-footer__meta-item--grow",
-          shiny::tag(
-            "svg",
-            list(
-              role = "presentation",
-              focusable = "false",
-              class = "govuk-footer__licence-logo",
-              xmlns = "http://www.w3.org/2000/svg",
-              viewbox = "0 0 483.2 195.7",
-              height = "17",
-              width = "41",
-              shiny::tag("path", list(
-                fill = "currentColor",
-                d = paste0(
-                  "M421.5 142.8V.1l-50.7 32.3v161.1h112.4v-50.7",
-                  "zm-122.3-9.6A47.12 47.12 0 0 1 221 97.8c0-26 21",
-                  ".1-47.1 47.1-47.1 16.7 0 31.4 8.7 39.7 21.8l42.7",
-                  "-27.2A97.63 97.63 0 0 0 268.1 0c-36.5 0-68.3 20.1",
-                  "-85.1 49.7A98 98 0 0 0 97.8 0C43.9 0 0 43.9 0 97",
-                  ".8s43.9 97.8 97.8 97.8c36.5 0 68.3-20.1 85.1-49.",
-                  "7a97.76 97.76 0 0 0 149.6 25.4l19.4 22.2h3v-87.8",
-                  "h-80l24.3 27.5zM97.8 145c-26 0-47.1-21.1-47.1-47",
-                  ".1s21.1-47.1 47.1-47.1 47.2 21 47.2 47S123.8 145",
-                  " 97.8 145"
-                )
-              ))
-            )
-          ),
-          shiny::tags$span(
-            class = "govuk-footer__licence-description",
-            "All content is available under the",
-            shiny::tags$a(
-              class = "govuk-footer__link",
-              href = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-              rel = "license",
-              "Open Government Licence v3.0",
-              .noWS = "after"
-            ),
-            ", except where otherwise stated"
+
+          # Set a visually hidden title for accessibility
+          shiny::h2(class = "govuk-visually-hidden", "Support links"),
+          # Generate as many links as needed
+          shiny::tags$ul(
+            class = "govuk-footer__inline-list",
+            lapply(links_list, create_footer_link)
           )
         ),
-        shiny::tags$div(
-          class = "govuk-footer__meta-item",
-          shiny::tags$a(
-            class = "govuk-footer__link govuk-footer__copyright-logo",
-            href =
-              paste0(
-                "https://www.nationalarchives.gov.uk/information-management/",
-                "re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # Back to copied code from shinyGovstyle
+        shiny::div(
+          class = "govuk-footer__meta",
+          shiny::tagList(
+            shiny::div(
+              class = "govuk-footer__meta-item govuk-footer__meta-item--grow",
+              shiny::tag(
+                "svg",
+                list(
+                  role = "presentation",
+                  focusable = "false",
+                  class = "govuk-footer__licence-logo",
+                  xmlns = "http://www.w3.org/2000/svg",
+                  viewbox = "0 0 483.2 195.7",
+                  height = "17",
+                  width = "41",
+                  shiny::tag(
+                    "path",
+                    list(
+                      fill = "currentColor",
+                      d = paste0(
+                        "M421.5 142.8V.1l-50.7 32.3v161.1h112.4v-50.7",
+                        "zm-122.3-9.6A47.12 47.12 0 0 1 221 97.8c0-26 21",
+                        ".1-47.1 47.1-47.1 16.7 0 31.4 8.7 39.7 21.8l42.7",
+                        "-27.2A97.63 97.63 0 0 0 268.1 0c-36.5 0-68.3 20.1",
+                        "-85.1 49.7A98 98 0 0 0 97.8 0C43.9 0 0 43.9 0 97",
+                        ".8s43.9 97.8 97.8 97.8c36.5 0 68.3-20.1 85.1-49.",
+                        "7a97.76 97.76 0 0 0 149.6 25.4l19.4 22.2h3v-87.8",
+                        "h-80l24.3 27.5zM97.8 145c-26 0-47.1-21.1-47.1-47",
+                        ".1s21.1-47.1 47.1-47.1 47.2 21 47.2 47S123.8 145",
+                        " 97.8 145"
+                      )
+                    )
+                  )
+                )
               ),
-            "\u00A9 Crown copyright"
+              shiny::tags$span(
+                class = "govuk-footer__licence-description",
+                "All content is available under the",
+                shiny::tags$a(
+                  class = "govuk-footer__link",
+                  href = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                  rel = "license",
+                  "Open Government Licence v3.0",
+                  .noWS = "after"
+                ),
+                ", except where otherwise stated"
+              )
+            ),
+            shiny::tags$div(
+              class = "govuk-footer__meta-item",
+              shiny::tags$a(
+                class = "govuk-footer__link govuk-footer__copyright-logo",
+                href = paste0(
+                  "https://www.nationalarchives.gov.uk/information-management/",
+                  "re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/"
+                ),
+                "\u00A9 Crown copyright"
+              )
+            )
           )
         )
-      ))
-    ))
+      )
+    )
   )
 }
 
@@ -343,9 +360,15 @@ dfe_contents_links <- function(links_list) {
   create_sidelink <- function(link_text) {
     tags$li(
       "—",
-      actionLink(tolower(gsub(
-        " ", "_", link_text
-      )), link_text, class = "contents_link")
+      actionLink(
+        tolower(gsub(
+          " ",
+          "_",
+          link_text
+        )),
+        link_text,
+        class = "contents_link"
+      )
     )
   }
 

@@ -20,7 +20,8 @@ expandable <- function(input_id, label, contents) {
 
   # Create the expandable element
   gov_details <- shiny::tags$details(
-    class = "govuk-details", id = input_id,
+    class = "govuk-details",
+    id = input_id,
     shiny::tags$summary(
       class = "govuk-details__summary",
       shiny::tags$span(
@@ -37,9 +38,15 @@ expandable <- function(input_id, label, contents) {
 
 # Value box function ----------------------------------------------------------
 # fontsize: can be small, medium or large
-value_box <- function(value, subtitle, icon = NULL,
-                      color = "blue", width = 4,
-                      href = NULL, fontsize = "medium") {
+value_box <- function(
+  value,
+  subtitle,
+  icon = NULL,
+  color = "blue",
+  width = 4,
+  href = NULL,
+  fontsize = "medium"
+) {
   validate_color(color)
   if (!is.null(icon) && !inherits(icon, "shiny.tag")) {
     stop("icon must be a shiny.tag object")
@@ -75,8 +82,11 @@ validate_color <- function(color) {
   }
 
   stop(
-    "Invalid color: ", ifelse(is.null(color), "NULL", color), ". Valid colors are: ",
-    paste(valid_colors, collapse = ", "), "."
+    "Invalid color: ",
+    ifelse(is.null(color), "NULL", color),
+    ". Valid colors are: ",
+    paste(valid_colors, collapse = ", "),
+    "."
   )
 }
 
@@ -87,7 +97,11 @@ validate_color <- function(color) {
 # Note the advice on trying to keep to a maximum of 4 series in a single plot
 # AF colours package guidance here: https://best-practice-and-impact.github.io/afcolours/
 suppressMessages(
-  gss_colour_pallette <- afcolours::af_colours("categorical", colour_format = "hex", n = 4)
+  gss_colour_pallette <- afcolours::af_colours(
+    "categorical",
+    colour_format = "hex",
+    n = 4
+  )
 )
 
 
@@ -294,8 +308,10 @@ get_metadata <- function(data, input_indicator, metadata) {
 
   # Warning if any entry in metadata_output appears to be a 5-digit number
   if (any(grepl("^\\d{5}$", metadata_output))) {
-    warning("Detected a 5-digit numeric entry in metadata_output,
-            which may represent a misformatted date (e.g., Excel numeric).")
+    warning(
+      "Detected a 5-digit numeric entry in metadata_output,
+            which may represent a misformatted date (e.g., Excel numeric)."
+    )
 
     # Convert 5-digit number to Date if it matches the Excel date format
     metadata_output <- metadata_output |>
@@ -365,8 +381,14 @@ clean_ldn_region <- function(region, filtered_bds) {
   }
 
   # Check if required columns exist in filtered_bds
-  if (!all(c("LA and Regions", "values_num", "Years_num") %in% colnames(filtered_bds))) {
-    stop("filtered_bds must contain 'LA and Regions', 'values_num', and 'Years_num' columns")
+  if (
+    !all(
+      c("LA and Regions", "values_num", "Years_num") %in% colnames(filtered_bds)
+    )
+  ) {
+    stop(
+      "filtered_bds must contain 'LA and Regions', 'values_num', and 'Years_num' columns"
+    )
   }
 
   # Determine the latest year available in the dataset
@@ -404,13 +426,15 @@ get_af_colours <- function() {
   withCallingHandlers(
     afcolours::af_colours(),
     message = function(m) {
-      if (grepl(
-        paste0(
-          "It is best practice to limit to four categories when using the ",
-          "categorical palette so the chart does not become too cluttered."
-        ),
-        m$message
-      )) {
+      if (
+        grepl(
+          paste0(
+            "It is best practice to limit to four categories when using the ",
+            "categorical palette so the chart does not become too cluttered."
+          ),
+          m$message
+        )
+      ) {
         invokeRestart("muffleMessage")
       }
     }
@@ -594,13 +618,15 @@ af_colours_focus <- function() {
   withCallingHandlers(
     afcolours::af_colours(type = "focus"),
     message = function(m) {
-      if (grepl(
-        paste0(
-          "This palette should only be used to highlight specific ",
-          "elements to help users understand the information."
-        ),
-        m$message
-      )) {
+      if (
+        grepl(
+          paste0(
+            "This palette should only be used to highlight specific ",
+            "elements to help users understand the information."
+          ),
+          m$message
+        )
+      ) {
         invokeRestart("muffleMessage")
       }
     }
@@ -698,7 +724,10 @@ check_year_suffix_consistency <- function(data) {
 #'         preserving the original names.
 #'
 sort_year_columns <- function(full_query_data) {
-  full_query_year_cols <- names(full_query_data)[grepl("^\\d{4}", names(full_query_data))]
+  full_query_year_cols <- names(full_query_data)[grepl(
+    "^\\d{4}",
+    names(full_query_data)
+  )]
 
   full_query_year_cols |>
     purrr::set_names() |>
@@ -759,7 +788,8 @@ add_line_breaks <- function(text, max_length = 20) {
 
   for (word in words) {
     if (nchar(current_line) + nchar(word) + 1 <= max_length) {
-      current_line <- paste(current_line,
+      current_line <- paste(
+        current_line,
         word,
         sep = if (nchar(current_line) > 0) " " else ""
       )
@@ -793,7 +823,12 @@ add_line_breaks <- function(text, max_length = 20) {
 #' # Wrap a plot with a larger spinner
 #' with_gov_spinner(plotOutput("la_plot"), size = 2)
 #'
-with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1d70b8") {
+with_gov_spinner <- function(
+  ui_element,
+  spinner_type = 6,
+  size = 1,
+  color = "#1d70b8"
+) {
   shinycssloaders::withSpinner(
     ui_element,
     type = spinner_type,
@@ -837,10 +872,11 @@ with_gov_spinner <- function(ui_element, spinner_type = 6, size = 1, color = "#1
 #' )
 #'
 update_topic_label <- function(
-    indicator_input,
-    topic_input,
-    topic_indicator_data,
-    topic_label_id = "topic_label") {
+  indicator_input,
+  topic_input,
+  topic_indicator_data,
+  topic_label_id = "topic_label"
+) {
   shiny::observeEvent(c(indicator_input(), topic_input()), {
     indicator <- indicator_input()
     topic <- topic_input()
@@ -849,7 +885,9 @@ update_topic_label <- function(
     label <- "Topic:"
 
     # Update label if conditions are met
-    if (!is.null(indicator) && indicator != "" && (topic %in% c("", "All Topics"))) {
+    if (
+      !is.null(indicator) && indicator != "" && (topic %in% c("", "All Topics"))
+    ) {
       # Get related topic(s)
       related_topics <- topic_indicator_data |>
         dplyr::filter(.data$Measure == indicator) |>
@@ -966,20 +1004,27 @@ format_text <- function(text) {
   text <- gsub("</li></ul><br><br>", "</li></ul><br>", text, perl = TRUE)
 
   # Replace markdown-style links with HTML links
-  text <- stringr::str_replace_all(text, "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)", function(match) {
-    # Extract the link text and URL using captured groups
-    matches <- stringr::str_match_all(match, "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)")
+  text <- stringr::str_replace_all(
+    text,
+    "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)",
+    function(match) {
+      # Extract the link text and URL using captured groups
+      matches <- stringr::str_match_all(
+        match,
+        "\\[([^\\]]+)\\]\\((https?://[^)]+)\\)"
+      )
 
-    link_text <- matches[[1]][2] # Captured group 1: link text
-    href <- matches[[1]][3] # Captured group 2: URL
+      link_text <- matches[[1]][2] # Captured group 1: link text
+      href <- matches[[1]][3] # Captured group 2: URL
 
-    # Generate HTML link using dfeshiny::external_link(), convert to character
-    as.character(dfeshiny::external_link(
-      href = href,
-      link_text = link_text,
-      add_warning = TRUE
-    ))
-  })
+      # Generate HTML link using dfeshiny::external_link(), convert to character
+      as.character(dfeshiny::external_link(
+        href = href,
+        link_text = link_text,
+        add_warning = TRUE
+      ))
+    }
+  )
 
   # Trim any leading or trailing spaces
   text <- trimws(text)

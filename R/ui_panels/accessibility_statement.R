@@ -16,17 +16,26 @@ a11y_panel <- function() {
         href = "https://www.gov.uk/government/organisations/department-for-education",
         "Department for Education (DfE)",
         .noWS = "after"
-      ), ".",
+      ),
+      ".",
       "This statement does not cover any other services run by the Department for Education (DfE) or GOV.UK."
     ),
     h2("How you should be able to use this website"),
-    p("We want as many people as possible to be able to use this website. You should be able to:"),
+    p(
+      "We want as many people as possible to be able to use this website. You should be able to:"
+    ),
     tags$div(tags$ul(
-      tags$li("change colours, contrast levels and fonts using browser or device settings"),
+      tags$li(
+        "change colours, contrast levels and fonts using browser or device settings"
+      ),
       tags$li("zoom in up to 400% without the text spilling off the screen"),
-      tags$li("navigate most of the website using a keyboard or speech recognition software"),
-      tags$li("listen to most of the website using a screen reader
-              (including the most recent versions of JAWS, NVDA and VoiceOver)")
+      tags$li(
+        "navigate most of the website using a keyboard or speech recognition software"
+      ),
+      tags$li(
+        "listen to most of the website using a screen reader
+              (including the most recent versions of JAWS, NVDA and VoiceOver)"
+      )
     )),
     p("We’ve also made the website text as simple as possible to understand."),
     p(
@@ -48,9 +57,11 @@ a11y_panel <- function() {
       ),
       ". More details are available on that service for alternative formats of this data.",
     ),
-    p("We’re always looking to improve the accessibility of this website.
+    p(
+      "We’re always looking to improve the accessibility of this website.
        If you find any problems not listed on this page or think we’re not meeting
-       accessibility requirements, contact us:"),
+       accessibility requirements, contact us:"
+    ),
     tags$ul(tags$li(
       a(
         href = "mailto:explore.statistics@education.gov.uk",
@@ -58,9 +69,11 @@ a11y_panel <- function() {
       )
     )),
     h2("Enforcement procedure"),
-    p("The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies
+    p(
+      "The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies
        (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018
-       (the ‘accessibility regulations’)."),
+       (the ‘accessibility regulations’)."
+    ),
     p(
       "If you are not happy with how we respond to your complaint, ",
       a(
@@ -71,8 +84,10 @@ a11y_panel <- function() {
       "."
     ),
     h2("Technical information about this website's accessibility"),
-    p("The Department for Education (DfE) is committed to making its website accessible, in accordance with the
-    Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018."),
+    p(
+      "The Department for Education (DfE) is committed to making its website accessible, in accordance with the
+    Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018."
+    ),
     h3("Compliance status"),
     p(
       "This website is partially compliant with the", # TODO
@@ -84,8 +99,10 @@ a11y_panel <- function() {
       " due to the non-compliances listed below."
     ),
     h3("Non accessible content"),
-    p("The content listed below is non-accessible for the following reasons.
-       We will address these issues to ensure our content is accessible."),
+    p(
+      "The content listed below is non-accessible for the following reasons.
+       We will address these issues to ensure our content is accessible."
+    ),
     tags$div(tags$ul(
       tags$li("Not available yet") # TODO
     )),
@@ -107,7 +124,9 @@ a11y_panel <- function() {
       ),
       "."
     ),
-    p("DAC tested a sample of pages to cover the core functionality of the service including:"),
+    p(
+      "DAC tested a sample of pages to cover the core functionality of the service including:"
+    ),
     tags$div(tags$ul(
       tags$li("navigation"),
       tags$li("interactive dropdown selections"),
@@ -129,8 +148,10 @@ a11y_panel <- function() {
       "."
     ),
     h2("What we're doing to improve accessibility"),
-    p("We plan to continually test the service for accessibility issues, and are working through a prioritised
-    list of issues to resolve."),
+    p(
+      "We plan to continually test the service for accessibility issues, and are working through a prioritised
+    list of issues to resolve."
+    ),
     p(
       "Our current list of issues to be resolved is available on our ",
       a(
@@ -141,7 +162,9 @@ a11y_panel <- function() {
       "."
     ),
     h2("Preparation of this accessibility statement"),
-    p("This statement was prepared on 1st July 2024. It was last reviewed on [To be done]."), # TODO
+    p(
+      "This statement was prepared on 1st July 2024. It was last reviewed on [To be done]."
+    ), # TODO
     p(
       "The template used for this website was last testing in March 2024 against the WCAG 2.2 AA standard.
     This test of a representative sample of pages was carried out by the",
@@ -152,6 +175,8 @@ a11y_panel <- function() {
       ),
       "."
     ),
-    p("We also used findings from our own testing when preparing this accessibility statement.")
+    p(
+      "We also used findings from our own testing when preparing this accessibility statement."
+    )
   )
 }
