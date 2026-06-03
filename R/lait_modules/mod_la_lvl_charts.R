@@ -324,8 +324,10 @@ LA_BarChartUI <- function(id) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_BarChartServer <- function(
-    id,
+      "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
     app_inputs,
     bds_metrics,
     stat_n_la,
