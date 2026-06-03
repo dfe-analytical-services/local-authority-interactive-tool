@@ -85,10 +85,12 @@ LA_LineChartUI <- function(id) {
 #' allowing users to explore the data visually.
 #'
 LA_LineChartServer <- function(
-    id,
-    app_inputs,
-    bds_metrics,
-    stat_n_la,
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  covid_affected_data
+) {
     covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
