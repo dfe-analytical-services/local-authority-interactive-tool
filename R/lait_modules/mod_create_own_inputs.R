@@ -27,7 +27,9 @@ Create_MainInputsUI <- function(id) {
           inputId = ns("geog_input"),
           label = tags$label(
             "LAs, Regions, and England:",
-            create_tooltip_icon("You can change selection by typing or scrolling")
+            create_tooltip_icon(
+              "You can change selection by typing or scrolling"
+            )
           ),
           choices = c(la_names_bds, region_names_bds, "England"),
           multiple = TRUE,
@@ -135,7 +137,8 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
 
     # Filter indicator choices based on the selected topic
     # But keep already selected indicators from other topics
-    shiny::observeEvent(input$topic_input,
+    shiny::observeEvent(
+      input$topic_input,
       {
         req(input$topic_input)
         # Available indicators (based on topic chosen)
@@ -165,7 +168,8 @@ Create_MainInputsServer <- function(id, topic_indicator_full) {
 
     # Update the selected_indicators reactive for newly selected topic-indicator pairs
     # This keeps selection consistent across topics
-    shiny::observeEvent(input$indicator,
+    shiny::observeEvent(
+      input$indicator,
       {
         # Get the new topic-indicator pairs
         current_filtered <- topic_indicator_full |>
@@ -279,7 +283,12 @@ YearRangeUI <- function(id) {
 #' @return A list containing reactive values for selected year range
 #'         and available year choices.
 #'
-YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) {
+YearRangeServer <- function(
+  id,
+  bds_metrics,
+  indicator_input,
+  clear_selections
+) {
   moduleServer(id, function(input, output, session) {
     # Compute years choices available based on selected indicator
     years_choices <- reactive({
@@ -383,12 +392,14 @@ YearRangeServer <- function(id, bds_metrics, indicator_input, clear_selections) 
 #' @return A reactive value containing the combined geography inputs based
 #'         on user selections and additional groupings.
 #'
-GroupingInputServer <- function(id,
-                                create_inputs,
-                                la_names_bds,
-                                region_names_bds,
-                                stat_n_geog,
-                                stat_n_la) {
+GroupingInputServer <- function(
+  id,
+  create_inputs,
+  la_names_bds,
+  region_names_bds,
+  stat_n_geog,
+  stat_n_la
+) {
   moduleServer(id, function(input, output, session) {
     # Combine the geography selections
     geog_inputs <- reactive({
@@ -421,7 +432,10 @@ GroupingInputServer <- function(id,
 
       # LA statistical neighbours
       if (isTRUE(create_inputs$la_group() == "la_stat_ns")) {
-        selected_la_stat_n <- get_la_stat_neighbrs(stat_n_la, create_inputs$geog())
+        selected_la_stat_n <- get_la_stat_neighbrs(
+          stat_n_la,
+          create_inputs$geog()
+        )
 
         inputs <- c(inputs, selected_la_stat_n)
       }
@@ -458,10 +472,12 @@ GroupingInputServer <- function(id,
 #'         authorities and their corresponding statistical neighbours, with
 #'         the parent LA indicated for each SN.
 #'
-StatN_AssociationServer <- function(id,
-                                    create_inputs,
-                                    la_names_bds,
-                                    stat_n_la) {
+StatN_AssociationServer <- function(
+  id,
+  create_inputs,
+  la_names_bds,
+  stat_n_la
+) {
   moduleServer(id, function(input, output, session) {
     stat_n_association <- reactive({
       # Only if SN grouping selected compute rest of module

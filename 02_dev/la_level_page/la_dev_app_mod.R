@@ -24,7 +24,6 @@ ui_mod <- bslib::page_fillable(
   # Tab header ================================================================
   h1("Local Authority View"),
 
-
   # Start of app  =============================================================
   appInputsUI("la_inputs"),
 

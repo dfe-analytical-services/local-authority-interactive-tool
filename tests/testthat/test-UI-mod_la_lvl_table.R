@@ -30,7 +30,6 @@
 #
 # shinytest_app$stop()
 
-
 # 2. Uses minimal test-app .R file for setup ----------------------------------
 testthat::test_that("There are 4 rows in the LA main table", {
   shinytest_app <- shinytest2::AppDriver$new(
@@ -113,7 +112,6 @@ testthat::test_that("There are 4 rows in the LA main table", {
 
 # nolint end
 
-
 # Testing LA charts - made using shinytest2::record_test()
 test_that("Check LA charts behave as expected", {
   app <- shinytest2::AppDriver$new(
@@ -180,7 +178,11 @@ test_that("Check LA charts behave as expected", {
   la_barchart_str <- la_barchart_list$x$html
 
   # Extract all text content from <text> tags
-  cleaned_barplot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", la_barchart_str)
+  cleaned_barplot_str <- gsub(
+    "<text[^>]*>([^<]*)</text>",
+    "\\1",
+    la_barchart_str
+  )
 
   # Remove any extra whitespace
   cleaned_barplot_str <- gsub("\n", " ", cleaned_barplot_str)

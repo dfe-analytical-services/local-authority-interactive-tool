@@ -10,7 +10,6 @@ list.files("R/", full.names = TRUE) |>
 
 # UI
 ui_dev <- bslib::page_fillable(
-
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
@@ -85,7 +84,6 @@ ui_dev <- bslib::page_fillable(
 )
 
 
-
 # Server
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
@@ -94,7 +92,11 @@ server_dev <- function(input, output, session) {
     # Get indicator choices for selected topic
     filtered_topic_bds <- bds_metrics |>
       dplyr::filter(
-        if (!is.null(input$topic_input)) .data$Topic == input$topic_input else TRUE
+        if (!is.null(input$topic_input)) {
+          .data$Topic == input$topic_input
+        } else {
+          TRUE
+        }
       ) |>
       pull_uniques("Measure")
 
@@ -105,7 +107,6 @@ server_dev <- function(input, output, session) {
       choices = filtered_topic_bds
     )
   })
-
 
   # Region LA Level table ----------------------------------
   # Filter for selected topic and indicator
@@ -125,7 +126,14 @@ server_dev <- function(input, output, session) {
   all_la_table <- reactive({
     # All LAs long data
     all_la_long <- filtered_bds$data |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values)
+      dplyr::select(
+        `LA Number`,
+        `LA and Regions`,
+        Years,
+        Years_num,
+        values_num,
+        Values
+      )
 
     # Difference between last two years
     all_la_diff <- all_la_long |>
@@ -142,9 +150,17 @@ server_dev <- function(input, output, session) {
         Rank = dplyr::case_when(
           is.na(values_num) ~ NA,
           # Rank in descending order
-          indicator_polarity == "High" ~ rank(-values_num, ties.method = "min", na.last = TRUE),
+          indicator_polarity == "High" ~ rank(
+            -values_num,
+            ties.method = "min",
+            na.last = TRUE
+          ),
           # Rank in ascending order
-          indicator_polarity == "Low" ~ rank(values_num, ties.method = "min", na.last = TRUE)
+          indicator_polarity == "Low" ~ rank(
+            values_num,
+            ties.method = "min",
+            na.last = TRUE
+          )
         )
       ) |>
       dplyr::select(`LA and Regions`, Rank)
@@ -219,8 +235,18 @@ server_dev <- function(input, output, session) {
 
   # Download tables
   # Store the table and export file in reactive values
-  la_local <- reactiveValues(export_file = NULL, data = NULL, file_type = NULL, file_name = NULL)
-  region_local <- reactiveValues(export_file = NULL, data = NULL, file_type = NULL, file_name = NULL)
+  la_local <- reactiveValues(
+    export_file = NULL,
+    data = NULL,
+    file_type = NULL,
+    file_name = NULL
+  )
+  region_local <- reactiveValues(
+    export_file = NULL,
+    data = NULL,
+    file_type = NULL,
+    file_name = NULL
+  )
 
   # Observe when input$file_type or all_la_table is updated and create relevant file
   observeEvent(c(input$file_type, all_la_table()), {
@@ -234,16 +260,26 @@ server_dev <- function(input, output, session) {
       filter_la_data_all_la(la_names_bds)
 
     # Creating download
-    la_local$export_file <- generate_download_file(la_local$data, input$file_type)
+    la_local$export_file <- generate_download_file(
+      la_local$data,
+      input$file_type
+    )
 
     # Region table
     region_local$file_type <- input$file_type
-    region_local$file_name <- c(input$la_input, input$indicator, "All-LA-Region-table")
+    region_local$file_name <- c(
+      input$la_input,
+      input$indicator,
+      "All-LA-Region-table"
+    )
 
     region_local$data <- all_la_table() |>
       filter_region_data_all_la(la_names_bds)
 
-    region_local$export_file <- generate_download_file(region_local$data, input$file_type)
+    region_local$export_file <- generate_download_file(
+      region_local$data,
+      input$file_type
+    )
   })
 
   # Download handlers

@@ -24,20 +24,30 @@
 #'   region_names
 #' )
 #'
-Region_LongPlotServer <- function(id, app_inputs, bds_metrics, region_names_bds) {
+Region_LongPlotServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  region_names_bds
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format Region LA data
-    region_long <- Region_LongDataServer("region_long", filtered_bds, region_names_bds)
+    region_long <- Region_LongDataServer(
+      "region_long",
+      filtered_bds,
+      region_names_bds
+    )
 
     # Filter region_long data for any (Ldn) regions with all NA values, and England
     reactive({
       region_long() |>
         dplyr::group_by(`LA and Regions`) |>
         dplyr::filter(
-          !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
+          !(grepl("^London \\(", `LA and Regions`) &
+            dplyr::n() == sum(is.na(values_num))),
           `LA and Regions` %notin% "England"
         ) |>
         dplyr::ungroup()
@@ -200,12 +210,14 @@ Region_FocusLineChartUI <- function(id) {
 #'   bds_metrics, stat_n_geog, region_names_bds
 #' )
 #'
-Region_FocusLineChartServer <- function(id,
-                                        app_inputs,
-                                        bds_metrics,
-                                        stat_n_geog,
-                                        region_names_bds,
-                                        covid_affected_data) {
+Region_FocusLineChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_geog,
+  region_names_bds,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
@@ -235,8 +247,16 @@ Region_FocusLineChartServer <- function(id,
         reorder_la_regions(region_clean(), after = Inf) |>
         # Creating options for graph labels
         dplyr::mutate(
-          label_color = ifelse(`LA and Regions` == region_clean(), get_focus_front_colour(), get_gov_secondary_text_colour()),
-          label_fontface = ifelse(`LA and Regions` == region_clean(), "bold", "plain")
+          label_color = ifelse(
+            `LA and Regions` == region_clean(),
+            get_focus_front_colour(),
+            get_gov_secondary_text_colour()
+          ),
+          label_fontface = ifelse(
+            `LA and Regions` == region_clean(),
+            "bold",
+            "plain"
+          )
         )
     })
 
@@ -289,11 +309,16 @@ Region_FocusLineChartServer <- function(id,
             # Only show point data where line won't appear (NAs)
             ggplot2::geom_point(
               data = subset(
-                create_show_point(chart_data(), covid_affected_data, app_inputs$indicator()),
+                create_show_point(
+                  chart_data(),
+                  covid_affected_data,
+                  app_inputs$indicator()
+                ),
                 show_point
               ),
               ggplot2::aes(
-                x = Years_num, y = values_num,
+                x = Years_num,
+                y = values_num,
                 color = `LA and Regions`,
                 size = `LA and Regions`
               ),
@@ -316,7 +341,10 @@ Region_FocusLineChartServer <- function(id,
                 label = `LA and Regions`,
                 fontface = label_fontface
               ),
-              colour = subset(chart_data(), Years == current_year())$label_color,
+              colour = subset(
+                chart_data(),
+                Years == current_year()
+              )$label_color,
               segment.colour = NA,
               label.size = NA,
               max.overlaps = Inf,
@@ -374,7 +402,11 @@ Region_FocusLineChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Line-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Regional-Level-Focus-Line-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)
@@ -488,12 +520,14 @@ Region_FocusBarChartUI <- function(id) {
 #'   covid_affected_data
 #' )
 #' }
-Region_FocusBarChartServer <- function(id,
-                                       app_inputs,
-                                       bds_metrics,
-                                       stat_n_geog,
-                                       region_names_bds,
-                                       covid_affected_data) {
+Region_FocusBarChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_geog,
+  region_names_bds,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
@@ -585,7 +619,11 @@ Region_FocusBarChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Focus-Bar-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Regional-Level-Focus-Bar-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)
@@ -697,16 +735,17 @@ Region_MultiChartInputUI <- function(id) {
 #'   "multi_chart_input", app_inputs, stat_n_geog, bds_metrics, region_names_bds, shared_values
 #' )
 #' }
-Region_MultiChartInputServer <- function(id,
-                                         app_inputs,
-                                         stat_n_geog,
-                                         bds_metrics,
-                                         region_names_bds,
-                                         shared_values) {
+Region_MultiChartInputServer <- function(
+  id,
+  app_inputs,
+  stat_n_geog,
+  bds_metrics,
+  region_names_bds,
+  shared_values
+) {
   moduleServer(id, function(input, output, session) {
     # Helper function to retain only the valid selections that are in the available choices
-    retain_valid_selections <- function(current_choices,
-                                        previous_selections) {
+    retain_valid_selections <- function(current_choices, previous_selections) {
       intersect(previous_selections, current_choices)
     }
 
@@ -731,8 +770,14 @@ Region_MultiChartInputServer <- function(id,
       prev_bar_selections <- shared_values$chart_bar_input
 
       # Retain only valid selections from the previous inputs
-      valid_line_selections <- retain_valid_selections(valid_selections(), prev_line_selections)
-      valid_bar_selections <- retain_valid_selections(valid_selections(), prev_bar_selections)
+      valid_line_selections <- retain_valid_selections(
+        valid_selections(),
+        prev_line_selections
+      )
+      valid_bar_selections <- retain_valid_selections(
+        valid_selections(),
+        prev_bar_selections
+      )
 
       # Update the line chart selectize input with valid selections
       updateSelectizeInput(
@@ -752,7 +797,8 @@ Region_MultiChartInputServer <- function(id,
     })
 
     # Line chart input --------------------------------------------------------
-    observeEvent(input$chart_line_input,
+    observeEvent(
+      input$chart_line_input,
       {
         if (!setequal(input$chart_line_input, shared_values$chart_line_input)) {
           # Update line chart shared val with user input
@@ -764,30 +810,37 @@ Region_MultiChartInputServer <- function(id,
     )
 
     # Keep the bar selected synchronized with shared values
-    observeEvent(shared_values$chart_line_input,
+    observeEvent(
+      shared_values$chart_line_input,
       {
-        later::later(function() {
-          isolate({
-            if (!setequal(input$chart_bar_input, shared_values$chart_line_input)) {
-              updateSelectizeInput(
-                session = session,
-                inputId = "chart_bar_input",
-                selected = if (is.null(shared_values$chart_line_input)) {
-                  character(0)
-                } else {
-                  shared_values$chart_line_input
-                }
-              )
-            }
-          })
-        }, delay = 0.5)
+        later::later(
+          function() {
+            isolate({
+              if (
+                !setequal(input$chart_bar_input, shared_values$chart_line_input)
+              ) {
+                updateSelectizeInput(
+                  session = session,
+                  inputId = "chart_bar_input",
+                  selected = if (is.null(shared_values$chart_line_input)) {
+                    character(0)
+                  } else {
+                    shared_values$chart_line_input
+                  }
+                )
+              }
+            })
+          },
+          delay = 0.5
+        )
       },
       ignoreNULL = FALSE,
       ignoreInit = TRUE
     )
 
     # Bar chart input ---------------------------------------------------------
-    observeEvent(input$chart_bar_input,
+    observeEvent(
+      input$chart_bar_input,
       {
         if (!setequal(input$chart_bar_input, shared_values$chart_bar_input)) {
           # Update bar chart shared val with user input
@@ -799,23 +852,29 @@ Region_MultiChartInputServer <- function(id,
     )
 
     # Keep the line selected synchronized with shared values
-    observeEvent(shared_values$chart_bar_input,
+    observeEvent(
+      shared_values$chart_bar_input,
       {
-        later::later(function() {
-          isolate({
-            if (!setequal(input$chart_line_input, shared_values$chart_bar_input)) {
-              updateSelectizeInput(
-                session = session,
-                inputId = "chart_line_input",
-                selected = if (is.null(shared_values$chart_bar_input)) {
-                  character(0)
-                } else {
-                  shared_values$chart_bar_input
-                }
-              )
-            }
-          })
-        }, delay = 0.5)
+        later::later(
+          function() {
+            isolate({
+              if (
+                !setequal(input$chart_line_input, shared_values$chart_bar_input)
+              ) {
+                updateSelectizeInput(
+                  session = session,
+                  inputId = "chart_line_input",
+                  selected = if (is.null(shared_values$chart_bar_input)) {
+                    character(0)
+                  } else {
+                    shared_values$chart_bar_input
+                  }
+                )
+              }
+            })
+          },
+          delay = 0.5
+        )
       },
       ignoreNULL = FALSE,
       ignoreInit = TRUE
@@ -918,13 +977,15 @@ Region_MultiLineChartUI <- function(id) {
 #'   bds_metrics, stat_n_geog, region_names_bds
 #' )
 #'
-Region_MultiLineChartServer <- function(id,
-                                        app_inputs,
-                                        bds_metrics,
-                                        stat_n_geog,
-                                        region_names_bds,
-                                        shared_values,
-                                        covid_affected_data) {
+Region_MultiLineChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_geog,
+  region_names_bds,
+  shared_values,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Obtain data for plotting by region
     region_long_plot <- Region_LongPlotServer(
@@ -1020,7 +1081,11 @@ Region_MultiLineChartServer <- function(id,
             # Only show point data where line won't appear (NAs)
             ggplot2::geom_point(
               data = subset(
-                create_show_point(chart_data(), covid_affected_data, app_inputs$indicator()),
+                create_show_point(
+                  chart_data(),
+                  covid_affected_data,
+                  app_inputs$indicator()
+                ),
                 show_point
               ),
               ggplot2::aes(
@@ -1090,7 +1155,11 @@ Region_MultiLineChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Line-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Regional-Level-Multi-Line-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)
@@ -1226,13 +1295,15 @@ Region_MultiBarChartUI <- function(id) {
 #'   shared_values, covid_affected_data
 #' )
 #' }
-Region_MultiBarChartServer <- function(id,
-                                       app_inputs,
-                                       bds_metrics,
-                                       stat_n_geog,
-                                       region_names_bds,
-                                       shared_values,
-                                       covid_affected_data) {
+Region_MultiBarChartServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_geog,
+  region_names_bds,
+  shared_values,
+  covid_affected_data
+) {
   moduleServer(id, function(input, output, session) {
     # Get data for the region's long format plot
     region_long_plot <- Region_LongPlotServer(
@@ -1339,7 +1410,11 @@ Region_MultiBarChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = static_chart(), "html" = interactive_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Regional-Level-Multi-Bar-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Regional-Level-Multi-Bar-Chart"
+      ))
     )
 
     # Plot used for copy to clipboard (hidden)

@@ -92,10 +92,12 @@ InternalLinkUI <- function(id, link_text) {
 #' @return None. This function is called for its side effects, which include
 #' switching the active tab.
 #'
-InternalLinkServer <- function(id,
-                               tab_value,
-                               parent_session,
-                               tabset_id = "left_nav") {
+InternalLinkServer <- function(
+  id,
+  tab_value,
+  parent_session,
+  tabset_id = "left_nav"
+) {
   moduleServer(id, function(input, output, session) {
     observeEvent(input$internal_link, {
       # Switch to the specified tab
@@ -177,34 +179,52 @@ Download_DataUI <- function(id, download_label) {
 #' )
 #' }
 #'
-Download_DataServer <- function(id, file_type_input, data_for_download, download_name) {
+Download_DataServer <- function(
+  id,
+  file_type_input,
+  data_for_download,
+  download_name
+) {
   moduleServer(id, function(input, output, session) {
     # Reactive values for storing file path
-    local <- reactiveValues(export_file = NULL, data = NULL, plot_width = NULL, file_type = NULL, file_name = NULL)
+    local <- reactiveValues(
+      export_file = NULL,
+      data = NULL,
+      plot_width = NULL,
+      file_type = NULL,
+      file_name = NULL
+    )
 
     # Observe changes in file type or data and generate export file
-    observeEvent(list(file_type_input(), data_for_download(), download_name()), {
-      # Ensure inputs are not NULL
-      req(file_type_input(), data_for_download(), download_name())
+    observeEvent(
+      list(file_type_input(), data_for_download(), download_name()),
+      {
+        # Ensure inputs are not NULL
+        req(file_type_input(), data_for_download(), download_name())
 
-      # Setting parameters
-      local$file_type <- file_type_input()
-      local$file_name <- download_name()
+        # Setting parameters
+        local$file_type <- file_type_input()
+        local$file_name <- download_name()
 
-      # For charts we need to pull the relevant object from the reactive list
-      if (grepl("svg", local$file_type, ignore.case = TRUE)) {
-        local$data <- data_for_download()$"svg"
-        # Getting plot width from ggiraph obj ratio
-        local$plot_width <- data_for_download()$"html"$x$ratio * 5
-      } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
-        local$data <- data_for_download()$"html"
-      } else {
-        local$data <- data_for_download()
+        # For charts we need to pull the relevant object from the reactive list
+        if (grepl("svg", local$file_type, ignore.case = TRUE)) {
+          local$data <- data_for_download()$"svg"
+          # Getting plot width from ggiraph obj ratio
+          local$plot_width <- data_for_download()$"html"$x$ratio * 5
+        } else if (grepl("html", local$file_type, ignore.case = TRUE)) {
+          local$data <- data_for_download()$"html"
+        } else {
+          local$data <- data_for_download()
+        }
+
+        # Generate the file based on the selected file type
+        local$export_file <- generate_download_file(
+          local$data,
+          local$file_type,
+          local$plot_width
+        )
       }
-
-      # Generate the file based on the selected file type
-      local$export_file <- generate_download_file(local$data, local$file_type, local$plot_width)
-    })
+    )
 
     # Download handler
     output$download <- create_download_handler(
@@ -319,7 +339,8 @@ CopyToClipboardPopUpServer <- function(id) {
         session,
         input,
         text = tags$span(
-          style = "color: white; font-size: 20px;", "Chart copied!"
+          style = "color: white; font-size: 20px;",
+          "Chart copied!"
         ),
         type = "success",
         position = "top-center",
@@ -338,7 +359,8 @@ CopyToClipboardPopUpServer <- function(id) {
         session,
         input,
         text = tags$span(
-          style = "color: white; font-size: 20px;", "Failed to copy chart!"
+          style = "color: white; font-size: 20px;",
+          "Failed to copy chart!"
         ),
         type = "error",
         position = "top-center",

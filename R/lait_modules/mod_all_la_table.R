@@ -37,7 +37,14 @@ Build_AllLATableServer <- function(id, filtered_bds, la_names_bds) {
     reactive({
       # All LAs long data
       all_la_long <- filtered_bds() |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values)
+        dplyr::select(
+          `LA Number`,
+          `LA and Regions`,
+          Years,
+          Years_num,
+          values_num,
+          Values
+        )
 
       # Difference between last two years
       all_la_diff <- all_la_long |>
@@ -288,9 +295,16 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
         # Keep only Regions and England (remove London Inner/Outer with all NAs)
         dplyr::filter(
           `LA and Regions` %notin% la_names_bds,
-          !(`LA and Regions` %in% c("London (Inner)", "London (Outer)") &
+          !(`LA and Regions` %in%
+            c("London (Inner)", "London (Outer)") &
             # Sums number of non-NA cols (left of LA and Regions) and checks if = 0
-            rowSums(!is.na(dplyr::select(all_la_table(), -c(`LA Number`, `LA and Regions`)))) == 0)
+            rowSums(
+              !is.na(dplyr::select(
+                all_la_table(),
+                -c(`LA Number`, `LA and Regions`)
+              ))
+            ) ==
+              0)
         ) |>
         # Replace Rank
         dplyr::mutate(Rank = "") |>
@@ -326,7 +340,12 @@ AllLA_TableServer <- function(id, app_inputs, bds_metrics, la_names_bds) {
           )
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, all_la_region_table, all_la_region, "Region")
+          highlight_selected_row(
+            index,
+            all_la_region_table,
+            all_la_region,
+            "Region"
+          )
         },
         pagination = FALSE
         # class = "hidden-column-headers"

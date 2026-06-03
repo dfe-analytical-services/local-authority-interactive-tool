@@ -118,15 +118,28 @@ StatN_LongServer <- function(id, la_input, filtered_bds, stat_n_la) {
 
       # Statistical Neighbours long data
       filtered_bds() |>
-        dplyr::filter(`LA and Regions` %in% c(la_input(), stat_n_sns(), stat_n_region(), "England")) |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
+        dplyr::filter(
+          `LA and Regions` %in%
+            c(la_input(), stat_n_sns(), stat_n_region(), "England")
+        ) |>
+        dplyr::select(
+          `LA Number`,
+          `LA and Regions`,
+          Years,
+          Years_num,
+          values_num,
+          Values
+        ) |>
         dplyr::bind_rows(stat_n_sn_avg) |>
         dplyr::mutate(
           `LA and Regions` = factor(
             `LA and Regions`,
             levels = c(
-              la_input(), stat_n_sns(), "Statistical Neighbours",
-              stat_n_region(), "England"
+              la_input(),
+              stat_n_sns(),
+              "Statistical Neighbours",
+              stat_n_region(),
+              "England"
             )
           )
         )
@@ -315,10 +328,7 @@ StatN_TablesUI <- function(id) {
 #' year. The final reactable table is formatted using a custom dfe_reactable
 #' function, and rows are highlighted based on the selected LA.
 #'
-StatN_LASNsTableServer <- function(id,
-                                   app_inputs,
-                                   bds_metrics,
-                                   stat_n_la) {
+StatN_LASNsTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -365,7 +375,11 @@ StatN_LASNsTableServer <- function(id,
       "statn_download",
       reactive(input$file_type),
       reactive(stat_n_sns_table()),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "SN-Stat-Neighbour-Level"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "SN-Stat-Neighbour-Level"
+      ))
     )
 
     # Table output ------------------------------------------------------------
@@ -382,7 +396,12 @@ StatN_LASNsTableServer <- function(id,
           set_custom_default_col_widths()
         ),
         rowStyle = function(index) {
-          highlight_selected_row(index, stat_n_sns_table(), app_inputs$la(), "LA")
+          highlight_selected_row(
+            index,
+            stat_n_sns_table(),
+            app_inputs$la(),
+            "LA"
+          )
         },
         pagination = FALSE
       )
@@ -441,10 +460,7 @@ StatN_GeogCompTableUI <- function(id) {
 #' and column alignments are handled using a custom \code{format_num_reactable_cols}
 #' function.
 #'
-StatN_GeogCompTableServer <- function(id,
-                                      app_inputs,
-                                      bds_metrics,
-                                      stat_n_la) {
+StatN_GeogCompTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -472,11 +488,14 @@ StatN_GeogCompTableServer <- function(id,
     # Keep LA geographic comparison areas
     stat_n_geog_table <- reactive({
       stat_n_table() |>
-        dplyr::filter(`LA and Regions` %in% c(
-          "Statistical Neighbours",
-          stat_n_region(),
-          "England"
-        )) |>
+        dplyr::filter(
+          `LA and Regions` %in%
+            c(
+              "Statistical Neighbours",
+              stat_n_region(),
+              "England"
+            )
+        ) |>
         dplyr::arrange(`LA and Regions`)
     })
 
@@ -485,7 +504,11 @@ StatN_GeogCompTableServer <- function(id,
       "geog_download",
       reactive(input$file_type),
       reactive(stat_n_geog_table()),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Geog-Stat-Neighbour-Level"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Geog-Stat-Neighbour-Level"
+      ))
     )
 
     # Table output ------------------------------------------------------------
@@ -569,12 +592,14 @@ StatN_StatsTableUI <- function(id) {
 #' It also calculates quartile banding based on the latest values for
 #' the selected indicator.
 #'
-StatN_StatsTableServer <- function(id,
-                                   app_inputs,
-                                   bds_metrics,
-                                   stat_n_la,
-                                   la_names_bds,
-                                   no_qb_indicators) {
+StatN_StatsTableServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  la_names_bds,
+  no_qb_indicators
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer(
@@ -606,9 +631,7 @@ StatN_StatsTableServer <- function(id,
 
       # Extract change from prev year
       stat_n_change_prev <- stat_n_diff() |>
-        filter_la_regions(stat_n_stats_geog,
-          pull_col = "values_num"
-        )
+        filter_la_regions(stat_n_stats_geog, pull_col = "values_num")
 
       # Get polarity of indicator
       stat_n_indicator_polarity <- filtered_bds() |>
@@ -623,15 +646,22 @@ StatN_StatsTableServer <- function(id,
         calculate_rank(stat_n_indicator_polarity) |>
         filter_la_regions(app_inputs$la(), pull_col = "rank")
 
-
       # Calculate quartile bands for indicator
       stat_n_quartile_bands <- filtered_bds() |>
-        filter_la_regions(la_names_bds, latest = TRUE, pull_col = "values_num") |>
+        filter_la_regions(
+          la_names_bds,
+          latest = TRUE,
+          pull_col = "values_num"
+        ) |>
         quantile(na.rm = TRUE)
 
       # Extracting LA latest value
       stat_n_indicator_val <- filtered_bds() |>
-        filter_la_regions(app_inputs$la(), latest = TRUE, pull_col = "values_num")
+        filter_la_regions(
+          app_inputs$la(),
+          latest = TRUE,
+          pull_col = "values_num"
+        )
 
       # Boolean as to whether to include Quartile Banding
       no_show_qb <- app_inputs$indicator() %in% no_qb_indicators

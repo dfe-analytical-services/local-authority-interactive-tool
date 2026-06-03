@@ -67,14 +67,23 @@ sn_avg <- la_filtered_bds |>
 # LA levels long
 la_long <- la_filtered_bds |>
   dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-  dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
+  dplyr::select(
+    `LA Number`,
+    `LA and Regions`,
+    Years,
+    Years_num,
+    values_num,
+    Values
+  ) |>
   dplyr::bind_rows(sn_avg) |>
   dplyr::mutate(
     `LA and Regions` = factor(
       `LA and Regions`,
       levels = c(
-        selected_la, la_region_ldn_clean,
-        "Statistical Neighbours", "England"
+        selected_la,
+        la_region_ldn_clean,
+        "Statistical Neighbours",
+        "England"
       )
     )
   )
@@ -86,11 +95,13 @@ la_diff <- la_long |>
 # Join difference and pivot wider to recreate LAIT table
 la_table <- la_long |>
   dplyr::bind_rows(la_diff) |>
-  dplyr::mutate(Values = dplyr::case_when(
-    is.na(values_num) ~ Values,
-    `Years` == "Change from previous year" ~ as.character(values_num),
-    TRUE ~ as.character(values_num)
-  )) |>
+  dplyr::mutate(
+    Values = dplyr::case_when(
+      is.na(values_num) ~ Values,
+      `Years` == "Change from previous year" ~ as.character(values_num),
+      TRUE ~ as.character(values_num)
+    )
+  ) |>
   tidyr::pivot_wider(
     id_cols = c("LA Number", "LA and Regions"),
     names_from = Years,
@@ -120,7 +131,8 @@ dfe_reactable(
 
 # Extract change from prev year (from LA table)
 la_change_prev <- la_table |>
-  filter_la_regions(selected_la,
+  filter_la_regions(
+    selected_la,
     latest = FALSE,
     pull_col = "Change from previous year"
   )
@@ -131,9 +143,7 @@ la_indicator_polarity <- filtered_bds |>
 
 # Set the trend value
 la_trend <- la_diff |>
-  filter_la_regions(selected_la,
-    pull_col = "values_num"
-  )
+  filter_la_regions(selected_la, pull_col = "values_num")
 
 # Get latest rank, ties are set to min & NA vals to NA rank
 la_rank <- filtered_bds |>
@@ -244,9 +254,13 @@ dfe_reactable(
       get_indicator_dps(filtered_bds),
       num_exclude = "LA Number",
       categorical = c(
-        "Trend", "Quartile Banding", "Latest National Rank",
-        "A", "B",
-        "C", "D"
+        "Trend",
+        "Quartile Banding",
+        "Latest National Rank",
+        "A",
+        "B",
+        "C",
+        "D"
       )
     ),
     # Define specific formatting for the Trend and Quartile Banding columns
@@ -297,7 +311,8 @@ la_line_chart <- la_long |>
     data = subset(
       create_show_point(la_long, covid_affected_data, selected_indicator),
       show_point
-    ), ggplot2::aes(
+    ),
+    ggplot2::aes(
       x = Years_num,
       y = values_num,
       color = `LA and Regions`
@@ -357,7 +372,12 @@ htmlwidgets::saveWidget(ggiraph_test_save, tempfile(fileext = ".html"))
 
 # LA bar plot -----------------------------------------------------------------
 # Generate the covid plot data if add_covid_plot is TRUE (for bar chart)
-covid_plot_bar <- calculate_covid_plot(la_long, covid_affected_data, selected_la, "bar")
+covid_plot_bar <- calculate_covid_plot(
+  la_long,
+  covid_affected_data,
+  selected_la,
+  "bar"
+)
 
 # Plot
 la_bar_chart <- la_long |>
@@ -393,7 +413,6 @@ ggiraph::girafe(
   ),
   fonts = list(sans = "Arial")
 )
-
 
 
 # LA Metadata -----------------------------------------------------------------

@@ -31,7 +31,6 @@ info_page_panel <- function() {
           br(),
           br(),
 
-
           # Guidance sources ===================================================
           h2(
             id = "useful_links_link",

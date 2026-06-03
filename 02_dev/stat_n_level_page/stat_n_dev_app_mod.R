@@ -23,7 +23,6 @@ ui_mod <- bslib::page_fillable(
   # Tab header ================================================================
   h1("Statistical Neighbour Level"),
 
-
   # Start of app  =============================================================
   appInputsUI("stat_n_inputs"),
 
@@ -56,7 +55,11 @@ server_mod <- function(input, output, session) {
   )
 
   # Extract selected LA, Topic and Indicator
-  app_inputs <- appInputsServer("stat_n_inputs", shared_values, topic_indicator_full)
+  app_inputs <- appInputsServer(
+    "stat_n_inputs",
+    shared_values,
+    topic_indicator_full
+  )
 
   # Statistical Neighbour tables ==============================================
   # LA statistical neighbours table -------------------------------------------

@@ -162,10 +162,12 @@ pretty_num_large <- function(x, dp = 0, ...) {
 #' # Apply formatting to all numeric columns except specified ones
 #' pretty_num_table(df, exclude_columns = c("b"), dp = 2)
 #'
-pretty_num_table <- function(data,
-                             include_columns = NULL,
-                             exclude_columns = NULL,
-                             ...) {
+pretty_num_table <- function(
+  data,
+  include_columns = NULL,
+  exclude_columns = NULL,
+  ...
+) {
   # Check if data is empty
   if (nrow(data) < 1) {
     warning("Data seems to be empty. Returning unmodified.")
@@ -248,8 +250,6 @@ dfe_reactable <- function(data, ...) {
     ...
   )
 }
-
-
 
 
 #' Check if a column contains numeric or NA values
@@ -389,13 +389,17 @@ set_custom_default_col_widths <- function(...) {
 #'   categorical = c("Category")
 #' )
 #'
-format_num_reactable_cols <- function(data,
-                                      indicator_dps,
-                                      num_exclude = NULL,
-                                      categorical = NULL) {
+format_num_reactable_cols <- function(
+  data,
+  indicator_dps,
+  num_exclude = NULL,
+  categorical = NULL
+) {
   formatted_cols <- lapply(names(data), function(col) {
     col_data <- data[[col]]
-    if (is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))) {
+    if (
+      is_numeric_or_na(col_data) && (col %notin% c(num_exclude, categorical))
+    ) {
       # Format numeric columns
       format_reactable_num_col(col, indicator_dps)
     } else if (col %in% categorical) {
@@ -450,16 +454,17 @@ format_num_reactable_cols <- function(data,
 #' )
 #'
 build_la_stats_table <- function(
-    main_table,
-    selected_la,
-    trend,
-    change_since_prev,
-    rank,
-    quartile,
-    quartile_bands,
-    indicator_dps,
-    indicator_polarity,
-    no_show_qb) {
+  main_table,
+  selected_la,
+  trend,
+  change_since_prev,
+  rank,
+  quartile,
+  quartile_bands,
+  indicator_dps,
+  indicator_polarity,
+  no_show_qb
+) {
   # Get LA number
   la_number <- main_table |>
     filter_la_regions(selected_la, pull_col = "LA Number")
@@ -496,7 +501,11 @@ build_la_stats_table <- function(
   }
 
   # Quartile band columns
-  polarity_case <- if (is.na(indicator_polarity[1])) "none" else tolower(indicator_polarity[1])
+  polarity_case <- if (is.na(indicator_polarity[1])) {
+    "none"
+  } else {
+    tolower(indicator_polarity[1])
+  }
 
   if (polarity_case == "low") {
     bands <- list(
@@ -526,10 +535,13 @@ build_la_stats_table <- function(
 
   # Apply no_show_qb logic
   if (isTRUE(no_show_qb)) {
-    bands <- modifyList(bands, list(
-      "Quartile Banding" = rep("-", n_rows),
-      "No Quartiles" = rep("Data range is too small.", n_rows)
-    ))
+    bands <- modifyList(
+      bands,
+      list(
+        "Quartile Banding" = rep("-", n_rows),
+        "No Quartiles" = rep("Data range is too small.", n_rows)
+      )
+    )
   }
 
   # Convert all band entries to flat character vectors
@@ -554,12 +566,13 @@ build_la_stats_table <- function(
   )
 
   # Bind everything together safely
-  stats_table <- dplyr::bind_cols(stats_table, as.data.frame(bands, check.names = FALSE))
+  stats_table <- dplyr::bind_cols(
+    stats_table,
+    as.data.frame(bands, check.names = FALSE)
+  )
 
   stats_table
 }
-
-
 
 
 #' Build a formatted statistics table for regions
@@ -586,11 +599,13 @@ build_la_stats_table <- function(
 #'   c("Up", "Down"), c(10, -5), some_filtered_data
 #' )
 #'
-build_region_stats_table <- function(la_number,
-                                     area_name,
-                                     trend,
-                                     change_since_prev,
-                                     filtered_bds) {
+build_region_stats_table <- function(
+  la_number,
+  area_name,
+  trend,
+  change_since_prev,
+  filtered_bds
+) {
   data.frame(
     "LA Number" = la_number,
     "LA and Regions" = area_name,
@@ -617,14 +632,15 @@ build_region_stats_table <- function(la_number,
 #' @export
 
 build_sn_stats_table <- function(
-    stat_n_diff,
-    la_and_regions,
-    trend,
-    change_prev,
-    national_rank,
-    quartile_band,
-    polarity,
-    pull_col = "LA Number") {
+  stat_n_diff,
+  la_and_regions,
+  trend,
+  change_prev,
+  national_rank,
+  quartile_band,
+  polarity,
+  pull_col = "LA Number"
+) {
   # Helper to safely pad or replace missing values
   safe_fill <- function(x, len, na_value) {
     if (length(x) == 0 || all(is.na(x))) {
@@ -655,8 +671,6 @@ build_sn_stats_table <- function(
 }
 
 
-
-
 #' Highlight a selected row in a reactable
 #'
 #' This function applies a specific style to a row if the value in the
@@ -680,7 +694,12 @@ build_sn_stats_table <- function(
 #'   }
 #' )
 #' }
-highlight_selected_row <- function(index, data, selected_area = NULL, geog_col = "LA and Regions") {
+highlight_selected_row <- function(
+  index,
+  data,
+  selected_area = NULL,
+  geog_col = "LA and Regions"
+) {
   la_region <- data[index, geog_col]
 
   # Handle missing values first
@@ -944,7 +963,12 @@ set_min_col_width <- function(min_width = 60) {
 #'         for "LAs in [Region]", statistical neighbors, and "All LAs"
 #'         or "All Regions" as applicable.
 #'
-get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geog) {
+get_geog_selection <- function(
+  input,
+  la_names_bds,
+  region_names_bds,
+  stat_n_geog
+) {
   # Initialise an empty vector to store the results
   selection <- input$geog
 
@@ -956,7 +980,10 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
 
     # Only add Region LAs if they are LAs
     if (length(selected_las) > 0) {
-      selection <- c(setdiff(selection, selected_las), paste0("LAs in ", selected_la_regions))
+      selection <- c(
+        setdiff(selection, selected_las),
+        paste0("LAs in ", selected_la_regions)
+      )
     }
   }
 
@@ -966,7 +993,10 @@ get_geog_selection <- function(input, la_names_bds, region_names_bds, stat_n_geo
 
     # Only add stat neighbours if they are LAs
     if (length(selected_las) > 0) {
-      selection <- c(setdiff(selection, selected_las), paste0(selected_las, " statistical neighbours"))
+      selection <- c(
+        setdiff(selection, selected_las),
+        paste0(selected_las, " statistical neighbours")
+      )
     }
   }
 
@@ -1069,10 +1099,11 @@ truncate_cell_with_hover <- function(text, tooltip) {
 #' )
 #'
 create_tooltip_icon <- function(
-    tooltip_text,
-    icon_class = "fas fa-info-circle",
-    icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
-    ...) {
+  tooltip_text,
+  icon_class = "fas fa-info-circle",
+  icon_style = "color: #5694ca; padding-right: 7px; padding-left: 7px; cursor: help;",
+  ...
+) {
   bslib::tooltip(
     htmltools::tags$span(
       htmltools::tags$i(

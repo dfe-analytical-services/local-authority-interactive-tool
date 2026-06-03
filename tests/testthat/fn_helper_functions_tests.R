@@ -1,4 +1,9 @@
-generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las = 4) {
+generate_bds_dummy_data <- function(
+  bds_data,
+  n_measure = 10,
+  n_years = 4,
+  n_las = 4
+) {
   set.seed(1)
 
   # Length of column
@@ -13,17 +18,13 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   measures_n_topics <- bds_data |>
     dplyr::distinct(Topic, Measure, Measure_short, y_axis_name) |>
     dplyr::sample_n(n_measure) |>
-    (
-      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), each = n_years * n_las))
-    )()
+    (\(x) dplyr::slice(x, rep(seq_len(nrow(x)), each = n_years * n_las)))()
 
   # Local Authorities
   local_authorities <- bds_data |>
     dplyr::distinct(`LA and Regions`, Region) |>
     dplyr::sample_n(n_las) |>
-    (
-      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), years = n_years * n_measure))
-    )()
+    (\(x) dplyr::slice(x, rep(seq_len(nrow(x)), years = n_years * n_measure)))()
 
   # Values
   measure_test <- measures_n_topics |>
@@ -36,7 +37,11 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
       dplyr::pull(Values) |>
       sample(size = n_years * n_las, replace = TRUE)
 
-    sampled_values_clean <- ifelse(sampled_values %in% c("-", "c"), NA, sampled_values)
+    sampled_values_clean <- ifelse(
+      sampled_values %in% c("-", "c"),
+      NA,
+      sampled_values
+    )
 
     sampled_values_num <- as.numeric(sampled_values_clean)
 
@@ -49,7 +54,6 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
     )
   })
   values_col <- do.call(rbind, sampled_values_lst)
-
 
   # Build dependent dataset
   dummy_bds_dependent <- measures_n_topics |>
@@ -65,12 +69,21 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
     )
   })
 
-
   # Other cols
-  measure_code_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
-  la_number_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
-  type_col <- replicate(n_repeats, paste0(sample(LETTERS, 3, replace = TRUE), collapse = ""))
-  combined_code_col <- paste(measure_code_col,
+  measure_code_col <- replicate(
+    n_repeats,
+    paste0(sample(1:9, 3, replace = TRUE), collapse = "")
+  )
+  la_number_col <- replicate(
+    n_repeats,
+    paste0(sample(1:9, 3, replace = TRUE), collapse = "")
+  )
+  type_col <- replicate(
+    n_repeats,
+    paste0(sample(LETTERS, 3, replace = TRUE), collapse = "")
+  )
+  combined_code_col <- paste(
+    measure_code_col,
     dummy_bds_dependent$Measure_short,
     dummy_bds_dependent$year_col,
     sep = "_"
@@ -97,10 +110,12 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
 }
 
 
-
-
-
-generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las = 4) {
+generate_bds_dummy_data <- function(
+  bds_data,
+  n_measure = 10,
+  n_years = 4,
+  n_las = 4
+) {
   set.seed(1)
 
   # Length of column
@@ -133,17 +148,13 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
   measures_n_topics <- bds_data |>
     dplyr::distinct(Topic, Measure, Measure_short, y_axis_name) |>
     dplyr::sample_n(n_measure) |>
-    (
-      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), each = n_years * n_las))
-    )()
+    (\(x) dplyr::slice(x, rep(seq_len(nrow(x)), each = n_years * n_las)))()
 
   # Local Authorities
   local_authorities <- bds_data |>
     dplyr::distinct(`LA and Regions`, Region) |>
     dplyr::sample_n(n_las) |>
-    (
-      \(x) dplyr::slice(x, rep(seq_len(nrow(x)), years = n_years * n_measure))
-    )()
+    (\(x) dplyr::slice(x, rep(seq_len(nrow(x)), years = n_years * n_measure)))()
 
   # Values
   measure_test <- measures_n_topics |>
@@ -156,7 +167,11 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
       dplyr::pull(Values) |>
       sample(size = n_years * n_las, replace = TRUE)
 
-    sampled_values_clean <- ifelse(sampled_values %in% c("-", "c"), NA, sampled_values)
+    sampled_values_clean <- ifelse(
+      sampled_values %in% c("-", "c"),
+      NA,
+      sampled_values
+    )
 
     sampled_values_num <- as.numeric(sampled_values_clean)
 
@@ -169,7 +184,6 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
     )
   })
   values_col <- do.call(rbind, sampled_values_lst)
-
 
   # Build dependent dataset
   dummy_bds_dependent <- measures_n_topics |>
@@ -185,12 +199,21 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
     )
   })
 
-
   # Other cols
-  measure_code_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
-  la_number_col <- replicate(n_repeats, paste0(sample(1:9, 3, replace = TRUE), collapse = ""))
-  type_col <- replicate(n_repeats, paste0(sample(LETTERS, 3, replace = TRUE), collapse = ""))
-  combined_code_col <- paste(measure_code_col,
+  measure_code_col <- replicate(
+    n_repeats,
+    paste0(sample(1:9, 3, replace = TRUE), collapse = "")
+  )
+  la_number_col <- replicate(
+    n_repeats,
+    paste0(sample(1:9, 3, replace = TRUE), collapse = "")
+  )
+  type_col <- replicate(
+    n_repeats,
+    paste0(sample(LETTERS, 3, replace = TRUE), collapse = "")
+  )
+  combined_code_col <- paste(
+    measure_code_col,
     dummy_bds_dependent$Measure_short,
     dummy_bds_dependent$year_col,
     sep = "_"
@@ -217,8 +240,6 @@ generate_bds_dummy_data <- function(bds_data, n_measure = 10, n_years = 4, n_las
 }
 
 
-
-
 # Source functions (all scripts in R/ with prefix 'fn_') ----------------------
 list.files("R/", full.names = TRUE) |>
   (\(x) {
@@ -231,7 +252,10 @@ library(testthat)
 
 # Define a function to calculate coverage for each file
 calculate_coverage <- function(fn_file) {
-  coverage <- covr::file_coverage(paste0("R/", fn_file), paste0("tests/testthat/test-", fn_file))
+  coverage <- covr::file_coverage(
+    paste0("R/", fn_file),
+    paste0("tests/testthat/test-", fn_file)
+  )
   coverage
 }
 

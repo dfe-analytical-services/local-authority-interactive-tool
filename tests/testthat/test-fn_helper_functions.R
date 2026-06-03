@@ -16,7 +16,10 @@ test_that("expandable() handles shiny.tag as contents", {
   expect_equal(result$children[[2]]$name, "div")
   expect_true(inherits(result$children[[2]]$children[[1]], "shiny.tag"))
   expect_equal(result$children[[2]]$children[[1]]$name, "p")
-  expect_equal(result$children[[2]]$children[[1]]$children[[1]], "Paragraph content")
+  expect_equal(
+    result$children[[2]]$children[[1]]$children[[1]],
+    "Paragraph content"
+  )
 })
 
 # 3. expandable() test for error when input_id is not a single string
@@ -370,7 +373,10 @@ test_that("4. get_metadata with non-matching indicator", {
   )
 
   expect_warning(
-    expect_equal(get_metadata(data, "gear", "Description"), "No matching metadata"),
+    expect_equal(
+      get_metadata(data, "gear", "Description"),
+      "No matching metadata"
+    ),
     "No matching metadata for Description"
   )
 })
@@ -394,7 +400,10 @@ test_that("6. get_metadata with empty data frame", {
   )
 
   expect_warning(
-    expect_equal(get_metadata(data, "gear", "Description"), "No matching metadata"),
+    expect_equal(
+      get_metadata(data, "gear", "Description"),
+      "No matching metadata"
+    ),
     "No matching metadata for Description"
   )
 })
@@ -402,7 +411,11 @@ test_that("6. get_metadata with empty data frame", {
 test_that("7. get_metadata with special characters in metadata", {
   data <- data.frame(
     Measure = c("mpg", "cyl", "hp"),
-    `Hyperlink(s)` = c("http://example.com/mpg", "http://example.com/cyl", "http://example.com/hp"),
+    `Hyperlink(s)` = c(
+      "http://example.com/mpg",
+      "http://example.com/cyl",
+      "http://example.com/hp"
+    ),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )

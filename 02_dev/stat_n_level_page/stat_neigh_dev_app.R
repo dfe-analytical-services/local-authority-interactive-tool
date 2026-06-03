@@ -10,7 +10,6 @@ list.files("R/", full.names = TRUE) |>
 
 # UI
 ui_dev <- bslib::page_fillable(
-
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
@@ -151,7 +150,8 @@ ui_dev <- bslib::page_fillable(
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input,
+  shiny::observeEvent(
+    input$topic_input,
     {
       # Save the currently selected indicator
       current_indicator <- input$indicator
@@ -161,7 +161,9 @@ server_dev <- function(input, output, session) {
         dplyr::filter(
           # If topic_input is not NULL or "All topics", filter by selected topics
           # Include all rows if no topic is selected or "All topics" is selected
-          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
+          if (
+            is.null(input$topic_input) | "All topics" %in% input$topic_input
+          ) {
             TRUE
           } else {
             .data$Topic %in% input$topic_input
@@ -187,7 +189,6 @@ server_dev <- function(input, output, session) {
     },
     ignoreNULL = FALSE
   )
-
 
   # Region LA Level table ----------------------------------
   # Filter for selected topic and indicator
@@ -246,15 +247,28 @@ server_dev <- function(input, output, session) {
 
     # Statistical Neighbours long data
     filtered_bds$data |>
-      dplyr::filter(`LA and Regions` %in% c(input$la_input, stat_n_sns(), stat_n_region(), "England")) |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num, Values) |>
+      dplyr::filter(
+        `LA and Regions` %in%
+          c(input$la_input, stat_n_sns(), stat_n_region(), "England")
+      ) |>
+      dplyr::select(
+        `LA Number`,
+        `LA and Regions`,
+        Years,
+        Years_num,
+        values_num,
+        Values
+      ) |>
       dplyr::bind_rows(stat_n_sn_avg) |>
       dplyr::mutate(
         `LA and Regions` = factor(
           `LA and Regions`,
           levels = c(
-            input$la_input, stat_n_sns(), "Statistical Neighbours",
-            stat_n_region(), "England"
+            input$la_input,
+            stat_n_sns(),
+            "Statistical Neighbours",
+            stat_n_region(),
+            "England"
           )
         )
       )
@@ -310,11 +324,14 @@ server_dev <- function(input, output, session) {
   # Join difference and pivot wider to recreate 2nd Statistical Neighbours table
   output$stat_n_comp_table <- reactable::renderReactable({
     stat_n_comp_table <- stat_n_table() |>
-      dplyr::filter(`LA and Regions` %in% c(
-        "Statistical Neighbours",
-        stat_n_region(),
-        "England"
-      )) |>
+      dplyr::filter(
+        `LA and Regions` %in%
+          c(
+            "Statistical Neighbours",
+            stat_n_region(),
+            "England"
+          )
+      ) |>
       dplyr::arrange(`LA and Regions`)
 
     # Output table
@@ -336,16 +353,13 @@ server_dev <- function(input, output, session) {
     )
   })
 
-
   # Statistical Neighbour Level stats table -------------------------------------
   stat_n_stats_table <- reactive({
     stat_n_stats_geog <- c(input$la_input, stat_n_region(), "England")
 
     # Extract change from prev year
     stat_n_change_prev <- stat_n_diff() |>
-      filter_la_regions(stat_n_stats_geog,
-        pull_col = "values_num"
-      )
+      filter_la_regions(stat_n_stats_geog, pull_col = "values_num")
 
     # Get polarity of indicator
     stat_n_indicator_polarity <- filtered_bds$data |>
@@ -359,7 +373,6 @@ server_dev <- function(input, output, session) {
       filter_la_regions(la_names_bds, latest = TRUE) |>
       calculate_rank(stat_n_indicator_polarity) |>
       filter_la_regions(input$la_input, pull_col = "rank")
-
 
     # Calculate quartile bands for indicator
     stat_n_quartile_bands <- filtered_bds$data |>
@@ -440,7 +453,6 @@ server_dev <- function(input, output, session) {
     )
   })
 
-
   # Statistical Neighbour charts ----------------------------------------------
 
   # Shared inputs -------------------------------------------------------------
@@ -463,8 +475,14 @@ server_dev <- function(input, output, session) {
     prev_bar_selections <- input$chart_bar_input
 
     # Retain only valid selections from previous inputs
-    valid_line_selections <- retain_valid_selections(multi_chart_data, prev_line_selections)
-    valid_bar_selections <- retain_valid_selections(multi_chart_data, prev_bar_selections)
+    valid_line_selections <- retain_valid_selections(
+      multi_chart_data,
+      prev_line_selections
+    )
+    valid_bar_selections <- retain_valid_selections(
+      multi_chart_data,
+      prev_bar_selections
+    )
 
     # Update chart_line_input while retaining valid previous selections
     updateSelectInput(
@@ -490,7 +508,8 @@ server_dev <- function(input, output, session) {
   )
 
   # Keep line and bar inputs synchronised without resetting selections
-  observeEvent(input$chart_line_input,
+  observeEvent(
+    input$chart_line_input,
     {
       # Capture the current reactive values
       shared_chart_inputs$line_chart <- input$chart_line_input
@@ -500,30 +519,37 @@ server_dev <- function(input, output, session) {
   )
 
   # Update the bar chart with new line chart value
-  observeEvent(shared_chart_inputs$line_chart,
+  observeEvent(
+    shared_chart_inputs$line_chart,
     {
-      later::later(function() {
-        isolate({
-          if (!setequal(shared_chart_inputs$line_chart, input$chart_bar_input)) {
-            updateSelectInput(
-              session = session,
-              inputId = "chart_bar_input",
-              selected = if (is.null(shared_chart_inputs$line_chart)) {
-                character(0)
-              } else {
-                shared_chart_inputs$line_chart
-              }
-            )
-          }
-        })
-      }, delay = 0.1)
+      later::later(
+        function() {
+          isolate({
+            if (
+              !setequal(shared_chart_inputs$line_chart, input$chart_bar_input)
+            ) {
+              updateSelectInput(
+                session = session,
+                inputId = "chart_bar_input",
+                selected = if (is.null(shared_chart_inputs$line_chart)) {
+                  character(0)
+                } else {
+                  shared_chart_inputs$line_chart
+                }
+              )
+            }
+          })
+        },
+        delay = 0.1
+      )
     },
     ignoreNULL = FALSE,
     ignoreInit = TRUE
   )
 
   # Update shared bar input
-  observeEvent(input$chart_bar_input,
+  observeEvent(
+    input$chart_bar_input,
     {
       # Capture the current reactive values
       shared_chart_inputs$chart_bar_input <- input$chart_bar_input
@@ -533,28 +559,36 @@ server_dev <- function(input, output, session) {
   )
 
   # Update line chart with bar chart input
-  observeEvent(shared_chart_inputs$bar_chart,
+  observeEvent(
+    shared_chart_inputs$bar_chart,
     {
-      later::later(function() {
-        isolate({
-          if (!setequal(shared_chart_inputs$chart_bar_input, input$chart_line_input)) {
-            updateSelectInput(
-              session = session,
-              inputId = "chart_line_input",
-              selected = if (is.null(shared_chart_inputs$chart_bar_input)) {
-                character(0)
-              } else {
-                shared_chart_inputs$chart_bar_input
-              }
-            )
-          }
-        })
-      }, delay = 0.1)
+      later::later(
+        function() {
+          isolate({
+            if (
+              !setequal(
+                shared_chart_inputs$chart_bar_input,
+                input$chart_line_input
+              )
+            ) {
+              updateSelectInput(
+                session = session,
+                inputId = "chart_line_input",
+                selected = if (is.null(shared_chart_inputs$chart_bar_input)) {
+                  character(0)
+                } else {
+                  shared_chart_inputs$chart_bar_input
+                }
+              )
+            }
+          })
+        },
+        delay = 0.1
+      )
     },
     ignoreNULL = FALSE,
     ignoreInit = TRUE
   )
-
 
   # Statistical Neighbour Level SN focus plot -----------------------------------
   output$stat_n_focus_line_chart <- ggiraph::renderGirafe({
@@ -564,11 +598,16 @@ server_dev <- function(input, output, session) {
       reorder_la_regions(input$la_input, after = Inf) |>
       # Creating options for graph labels
       dplyr::mutate(
-        label_color = ifelse(`LA and Regions` == input$la_input,
+        label_color = ifelse(
+          `LA and Regions` == input$la_input,
           get_focus_front_colour(),
           get_gov_secondary_text_colour()
         ),
-        label_fontface = ifelse(`LA and Regions` == input$la_input, "bold", "plain")
+        label_fontface = ifelse(
+          `LA and Regions` == input$la_input,
+          "bold",
+          "plain"
+        )
       )
 
     if (all(is.na(focus_line_data$values_num))) {
@@ -596,7 +635,11 @@ server_dev <- function(input, output, session) {
           na.rm = TRUE
         ) +
         format_axes(focus_line_data) +
-        set_plot_colours(focus_line_data, colour_type = "focus", focus_group = input$la_input) +
+        set_plot_colours(
+          focus_line_data,
+          colour_type = "focus",
+          focus_group = input$la_input
+        ) +
         set_plot_labs(filtered_bds$data) +
         ggrepel::geom_label_repel(
           data = subset(focus_line_data, Years == current_year()),
@@ -621,7 +664,6 @@ server_dev <- function(input, output, session) {
         theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
         guides(color = "none", size = "none")
 
-
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(focus_line_data),
@@ -645,7 +687,6 @@ server_dev <- function(input, output, session) {
     }
   })
 
-
   # Statistical Neighbour Level SN multi-choice line plot -----------------------
   output$stat_n_multi_line_chart <- ggiraph::renderGirafe({
     # Stores all valid regions in data
@@ -660,7 +701,10 @@ server_dev <- function(input, output, session) {
       ) |>
       # Set area orders so selection order starts on top of plot
       reorder_la_regions(
-        rev(intersect(c(input$la_input, input$chart_line_input), valid_regions)),
+        rev(intersect(
+          c(input$la_input, input$chart_line_input),
+          valid_regions
+        )),
         after = Inf
       )
 
@@ -711,7 +755,6 @@ server_dev <- function(input, output, session) {
         # Revert order of the legend so goes from right to left
         ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
-
       # Creating vertical geoms to make vertical hover tooltip
       vertical_hover <- lapply(
         get_years(stat_n_line_chart_data),
@@ -736,7 +779,6 @@ server_dev <- function(input, output, session) {
       )
     }
   })
-
 
   # Statistical Neighbour focus bar plot ----------------------------------------
   output$stat_n_focus_bar_chart <- ggiraph::renderGirafe({
@@ -794,7 +836,6 @@ server_dev <- function(input, output, session) {
       )
     }
   })
-
 
   # Statistical Neighbour multi-choice bar plot -------------------------------
   output$stat_n_multi_bar_chart <- ggiraph::renderGirafe({

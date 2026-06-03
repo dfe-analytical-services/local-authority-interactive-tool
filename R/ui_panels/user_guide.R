@@ -9,34 +9,42 @@ user_guide_panel <- function() {
           shiny::br(),
           h1("LAIT User Guide"),
 
-
           # Introduction =======================================================
           h2("Introduction"),
-          p("The Department for Education (DfE) has developed the Local Authority Interactive Tool
+          p(
+            "The Department for Education (DfE) has developed the Local Authority Interactive Tool
               (LAIT) to provide easy access to a wide range of data related to
               children and young people sourced from various departments across
               government.The app is designed and maintained by the DfE's Regions
-              Group LA Performance & Data (LAPD) Team."),
-
+              Group LA Performance & Data (LAPD) Team."
+          ),
 
           # Context and Purpose ================================================
           h2("Context and purpose"),
-          p("The tool facilitates local authority ‘benchmarking’ and trend
+          p(
+            "The tool facilitates local authority ‘benchmarking’ and trend
               analysis by allowing users to compare individual local authority
               (LA) data alongside national, regional and Statistical Neighbour
-              groupings over time (up to 10 years)."),
-          p("The tool consists of five data views which present data items
+              groupings over time (up to 10 years)."
+          ),
+          p(
+            "The tool consists of five data views which present data items
               largely in the form of tables and charts, which can be downloaded
               and used elsewhere.  Rank and quartile positions are also included
               to ease the assessment of local authority positioning in a
-              national context."),
-          p("The tool holds in the region of 400 children's services measures
-              covering:"),
+              national context."
+          ),
+          p(
+            "The tool holds in the region of 400 children's services measures
+              covering:"
+          ),
           tags$ul(
             tags$li("Children’s health and wellbeing;"),
-            tags$li("Children in need, Child protection,
+            tags$li(
+              "Children in need, Child protection,
                     Children’s services workforce,
-                    and Children looked after (inc. adoption);"),
+                    and Children looked after (inc. adoption);"
+            ),
             tags$li("Early years;"),
             tags$li("Key stage attainment (inc. by age 19);"),
             tags$li("Children with SEN;"),
@@ -46,21 +54,26 @@ user_guide_panel <- function() {
             tags$li("Youth offending;"),
             tags$li("Children’s services finance.")
           ),
-          p("We will add some relevant background information here. For example
-              some useful LAIT resources."),
-
+          p(
+            "We will add some relevant background information here. For example
+              some useful LAIT resources."
+          ),
 
           # Using the app ======================================================
           h2("Using the app"),
-          p("Below provides some guidance on how to use the LAIT app.
+          p(
+            "Below provides some guidance on how to use the LAIT app.
               The tool should be easy to use and consulting this guidance
               is not necessarily required. However it does given written detail
               and screenshots of the app to describe the functionality, which
-              may give further clarity."),
-          p("The Hints and Tips section explains how to harness the full
+              may give further clarity."
+          ),
+          p(
+            "The Hints and Tips section explains how to harness the full
               features of the app. For example, how to save your selections
               on the Create Your Own page and the statsitical neighbour
-              average calculation explanation."),
+              average calculation explanation."
+          ),
           shinyGovstyle::accordion(
             inputId = "user-guide-how-to",
             titles = c(
@@ -122,7 +135,9 @@ user_guide_panel <- function() {
                   tags$li("LA Groupings: Include All LAs"),
                   tags$li("Other Groupings: England")
                 ),
-                HTML("<br>Try the link out and see the selections prepopulate!"),
+                HTML(
+                  "<br>Try the link out and see the selections prepopulate!"
+                ),
                 tags$br(),
                 dfeshiny::external_link(
                   href = paste0(
@@ -687,9 +702,11 @@ user_guide_panel <- function() {
                 ),
                 tagList(
                   tags$ol(
-                    tags$li("Using the dropdown menus, choose the level of data
+                    tags$li(
+                      "Using the dropdown menus, choose the level of data
                               i.e., LA(s), Region(s), England, or combinations
-                              of these."),
+                              of these."
+                    ),
                     tags$br(),
                     tags$li(tagList(
                       "Choose measure(s). You can choose multiple measures

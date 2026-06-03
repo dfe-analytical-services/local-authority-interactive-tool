@@ -21,7 +21,6 @@ ui_mod <- bslib::page_fillable(
   # Tab header ================================================================
   h1("All Local Authorities"),
 
-
   # Start of app  =============================================================
   appInputsUI("all_la_inputs"),
 
@@ -48,7 +47,6 @@ server_mod <- function(input, output, session) {
     shared_values,
     topic_indicator_full
   )
-
 
   # LA and Region table -------------------------------------------------------
   AllLA_TableServer(

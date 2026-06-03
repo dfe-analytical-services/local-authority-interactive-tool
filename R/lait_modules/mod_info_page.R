@@ -87,10 +87,15 @@ LatestDataUpdateServer <- function(id, metrics_data) {
   moduleServer(id, function(input, output, session) {
     # Prepare the data
     latest_updated_indicator <- metrics_data |>
-      dplyr::mutate(latest_update_date = as.Date(paste(`Last Update`, "01"),
-        format = "%B %Y %d"
-      )) |>
-      dplyr::filter(latest_update_date == max(latest_update_date, na.rm = TRUE)) |>
+      dplyr::mutate(
+        latest_update_date = as.Date(
+          paste(`Last Update`, "01"),
+          format = "%B %Y %d"
+        )
+      ) |>
+      dplyr::filter(
+        latest_update_date == max(latest_update_date, na.rm = TRUE)
+      ) |>
       dplyr::select(Indicator = Measure, `Last Update`) |>
       order_alphabetically(Indicator)
 
@@ -242,7 +247,8 @@ LatestDevUpdateUI <- function(id) {
     ),
     # Add the keyframe animation for spinning
     shiny::tags$style(
-      shiny::HTML("
+      shiny::HTML(
+        "
         @keyframes rotateIcon {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
@@ -250,7 +256,8 @@ LatestDevUpdateUI <- function(id) {
         .btn-link {
           text-decoration: none;
         }
-      ")
+      "
+      )
     )
   )
 }
@@ -407,13 +414,15 @@ IndicatorInfoTableServer <- function(id, metrics_data) {
         ) |>
         # Convert to nice looking links
         dplyr::rowwise() |>
-        dplyr::mutate(`Hyperlink(s) (opens in new tab)` = as.character(
-          dfeshiny::external_link(
-            href = `Hyperlink(s)`,
-            link_text = Measure,
-            add_warning = FALSE
+        dplyr::mutate(
+          `Hyperlink(s) (opens in new tab)` = as.character(
+            dfeshiny::external_link(
+              href = `Hyperlink(s)`,
+              link_text = Measure,
+              add_warning = FALSE
+            )
           )
-        )) |>
+        ) |>
         dplyr::ungroup() |>
         order_alphabetically(Measure)
 
@@ -496,13 +505,15 @@ UsefulLinksServer <- function(id, useful_links) {
     # Prepare the data for display
     useful_links_formatted <- useful_links |>
       dplyr::rowwise() |>
-      dplyr::mutate(nice_useful_link = as.character(
-        dfeshiny::external_link(
-          href = Link,
-          link_text = Tool_Name,
-          add_warning = FALSE
+      dplyr::mutate(
+        nice_useful_link = as.character(
+          dfeshiny::external_link(
+            href = Link,
+            link_text = Tool_Name,
+            add_warning = FALSE
+          )
         )
-      )) |>
+      ) |>
       dplyr::ungroup()
 
     # Render the UI

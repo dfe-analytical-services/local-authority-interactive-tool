@@ -161,7 +161,9 @@ create_plot_colours <- function(data_long, focus_group = NULL) {
   }
 
   # Assign colours for remaining groups (ensure now duplicate colours)
-  remaining_colours <- setdiff(get_clean_af_colours(), plot_colours)[seq_along(plot_groups)]
+  remaining_colours <- setdiff(get_clean_af_colours(), plot_colours)[seq_along(
+    plot_groups
+  )]
   names(remaining_colours) <- plot_groups
 
   # Combine all colours
@@ -309,12 +311,18 @@ pretty_y_gridlines <- function(data_long) {
 
   # Ensure there's a break above the max value
   if (max(pretty_breaks) <= y_range[2] && y_range[2] != 0) {
-    pretty_breaks <- c(pretty_breaks, max(pretty_breaks) + 1.1 * diff(pretty_breaks[1:2]))
+    pretty_breaks <- c(
+      pretty_breaks,
+      max(pretty_breaks) + 1.1 * diff(pretty_breaks[1:2])
+    )
   }
 
   # Ensure there's a break below the min value
   if (min(pretty_breaks) >= y_range[1] && y_range[1] != 0) {
-    pretty_breaks <- c(min(pretty_breaks) - 1.1 * diff(pretty_breaks[1:2]), pretty_breaks)
+    pretty_breaks <- c(
+      min(pretty_breaks) - 1.1 * diff(pretty_breaks[1:2]),
+      pretty_breaks
+    )
   }
 
   # Return the expanded range for y-limits
@@ -388,7 +396,12 @@ pretty_num_remove_zero <- function(x, dp = 2, ...) {
 
   # Remove trailing zeroes after decimal point
   if (abs(as.numeric(x)) >= 1 || abs(as.numeric(x)) == 0) {
-    formatted_numbers <- sub("\\.0+(?=\\s|$)", "", formatted_numbers, perl = TRUE)
+    formatted_numbers <- sub(
+      "\\.0+(?=\\s|$)",
+      "",
+      formatted_numbers,
+      perl = TRUE
+    )
   }
 
   formatted_numbers
@@ -441,7 +454,11 @@ format_axes <- function(data_long, indicator_dps = 2) {
       limits = range(y_breaks),
       expand = expansion(0, 0),
       breaks = pretty(y_breaks),
-      labels = unlist(lapply(pretty(y_breaks), pretty_num_remove_zero, indicator_dps))
+      labels = unlist(lapply(
+        pretty(y_breaks),
+        pretty_num_remove_zero,
+        indicator_dps
+      ))
     ),
     ggplot2::scale_x_continuous(
       breaks = num_years,
@@ -482,20 +499,32 @@ format_axes <- function(data_long, indicator_dps = 2) {
 #'   colours +
 #'   geom_line()
 #'
-set_plot_colours <- function(data_long,
-                             colour_type = "colour",
-                             focus_group = NULL) {
+set_plot_colours <- function(
+  data_long,
+  colour_type = "colour",
+  focus_group = NULL
+) {
   if (colour_type == "colour") {
-    ggplot2::scale_colour_manual(values = create_plot_colours(data_long, focus_group))
+    ggplot2::scale_colour_manual(
+      values = create_plot_colours(data_long, focus_group)
+    )
   } else if (colour_type == "fill") {
-    ggplot2::scale_fill_manual(values = create_plot_colours(data_long, focus_group))
+    ggplot2::scale_fill_manual(
+      values = create_plot_colours(data_long, focus_group)
+    )
   } else if (colour_type == "focus") {
     list(
-      ggplot2::scale_color_manual(values = create_focus_plot_colours(data_long, focus_group)),
-      ggplot2::scale_size_manual(values = create_focus_plot_sizes(data_long, focus_group))
+      ggplot2::scale_color_manual(
+        values = create_focus_plot_colours(data_long, focus_group)
+      ),
+      ggplot2::scale_size_manual(
+        values = create_focus_plot_sizes(data_long, focus_group)
+      )
     )
   } else if (colour_type == "focus-fill") {
-    ggplot2::scale_fill_manual(values = create_focus_plot_colours(data_long, focus_group))
+    ggplot2::scale_fill_manual(
+      values = create_focus_plot_colours(data_long, focus_group)
+    )
   }
 }
 
@@ -620,7 +649,12 @@ generate_year_text <- function(data, years_num) {
 #'
 #' @return A formatted string containing measures and corresponding values.
 #' @export
-tooltip_text_w_indicator <- function(data, years_num, indicator_dp, geog_colours) {
+tooltip_text_w_indicator <- function(
+  data,
+  years_num,
+  indicator_dp,
+  geog_colours
+) {
   measure_summary <- data |>
     dplyr::filter(Years_num == years_num) |>
     dplyr::arrange(dplyr::desc(values_num)) |>
@@ -628,8 +662,13 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp, geog_colours
     dplyr::group_by(Measure) |>
     dplyr::summarise(
       tooltip_text = paste0(
-        "<span style='color:", geog_colours[`LA and Regions`], ";'>",
-        `LA and Regions`, ": ", values_num, "</span>",
+        "<span style='color:",
+        geog_colours[`LA and Regions`],
+        ";'>",
+        `LA and Regions`,
+        ": ",
+        values_num,
+        "</span>",
         collapse = "\n"
       ),
       .groups = "drop"
@@ -681,7 +720,13 @@ tooltip_text_w_indicator <- function(data, years_num, indicator_dp, geog_colours
 #' # Generate tooltip text without any highlighted geography
 #' tooltip_text(data = my_data, years_num = 2022, indicator_dp = 2)
 #'
-tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_colours) {
+tooltip_text <- function(
+  data,
+  years_num,
+  indicator_dp,
+  focus_geog = NULL,
+  geog_colours
+) {
   data_clean <- data |>
     dplyr::filter(Years_num == years_num) |>
     dplyr::arrange(dplyr::desc(values_num)) |>
@@ -692,19 +737,38 @@ tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_
     value <- row["values_num"]
 
     text_colour <- if (!is.null(focus_geog)) {
-      if (geography == focus_geog) get_focus_front_colour() else get_gov_secondary_text_colour()
+      if (geography == focus_geog) {
+        get_focus_front_colour()
+      } else {
+        get_gov_secondary_text_colour()
+      }
     } else {
       geog_colours[geography]
     }
 
-    weight <- if (text_colour %in% c(get_selected_la_colour(), get_focus_front_colour())) "font-weight: bold;" else ""
+    weight <- if (
+      text_colour %in% c(get_selected_la_colour(), get_focus_front_colour())
+    ) {
+      "font-weight: bold;"
+    } else {
+      ""
+    }
 
-    paste0("<span style='color:", text_colour, "; ", weight, "'>", geography, ": ", value, "</span>")
+    paste0(
+      "<span style='color:",
+      text_colour,
+      "; ",
+      weight,
+      "'>",
+      geography,
+      ": ",
+      value,
+      "</span>"
+    )
   })
 
   paste(tooltip_lines, collapse = "\n")
 }
-
 
 
 #' Add an Interactive Vertical Line with Tooltips
@@ -741,11 +805,13 @@ tooltip_text <- function(data, years_num, indicator_dp, focus_geog = NULL, geog_
 #'   include_measure = TRUE
 #' )
 #'
-tooltip_vlines <- function(x,
-                           data,
-                           indicator_dp = 1,
-                           focus_geog = NULL,
-                           include_measure = FALSE) {
+tooltip_vlines <- function(
+  x,
+  data,
+  indicator_dp = 1,
+  focus_geog = NULL,
+  include_measure = FALSE
+) {
   year_text <- generate_year_text(data, x)
   geog_colours <- create_plot_colours(data)
 
@@ -801,10 +867,12 @@ tooltip_vlines <- function(x,
 #'   text_colour = "blue", include_measure = TRUE
 #' )
 #'
-tooltip_bar <- function(data,
-                        indicator_dps,
-                        focus_geog = NULL,
-                        include_measure = FALSE) {
+tooltip_bar <- function(
+  data,
+  indicator_dps,
+  focus_geog = NULL,
+  include_measure = FALSE
+) {
   # Prepare data with formatted numbers
   data_clean <- data |>
     pretty_num_table(include_columns = "values_num", dp = indicator_dps)
@@ -832,16 +900,27 @@ tooltip_bar <- function(data,
     }
 
     weight <- ifelse(
-      text_colour %in% c(get_selected_la_colour(), get_focus_front_colour()) & !include_measure,
+      text_colour %in%
+        c(get_selected_la_colour(), get_focus_front_colour()) &
+        !include_measure,
       "bold",
       "normal"
     )
 
     paste0(
       measure_text,
-      "Year: ", year, "\n\n",
-      "<span style='color:", text_colour, "; font-weight: ", weight, ";'>",
-      geography, ": ", value, "</span>"
+      "Year: ",
+      year,
+      "\n\n",
+      "<span style='color:",
+      text_colour,
+      "; font-weight: ",
+      weight,
+      ";'>",
+      geography,
+      ": ",
+      value,
+      "</span>"
     )
   })
 }
@@ -945,11 +1024,24 @@ generic_ggiraph_options <- function(...) {
 #' reordered_data <- reorder_la_regions(chart_data, factor_order)
 #' print(reordered_data)
 #'
-reorder_la_regions <- function(chart_data, factor_order = NULL, reverse = FALSE, ...) {
+reorder_la_regions <- function(
+  chart_data,
+  factor_order = NULL,
+  reverse = FALSE,
+  ...
+) {
   chart_data |>
     dplyr::mutate(
-      `LA and Regions` = forcats::fct_relevel(`LA and Regions`, factor_order, ...),
-      `LA and Regions` = if (reverse) forcats::fct_rev(`LA and Regions`) else `LA and Regions`
+      `LA and Regions` = forcats::fct_relevel(
+        `LA and Regions`,
+        factor_order,
+        ...
+      ),
+      `LA and Regions` = if (reverse) {
+        forcats::fct_rev(`LA and Regions`)
+      } else {
+        `LA and Regions`
+      }
     ) |>
     dplyr::arrange(`LA and Regions`)
 }
@@ -1096,7 +1188,8 @@ create_show_point <- function(data, covid_affected_data, selected_indicators) {
   # Check if all indicators affected by COVID
   all_covid_affected <- all(
     covid_affected_data |>
-      pull_uniques("Measure") %in% selected_indicators
+      pull_uniques("Measure") %in%
+      selected_indicators
   )
 
   data |>
@@ -1112,11 +1205,13 @@ create_show_point <- function(data, covid_affected_data, selected_indicators) {
 
       # First COVID affected year (First NA within 2019–2021)
       is_first_covid_na = (Years_num >= 2019 & Years_num <= 2021) &
-        is_na & dplyr::lag(!is_na, default = FALSE),
+        is_na &
+        dplyr::lag(!is_na, default = FALSE),
 
       # Last COVID affected year (Last NA within 2019–2021)
       is_last_covid_na = (Years_num >= 2019 & Years_num <= 2021) &
-        is_na & dplyr::lead(!is_na, default = FALSE),
+        is_na &
+        dplyr::lead(!is_na, default = FALSE),
 
       # Finds the last non-NA before first COVID (show point)
       is_prev_covid = dplyr::lead(is_first_covid_na, default = FALSE),
@@ -1195,7 +1290,12 @@ create_show_point <- function(data, covid_affected_data, selected_indicators) {
 #' # Line chart example
 #' covid_plot_data <- calculate_covid_plot(data, covid_affected, "line")
 #'
-calculate_covid_plot <- function(data, covid_affected_data, selected_indicators, chart_type) {
+calculate_covid_plot <- function(
+  data,
+  covid_affected_data,
+  selected_indicators,
+  chart_type
+) {
   # Check if measures affected by COVID
   covid_affected <- covid_affected_data |>
     dplyr::filter(Measure %in% selected_indicators)
@@ -1241,7 +1341,8 @@ calculate_covid_plot <- function(data, covid_affected_data, selected_indicators,
     # Check if all indicators affected by COVID
     all_covid_affected <- all(
       covid_affected |>
-        pull_uniques("Measure") %in% selected_indicators
+        pull_uniques("Measure") %in%
+        selected_indicators
     )
 
     # Set label based on whether the COVID period is the same across all indicators
@@ -1326,39 +1427,49 @@ add_covid_elements <- function(covid_plot_data, include_shaded_box = FALSE) {
     elements <- list()
 
     # Add vertical lines for COVID periods (mainly for Create Own Bar - facet_wrap)
-    if ("start_year" %in% colnames(covid_plot_data) && "end_year" %in% colnames(covid_plot_data)) {
-      elements <- append(elements, list(
-        ggplot2::geom_vline(
-          data = covid_plot_data,
-          ggplot2::aes(xintercept = start_year),
-          linetype = "dashed",
-          color = "grey50",
-          alpha = 0.5,
-          linewidth = 0.3
-        ),
-        ggplot2::geom_vline(
-          data = covid_plot_data,
-          ggplot2::aes(xintercept = end_year),
-          linetype = "dashed",
-          color = "grey50",
-          alpha = 0.5,
-          linewidth = 0.3
+    if (
+      "start_year" %in%
+        colnames(covid_plot_data) &&
+        "end_year" %in% colnames(covid_plot_data)
+    ) {
+      elements <- append(
+        elements,
+        list(
+          ggplot2::geom_vline(
+            data = covid_plot_data,
+            ggplot2::aes(xintercept = start_year),
+            linetype = "dashed",
+            color = "grey50",
+            alpha = 0.5,
+            linewidth = 0.3
+          ),
+          ggplot2::geom_vline(
+            data = covid_plot_data,
+            ggplot2::aes(xintercept = end_year),
+            linetype = "dashed",
+            color = "grey50",
+            alpha = 0.5,
+            linewidth = 0.3
+          )
         )
-      ))
+      )
     }
 
     # Add vertical lines for COVID periods (for all other line and bar charts)
     if ("vertical_lines" %in% colnames(covid_plot_data)) {
-      elements <- append(elements, list(
-        ggplot2::geom_vline(
-          data = covid_plot_data,
-          ggplot2::aes(xintercept = vertical_lines),
-          linetype = "dashed",
-          color = "grey50",
-          alpha = 0.5,
-          linewidth = 0.3
+      elements <- append(
+        elements,
+        list(
+          ggplot2::geom_vline(
+            data = covid_plot_data,
+            ggplot2::aes(xintercept = vertical_lines),
+            linetype = "dashed",
+            color = "grey50",
+            alpha = 0.5,
+            linewidth = 0.3
+          )
         )
-      ))
+      )
     }
 
     # Add a label to explain COVID impact

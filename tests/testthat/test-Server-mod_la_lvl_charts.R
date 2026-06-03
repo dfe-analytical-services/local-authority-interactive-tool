@@ -42,7 +42,10 @@ testthat::test_that("LA_LineChartServer creates a ggiraph chart with the correct
       extracted_text <- gsub("\\s+", " ", extracted_text)
 
       # Check title
-      testthat::expect_true(grepl("CLA - KS4 Average Attainment 8 Score", extracted_text))
+      testthat::expect_true(grepl(
+        "CLA - KS4 Average Attainment 8 Score",
+        extracted_text
+      ))
     }
   )
 })
@@ -85,7 +88,11 @@ testthat::test_that("LA_BarChartServer creates a ggiraph chart with the correct 
       plot_data_str <- plot_data_list$x$html
 
       # Extract all text content from <text> tags
-      cleaned_plot_str <- gsub("<text[^>]*>([^<]*)</text>", "\\1", plot_data_str)
+      cleaned_plot_str <- gsub(
+        "<text[^>]*>([^<]*)</text>",
+        "\\1",
+        plot_data_str
+      )
 
       # Remove any extra whitespace
       cleaned_plot_str <- gsub("\n", " ", cleaned_plot_str)

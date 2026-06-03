@@ -93,10 +93,13 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       # Then filter for selected LA, region, stat neighbours and national
       la_filtered_bds <- filtered_bds() |>
         dplyr::filter(
-          `LA and Regions` %in% c(
-            app_inputs$la(), la_region_ldn_clean,
-            la_sns, "England"
-          )
+          `LA and Regions` %in%
+            c(
+              app_inputs$la(),
+              la_region_ldn_clean,
+              la_sns,
+              "England"
+            )
         )
 
       # SN average
@@ -115,14 +118,22 @@ LA_LongDataServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       # LA levels long
       la_long <- la_filtered_bds |>
         dplyr::filter(`LA and Regions` %notin% c(la_sns)) |>
-        dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
+        dplyr::select(
+          `LA Number`,
+          `LA and Regions`,
+          Years,
+          Years_num,
+          values_num
+        ) |>
         dplyr::bind_rows(sn_avg) |>
         dplyr::mutate(
           `LA and Regions` = factor(
             `LA and Regions`,
             levels = c(
-              app_inputs$la(), la_region_ldn_clean,
-              "Statistical Neighbours", "England"
+              app_inputs$la(),
+              la_region_ldn_clean,
+              "Statistical Neighbours",
+              "England"
             )
           )
         )
@@ -177,8 +188,10 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
     # Main LA Level table ----------------------------------
     # Long format LA data
     la_long <- LA_LongDataServer(
-      "la_table_data", app_inputs,
-      bds_metrics, stat_n_la
+      "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
     )
 
     # Difference between last two years
@@ -200,7 +213,6 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
         dplyr::arrange(`LA and Regions`)
     })
 
-
     # LA table download -------------------------------------------------------
     # File download text - calculates file size
     ns <- NS(id)
@@ -213,7 +225,11 @@ LA_LevelTableServer <- function(id, app_inputs, bds_metrics, stat_n_la) {
       "la_download",
       reactive(input$file_type),
       reactive(la_table()),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "Local-Authority-View"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "Local-Authority-View"
+      ))
     )
 
     # Reactable table output
@@ -282,19 +298,23 @@ LA_StatsTableUI <- function(id) {
 #' @param bds_metrics A data frame of BDS metrics
 #' @param stat_n_la A data frame of statistical neighbours for each LA
 #' @return A list of outputs for the UI, including a data table of the LA stats
-LA_StatsTableServer <- function(id,
-                                app_inputs,
-                                bds_metrics,
-                                stat_n_la,
-                                no_qb_indicators) {
+LA_StatsTableServer <- function(
+  id,
+  app_inputs,
+  bds_metrics,
+  stat_n_la,
+  no_qb_indicators
+) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
     la_long <- LA_LongDataServer(
-      "la_table_data", app_inputs,
-      bds_metrics, stat_n_la
+      "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
     )
 
     # Difference between last two years
@@ -341,7 +361,8 @@ LA_StatsTableServer <- function(id,
       # Calculate quartile bands for indicator
       la_quartile_bands <- safe_scalar(
         filtered_bds() |>
-          filter_la_regions(la_names_bds,
+          filter_la_regions(
+            la_names_bds,
             latest = TRUE,
             pull_col = "values_num"
           ) |>
@@ -352,7 +373,8 @@ LA_StatsTableServer <- function(id,
       # Extracting LA latest value
       la_indicator_val <- safe_scalar(
         filtered_bds() |>
-          filter_la_regions(app_inputs$la(),
+          filter_la_regions(
+            app_inputs$la(),
             latest = TRUE,
             pull_col = "values_num"
           ),
@@ -387,7 +409,6 @@ LA_StatsTableServer <- function(id,
         no_show_qb
       )
     })
-
 
     # LA Stats table
     output$la_stats <- reactable::renderReactable({

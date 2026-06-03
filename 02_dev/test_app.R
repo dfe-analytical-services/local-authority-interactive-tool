@@ -22,7 +22,6 @@ ui_test <- bslib::page_fillable(
   h1("Regional Level"),
   appInputsUI("la_level"),
 
-
   # Region multi chart
   div(
     class = "well",

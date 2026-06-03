@@ -128,7 +128,9 @@ region_table <- region_long |>
   ) |>
   dplyr::arrange(.data[[current_year]], `LA and Regions`) |>
   # Places England row at the bottom of the table
-  dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
+  dplyr::mutate(
+    is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)
+  ) |>
   dplyr::arrange(is_england, .by_group = FALSE) |>
   dplyr::select(-is_england)
 
@@ -163,16 +165,11 @@ region_la_num <- region_table |>
 # Get change in previous year
 # Selected LA
 region_la_change_prev <- region_la_diff |>
-  filter_la_regions(selected_la,
-    pull_col = "values_num"
-  )
+  filter_la_regions(selected_la, pull_col = "values_num")
 
 # Region and England
 region_change_prev <- region_diff |>
-  filter_la_regions(c(region_clean, "England"),
-    pull_col = "values_num"
-  )
-
+  filter_la_regions(c(region_clean, "England"), pull_col = "values_num")
 
 
 # Creating the stats table cols
@@ -227,7 +224,8 @@ region_long_plot <- region_long |>
   dplyr::group_by(`LA and Regions`) |>
   # Remove any "London (" regions where all values_num are NA
   dplyr::filter(
-    !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
+    !(grepl("^London \\(", `LA and Regions`) &
+      dplyr::n() == sum(is.na(values_num))),
     `LA and Regions` %notin% "England"
   )
 
@@ -305,7 +303,11 @@ focus_line_data <- region_long_plot |>
   reorder_la_regions(region_clean, after = Inf) |>
   # Creating options for graph labels
   dplyr::mutate(
-    label_color = ifelse(`LA and Regions` == region_clean, get_focus_front_colour(), get_gov_secondary_text_colour()),
+    label_color = ifelse(
+      `LA and Regions` == region_clean,
+      get_focus_front_colour(),
+      get_gov_secondary_text_colour()
+    ),
     label_fontface = ifelse(`LA and Regions` == region_clean, "bold", "plain")
   )
 
@@ -322,7 +324,11 @@ region_line_chart <- focus_line_data |>
     na.rm = TRUE
   ) +
   format_axes(focus_line_data) +
-  set_plot_colours(focus_line_data, colour_type = "focus", focus_group = region_clean) +
+  set_plot_colours(
+    focus_line_data,
+    colour_type = "focus",
+    focus_group = region_clean
+  ) +
   set_plot_labs(filtered_bds) +
   ggrepel::geom_label_repel(
     data = subset(focus_line_data, Years == current_year),
@@ -346,8 +352,6 @@ region_line_chart <- focus_line_data |>
   coord_cartesian(clip = "off") +
   theme(plot.margin = margin(5.5, 66, 5.5, 5.5)) +
   guides(color = "none", size = "none")
-
-
 
 
 # Creating vertical geoms to make vertical hover tooltip

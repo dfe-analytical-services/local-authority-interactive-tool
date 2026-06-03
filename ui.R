@@ -140,7 +140,9 @@ ui <- function(input, output, session) {
             "cookies_to_dashboard",
             "Back to dashboard"
           ),
-          dfeshiny::cookies_panel_ui(google_analytics_key = google_analytics_key)
+          dfeshiny::cookies_panel_ui(
+            google_analytics_key = google_analytics_key
+          )
         )
       ),
       tags$div(

@@ -132,13 +132,15 @@ create_measure_key <- function(data) {
 #' }
 #'
 generate_download_file <- function(data, file_type, svg_width = 8.5) {
-  out <- tempfile(fileext = dplyr::case_when(
-    grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
-    grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
-    grepl("svg", file_type, ignore.case = TRUE) ~ ".svg",
-    grepl("html", file_type, ignore.case = TRUE) ~ ".html",
-    TRUE ~ "Error"
-  ))
+  out <- tempfile(
+    fileext = dplyr::case_when(
+      grepl("csv", file_type, ignore.case = TRUE) ~ ".csv",
+      grepl("xlsx", file_type, ignore.case = TRUE) ~ ".xlsx",
+      grepl("svg", file_type, ignore.case = TRUE) ~ ".svg",
+      grepl("html", file_type, ignore.case = TRUE) ~ ".html",
+      TRUE ~ "Error"
+    )
+  )
 
   if (grepl("csv", file_type, ignore.case = TRUE)) {
     write.csv(data, file = out, row.names = FALSE)
@@ -199,7 +201,10 @@ create_download_handler <- function(local) {
       paste0(paste(local$file_name, collapse = "-"), "-", Sys.Date(), file_ext)
     },
     content = function(file) {
-      pop_up <- shiny::showNotification("Generating download file", duration = NULL)
+      pop_up <- shiny::showNotification(
+        "Generating download file",
+        duration = NULL
+      )
       file.copy(local$export_file, file)
       on.exit(shiny::removeNotification(pop_up), add = TRUE)
     }
@@ -375,10 +380,12 @@ file_type_input_btn <- function(input_id, data = NULL, file_type = "table") {
 #' )
 #' }
 #'
-update_and_fetch_metadata <- function(input_indicator,
-                                      metadata_type,
-                                      reactive_storage,
-                                      key) {
+update_and_fetch_metadata <- function(
+  input_indicator,
+  metadata_type,
+  reactive_storage,
+  key
+) {
   if (input_indicator == "") {
     return(reactive_storage[[key]])
   }

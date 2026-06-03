@@ -10,7 +10,6 @@ list.files("R/", full.names = TRUE) |>
 
 # UI
 ui_dev <- bslib::page_fillable(
-
   ## Custom CSS =============================================================
   shiny::includeCSS(here::here("www/dfe_shiny_gov_style.css")),
 
@@ -156,23 +155,23 @@ ui_dev <- bslib::page_fillable(
         div(
           # Creates a flex container where the items are centered vertically
           style = "display: flex; align-items: baseline;",
-          h3("Last Updated:",
+          h3(
+            "Last Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           textOutput("last_update")
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Next Updated:",
+          h3(
+            "Next Updated:",
             style = "margin-right: 1rem; margin-bottom: 0.3rem;"
           ),
           uiOutput("next_update")
         ),
         div(
           style = "display: flex; align-items: baseline;",
-          h3("Source:",
-            style = "margin-right: 1rem; margin-bottom: 0.3rem;"
-          ),
+          h3("Source:", style = "margin-right: 1rem; margin-bottom: 0.3rem;"),
           uiOutput("source")
         )
       )
@@ -184,7 +183,8 @@ ui_dev <- bslib::page_fillable(
 server_dev <- function(input, output, session) {
   # Input ----------------------------------
   # Using the server to power to the provider dropdown for increased speed
-  shiny::observeEvent(input$topic_input,
+  shiny::observeEvent(
+    input$topic_input,
     {
       # Save the currently selected indicator
       current_indicator <- input$indicator
@@ -194,7 +194,9 @@ server_dev <- function(input, output, session) {
         dplyr::filter(
           # If topic_input is not NULL or "All topics", filter by selected topics
           # Include all rows if no topic is selected or "All topics" is selected
-          if (is.null(input$topic_input) | "All topics" %in% input$topic_input) {
+          if (
+            is.null(input$topic_input) | "All topics" %in% input$topic_input
+          ) {
             TRUE
           } else {
             .data$Topic %in% input$topic_input
@@ -273,7 +275,13 @@ server_dev <- function(input, output, session) {
 
     # Region LA levels long
     region_la_long <- region_la_filtered_bds |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
+      dplyr::select(
+        `LA Number`,
+        `LA and Regions`,
+        Years,
+        Years_num,
+        values_num
+      ) |>
       dplyr::mutate(
         `LA and Regions` = factor(`LA and Regions`)
       )
@@ -333,7 +341,13 @@ server_dev <- function(input, output, session) {
 
     # Region levels long
     region_long <- region_filtered_bds |>
-      dplyr::select(`LA Number`, `LA and Regions`, Years, Years_num, values_num) |>
+      dplyr::select(
+        `LA Number`,
+        `LA and Regions`,
+        Years,
+        Years_num,
+        values_num
+      ) |>
       dplyr::mutate(
         `LA and Regions` = factor(`LA and Regions`)
       )
@@ -357,7 +371,9 @@ server_dev <- function(input, output, session) {
       ) |>
       dplyr::arrange(.data[[current_year()]], `LA and Regions`) |>
       # Places England row at the bottom of the table
-      dplyr::mutate(is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)) |>
+      dplyr::mutate(
+        is_england = ifelse(grepl("^England", `LA and Regions`), 1, 0)
+      ) |>
       dplyr::arrange(is_england, .by_group = FALSE) |>
       dplyr::select(-is_england)
 
@@ -382,7 +398,6 @@ server_dev <- function(input, output, session) {
     )
   })
 
-
   # Regional Level Stats table --------------------------------------------------
   region_stats_table <- reactive({
     # Get LA numbers
@@ -392,7 +407,10 @@ server_dev <- function(input, output, session) {
 
     # Region and England
     region_la_num <- region_table() |>
-      filter_la_regions(c(region_la_ldn_clean(), "England"), pull_col = "LA Number")
+      filter_la_regions(
+        c(region_la_ldn_clean(), "England"),
+        pull_col = "LA Number"
+      )
 
     # Get change in previous year
     # Difference between last two years
@@ -468,7 +486,8 @@ server_dev <- function(input, output, session) {
       dplyr::group_by(`LA and Regions`) |>
       # Remove any London () regions that are all NA
       dplyr::filter(
-        !(grepl("^London \\(", `LA and Regions`) & dplyr::n() == sum(is.na(values_num))),
+        !(grepl("^London \\(", `LA and Regions`) &
+          dplyr::n() == sum(is.na(values_num))),
         `LA and Regions` %notin% "England"
       )
   })
@@ -504,11 +523,16 @@ server_dev <- function(input, output, session) {
       reorder_la_regions(region_la_ldn_clean(), after = Inf) |>
       # Creating options for graph labels
       dplyr::mutate(
-        label_color = ifelse(`LA and Regions` == region_la_ldn_clean(),
+        label_color = ifelse(
+          `LA and Regions` == region_la_ldn_clean(),
           get_focus_front_colour(),
           get_gov_secondary_text_colour()
         ),
-        label_fontface = ifelse(`LA and Regions` == region_la_ldn_clean(), "bold", "plain")
+        label_fontface = ifelse(
+          `LA and Regions` == region_la_ldn_clean(),
+          "bold",
+          "plain"
+        )
       )
 
     # Built focus plot
@@ -525,7 +549,8 @@ server_dev <- function(input, output, session) {
         na.rm = TRUE
       ) +
       format_axes(region_focus_line_data) +
-      set_plot_colours(region_focus_line_data,
+      set_plot_colours(
+        region_focus_line_data,
         colour_type = "focus",
         focus_group = region_la_ldn_clean()
       ) +
@@ -538,7 +563,10 @@ server_dev <- function(input, output, session) {
           label = `LA and Regions`,
           fontface = label_fontface
         ),
-        colour = subset(region_focus_line_data, Years == current_year())$label_color,
+        colour = subset(
+          region_focus_line_data,
+          Years == current_year()
+        )$label_color,
         segment.colour = NA,
         label.size = NA,
         max.overlaps = Inf,
@@ -628,7 +656,6 @@ server_dev <- function(input, output, session) {
       # Revert order of the legend so goes from right to left
       ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
 
-
     # Creating vertical geoms to make vertical hover tooltip
     vertical_hover <- lapply(
       get_years(region_multi_choice_data),
@@ -653,7 +680,6 @@ server_dev <- function(input, output, session) {
   output$region_multi_line_chart <- ggiraph::renderGirafe({
     region_multi_line_chart()
   })
-
 
   # Region focus bar plot -----------------------------------------------------
   region_focus_bar_chart <- reactive({
@@ -681,7 +707,11 @@ server_dev <- function(input, output, session) {
         colour = "black"
       ) +
       format_axes(region_focus_bar_data) +
-      set_plot_colours(region_focus_bar_data, "focus-fill", region_la_ldn_clean()) +
+      set_plot_colours(
+        region_focus_bar_data,
+        "focus-fill",
+        region_la_ldn_clean()
+      ) +
       set_plot_labs(filtered_bds$data) +
       custom_theme() +
       guides(fill = "none")
@@ -733,7 +763,11 @@ server_dev <- function(input, output, session) {
         colour = "black"
       ) +
       format_axes(region_multi_choice_data) +
-      set_plot_colours(region_multi_choice_data, "fill", region_la_ldn_clean()) +
+      set_plot_colours(
+        region_multi_choice_data,
+        "fill",
+        region_la_ldn_clean()
+      ) +
       set_plot_labs(filtered_bds$data) +
       custom_theme()
 
@@ -753,7 +787,6 @@ server_dev <- function(input, output, session) {
   output$region_multi_bar_chart <- ggiraph::renderGirafe({
     region_multi_bar_chart()
   })
-
 
   # LA Metadata ---------------------------------------------------------------
   # Reactive values to store previous data

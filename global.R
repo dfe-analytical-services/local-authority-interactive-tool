@@ -102,7 +102,6 @@ stat_n_raw <- readxl::read_xlsx(
 )
 
 
-
 # Data dictionary
 metrics_raw <- read.csv(
   here::here("01_data/02_prod/lait_data_dictionary.csv"),
@@ -162,7 +161,8 @@ stat_n <- stat_n_raw |>
 
 # Transforming long
 stat_n_long <- stat_n |>
-  tidyr::pivot_longer(dplyr::starts_with("SN"),
+  tidyr::pivot_longer(
+    dplyr::starts_with("SN"),
     names_to = c(".value", "SN_SNP"),
     names_pattern = "^(.*?)(\\d+)$"
   )
@@ -250,10 +250,19 @@ metrics_discontinued <- metrics_raw |>
 # Some creation and cleaning of important cols
 bds_metrics <- metrics_clean |>
   dplyr::select(
-    Topic, Measure_code, Measure, Measure_short, state_funded_flag,
-    Polarity, y_axis_name, Year_Type, Chart_title, dps
+    Topic,
+    Measure_code,
+    Measure,
+    Measure_short,
+    state_funded_flag,
+    Polarity,
+    y_axis_name,
+    Year_Type,
+    Chart_title,
+    dps
   ) |>
-  dplyr::left_join(bds_clean,
+  dplyr::left_join(
+    bds_clean,
     by = c("Measure_short" = "Short Desc"),
     relationship = "many-to-many"
   ) |>
@@ -275,16 +284,13 @@ bds_metrics_dupes <- bds_metrics |>
   dplyr::filter(Measure_short %in% metrics_duplicates)
 
 # PROOF 1: Number of rows in bds == rows in bds (many-to-many) minus dupes
-testthat::test_that(
-  "Rows in BDS and BDS post merge are equal (minus the dupes)",
-  {
-    testthat::expect_equal(
-      bds_clean |>
-        nrow(),
-      nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)
-    )
-  }
-)
+testthat::test_that("Rows in BDS and BDS post merge are equal (minus the dupes)", {
+  testthat::expect_equal(
+    bds_clean |>
+      nrow(),
+    nrow(bds_metrics) - (nrow(bds_metrics_dupes) / 2)
+  )
+})
 # Using waldo to do same as test
 waldo::compare(
   x = bds_clean |>
@@ -307,19 +313,16 @@ setdiff(
 
 
 # PROOF 2: The unique values of Measure Short + Topic are the same
-testthat::test_that(
-  "Unique vals of measure_short + topic are the same in BDS & Metrics",
-  {
-    testthat::expect_equal(
-      bds_metrics |>
-        create_measure_key() |>
-        pull_uniques("measure_key"),
-      metrics_clean |>
-        create_measure_key() |>
-        pull_uniques("measure_key")
-    )
-  }
-)
+testthat::test_that("Unique vals of measure_short + topic are the same in BDS & Metrics", {
+  testthat::expect_equal(
+    bds_metrics |>
+      create_measure_key() |>
+      pull_uniques("measure_key"),
+    metrics_clean |>
+      create_measure_key() |>
+      pull_uniques("measure_key")
+  )
+})
 
 # PROOF 3: Number of topics per duplicate is 2
 testthat::test_that("Number of topics per duplicate is 2", {
