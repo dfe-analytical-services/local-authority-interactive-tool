@@ -91,6 +91,8 @@ LA_LineChartServer <- function(
   stat_n_la,
   covid_affected_data
 ) {
+  covid_affected_data
+) {
     covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
