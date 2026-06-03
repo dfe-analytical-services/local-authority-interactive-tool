@@ -97,8 +97,10 @@ LA_LineChartServer <- function(
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
-
-    # Long format LA data
+      "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
       "la_table_data",
       app_inputs,
       bds_metrics,
