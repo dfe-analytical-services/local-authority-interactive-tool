@@ -84,20 +84,30 @@ LA_LineChartUI <- function(id) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_LineChartServer <- function(id,
-                               app_inputs,
-                               bds_metrics,
-                               stat_n_la,
-                               covid_affected_data) {
+LA_LineChartServer <- function(
+    id,
+    app_inputs,
+    bds_metrics,
+    stat_n_la,
+    covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
-    la_long <- LA_LongDataServer(
-      "la_table_data", app_inputs,
-      bds_metrics, stat_n_la
+    la_long_raw <- LA_LongDataServer(
+      "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
     )
+    # Data must be sorted by group and year before passing to ggplot, as
+    # geom_path_interactive connects points in row order (not by x value),
+    # so unsorted data causes lines to render incorrectly or not at all.
+    la_long <- reactive({
+      la_long_raw() |>
+        dplyr::arrange(dplyr::desc(`LA and Regions`), Years_num)
+    })
 
     # Build main static plot
     line_chart <- reactive({
@@ -169,9 +179,7 @@ LA_LineChartServer <- function(id,
         format_axes(la_long()) +
         set_plot_colours(la_long(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
-        custom_theme() +
-        # Revert order of the legend so goes from right to left
-        ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+        custom_theme()
     })
 
     # Interactive plot wrapper
@@ -203,7 +211,11 @@ LA_LineChartServer <- function(id,
       "chart_download",
       reactive(input$file_type),
       reactive(list("svg" = line_chart(), "html" = interactive_line_chart())),
-      reactive(c(app_inputs$la(), app_inputs$indicator(), "LA-Level-Line-Chart"))
+      reactive(c(
+        app_inputs$la(),
+        app_inputs$indicator(),
+        "LA-Level-Line-Chart"
+      ))
     )
 
     # Hidden static plot for clipboard
@@ -222,7 +234,6 @@ LA_LineChartServer <- function(id,
     })
   })
 }
-
 
 
 #' Bar Chart UI Module
@@ -309,19 +320,22 @@ LA_BarChartUI <- function(id) {
 #' The chart is designed to be fully responsive and interactive,
 #' allowing users to explore the data visually.
 #'
-LA_BarChartServer <- function(id,
-                              app_inputs,
-                              bds_metrics,
-                              stat_n_la,
-                              covid_affected_data) {
+LA_BarChartServer <- function(
+    id,
+    app_inputs,
+    bds_metrics,
+    stat_n_la,
+    covid_affected_data) {
   moduleServer(id, function(input, output, session) {
     # Filter for selected topic and indicator
     filtered_bds <- BDS_FilteredServer("filtered_bds", app_inputs, bds_metrics)
 
     # Long format LA data
     la_long <- LA_LongDataServer(
-      "la_table_data", app_inputs,
-      bds_metrics, stat_n_la
+      "la_table_data",
+      app_inputs,
+      bds_metrics,
+      stat_n_la
     )
 
     # Build main static plot
