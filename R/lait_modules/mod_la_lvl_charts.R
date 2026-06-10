@@ -178,7 +178,7 @@ LA_LineChartServer <- function(
       plot +
         add_covid_elements(covid_plot) +
         format_axes(la_long()) +
-        set_plot_colours(la_long(), "colour", app_inputs$la()) +
+        set_plot_colours(la_long_raw(), "colour", app_inputs$la()) +
         set_plot_labs(filtered_bds()) +
         custom_theme()
     })
@@ -189,7 +189,7 @@ LA_LineChartServer <- function(
       vertical_hover <- lapply(
         get_years(la_long()),
         tooltip_vlines,
-        la_long(),
+        la_long_raw(),
         get_indicator_dps(filtered_bds())
       )
 
