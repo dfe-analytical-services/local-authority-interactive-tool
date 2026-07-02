@@ -36,3 +36,5 @@ if (system.file(package = "dfeshiny") != "") {
 
 # Install commit-hooks locally
 statusWriteCommit <- file.copy(".hooks/pre-commit.R", ".git/hooks/pre-commit", overwrite = TRUE)
+message(getwd())
+message(paste0(list.files(), collapse = ", "))
