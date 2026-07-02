@@ -486,10 +486,8 @@ server_dev <- function(input, output, session) {
       dplyr::group_by(`LA and Regions`) |>
       # Remove any London () regions that are all NA
       dplyr::filter(
-        !(
-          grepl("^London \\(", `LA and Regions`) &
-            dplyr::n() == sum(is.na(values_num))
-        ),
+        !(grepl("^London \\(", `LA and Regions`) &
+          dplyr::n() == sum(is.na(values_num))),
         `LA and Regions` %notin% "England"
       )
   })
