@@ -640,6 +640,7 @@ QueryTableServer <- function(id, query) {
             query$data <- query$data[
               query$data$.query_id != q_id,
               ,
+              ,
               drop = FALSE
             ]
 
