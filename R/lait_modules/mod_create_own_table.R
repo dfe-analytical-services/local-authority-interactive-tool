@@ -638,8 +638,7 @@ QueryTableServer <- function(id, query) {
           {
             # Remove the corresponding row (query) from query$data using the query ID
             query$data <- query$data[
-              query$data$.query_id != q_id, ,
-              ,
+              query$data$.query_id != q_id, , ,
               drop = FALSE
             ]
 
