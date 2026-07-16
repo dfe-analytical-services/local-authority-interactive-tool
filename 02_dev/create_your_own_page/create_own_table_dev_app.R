@@ -776,7 +776,8 @@ server <- function(input, output, session) {
 
           # Also remove the corresponding rows from query$output
           query$output <- query$output[
-            query$output$.query_id != q_id, ,
+            query$output$.query_id != q_id,
+            ,
             drop = FALSE
           ]
 
