@@ -638,14 +638,15 @@ QueryTableServer <- function(id, query) {
           {
             # Remove the corresponding row (query) from query$data using the query ID
             query$data <- query$data[
-              query$data$.query_id != q_id, ,
+              query$data$.query_id != q_id,
               ,
               drop = FALSE
             ]
 
             # Also remove the corresponding rows from query$output
             query$output <- query$output[
-              query$output$.query_id != q_id, ,
+              query$output$.query_id != q_id,
+              ,
               drop = FALSE
             ]
 
@@ -711,8 +712,7 @@ CreateOwnDataServer <- function(id, query, bds_metrics) {
 
       # Remove columns that contain only NaN values
       # (aka user removed query that was including these years so no need to display them now)
-      query_output_clean <- query$output[
-        ,
+      query_output_clean <- query$output[,
         !sapply(query$output, function(x) all(is.nan(x)))
       ]
 

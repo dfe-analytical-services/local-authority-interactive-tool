@@ -42,6 +42,7 @@ if (FALSE) {
   shhh(library(shinyGovstyle))
   # Plotting
   shhh(library(svglite)) # For saving plots as svg
+  shhh(library(rsconnect))
 }
 
 # Source scripts ==============================================================
