@@ -16,7 +16,7 @@ app <- AppDriver$new(
   width = 1445,
   load_timeout = 120 * 1000,
   timeout = 120 * 1000,
-  wait = TRUE,
+  wait = FALSE,
   options = list(test.mode = TRUE),
   expect_values_screenshot_args = FALSE # Turn off as we don't need screenshots
 )

@@ -225,7 +225,7 @@ region_long_plot <- region_long |>
   # Remove any "London (" regions where all values_num are NA
   dplyr::filter(
     !(grepl("^London \\(", `LA and Regions`) &
-        dplyr::n() == sum(is.na(values_num))),
+      dplyr::n() == sum(is.na(values_num))),
     `LA and Regions` %notin% "England"
   )
 

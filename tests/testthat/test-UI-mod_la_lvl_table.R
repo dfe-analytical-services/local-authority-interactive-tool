@@ -36,7 +36,7 @@ testthat::test_that("There are 4 rows in the LA main table", {
     app_dir = here::here("tests/testthat/test-app_mod_la_lvl_table/"),
     load_timeout = 120 * 1000,
     timeout = 120 * 1000,
-    wait = TRUE
+    wait = FALSE
   )
 
   # Get export values
