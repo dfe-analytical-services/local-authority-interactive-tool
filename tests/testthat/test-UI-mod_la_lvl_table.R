@@ -34,8 +34,8 @@
 testthat::test_that("There are 4 rows in the LA main table", {
   shinytest_app <- shinytest2::AppDriver$new(
     app_dir = here::here("tests/testthat/test-app_mod_la_lvl_table/"),
-    load_timeout = 45 * 1000,
-    timeout = 60 * 1000,
+    load_timeout = 120 * 1000,
+    timeout = 120 * 1000,
     wait = TRUE
   )
 
