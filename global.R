@@ -449,4 +449,4 @@ no_qb_indicators <- metrics_clean |>
   pull_uniques("Measure")
 
 # Successful load of global.R message
-cat(crayon::green("global.R successfully loaded!"))
+message(crayon::green("global.R successfully loaded!"))

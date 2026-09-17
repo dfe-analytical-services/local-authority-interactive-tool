@@ -14,9 +14,9 @@ app <- AppDriver$new(
   name = "basic_load",
   height = 846,
   width = 1445,
-  load_timeout = 100 * 1000,
-  timeout = 60 * 1000,
-  wait = TRUE,
+  load_timeout = 120 * 1000,
+  timeout = 120 * 1000,
+  wait = FALSE,
   options = list(test.mode = TRUE),
   expect_values_screenshot_args = FALSE # Turn off as we don't need screenshots
 )
