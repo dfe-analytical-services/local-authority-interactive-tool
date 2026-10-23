@@ -778,7 +778,8 @@
       "NeedsCompilation": "no",
       "Author": "Jennifer Bryan [cre, aut], Hadley Wickham [ctb]",
       "Maintainer": "Jennifer Bryan <jenny@stat.ubc.ca>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "Encoding": "UTF-8"
     },
     "checkmate": {
       "Package": "checkmate",
@@ -987,7 +988,7 @@
       "NeedsCompilation": "yes",
       "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>), John MacFarlane [cph] (Author of cmark)",
       "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "covr": {
       "Package": "covr",
@@ -1652,7 +1653,7 @@
       "NeedsCompilation": "no",
       "Author": "Hadley Wickham [aut, cre], Yihui Xie [aut] (ORCID: <https://orcid.org/0000-0003-0645-5666>), Michael Lawrence [ctb], Thomas Kluyver [ctb], Jeroen Ooms [ctb], Barret Schloerke [ctb], Adam Ryczkowski [ctb], Hiroaki Yutani [ctb], Michel Lang [ctb], Karolis Koncevičius [ctb], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Hadley Wickham <hadley@posit.co>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "fansi": {
       "Package": "fansi",
@@ -2508,7 +2509,7 @@
       "NeedsCompilation": "no",
       "Author": "Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>), Jennifer Bryan [ctb] (ORCID: <https://orcid.org/0000-0002-6983-2759>)",
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "highr": {
       "Package": "highr",
@@ -2907,7 +2908,8 @@
       "URL": "https://www.rforge.net/jpeg/",
       "BugReports": "https://github.com/s-u/jpeg/issues",
       "NeedsCompilation": "yes",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "Encoding": "UTF-8"
     },
     "jquerylib": {
       "Package": "jquerylib",
@@ -3320,7 +3322,7 @@
       "NeedsCompilation": "no",
       "Author": "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>), JJ Allaire [aut], Jeffrey Horner [aut], Henrik Bengtsson [ctb], Jim Hester [ctb], Yixuan Qiu [ctb], Kohske Takahashi [ctb], Adam November [ctb], Nacho Caballero [ctb], Jeroen Ooms [ctb], Thomas Leeper [ctb], Joe Cheng [ctb], Andrzej Oles [ctb], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Yihui Xie <xie@yihui.name>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "memoise": {
       "Package": "memoise",
@@ -3729,7 +3731,7 @@
       "NeedsCompilation": "no",
       "Author": "Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>), Hadley Wickham [aut], RStudio [cph]",
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "pingr": {
       "Package": "pingr",
@@ -4677,7 +4679,7 @@
       ],
       "Encoding": "UTF-8",
       "NeedsCompilation": "no",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "renv": {
       "Package": "renv",
@@ -4984,7 +4986,7 @@
       "NeedsCompilation": "no",
       "Author": "Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>)",
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "rsconnect": {
       "Package": "rsconnect",
@@ -5294,7 +5296,7 @@
     "shinyGovstyle": {
       "Package": "shinyGovstyle",
       "Version": "0.3.0",
-      "Source": "GitHub",
+      "Source": "Repository",
       "Title": "Custom Gov Style Inputs for Shiny",
       "Authors@R": "c( person(\"Ross\", \"Wyatt\", , \"ross.wyatt@justice.gov.uk\", role = \"aut\"), person(\"Cam\", \"Race\", , \"camrace8@gmail.com\", role = c(\"aut\", \"cre\")), person(\"Sarah\", \"Wong\", role = \"aut\"), person(\"Richard\", \"Bielby\", , \"richard.bielby@education.gov.uk\", role = \"ctb\"), person(\"Charlotte\", \"Foster\", , \"charlotte.foster@education.gov.uk\", role = \"ctb\"), person(\"Jeni\", \"Martin\", role = \"ctb\"), person(\"Andrew\", \"Baker\", , \"andrew.baker1@dhsc.gov.uk\", role = \"ctb\") )",
       "Description": "Provides 'shiny' components styled using the GOV.UK Design System. See <https://design-system.service.gov.uk/components/> for component guidance.",
@@ -5333,16 +5335,11 @@
       "Encoding": "UTF-8",
       "Language": "en-GB",
       "LazyData": "true",
-      "Roxygen": "list(markdown = TRUE)",
       "Config/roxygen2/version": "8.1.0",
+      "NeedsCompilation": "no",
       "Author": "Ross Wyatt [aut], Cam Race [aut, cre], Sarah Wong [aut], Richard Bielby [ctb], Charlotte Foster [ctb], Jeni Martin [ctb], Andrew Baker [ctb]",
       "Maintainer": "Cam Race <camrace8@gmail.com>",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteUsername": "dfe-analytical-services",
-      "RemoteRepo": "shinyGovstyle",
-      "RemoteRef": "main",
-      "RemoteSha": "8a432a482d6ead0350e1a6b75c810c4e369b28f3"
+      "Repository": "CRAN"
     },
     "shinyToastify": {
       "Package": "shinyToastify",
@@ -6592,7 +6589,7 @@
       "NeedsCompilation": "no",
       "Author": "Hadley Wickham [aut, cre], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Hadley Wickham <hadley@posit.co>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/latest"
     },
     "websocket": {
       "Package": "websocket",
