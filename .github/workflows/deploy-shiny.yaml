@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - development
+      - deploy-check
   pull_request:
     branches:
       - main
