@@ -13,6 +13,4 @@ jobs:
     uses: dfe-analytical-services/dfeshiny/.github/workflows/dashboard_deploy_template.yaml@main
     with:
       parameter_file: deploy-parameters.yaml
-    secrets:
-      SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
-      SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
+    secrets: inherit
