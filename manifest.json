@@ -46,6 +46,38 @@
         "RemoteSha": "1.30.2-1"
       }
     },
+    "DBI": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "DBI",
+        "Title": "R Database Interface",
+        "Version": "1.3.0",
+        "Date": "2026-02-11",
+        "Authors@R": "c(\n    person(\"R Special Interest Group on Databases (R-SIG-DB)\", role = \"aut\"),\n    person(\"Hadley\", \"Wickham\", role = \"aut\"),\n    person(\"Kirill\", \"Müller\", , \"kirill@cynkra.com\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-1416-3412\")),\n    person(\"R Consortium\", role = \"fnd\")\n  )",
+        "Description": "A database interface definition for communication between R\n    and relational database management systems.  All classes in this\n    package are virtual and need to be extended by the various R/DBMS\n    implementations.",
+        "License": "LGPL (>= 2.1)",
+        "URL": "https://dbi.r-dbi.org, https://github.com/r-dbi/DBI",
+        "BugReports": "https://github.com/r-dbi/DBI/issues",
+        "Depends": "methods, R (>= 3.0.0)",
+        "Suggests": "arrow, blob, callr, covr, DBItest (>= 1.8.2), dbplyr,\ndownlit, dplyr, glue, hms, knitr, magrittr, nanoarrow (>=\n0.3.0.1), otel, otelsdk, RMariaDB, rmarkdown, rprojroot,\nRSQLite (>= 1.1-2), testthat (>= 3.0.0), vctrs, xml2",
+        "VignetteBuilder": "knitr",
+        "Config/autostyle/scope": "line_breaks",
+        "Config/autostyle/strict": "false",
+        "Config/Needs/check": "r-dbi/DBItest",
+        "Config/Needs/website": "r-dbi/DBItest, r-dbi/dbitemplate, adbi,\nAzureKusto, bigrquery, DatabaseConnector, dittodb, duckdb,\nimplyr, lazysf, odbc, pool, RAthena, IMSMWU/RClickhouse, RH2,\nRJDBC, RMariaDB, RMySQL, RPostgres, RPostgreSQL, RPresto,\nRSQLite, sergeant, sparklyr, withr",
+        "Config/testthat/edition": "3",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.3.9000",
+        "NeedsCompilation": "no",
+        "Packaged": "2026-02-24 17:22:33 UTC; kirill",
+        "Author": "R Special Interest Group on Databases (R-SIG-DB) [aut],\n  Hadley Wickham [aut],\n  Kirill Müller [aut, cre] (ORCID:\n    <https://orcid.org/0000-0002-1416-3412>),\n  R Consortium [fnd]",
+        "Maintainer": "Kirill Müller <kirill@cynkra.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2026-02-25 06:31:27 UTC",
+        "Built": "R 4.5.2; ; 2026-03-04 01:53:06 UTC; windows"
+      }
+    },
     "MASS": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -1193,7 +1225,7 @@
         "Package": "curl",
         "Type": "Package",
         "Title": "A Modern and Flexible Web Client for R",
-        "Version": "8.0.0",
+        "Version": "8.1.0",
         "Authors@R": "c(\n    person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"), email = \"jeroenooms@gmail.com\",\n      comment = c(ORCID = \"0000-0002-4035-0289\")),\n    person(\"Hadley\", \"Wickham\", role = \"ctb\"),\n    person(\"Posit Software, PBC\", role = \"cph\"))",
         "Description": "Bindings to 'libcurl' <https://curl.se/libcurl/> for performing fully\n    configurable HTTP/FTP requests where responses can be processed in memory, on\n    disk, or streaming via the callback or connection interfaces. Some knowledge\n    of 'libcurl' is recommended; for a more-user-friendly web client see the \n    'httr2' package which builds on this package with http specific tools and logic.",
         "License": "MIT + file LICENSE",
@@ -1207,12 +1239,12 @@
         "Language": "en-US",
         "Config/roxygen2/version": "8.0.0",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-08-25 12:49:41 UTC; jeroen",
+        "Packaged": "2026-10-14 10:10:35 UTC; jeroen",
         "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>),\n  Hadley Wickham [ctb],\n  Posit Software, PBC [cph]",
         "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-08-25 16:40:02 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-09-12 01:23:18 UTC; windows",
+        "Date/Publication": "2026-10-14 12:12:13 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-10-21 01:21:21 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemoteRef": "curl",
@@ -1220,7 +1252,7 @@
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "8.0.0"
+        "RemoteSha": "8.1.0"
       }
     },
     "desc": {
@@ -1304,35 +1336,35 @@
         "Type": "Package",
         "Package": "dfeR",
         "Title": "Common Department for Education Analysis Tasks",
-        "Version": "1.0.1",
-        "Authors@R": "c(\n    person(\"Cam\", \"Race\", , \"cameron.race@education.gov.uk\", role = c(\"aut\", \"cre\")),\n    person(\"Department for Education, England\", , , \"statistics.development@education.gov.uk\", role = \"cph\"),\n    person(\"Laura\", \"Selby\", , \"laura.selby@education.gov.uk\", role = \"aut\"),\n    person(\"Adam\", \"Robinson\", role = \"aut\"),\n    person(\"Jen\", \"Machin\", , \"jen.machin@education.gov.uk\", role = \"ctb\"),\n    person(\"Jake\", \"Tufts\", , \"jake.tufts@education.gov.uk\", role = \"ctb\"),\n    person(\"Rich\", \"Bielby\", , \"richard.bielby@education.gov.uk\", role = \"ctb\",\n           comment = c(ORCID = \"0000-0001-9070-9969\")),\n    person(\"Menna\", \"Zayed\", , \"menna.zayed@education.gov.uk\", role = \"ctb\"),\n    person(\"Lauren\", \"Snaathorst\", , \"lauren.snaathorst@education.gov.uk\", role = \"ctb\")\n  )",
-        "Description": "Preferred methods for common analytical tasks that are\n    undertaken across the Department, including number formatting, project\n    templates and curated reference data.",
+        "Version": "2.0.0",
+        "Authors@R": "c(\n    person(\"Cam\", \"Race\", , \"cameron.race@education.gov.uk\", role = c(\"aut\", \"cre\")),\n    person(\"Department for Education, England\", , , \"statistics.development@education.gov.uk\", role = \"cph\"),\n    person(\"Laura\", \"Selby\", , \"laura.selby@education.gov.uk\", role = \"aut\"),\n    person(\"Adam\", \"Robinson\", role = \"aut\"),\n    person(\"Jen\", \"Machin\", , \"jen.machin@education.gov.uk\", role = \"ctb\"),\n    person(\"Jake\", \"Tufts\", , \"jake.tufts@education.gov.uk\", role = \"ctb\"),\n    person(\"Rich\", \"Bielby\", , \"richard.bielby@education.gov.uk\", role = \"ctb\",\n           comment = c(ORCID = \"0000-0001-9070-9969\")),\n    person(\"Menna\", \"Zayed\", , \"menna.zayed@education.gov.uk\", role = \"ctb\"),\n    person(\"Lauren\", \"Snaathorst\", , \"lauren.snaathorst@education.gov.uk\", role = \"ctb\"),\n    person(\"Lara\", \"Garbett\", , \"lara.garbett@education.gov.uk\", role = \"ctb\"),\n    person(\"Paula\", \"Rocha\", , \"paula.rocha@education.gov.uk\", role = \"ctb\")\n  )",
+        "Description": "Provides preferred methods for common analytical tasks\n    undertaken across the Department for Education in England, including\n    number formatting, project templates and curated reference data.",
         "License": "GPL (>= 3)",
         "URL": "https://dfe-analytical-services.github.io/dfeR/,\nhttps://github.com/dfe-analytical-services/dfeR",
         "BugReports": "https://github.com/dfe-analytical-services/dfeR/issues",
-        "Depends": "R (>= 2.10)",
-        "Imports": "dplyr, emoji, httr, jsonlite, lifecycle, magrittr, renv,\nrlang, tidyselect, usethis, utils, withr",
-        "Suggests": "knitr, readxl, rmarkdown, spelling, stringr, testthat (>=\n3.0.0)",
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "arrow, cli, DBI, dplyr, emoji, httr2, jsonlite, lifecycle,\nrenv, rlang, rstudio.prefs, stringr, tidyselect, usethis,\nutils, withr",
+        "Suggests": "knitr, rmarkdown, spelling, testthat (>= 3.1.7), mockery,\nggplot2, purrr, scales",
         "VignetteBuilder": "knitr",
         "Config/testthat/edition": "3",
         "Encoding": "UTF-8",
         "Language": "en-GB",
         "LazyData": "true",
-        "RoxygenNote": "7.3.2",
+        "Config/roxygen2/version": "8.1.0",
         "NeedsCompilation": "no",
-        "Packaged": "2025-01-15 20:48:25 UTC; camra",
-        "Author": "Cam Race [aut, cre],\n  Department for Education, England [cph],\n  Laura Selby [aut],\n  Adam Robinson [aut],\n  Jen Machin [ctb],\n  Jake Tufts [ctb],\n  Rich Bielby [ctb] (<https://orcid.org/0000-0001-9070-9969>),\n  Menna Zayed [ctb],\n  Lauren Snaathorst [ctb]",
+        "Packaged": "2026-09-23 17:29:49 UTC; camra",
+        "Author": "Cam Race [aut, cre],\n  Department for Education, England [cph],\n  Laura Selby [aut],\n  Adam Robinson [aut],\n  Jen Machin [ctb],\n  Jake Tufts [ctb],\n  Rich Bielby [ctb] (ORCID: <https://orcid.org/0000-0001-9070-9969>),\n  Menna Zayed [ctb],\n  Lauren Snaathorst [ctb],\n  Lara Garbett [ctb],\n  Paula Rocha [ctb]",
         "Maintainer": "Cam Race <cameron.race@education.gov.uk>",
         "Repository": "CRAN",
-        "Date/Publication": "2025-01-15 21:50:07 UTC",
-        "Built": "R 4.5.0; ; 2025-04-28 02:12:43 UTC; windows",
+        "Date/Publication": "2026-09-23 17:50:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-21 05:09:53 UTC; windows",
         "RemoteType": "standard",
         "RemoteRef": "dfeR",
         "RemotePkgRef": "dfeR",
-        "RemoteRepos": "https://www.stats.bris.ac.uk/R",
+        "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "1.0.1"
+        "RemoteSha": "2.0.0"
       }
     },
     "dfeshiny": {
@@ -1918,7 +1950,7 @@
       "description": {
         "Package": "gdtools",
         "Title": "Font Metrics and Font Management Utilities for R Graphics",
-        "Version": "0.5.1",
+        "Version": "0.5.2",
         "Authors@R": "c(\n    person(\"David\", \"Gohel\", , \"david.gohel@ardata.fr\", role = c(\"aut\", \"cre\")),\n    person(\"Hadley\", \"Wickham\", , \"hadley@rstudio.com\", role = \"aut\"),\n    person(\"Lionel\", \"Henry\", , \"lionel@rstudio.com\", role = \"aut\"),\n    person(\"Jeroen\", \"Ooms\", , \"jeroen@berkeley.edu\", role = \"aut\",\n           comment = c(ORCID = \"0000-0002-4035-0289\")),\n    person(\"Yixuan\", \"Qiu\", role = \"ctb\"),\n    person(\"R Core Team\", role = \"cph\",\n           comment = \"Cairo code from X11 device\"),\n    person(\"ArData\", role = \"cph\"),\n    person(\"RStudio\", role = \"cph\")\n  )",
         "Description": "Compute text metrics (width, ascent, descent) using 'Cairo'\n    and 'FreeType', independently of the active graphic device. Font\n    lookup is delegated to 'systemfonts'. Additional utilities let users\n    register 'Google Fonts' or bundled 'Liberation' fonts, check font\n    availability, and assemble 'htmlDependency' objects so that fonts are\n    correctly embedded in 'Shiny' applications, 'R Markdown' documents,\n    and 'htmlwidgets' outputs such as 'ggiraph'.",
         "License": "GPL-3 | file LICENSE",
@@ -1926,18 +1958,18 @@
         "BugReports": "https://github.com/davidgohel/gdtools/issues",
         "Depends": "R (>= 4.0.0)",
         "Imports": "fontquiver (>= 0.2.0), htmltools, Rcpp (>= 0.12.12),\nsystemfonts (>= 1.3.1), tools",
-        "Suggests": "curl, gfonts, methods, testthat",
+        "Suggests": "curl, gfonts, testthat",
         "LinkingTo": "Rcpp",
+        "Config/roxygen2/version": "8.1.1",
         "Encoding": "UTF-8",
         "SystemRequirements": "cairo, freetype2, fontconfig",
-        "Config/roxygen2/version": "8.0.0",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-05-25 16:16:18 UTC; davidgohel",
+        "Packaged": "2026-10-15 16:51:47 UTC; davidgohel",
         "Author": "David Gohel [aut, cre],\n  Hadley Wickham [aut],\n  Lionel Henry [aut],\n  Jeroen Ooms [aut] (ORCID: <https://orcid.org/0000-0002-4035-0289>),\n  Yixuan Qiu [ctb],\n  R Core Team [cph] (Cairo code from X11 device),\n  ArData [cph],\n  RStudio [cph]",
         "Maintainer": "David Gohel <david.gohel@ardata.fr>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-05-25 17:10:02 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-06-08 02:05:16 UTC; windows",
+        "Date/Publication": "2026-10-15 18:50:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-10-21 02:54:35 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemoteRef": "gdtools",
@@ -1945,7 +1977,7 @@
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "0.5.1"
+        "RemoteSha": "0.5.2"
       }
     },
     "generics": {
@@ -1983,7 +2015,7 @@
         "Type": "Package",
         "Package": "gert",
         "Title": "Simple Git Client for R",
-        "Version": "2.4.1",
+        "Version": "2.5.0",
         "Authors@R": "c(\n    person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"), email = \"jeroenooms@gmail.com\",\n      comment = c(ORCID = \"0000-0002-4035-0289\")),\n    person(\"Maëlle\", \"Salmon\", role = \"aut\", comment = c(ORCID = \"0000-0002-2815-0399\")),\n    person(\"Jennifer\", \"Bryan\", role = \"ctb\", email = \"jenny@posit.co\",\n      comment = c(ORCID = \"0000-0002-6983-2759\")))",
         "Description": "Simple git client for R based on 'libgit2' <https://libgit2.org> with\n    support for SSH and HTTPS remotes. All functions in 'gert' use basic R data \n    types (such as vectors and data-frames) for their arguments and return values.\n    User credentials are shared with command line 'git' through the git-credential\n    store and ssh keys stored on disk or ssh-agent.",
         "License": "MIT + file LICENSE",
@@ -1998,12 +2030,12 @@
         "Config/roxygen2/version": "8.0.0",
         "Config/testthat/edition": "3",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-08-19 12:38:16 UTC; jeroen",
+        "Packaged": "2026-10-14 10:02:36 UTC; jeroen",
         "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>),\n  Maëlle Salmon [aut] (ORCID: <https://orcid.org/0000-0002-2815-0399>),\n  Jennifer Bryan [ctb] (ORCID: <https://orcid.org/0000-0002-6983-2759>)",
         "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-08-19 14:20:02 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-09-12 02:53:30 UTC; windows",
+        "Date/Publication": "2026-10-14 10:40:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-10-21 03:21:33 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemoteRef": "gert",
@@ -2011,7 +2043,7 @@
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "2.4.1"
+        "RemoteSha": "2.5.0"
       }
     },
     "ggiraph": {
@@ -2243,11 +2275,11 @@
       "Repository": "https://cran.rstudio.com",
       "description": {
         "Package": "globals",
-        "Version": "0.19.1",
+        "Version": "0.20.0",
         "Depends": "R (>= 3.1.2)",
         "Imports": "codetools",
         "Title": "Identify Global Objects in R Expressions",
-        "Authors@R": "c(\n    person(\"Henrik\", \"Bengtsson\", role=c(\"aut\", \"cre\", \"cph\"),\n           email=\"henrikb@braju.com\"),\n    person(\"Davis\",\"Vaughan\", role=\"ctb\",\n           email=\"davis@posit.co\"))",
+        "Authors@R": "c(\n    person(\"Henrik\", \"Bengtsson\", role=c(\"aut\", \"cre\", \"cph\"),\n           email=\"henrikb@braju.com\",\n           comment = c(ORCID = \"0000-0002-7579-5165\")),\n    person(\"Davis\",\"Vaughan\", role=\"ctb\",\n           email=\"davis@posit.co\",\n           comment = c(ORCID = \"0000-0003-4777-038X\")))",
         "Description": "Identifies global (\"unknown\" or \"free\") objects in R expressions\n    by code inspection using various strategies (ordered, liberal,\n    conservative, or deep-first search). The objective of this package is to\n    make it as simple as possible to identify global objects for the purpose\n    of exporting them in parallel, distributed compute environments.",
         "License": "LGPL (>= 2.1)",
         "LazyLoad": "TRUE",
@@ -2256,21 +2288,21 @@
         "Encoding": "UTF-8",
         "URL": "https://globals.futureverse.org,\nhttps://github.com/futureverse/globals",
         "BugReports": "https://github.com/futureverse/globals/issues",
-        "RoxygenNote": "7.3.3",
+        "Config/roxygen2/version": "8.1.0",
         "NeedsCompilation": "no",
-        "Packaged": "2026-03-12 23:06:06 UTC; hb",
-        "Author": "Henrik Bengtsson [aut, cre, cph],\n  Davis Vaughan [ctb]",
+        "Packaged": "2026-10-11 19:38:28 UTC; hb",
+        "Author": "Henrik Bengtsson [aut, cre, cph] (ORCID:\n    <https://orcid.org/0000-0002-7579-5165>),\n  Davis Vaughan [ctb] (ORCID: <https://orcid.org/0000-0003-4777-038X>)",
         "Maintainer": "Henrik Bengtsson <henrikb@braju.com>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-03-13 07:30:09 UTC",
-        "Built": "R 4.5.2; ; 2026-03-16 15:04:54 UTC; windows",
+        "Date/Publication": "2026-10-11 20:40:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-11 23:51:19 UTC; windows",
         "RemoteType": "standard",
         "RemoteRef": "globals",
         "RemotePkgRef": "globals",
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "source",
-        "RemoteSha": "0.19.1"
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.20.0"
       }
     },
     "glue": {
@@ -4378,38 +4410,38 @@
       "description": {
         "Package": "readxl",
         "Title": "Read Excel Files",
-        "Version": "1.5.0.1",
-        "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0003-4757-117X\")),\n    person(\"Jennifer\", \"Bryan\", , \"jenny@posit.co\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-6983-2759\")),\n    person(\"Posit, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = \"Copyright holder of all R code and all C/C++ code without explicit copyright attribution\"),\n    person(\"Marcin\", \"Kalicinski\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included RapidXML code\"),\n    person(\"Komarov Valery\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Christophe Leitienne\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Bob Colbert\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"David Hoerl\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Evan Miller\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\")\n  )",
-        "Description": "Import excel files into R. Supports '.xls' via the embedded\n    'libxls' C library <https://github.com/libxls/libxls> and '.xlsx' via\n    the embedded 'RapidXML' C++ library\n    <https://rapidxml.sourceforge.net/>.  Works on Windows, Mac and Linux\n    without external dependencies.",
+        "Version": "1.6.0",
+        "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0003-4757-117X\")),\n    person(\"Jennifer\", \"Bryan\", , \"jenny@posit.co\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-6983-2759\")),\n    person(\"Posit, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = \"Copyright holder of all R code and all C/C++ code without explicit copyright attribution\"),\n    person(\"Marcin\", \"Kalicinski\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included RapidXML code\"),\n    person(\"Komarov Valery\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Christophe Leitienne\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Bob Colbert\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"David Hoerl\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Evan Miller\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"kokke\", role = \"ctb\",\n           comment = \"Author of included tiny-AES-c code\")\n  )",
+        "Description": "Import excel files into R. Supports '.xls' via the embedded\n    'libxls' C library <https://github.com/libxls/libxls> and '.xlsx' via\n    the embedded 'RapidXML' C++ library\n    <https://rapidxml.sourceforge.net/>.  Works on Windows, Mac and Linux\n    without external dependencies. Reading of password-encrypted '.xlsx'\n    files is supported via the embedded 'tiny-AES-c' C library\n    <https://github.com/kokke/tiny-AES-c>.",
         "License": "MIT + file LICENSE",
         "URL": "https://readxl.tidyverse.org, https://github.com/tidyverse/readxl",
         "BugReports": "https://github.com/tidyverse/readxl/issues",
-        "Depends": "R (>= 4.1)",
-        "Imports": "cellranger, tibble (>= 2.0.1), utils",
-        "Suggests": "covr, knitr, rmarkdown, testthat (>= 3.1.6), withr",
+        "Depends": "R (>= 4.2)",
+        "Imports": "cellranger, cli, rlang, tibble (>= 2.0.1), utils",
+        "Suggests": "askpass, covr, knitr, rmarkdown, testthat (>= 3.1.6), withr",
         "LinkingTo": "cpp11 (>= 0.5.5), progress",
         "VignetteBuilder": "knitr",
         "Config/build/compilation-database": "true",
         "Config/Needs/website": "tidyverse/tidytemplate, tidyverse",
-        "Config/roxygen2/version": "8.0.0",
+        "Config/roxygen2/version": "8.1.0",
         "Config/testthat/edition": "3",
         "Encoding": "UTF-8",
-        "Note": "libxls v1.6.3 c199d13",
+        "Note": "libxls v1.6.4 34c7cc6; tiny-AES-c 2385675",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-09-16 07:49:42 UTC; ripley",
-        "Author": "Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),\n  Jennifer Bryan [aut, cre] (ORCID:\n    <https://orcid.org/0000-0002-6983-2759>),\n  Posit, PBC [cph, fnd] (Copyright holder of all R code and all C/C++\n    code without explicit copyright attribution),\n  Marcin Kalicinski [ctb, cph] (Author of included RapidXML code),\n  Komarov Valery [ctb, cph] (Author of included libxls code),\n  Christophe Leitienne [ctb, cph] (Author of included libxls code),\n  Bob Colbert [ctb, cph] (Author of included libxls code),\n  David Hoerl [ctb, cph] (Author of included libxls code),\n  Evan Miller [ctb, cph] (Author of included libxls code)",
+        "Packaged": "2026-10-16 22:54:36 UTC; jenny",
+        "Author": "Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),\n  Jennifer Bryan [aut, cre] (ORCID:\n    <https://orcid.org/0000-0002-6983-2759>),\n  Posit, PBC [cph, fnd] (Copyright holder of all R code and all C/C++\n    code without explicit copyright attribution),\n  Marcin Kalicinski [ctb, cph] (Author of included RapidXML code),\n  Komarov Valery [ctb, cph] (Author of included libxls code),\n  Christophe Leitienne [ctb, cph] (Author of included libxls code),\n  Bob Colbert [ctb, cph] (Author of included libxls code),\n  David Hoerl [ctb, cph] (Author of included libxls code),\n  Evan Miller [ctb, cph] (Author of included libxls code),\n  kokke [ctb] (Author of included tiny-AES-c code)",
         "Maintainer": "Jennifer Bryan <jenny@posit.co>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-09-16 07:53:07 UTC",
-        "Built": "R 4.5.2; x86_64-w64-mingw32; 2026-09-17 13:28:33 UTC; windows",
+        "Date/Publication": "2026-10-17 07:20:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-10-20 23:51:54 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemoteRef": "readxl",
         "RemotePkgRef": "readxl",
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "source",
-        "RemoteSha": "1.5.0.1"
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "1.6.0"
       }
     },
     "rematch": {
@@ -4449,14 +4481,14 @@
         "Package": "renv",
         "Type": "Package",
         "Title": "Project Environments",
-        "Version": "1.2.4",
+        "Version": "1.3.1",
         "Authors@R": "c(\n    person(\"Kevin\", \"Ushey\", role = c(\"aut\", \"cre\"), email = \"kevin@rstudio.com\",\n           comment = c(ORCID = \"0000-0003-2880-7407\")),\n    person(\"Hadley\", \"Wickham\", role = c(\"aut\"), email = \"hadley@rstudio.com\",\n           comment = c(ORCID = \"0000-0003-4757-117X\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n    )",
         "Description": "A dependency management toolkit for R. Using 'renv', you can create\n    and manage project-local R libraries, save the state of these libraries to\n    a 'lockfile', and later restore your library as required. Together, these\n    tools can help make your projects more isolated, portable, and reproducible.",
         "License": "MIT + file LICENSE",
         "URL": "https://rstudio.github.io/renv/, https://github.com/rstudio/renv",
         "BugReports": "https://github.com/rstudio/renv/issues",
         "Imports": "utils",
-        "Suggests": "BiocManager, cli, compiler, covr, cpp11, curl, devtools,\ngenerics, gitcreds, jsonlite, jsonvalidate, knitr, miniUI,\nmodules, packrat, pak, R6, remotes, reticulate, rmarkdown,\nrstudioapi, shiny, testthat, uuid, waldo, yaml, webfakes",
+        "Suggests": "BiocManager, cli, compiler, covr, cpp11, curl, devtools,\ngenerics, gitcreds, jsonlite, jsonvalidate, knitr, miniUI,\nmodules, packrat, pak, pkgload, R6, remotes, reticulate,\nrmarkdown, rstudioapi, shiny, testthat, uuid, waldo, yaml,\nwebfakes",
         "Encoding": "UTF-8",
         "VignetteBuilder": "knitr",
         "Config/Needs/website": "tidyverse/tidytemplate",
@@ -4465,19 +4497,19 @@
         "Config/testthat/start-first": "bioconductor,python,install,restore,snapshot,retrieve,remotes",
         "Config/roxygen2/version": "8.0.0",
         "NeedsCompilation": "no",
-        "Packaged": "2026-08-03 20:47:11 UTC; kevin",
+        "Packaged": "2026-10-05 19:17:20 UTC; kevin",
         "Author": "Kevin Ushey [aut, cre] (ORCID: <https://orcid.org/0000-0003-2880-7407>),\n  Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),\n  Posit Software, PBC [cph, fnd]",
         "Maintainer": "Kevin Ushey <kevin@rstudio.com>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-08-03 23:10:02 UTC",
-        "Built": "R 4.5.3; ; 2026-08-05 08:57:19 UTC; windows",
+        "Date/Publication": "2026-10-06 10:40:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-21 01:33:07 UTC; windows",
         "RemoteType": "standard",
         "RemoteRef": "renv",
         "RemotePkgRef": "renv",
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "1.2.4"
+        "RemoteSha": "1.3.1"
       }
     },
     "rex": {
@@ -4629,14 +4661,14 @@
       "description": {
         "Package": "roxygen2",
         "Title": "In-Line Documentation for R",
-        "Version": "8.1.0",
+        "Version": "8.1.1",
         "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = c(\"aut\", \"cre\", \"cph\"),\n           comment = c(ORCID = \"0000-0003-4757-117X\")),\n    person(\"Peter\", \"Danenberg\", , \"pcd@roxygen.org\", role = c(\"aut\", \"cph\")),\n    person(\"Gábor\", \"Csárdi\", , \"csardi.gabor@gmail.com\", role = \"aut\"),\n    person(\"Manuel\", \"Eugster\", role = c(\"aut\", \"cph\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = c(ROR = \"03wc8by49\"))\n  )",
         "Description": "Generate your Rd documentation, 'NAMESPACE' file, and\n    collation field using specially formatted comments. Writing\n    documentation in-line with code makes it easier to keep your\n    documentation up-to-date as your requirements change. 'roxygen2' is\n    inspired by the 'Doxygen' system for C++.",
         "License": "MIT + file LICENSE",
         "URL": "https://roxygen2.r-lib.org/, https://github.com/r-lib/roxygen2",
         "BugReports": "https://github.com/r-lib/roxygen2/issues",
         "Depends": "R (>= 4.1)",
-        "Imports": "brew, cli (>= 3.3.0), commonmark, desc (>= 1.2.0), knitr,\nlifecycle, methods, pkgload (>= 1.5.2), R6 (>= 2.1.2), rdtools\n(>= 0.1.0), rlang (>= 1.1.0), utils, withr, xml2",
+        "Imports": "brew, cli (>= 3.3.0), commonmark, desc (>= 1.2.0), knitr,\nlifecycle, methods, pkgload (>= 1.5.2), R6 (>= 2.1.2), rdtools\n(>= 0.1.0), rlang (>= 1.1.0), stats, utils, withr, xml2",
         "Suggests": "covr, R.methodsS3, S7, R.oo, rmarkdown (>= 2.16), testthat\n(>= 3.1.2), yaml",
         "LinkingTo": "cpp11",
         "VignetteBuilder": "knitr",
@@ -4644,18 +4676,18 @@
         "Config/Needs/website": "tidyverse/tidytemplate",
         "Config/roxygen2/load": "installed",
         "Config/roxygen2/markdown": "TRUE",
-        "Config/roxygen2/version": "8.0.0.9000",
+        "Config/roxygen2/version": "8.1.0.9000",
         "Config/testthat/edition": "3",
         "Config/testthat/parallel": "TRUE",
         "Encoding": "UTF-8",
         "Language": "en-GB",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-07-31 13:20:14 UTC; hadleywickham",
+        "Packaged": "2026-10-08 20:31:11 UTC; hadleywickham",
         "Author": "Hadley Wickham [aut, cre, cph] (ORCID:\n    <https://orcid.org/0000-0003-4757-117X>),\n  Peter Danenberg [aut, cph],\n  Gábor Csárdi [aut],\n  Manuel Eugster [aut, cph],\n  Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)",
         "Maintainer": "Hadley Wickham <hadley@posit.co>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-08-04 20:00:02 UTC",
-        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-09-12 02:53:41 UTC; windows",
+        "Date/Publication": "2026-10-08 22:30:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-10-21 03:56:39 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemoteRef": "roxygen2",
@@ -4663,7 +4695,7 @@
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "8.1.0"
+        "RemoteSha": "8.1.1"
       }
     },
     "rprojroot": {
@@ -4710,7 +4742,7 @@
         "Type": "Package",
         "Package": "rsconnect",
         "Title": "Deploy Docs, Apps, and APIs to 'Posit Connect', 'shinyapps.io',\nand 'RPubs'",
-        "Version": "1.11.0",
+        "Version": "1.11.2",
         "Authors@R": "c(\n    person(\"Aron\", \"Atkins\", , \"aron@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Toph\", \"Allen\", role = \"aut\"),\n    person(\"Hadley\", \"Wickham\", role = \"aut\"),\n    person(\"Jonathan\", \"McPherson\", role = \"aut\"),\n    person(\"JJ\", \"Allaire\", role = \"aut\"),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
         "Description": "Programmatic deployment interface for 'RPubs',\n    'shinyapps.io', and 'Posit Connect'. Supported content types include R\n    Markdown documents, Shiny applications, Plumber APIs, plots, and\n    static web content.",
         "License": "GPL-2",
@@ -4727,19 +4759,56 @@
         "Encoding": "UTF-8",
         "Config/roxygen2/version": "8.1.0",
         "NeedsCompilation": "no",
-        "Packaged": "2026-08-25 13:17:54 UTC; aron",
+        "Packaged": "2026-09-28 16:11:21 UTC; aron",
         "Author": "Aron Atkins [aut, cre],\n  Toph Allen [aut],\n  Hadley Wickham [aut],\n  Jonathan McPherson [aut],\n  JJ Allaire [aut],\n  Posit Software, PBC [cph, fnd]",
         "Maintainer": "Aron Atkins <aron@posit.co>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-08-25 16:50:02 UTC",
-        "Built": "R 4.5.3; ; 2026-09-07 03:22:48 UTC; windows",
+        "Date/Publication": "2026-09-28 16:50:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-01 16:27:11 UTC; windows",
         "RemoteType": "standard",
         "RemoteRef": "rsconnect",
         "RemotePkgRef": "rsconnect",
-        "RemoteRepos": "https://cloud.r-project.org",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "source",
+        "RemoteSha": "1.11.2"
+      }
+    },
+    "rstudio.prefs": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "rstudio.prefs",
+        "Title": "Manage 'RStudio' Preferences and Addin Shortcuts",
+        "Version": "0.3.0",
+        "Authors@R": "c(\n    person(\"S.A.\", \"van der Wulp\", , \"vdwulp@gmail.com\", role = c(\"aut\", \"cre\", \"cph\")),\n    person(\"Daniel D.\", \"Sjoberg\", , \"danield.sjoberg@gmail.com\", role = c(\"aut\", \"cph\"),\n           comment = c(ORCID = \"0000-0003-0862-2018\")))",
+        "Description": "Provides an interface for working with 'RStudio' preference files\n    to modify settings and addin shortcuts without using point-and-click option\n    menus. Useful for ensuring a unified experience across devices and for\n    enforcing best practices. Also exposes some settings not available in the\n    Global Options dialog.",
+        "License": "GPL (>= 3)",
+        "URL": "https://github.com/vdwulp/rstudio.prefs,\nhttps://vdwulp.github.io/rstudio.prefs/",
+        "BugReports": "https://github.com/vdwulp/rstudio.prefs/issues",
+        "SystemRequirements": "RStudio (>= 1.3)",
+        "Depends": "R (>= 3.5)",
+        "Imports": "cli (>= 2.5.0), dplyr (>= 1.0.6), fs (>= 1.5.0), jsonlite (>=\n1.7.2), purrr (>= 0.3.4), rappdirs (>= 0.3.3), rlang (>=\n0.4.11), rstudioapi (>= 0.13), rvest (>= 1.0.0), tibble (>=\n3.1.2)",
+        "Suggests": "covr (>= 3.5.1), spelling (>= 2.2), testthat (>= 3.0.0),\nwithr (>= 2.3.0)",
+        "Config/testthat/edition": "3",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "Config/roxygen2/version": "8.1.0",
+        "Config/roxygen2/markdown": "TRUE",
+        "NeedsCompilation": "no",
+        "Packaged": "2026-09-26 12:54:17 UTC; wulps",
+        "Author": "S.A. van der Wulp [aut, cre, cph],\n  Daniel D. Sjoberg [aut, cph] (ORCID:\n    <https://orcid.org/0000-0003-0862-2018>)",
+        "Maintainer": "S.A. van der Wulp <vdwulp@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2026-09-26 13:20:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-21 04:42:07 UTC; windows",
+        "RemoteType": "standard",
+        "RemoteRef": "rstudio.prefs",
+        "RemotePkgRef": "rstudio.prefs",
+        "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "1.11.0"
+        "RemoteSha": "0.3.0"
       }
     },
     "rstudioapi": {
@@ -4798,6 +4867,37 @@
         "Repository": "RSPM",
         "Date/Publication": "2025-10-09 14:10:02 UTC",
         "Built": "R 4.5.0; ; 2025-10-10 04:45:06 UTC; windows"
+      }
+    },
+    "rvest": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "rvest",
+        "Title": "Easily Harvest (Scrape) Web Pages",
+        "Version": "1.0.5",
+        "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = c(ROR = \"03wc8by49\"))\n  )",
+        "Description": "Wrappers around the 'xml2' and 'httr' packages to make it\n    easy to download, then manipulate, HTML and XML.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://rvest.tidyverse.org/, https://github.com/tidyverse/rvest",
+        "BugReports": "https://github.com/tidyverse/rvest/issues",
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli, glue, httr (>= 0.5), lifecycle (>= 1.0.3), magrittr,\nrlang (>= 1.1.0), selectr, tibble, xml2 (>= 1.4.0)",
+        "Suggests": "chromote, covr, knitr, purrr, R6, readr, repurrrsive,\nrmarkdown, spelling, stringi (>= 0.3.1), testthat (>= 3.0.2),\ntidyr, webfakes",
+        "VignetteBuilder": "knitr",
+        "Config/Needs/website": "tidyverse/tidytemplate",
+        "Config/testthat/edition": "3",
+        "Config/testthat/parallel": "true",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "RoxygenNote": "7.3.2",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-08-29 12:57:41 UTC; hadleywickham",
+        "Author": "Hadley Wickham [aut, cre],\n  Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)",
+        "Maintainer": "Hadley Wickham <hadley@posit.co>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-08-29 14:00:02 UTC",
+        "Built": "R 4.5.1; ; 2025-10-06 02:44:26 UTC; windows"
       }
     },
     "sass": {
@@ -4872,6 +4972,40 @@
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
         "RemoteSha": "1.4.0"
+      }
+    },
+    "selectr": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "selectr",
+        "Type": "Package",
+        "Title": "Translate CSS Selectors to XPath Expressions",
+        "Version": "0.8-0",
+        "Authors@R": "c(person(\"Simon\", \"Potter\",\n                    role = c(\"aut\", \"trl\", \"cre\"),\n                    email = \"simon@sjp.co.nz\"),\n             person(\"Simon\", \"Sapin\", role = \"aut\"),\n             person(\"Ian\", \"Bicking\", role = \"aut\"))",
+        "License": "BSD_3_clause + file LICENCE",
+        "Encoding": "UTF-8",
+        "Depends": "R (>= 3.6)",
+        "Suggests": "testthat (>= 3.0.0), XML, xml2",
+        "Config/testthat/edition": "3",
+        "URL": "https://sjp.co.nz/projects/selectr/",
+        "BugReports": "https://github.com/sjp/selectr/issues",
+        "Language": "en-GB",
+        "Description": "Translates a CSS selector into an equivalent XPath\n  expression. This allows us to use CSS selectors when working with\n  the 'XML' and 'xml2' packages, which can only evaluate XPath\n  expressions. Also provided are convenience functions for querying\n  XML and HTML documents with CSS selectors. This package was\n  originally a port of the Python package 'cssselect'\n  (<https://cssselect.readthedocs.io/>).",
+        "NeedsCompilation": "no",
+        "Packaged": "2026-09-27 06:18:23 UTC; vscode",
+        "Author": "Simon Potter [aut, trl, cre],\n  Simon Sapin [aut],\n  Ian Bicking [aut]",
+        "Maintainer": "Simon Potter <simon@sjp.co.nz>",
+        "Repository": "CRAN",
+        "Date/Publication": "2026-09-27 06:50:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-21 01:21:19 UTC; windows",
+        "RemoteType": "standard",
+        "RemoteRef": "selectr",
+        "RemotePkgRef": "selectr",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.8-0"
       }
     },
     "sessioninfo": {
@@ -5163,8 +5297,8 @@
       "description": {
         "Package": "snowflakeauth",
         "Title": "Authentication Helpers for 'Snowflake'",
-        "Version": "0.3.0",
-        "Authors@R": "c(\n    person(\"Aaron\", \"Jacobs\", , \"aaron.jacobs@posit.co\", role = c(\"aut\")),\n    person(\"E. David\", \"Aja\", , \"david@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
+        "Version": "0.3.1",
+        "Authors@R": "c(\n    person(\"Aaron\", \"Jacobs\", , \"aaron.jacobs@posit.co\", role = c(\"aut\", \"cre\")),\n    person(\"E. David\", \"Aja\", , \"david@posit.co\", role = c(\"aut\")),\n    person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"))\n  )",
         "Description": "Authentication helpers for 'Snowflake'.\n    It provides compatibility with authentication approaches supported\n    by the 'Snowflake Connector for Python' <https://pypi.org/project/snowflake-connector-python>\n    and the 'Snowflake CLI' <https://pypi.org/project/snowflake-cli>.",
         "License": "MIT + file LICENSE",
         "Encoding": "UTF-8",
@@ -5175,19 +5309,19 @@
         "URL": "https://posit-dev.github.io/snowflakeauth/,\nhttps://github.com/posit-dev/snowflakeauth",
         "BugReports": "https://github.com/posit-dev/snowflakeauth/issues",
         "NeedsCompilation": "no",
-        "Packaged": "2026-08-31 15:34:48 UTC; edavidaja",
-        "Author": "Aaron Jacobs [aut],\n  E. David Aja [aut, cre],\n  Posit Software, PBC [cph, fnd]",
-        "Maintainer": "E. David Aja <david@posit.co>",
+        "Packaged": "2026-10-07 15:10:55 UTC; aaron",
+        "Author": "Aaron Jacobs [aut, cre],\n  E. David Aja [aut],\n  Posit Software, PBC [cph, fnd]",
+        "Maintainer": "Aaron Jacobs <aaron.jacobs@posit.co>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-08-31 22:00:02 UTC",
-        "Built": "R 4.5.3; ; 2026-09-07 02:55:39 UTC; windows",
+        "Date/Publication": "2026-10-07 16:00:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-21 03:02:37 UTC; windows",
         "RemoteType": "standard",
         "RemoteRef": "snowflakeauth",
         "RemotePkgRef": "snowflakeauth",
-        "RemoteRepos": "https://cloud.r-project.org",
+        "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "0.3.0"
+        "RemoteSha": "0.3.1"
       }
     },
     "sourcetools": {
@@ -5715,7 +5849,7 @@
         "Package": "tinytex",
         "Type": "Package",
         "Title": "Helper Functions to Install and Maintain TeX Live, and Compile\nLaTeX Documents",
-        "Version": "0.60",
+        "Version": "0.61",
         "Authors@R": "c(\n  person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\", \"cph\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\")),\n  person(given = \"Posit Software, PBC\", role = c(\"cph\", \"fnd\")),\n  person(\"Christophe\", \"Dervieux\", role = \"ctb\", comment = c(ORCID = \"0000-0003-4474-2498\")),\n  person(\"Devon\", \"Ryan\", role = \"ctb\", email = \"dpryan79@gmail.com\", comment = c(ORCID = \"0000-0002-8549-0971\")),\n  person(\"Ethan\", \"Heinzen\", role = \"ctb\"),\n  person(\"Fernando\", \"Cagua\", role = \"ctb\"),\n  person()\n  )",
         "Description": "Helper functions to install and maintain the 'LaTeX' distribution\n  named 'TinyTeX' (<https://yihui.org/tinytex/>), a lightweight, cross-platform,\n  portable, and easy-to-maintain version of 'TeX Live'. This package also\n  contains helper functions to compile 'LaTeX' documents, and install missing\n  'LaTeX' packages automatically.",
         "Imports": "xfun (>= 0.48)",
@@ -5726,19 +5860,19 @@
         "Encoding": "UTF-8",
         "RoxygenNote": "7.3.3",
         "NeedsCompilation": "no",
-        "Packaged": "2026-06-15 22:44:20 UTC; yihui",
+        "Packaged": "2026-09-17 18:47:44 UTC; yihui",
         "Author": "Yihui Xie [aut, cre, cph] (ORCID:\n    <https://orcid.org/0000-0003-0645-5666>),\n  Posit Software, PBC [cph, fnd],\n  Christophe Dervieux [ctb] (ORCID:\n    <https://orcid.org/0000-0003-4474-2498>),\n  Devon Ryan [ctb] (ORCID: <https://orcid.org/0000-0002-8549-0971>),\n  Ethan Heinzen [ctb],\n  Fernando Cagua [ctb]",
         "Maintainer": "Yihui Xie <xie@yihui.name>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-06-16 05:10:02 UTC",
-        "Built": "R 4.5.3; ; 2026-06-16 23:51:07 UTC; windows",
+        "Date/Publication": "2026-09-17 20:40:02 UTC",
+        "Built": "R 4.5.3; ; 2026-10-21 02:32:59 UTC; windows",
         "RemoteType": "standard",
         "RemoteRef": "tinytex",
         "RemotePkgRef": "tinytex",
-        "RemoteRepos": "http://cran.rstudio.com",
+        "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "0.60"
+        "RemoteSha": "0.61"
       }
     },
     "tippy": {
@@ -6209,33 +6343,33 @@
         "Package": "xfun",
         "Type": "Package",
         "Title": "Supporting Functions for Packages Maintained by 'Yihui Xie'",
-        "Version": "0.61",
+        "Version": "0.62",
         "Authors@R": "c(\n  person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\", \"cph\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\", URL = \"https://yihui.org\")),\n  person(\"Wush\", \"Wu\", role = \"ctb\"),\n  person(\"Daijiang\", \"Li\", role = \"ctb\"),\n  person(\"Xianying\", \"Tan\", role = \"ctb\"),\n  person(\"Salim\", \"Brüggemann\", role = \"ctb\", email = \"salim-b@pm.me\", comment = c(ORCID = \"0000-0002-5329-5987\")),\n  person(\"Christophe\", \"Dervieux\", role = \"ctb\"),\n  person()\n  )",
         "Description": "Miscellaneous functions commonly used in other packages maintained by 'Yihui Xie'.",
         "Depends": "R (>= 3.2.0)",
         "Imports": "grDevices, stats, tools",
-        "Suggests": "testit, parallel, codetools, methods, rstudioapi, tinytex (>=\n0.30), mime, litedown (>= 0.6), commonmark, knitr (>= 1.50),\nremotes, pak, curl, xml2, jsonlite, magick, yaml, data.table,\nqs2",
+        "Suggests": "testit, parallel, codetools, methods, rstudioapi, tinytex (>=\n0.30), mime, litedown (>= 0.6), knitr (>= 1.50), remotes, pak,\ncurl, xml2, jsonlite, magick, yaml, data.table, qs2",
         "License": "MIT + file LICENSE",
         "URL": "https://github.com/yihui/xfun",
         "BugReports": "https://github.com/yihui/xfun/issues",
         "Encoding": "UTF-8",
         "VignetteBuilder": "litedown",
-        "Config/roxygen2/version": "8.1.0",
+        "Config/roxygen2/version": "8.1.1",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-09-16 17:36:20 UTC; yihui",
+        "Packaged": "2026-10-16 01:24:19 UTC; yihui",
         "Author": "Yihui Xie [aut, cre, cph] (ORCID:\n    <https://orcid.org/0000-0003-0645-5666>, URL: https://yihui.org),\n  Wush Wu [ctb],\n  Daijiang Li [ctb],\n  Xianying Tan [ctb],\n  Salim Brüggemann [ctb] (ORCID: <https://orcid.org/0000-0002-5329-5987>),\n  Christophe Dervieux [ctb]",
         "Maintainer": "Yihui Xie <xie@yihui.name>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-09-16 18:30:02 UTC",
-        "Built": "R 4.5.2; x86_64-w64-mingw32; 2026-09-17 13:28:33 UTC; windows",
+        "Date/Publication": "2026-10-16 03:30:02 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-10-21 01:20:47 UTC; windows",
         "Archs": "x64",
         "RemoteType": "standard",
         "RemoteRef": "xfun",
         "RemotePkgRef": "xfun",
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
-        "RemotePkgPlatform": "source",
-        "RemoteSha": "0.61"
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.62"
       }
     },
     "xml2": {
@@ -6466,7 +6600,7 @@
       "checksum": "7fec9834ee9927cf76307a613d0e699e"
     },
     ".github/workflows/deploy-shiny.yaml": {
-      "checksum": "5cca08bb07305911437864e4374fb49c"
+      "checksum": "1ba705ebaa35372bc7623634bb11bbd7"
     },
     ".github/workflows/lint.yaml": {
       "checksum": "52c18810b35d0ea9112e713e09aa5c4b"
@@ -6478,7 +6612,7 @@
       "checksum": "21373c552fa1b0b8404341b9e3c127ac"
     },
     ".Rprofile": {
-      "checksum": "8b915e7d440a47553afe7cbc9d9d2d10"
+      "checksum": "472390d8542d0239d9f7f569a4722cde"
     },
     "01_data/02_prod/banner_update.csv": {
       "checksum": "c392296222ec63708bda8d3aacfce751"
@@ -6520,7 +6654,7 @@
       "checksum": "ee146c86116ae047ddabb40d20eb33e2"
     },
     "02_dev/create_your_own_page/create_own_table_dev_app.R": {
-      "checksum": "dcbf352c62467805fe53412aa2baf80c"
+      "checksum": "cbf4afabc04d877add29b40192a0a05c"
     },
     "02_dev/create_your_own_page/create_own_table_dev_mod_app.R": {
       "checksum": "1ac8fc33ea0f37a0f0def8d240f2c3eb"
@@ -6553,10 +6687,10 @@
       "checksum": "4556e5582fc23e0fcc6db80d4ab7bc1c"
     },
     "02_dev/region_level_page/regional_dev_app.R": {
-      "checksum": "c55489d604f87f2e3558f0ac1e310faa"
+      "checksum": "15723526267edf7984375d221399098f"
     },
     "02_dev/region_level_page/regional_page_features_workshop.R": {
-      "checksum": "b7e9c147b89c7bf7ba9939a2c270e819"
+      "checksum": "a5d4f1b348c49c6acd77d676b0b093a9"
     },
     "02_dev/stat_n_level_page/stat_n_dev_app_mod.R": {
       "checksum": "0fc73f5f2079d291890b6ff0ab7a430a"
@@ -6625,7 +6759,7 @@
       "checksum": "30d18e263d4b88652853f9231cef0fa1"
     },
     "R/lait_modules/mod_create_own_table.R": {
-      "checksum": "03c12e3a1289b21f70214c2d547fd5c4"
+      "checksum": "2cdbc9309418bcabb1ad85b41fa95b8a"
     },
     "R/lait_modules/mod_info_page.R": {
       "checksum": "cb69fb5bd79684b199101a9dd7f1fe0a"
@@ -6685,7 +6819,7 @@
       "checksum": "fe7c92a3c243d556bc7791ef0d9391cd"
     },
     "renv.lock": {
-      "checksum": "4a5641300c5e489aaf96c6d6c3292de3"
+      "checksum": "3b583e52b59f302fb3eb24a8ccac04da"
     },
     "server.R": {
       "checksum": "c455b6ac4784991b3a952169b548780e"
