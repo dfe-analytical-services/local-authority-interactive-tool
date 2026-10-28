@@ -1451,9 +1451,9 @@
       "Maintainer": "Rich Bielby <richard.bielby@education.gov.uk>",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "dfe-analytical-services",
+      "RemoteUsername": "rmbielby",
       "RemoteRepo": "dfeshiny",
-      "RemoteRef": "v0.7.0",
+      "RemoteRef": "main",
       "RemoteSha": "6d992337f0645fdb2691f12221c24afe1f4bf408"
     },
     "diffobj": {
